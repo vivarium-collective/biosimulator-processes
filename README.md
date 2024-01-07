@@ -17,7 +17,7 @@ install the dependencies required for your use.
 
  Most of the direct UI content for this tooling will be in the form of a jupyter notebook.
 
-### Using `core_processes.smoldyn_process.SmoldynProcess()`: 
+### Using `biosimulator_processes.smoldyn_process.SmoldynProcess()`: 
 
 #### PLEASE NOTE: 
 Due to the multi-lingual nature of Smoldyn, which is primarily 
