@@ -22,9 +22,6 @@ RUN wget https://download.opensuse.org/repositories/home:/dilawar/xUbuntu_22.04/
 # Install the downloaded package
 RUN dpkg -i smoldyn_2.64.4-1+2.1_amd64.deb
 
-# Set environment variables to avoid user interaction during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-
 # Update package lists and install Python 3 and pip
 RUN apt-get update && apt-get install -y \
     python3 \

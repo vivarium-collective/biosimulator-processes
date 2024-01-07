@@ -1,4 +1,4 @@
-from process_bigraph import Composite, pf
+from process_bigraph import Composite
 # from biosimulator_processes.smoldyn_process import SmoldynProcess
 
 
@@ -53,7 +53,7 @@ def test_process():
 
     # gather results
     results = workflow.gather_results()
-    print(f'RESULTS: {pf(results)}')
+    print(f'RESULTS: {results}')
 
 
 # def manually_test_process():

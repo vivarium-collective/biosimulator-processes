@@ -47,7 +47,7 @@ setup(
         "process-bigraph",
         "numpy",
         "pytest>=6.2.5",
-        # "tellurium",
+        "tellurium",
         "copasi-basico",
         "cobra"
     ],
