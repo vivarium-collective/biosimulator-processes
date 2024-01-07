@@ -22,21 +22,20 @@ RUN wget https://download.opensuse.org/repositories/home:/dilawar/xUbuntu_22.04/
 # Install the downloaded package
 RUN dpkg -i smoldyn_2.64.4-1+2.1_amd64.deb
 
+# Set environment variables to avoid user interaction during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-# RUN apt-get update && apt-get install -y \
-#     build-essential \
-#     wget \
-#     libgl1-mesa-dev \
-#     libglu1-mesa-dev \
-#     # && rm -rf /var/lib/apt/lists/*
+# Update package lists and install Python 3 and pip
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# RUN echo 'deb http://download.opensuse.org/repositories/home:/dilawar/Debian_11/ /' | tee /etc/apt/sources.list.d/home:dilawar.list
-# RUN curl -fsSL https://download.opensuse.org/repositories/home:dilawar/Debian_11/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/home_dilawar.gpg > /dev/null
-# RUN apt update
-# RUN apt install smoldyn
+# Optional: Create a symlink for python and pip if you want to use `python` and `pip` commands directly
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
-RUN pip install --upgrade pip \
-    && pip install ipython \
-    && pip install .
+#RUN pip install --upgrade pip \
+    #&& pip install ipython \
+    #&& pip install .
 
 CMD ["ipython3"]

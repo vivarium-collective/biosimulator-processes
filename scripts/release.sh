@@ -39,6 +39,6 @@ git push --tags
 python ../setup.py sdist bdist_wheel
 twine check ../dist/*
 twine upload ../dist/*
-rm -r ../dist && rm -r ../build && rm -r ../core_processes.egg-info
+rm -r ../dist && rm -r ../build && rm -r ../biosimulator_processes.egg-info
 
 echo "Version v$version has been published on PyPI and has a git tag."
