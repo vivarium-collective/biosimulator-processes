@@ -1,0 +1,7 @@
+.python-version
+__pycache__/
+.idea/
+*.ipynb_checkpoints/
+dist/
+.DS_Store
+*.egg-info/
