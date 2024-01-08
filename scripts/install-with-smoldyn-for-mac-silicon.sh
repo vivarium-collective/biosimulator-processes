@@ -29,4 +29,6 @@ sudo -H ./install.sh
 cd ..
 pip install -e .
 
+# remove the smoldyn dist
+rm -r $dist_dir
 
