@@ -2,6 +2,7 @@
 # the version and publishing the version to PyPI. Also perform some
 # basic checks to avoid mistakes in releases, for example tags not
 # matching PyPI.
+# You must pass the version you are trying to upload to the package index as an argument to this script. For example:
 # Usage: ./release.sh 0.0.1
 
 set -e
