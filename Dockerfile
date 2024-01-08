@@ -17,10 +17,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Download the smoldyn .deb package
-RUN wget https://download.opensuse.org/repositories/home:/dilawar/xUbuntu_22.04/amd64/smoldyn_2.64.4-1+2.1_amd64.deb
+#RUN wget https://download.opensuse.org/repositories/home:/dilawar/xUbuntu_22.04/amd64/smoldyn_2.64.4-1+2.1_amd64.deb
 
 # Install the downloaded package
-RUN dpkg -i smoldyn_2.64.4-1+2.1_amd64.deb
+#RUN dpkg -i smoldyn_2.64.4-1+2.1_amd64.deb
 
 # Update package lists and install Python 3 and pip
 RUN apt-get update && apt-get install -y \
@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y \
 # Optional: Create a symlink for python and pip if you want to use `python` and `pip` commands directly
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-#RUN pip install --upgrade pip \
+RUN pip install smoldyn \
     #&& pip install ipython \
     #&& pip install .
 
