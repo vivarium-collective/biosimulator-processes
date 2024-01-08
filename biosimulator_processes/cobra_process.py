@@ -4,6 +4,7 @@ COBRA FBA Process
 
 
 from process_bigraph import Process
+from cobra.io import read_sbml_model
 
 
 class CobraProcess(Process):
@@ -13,15 +14,6 @@ class CobraProcess(Process):
 
     def __init__(self, config=None):
         super().__init__(config)
-
-        try:
-            from cobra.io import read_sbml_model
-            # from cobra_process.library import pf
-        except:
-            raise ImportError('''
-                You must install core-processes with the [cobra] optional requirement. 
-                See the README for more information.
-            ''')
 
         self.model = read_sbml_model(self.config['model_file'])
         self.reactions = self.model.reactions
