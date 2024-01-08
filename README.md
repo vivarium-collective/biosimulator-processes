@@ -49,8 +49,3 @@ Mac, please adhere to the following instructions:
 
 ### Quick Start Example:
 #### TODO: Add quickstart example of instance declarations.
-
-
-## TODO: Add DatabaseEmitter to this README
-
-

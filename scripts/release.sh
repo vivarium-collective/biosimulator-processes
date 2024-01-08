@@ -2,14 +2,13 @@
 # the version and publishing the version to PyPI. Also perform some
 # basic checks to avoid mistakes in releases, for example tags not
 # matching PyPI.
-# You must pass the version you are trying to upload to the package index as an argument to this script. For example:
-# Usage: ./release.sh 0.0.1
 
-# CURRENT VERSION: 0.0.6
 
 # set -e
 
-version="$1"
+# version="$1"
+
+version=$(grep "__version__" biosimulator_processes/_VERSION.py | awk -F\' '{print $2}')
 
 # Check version is valid
 setup_py_version="$(python setup.py --version)"
