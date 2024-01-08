@@ -56,7 +56,7 @@ def test_process():
 
     # gather results
     results = workflow.gather_results()
-    print(f'RESULTS: {results}')
+    print(f'RESULTS: {pf(results)}')
 
 
 # def test_process_with_database_emitter():

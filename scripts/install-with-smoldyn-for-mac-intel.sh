@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# The following script serves as a utility for installing this repository with the Smoldyn requirement on a Intel Mac
+# The following script serves as a utility for installing this repository with the Smoldyn requirement on an Intel Mac
 
 set -e
 
 # set installation parameters
 dist_url=https://www.smoldyn.org/smoldyn-2.72-mac-Intel.tgz
-tarball_name=smoldyn-2.72-mac.tgz
+tarball_name=${dist_url##*/}
 dist_dir=${tarball_name%.tgz}
 
 # uninstall existing version
