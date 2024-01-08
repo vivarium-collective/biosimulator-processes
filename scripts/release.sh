@@ -36,9 +36,9 @@ git tag -m "Version v$version" "v$version"
 git push --tags
 
 # Create and publish package
-python ../setup.py sdist bdist_wheel
-twine check ../dist/*
-twine upload ../dist/*
-rm -r ../dist && rm -r ../build && rm -r ../biosimulator_processes.egg-info
+python setup.py sdist bdist_wheel
+twine check dist/*
+twine upload dist/*
+rm -r dist && rm -r build && rm -r biosimulator_processes.egg-info
 
 echo "Version v$version has been published on PyPI and has a git tag."
