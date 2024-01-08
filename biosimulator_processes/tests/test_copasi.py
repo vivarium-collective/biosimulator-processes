@@ -2,22 +2,27 @@ from process_bigraph import Composite, pf
 
 
 def test_process():
-
-    # this is the instance for the composite process to run
+    # 1. Define the sim state schema:
     initial_sim_state = {
-        'odeint': {
+        'copasi': {
             '_type': 'process',
-            'address': 'local:copasi',  # using a local toy process
+            'address': 'local:copasi',
             'config': {
-                'model_file': 'biosimulator_processes/tests/model_files/Caravagna2010.xml'  #
+                'model_file': 'biosimulator_processes/tests/model_files/Caravagna2010.xml'
             },
-            'wires': {
-                'time': ['time_store'],
+            'inputs': {
                 'floating_species': ['floating_species_store'],
                 # 'boundary_species': ['boundary_species_store'],
                 'model_parameters': ['model_parameters_store'],
-                'reactions': ['reactions_store'],
+                # 'time': ['time_store'],
+                # 'compartments': ['compartments_store'],
+                # 'parameters': ['parameters_store'],
+                # 'stoichiometries': ['stoichiometries_store']
             },
+            'outputs': {
+                'floating_species': ['floating_species_store'],
+                # 'time': ['time_store'],
+            }
         },
         'emitter': {
             '_type': 'step',
@@ -25,6 +30,9 @@ def test_process():
             'config': {
                 'ports': {
                     'inputs': {
+                        'floating_species': 'tree[float]'
+                    },
+                    'output': {
                         'floating_species': 'tree[float]'
                     }
                 }
@@ -35,19 +43,14 @@ def test_process():
         }
     }
 
-    # make the composite
+    # 2. Make the composite:
     workflow = Composite({
         'state': initial_sim_state
     })
 
-    # workflow.export_composite(filename='cobra_template')
-
-    # run
+    # 3. Run the composite workflow:
     workflow.run(10)
 
-    # gather results
+    # 4. Gather and pretty print results
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
-
-
-test_process()

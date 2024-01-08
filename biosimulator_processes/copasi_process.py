@@ -91,7 +91,6 @@ class CopasiProcess(Process):
             'outputs': {
                 'floating_species': floating_species_type
             }
-
         }
 
     def update(self, inputs, interval):
