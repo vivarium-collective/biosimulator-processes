@@ -6,4 +6,4 @@ dist/
 .DS_Store
 *.egg-info/
 refresh-env.sh
-install-with-smoldyn.sh
+smoldyn-2.72-mac/
