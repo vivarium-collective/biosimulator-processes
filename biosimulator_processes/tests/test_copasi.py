@@ -1,8 +1,4 @@
-from process_bigraph import Composite, pf, process_registry
-from biosimulator_processes.copasi_process import CopasiProcess
-
-
-process_registry.register(CopasiProcess, 'copasi')
+from process_bigraph import Composite, pf
 
 
 def test_process():
