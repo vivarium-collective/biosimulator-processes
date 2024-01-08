@@ -5,7 +5,7 @@ Core implementations of `process-bigraph.composite.Process()` aligning with BioS
 tools.
 
 
-## Getting Started (PyPI)
+## Installation
 
 The easiest way to download this tool is via the Python Package Index. You may download
 core-processes with: 
@@ -19,23 +19,33 @@ install the dependencies required for your use.
 
 ### Using `biosimulator_processes.smoldyn_process.SmoldynProcess()`: 
 
-#### PLEASE NOTE: 
+#### Mac Users PLEASE NOTE: 
 Due to the multi-lingual nature of Smoldyn, which is primarily 
 developed in C++, the installation process for utilizing 
 the `SmoldynProcess` process implementation requires separate handling. This is particularly 
 relevant for macOS and Windows users, where setting up the Python bindings can be more complex.
 
-Please follow the detailed installation instructions provided below to ensure proper setup 
-of Smoldyn for your system.
+For your convienience, we have created an installation shell script that will install the correct distribution of 
+Smoldyn based on your Mac processor along with the codebase of this repo. To install Smoldyn and this repo on your 
+Mac, please adhere to the following instructions:
 
-To download Smoldyn, please follow these steps:
+1. Clone this repo from Github:
 
-1. Visit the [Smoldyn Download Page](https://www.smoldyn.org/download.html).
-2. Choose the version appropriate for your operating system.
-3. Follow the instructions or links provided on the page to complete the download.
+        git clone https://github.com/vivarium-collective/biosimulator-processes.git
 
-For more detailed instructions and information, refer to the official Smoldyn documentation.
+2. Provide adminstrative access to the `scripts` directory within the cloned repo:
 
+        cd biosimulator-processes 
+        chmod +x scripts 
+
+3. Look for the install-with-smoldyn-for-mac-<YOUR MAC PROCESSOR> shell script where <YOUR MAC PROCESSOR> corresponds 
+    to your machine's processor:
+
+        ls scripts 
+
+4. Run the appropriate shell script (for example, using mac silicon):
+
+        scripts/install-with-smoldyn-for-mac-silicon.sh 
 
 ### Quick Start Example:
 #### TODO: Add quickstart example of instance declarations.
