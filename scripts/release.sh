@@ -5,7 +5,7 @@
 # You must pass the version you are trying to upload to the package index as an argument to this script. For example:
 # Usage: ./release.sh 0.0.1
 
-# CURRENT VERSION: 0.0.5
+# CURRENT VERSION: 0.0.6
 
 # set -e
 
