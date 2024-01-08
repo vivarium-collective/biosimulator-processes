@@ -9,7 +9,7 @@ def test_process():
     instance = {
         'smoldyn': {
             '_type': 'process',
-            'address': 'local:smoldyn_process',
+            'address': 'local:smoldyn',
             'config': {
                 'model_filepath': 'biosimulator_processes/tests/model_files/minE_model.txt',
                 'animate': False,

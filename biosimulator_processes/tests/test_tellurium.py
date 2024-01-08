@@ -7,7 +7,7 @@ def test_process():
     instance = {
         'tellurium': {
             '_type': 'process',
-            'address': 'local:tellurium_process',  # using a local toy process
+            'address': 'local:tellurium',  # using a local toy process
             'config': {
                 'sbml_model_path': 'biosimulator_processes/tests/model_files/BIOMD0000000061_url.xml',
             },
@@ -64,7 +64,7 @@ def test_process():
 #     instance = {
 #         'tellurium': {
 #             '_type': 'process',
-#             'address': 'local:tellurium_process',  # using a local toy process
+#             'address': 'local:tellurium',  # using a local toy process
 #             'config': {
 #                 'sbml_model_path': 'biosimulator_processes/tests/model_files/BIOMD0000000061_url.xml',
 #             },
