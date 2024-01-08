@@ -5,7 +5,9 @@
 # You must pass the version you are trying to upload to the package index as an argument to this script. For example:
 # Usage: ./release.sh 0.0.1
 
-set -e
+# CURRENT VERSION: 0.0.5
+
+# set -e
 
 version="$1"
 
@@ -20,8 +22,8 @@ fi
 # Check working directory is clean
 if [ ! -z "$(git status --untracked-files=no --porcelain)" ]; then
     echo "You have changes that have yet to be committed."
-    echo "Aborting."
-    exit 1
+    echo "Aborting PyPI upload and attempting to commit your changes."
+    scripts/commit.sh
 fi
 
 # Check that we are on main

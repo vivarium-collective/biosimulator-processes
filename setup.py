@@ -1,8 +1,6 @@
 import re
 from setuptools import setup, find_packages
-
-
-VERSION = '0.0.4'
+from biosimulator_processes._VERSION import __version__
 
 
 with open("README.md", "r") as readme:
@@ -19,7 +17,7 @@ with open("README.md", "r") as readme:
 
 setup(
     name="biosimulator-processes",
-    version=VERSION,
+    version=__version__,
     author="Ryan Spangler, Eran Agmon, Alex Patrie",
     author_email="ryan.spangler@gmail.com, agmon.eran@gmail.com, alexanderpatrie@gmail.com",
     description="",
