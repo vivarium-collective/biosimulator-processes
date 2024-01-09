@@ -30,7 +30,7 @@ class CopasiProcess(Process):
             'floating_species',
             # 'boundary_species',
             'model_parameters'
-            # 'time',
+            'time',
             # 'compartments',
             # 'parameters',
             # 'stoichiometries',
@@ -38,7 +38,7 @@ class CopasiProcess(Process):
 
         self.output_ports = [
             'floating_species',
-            # 'time',
+            'time',
         ]
 
         # Get the species (floating and boundary)
@@ -89,6 +89,7 @@ class CopasiProcess(Process):
                     reaction_id: 'float' for reaction_id in self.reaction_list},
             },
             'outputs': {
+                'time': 'float',
                 'floating_species': floating_species_type
             }
         }

@@ -14,14 +14,14 @@ def test_process():
                 'floating_species': ['floating_species_store'],
                 # 'boundary_species': ['boundary_species_store'],
                 'model_parameters': ['model_parameters_store'],
-                # 'time': ['time_store'],
+                'time': ['time_store'],
                 # 'compartments': ['compartments_store'],
                 # 'parameters': ['parameters_store'],
                 # 'stoichiometries': ['stoichiometries_store']
             },
             'outputs': {
                 'floating_species': ['floating_species_store'],
-                # 'time': ['time_store'],
+                'time': ['time_store'],
             }
         },
         'emitter': {
@@ -30,15 +30,18 @@ def test_process():
             'config': {
                 'ports': {
                     'inputs': {
-                        'floating_species': 'tree[float]'
+                        'floating_species': 'tree[float]',
+                        'time': 'float'
                     },
                     'output': {
-                        'floating_species': 'tree[float]'
+                        'floating_species': 'tree[float]',
+                        'time': 'float'
                     }
                 }
             },
             'inputs': {
                 'floating_species': ['floating_species_store'],
+                'time': ['time_store']
             }
         }
     }
@@ -54,3 +57,9 @@ def test_process():
     # 4. Gather and pretty print results
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
+
+
+from process_bigraph.registry import process_registry
+from biosimulator_processes.copasi_process import CopasiProcess
+process_registry.register(CopasiProcess, 'copasi')
+test_process()
