@@ -14,7 +14,11 @@ def test_process():
                 'model_filepath': 'biosimulator_processes/tests/model_files/minE_model.txt',
                 'animate': False,
             },
-            'wires': {  # this should return that which is in the schema
+            'inputs': {
+                'species_counts': ['species_counts_store'],
+                'molecules': ['molecules_store'],
+            },
+            'outputs': {
                 'species_counts': ['species_counts_store'],
                 'molecules': ['molecules_store'],
             }
@@ -34,11 +38,9 @@ def test_process():
                     },
                 }
             },
-            'wires': {
-                'inputs': {
-                    'species_counts': ['species_counts_store'],
-                    'molecules': ['molecules_store'],
-                }
+            'inputs': {
+                'species_counts': ['species_counts_store'],
+                'molecules': ['molecules_store'],
             }
         }
     }

@@ -2,7 +2,6 @@ from process_bigraph import Composite, pf
 
 
 def test_process():
-
     # this is the instance for the composite process to run...process instance keys may pertain to methods and not simulators directly
     instance = {
         'tellurium': {
@@ -19,7 +18,8 @@ def test_process():
                 'reactions': ['reactions_store'],
             },
             'outputs': {
-                'reactions': ['reactions_store']
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store'],
             }
         },
         'emitter': {
@@ -29,17 +29,17 @@ def test_process():
                 'ports': {
                     'inputs': {
                         'floating_species': 'tree[float]',
+                        'time': 'float'
                     },
                     'outputs': {
-                        'reactions': 'tree[float]'
+                        'floating_species': 'tree[float]',
+                        'time': 'float'
                     }
                 }
             },
             'inputs': {
                 'floating_species': ['floating_species_store'],
-            },
-            'outputs': {
-                'reactions': ['reactions_store']
+                'time': ['time_store'],
             }
         }
     }

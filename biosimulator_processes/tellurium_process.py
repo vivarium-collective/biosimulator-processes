@@ -97,7 +97,7 @@ class TelluriumProcess(Process):
             'floating_species',
             'boundary_species',
             'model_parameters'
-            # 'time',
+            'time',
             # 'compartments',
             # 'parameters',
             # 'stoichiometries',
@@ -105,7 +105,7 @@ class TelluriumProcess(Process):
 
         self.output_ports = [
             'floating_species',
-            # 'time',
+            'time',
         ]
 
         # Get the species (floating and boundary)
@@ -149,6 +149,7 @@ class TelluriumProcess(Process):
             'outputs': {
                 'floating_species': {
                     species_id: float_set for species_id in self.floating_species_list},
+                'time': 'float'
             }
 
         }

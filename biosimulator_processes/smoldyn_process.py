@@ -68,7 +68,6 @@ class SmoldynProcess(Process):
     """Smoldyn-based implementation of bi-graph process' `Process` API. Please note the following:
 
     For the purpose of this `Process` implementation,
-
     at each `update`, we need the function to do the following for each molecule/species in the simulation:
 
         - Get the molecule count with Smoldyn lang: (`molcount {molecule_name}`) shape: [time, ...speciesN],
@@ -242,8 +241,14 @@ class SmoldynProcess(Process):
 
         # return a generic tree of string for molecules
         return {
-            'species_counts': counts_type,
-            'molecules': 'tree[string]'  #molecules_type
+            'inputs': {
+                'species_counts': counts_type,
+                'molecules': 'tree[string]'  # molecules_type
+            },
+            'outputs': {
+                'species_counts': counts_type,
+                'molecules': 'tree[string]'
+            }
         }
 
     def update(self, state: Dict, interval: int) -> Dict:
