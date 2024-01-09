@@ -58,8 +58,3 @@ def test_process():
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
 
-
-from process_bigraph.registry import process_registry
-from biosimulator_processes.copasi_process import CopasiProcess
-process_registry.register(CopasiProcess, 'copasi')
-test_process()
