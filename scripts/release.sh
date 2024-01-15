@@ -6,9 +6,9 @@
 
 # set -e
 
-# version="$1"
+version="$1"
 
-version=$(grep "__version__" biosimulator_processes/_VERSION.py | awk -F\' '{print $2}')
+# version=$(grep "__version__" biosimulator_processes/_VERSION.py | awk -F\' '{print $2}')
 
 # Check version is valid
 setup_py_version="$(python setup.py --version)"
