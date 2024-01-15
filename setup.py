@@ -1,7 +1,8 @@
 import re
 from setuptools import setup, find_packages
-from biosimulator_processes._VERSION import __version__
 
+
+__version__ = "0.0.13"
 
 with open("README.md", "r") as readme:
     description = readme.read()
