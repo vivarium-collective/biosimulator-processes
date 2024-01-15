@@ -20,6 +20,6 @@ smoldyn = ["smoldyn"]
 [tool.poetry.group.dev.dependencies]
 pytest = ">=6.2.5"
 
-#[build-system]
-#requires = ["poetry-core"]
-#build-backend = "poetry.core.masonry.api"
+# [build-system]
+# requires = ["poetry-core"]
+# build-backend = "poetry.core.masonry.api"
