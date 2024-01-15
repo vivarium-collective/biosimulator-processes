@@ -1,14 +1,14 @@
 from process_bigraph import Composite, pf
 
 
-def test_process():
+def test_process(model_filepath: str = 'biosimulator_processes/tests/model_files/Caravagna2010.xml'):
     # 1. Define the sim state schema:
     initial_sim_state = {
         'copasi': {
             '_type': 'process',
             'address': 'local:copasi',
             'config': {
-                'model_file': 'biosimulator_processes/tests/model_files/Caravagna2010.xml'
+                'model_file': model_filepath
             },
             'inputs': {
                 'floating_species': ['floating_species_store'],

@@ -1,14 +1,14 @@
 from process_bigraph import Composite, pf
 
 
-def test_process():
+def test_process(model_filepath: str = 'biosimulator_processes/tests/model_files/BIOMD0000000061_url.xml'):
     # this is the instance for the composite process to run...process instance keys may pertain to methods and not simulators directly
     instance = {
         'tellurium': {
             '_type': 'process',
             'address': 'local:tellurium',  # using a local toy process
             'config': {
-                'sbml_model_path': 'biosimulator_processes/tests/model_files/BIOMD0000000061_url.xml',
+                'sbml_model_path': model_filepath,
             },
             'inputs': {
                 'time': ['time_store'],

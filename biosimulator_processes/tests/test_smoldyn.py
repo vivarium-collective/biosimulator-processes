@@ -1,8 +1,7 @@
-from process_bigraph import Composite
-# from biosimulator_processes.smoldyn_process import SmoldynProcess
+from process_bigraph import Composite, pp, pf
 
 
-def test_process():
+def test_process(model_filepath: str = 'biosimulator_processes/tests/model_files/minE_model.txt'):
     """Test the smoldyn process using the crowding model."""
 
     # this is the instance for the composite process to run
@@ -11,7 +10,7 @@ def test_process():
             '_type': 'process',
             'address': 'local:smoldyn',
             'config': {
-                'model_filepath': 'biosimulator_processes/tests/model_files/minE_model.txt',
+                'model_filepath': model_filepath,
                 'animate': False,
             },
             'inputs': {
@@ -45,17 +44,19 @@ def test_process():
         }
     }
 
+    total_time = 1
+
     # make the composite
     workflow = Composite({
         'state': instance
     })
 
     # run
-    workflow.run(1)
+    workflow.run(total_time)
 
     # gather results
     results = workflow.gather_results()
-    print(f'RESULTS: {results}')
+    pp(f'RESULTS: {pf(results)}')
 
 
 # def manually_test_process():
@@ -68,10 +69,10 @@ def test_process():
 #
 #     stop = 1
 #
-#     result = test_smoldyn_manually(stop, process, historical=True)
+#     result = run_smoldyn_manually(stop, process, historical=True)
 
 
-# def test_smoldyn_manually(stop_time: int, process: SmoldynProcess, historical: bool = False):
+# def run_smoldyn_manually(stop_time: int, process: SmoldynProcess, historical: bool = False):
 #     current_state = process.initial_state()
 #     runs = []
 #     for t, _ in enumerate(list(range(stop_time)), 1):
