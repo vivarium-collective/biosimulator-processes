@@ -1,16 +1,29 @@
 from process_bigraph import process_registry
-from biosimulator_processes.cobra_process import CobraProcess
-from biosimulator_processes.copasi_process import CopasiProcess
-from biosimulator_processes.tellurium_process import TelluriumProcess  # , TelluriumStep
-from biosimulator_processes.smoldyn_process import SmoldynProcess
 
+# Attempt to import and register CobraProcess
+try:
+    from biosimulator_processes.cobra_process import CobraProcess
+    process_registry.register('cobra', CobraProcess)
+except ImportError:
+    print("CobraProcess not available.")
 
-# register processes
-process_registry.register('cobra', CobraProcess)
-process_registry.register('copasi', CopasiProcess)
-process_registry.register('smoldyn', SmoldynProcess)
-process_registry.register('tellurium', TelluriumProcess)
+# Attempt to import and register CopasiProcess
+try:
+    from biosimulator_processes.copasi_process import CopasiProcess
+    process_registry.register('copasi', CopasiProcess)
+except ImportError:
+    print("CopasiProcess not available.")
 
-# TODO: Eventually integrate this Step implementation
-# process_registry.register('tellurium_step', TelluriumStep)
+# Attempt to import and register SmoldynProcess
+try:
+    from biosimulator_processes.smoldyn_process import SmoldynProcess
+    process_registry.register('smoldyn', SmoldynProcess)
+except ImportError:
+    print("SmoldynProcess not available.")
 
+# Attempt to import and register TelluriumProcess
+try:
+    from biosimulator_processes.tellurium_process import TelluriumProcess
+    process_registry.register('tellurium', TelluriumProcess)
+except ImportError:
+    print("TelluriumProcess not available.")
