@@ -1,5 +1,6 @@
 from process_bigraph import process_registry
 
+
 # Attempt to import and register CobraProcess
 try:
     from biosimulator_processes.cobra_process import CobraProcess

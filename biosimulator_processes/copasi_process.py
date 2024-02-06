@@ -28,9 +28,9 @@ class CopasiProcess(Process):
         # TODO -- make this configurable.
         self.input_ports = [
             'floating_species',
-            # 'boundary_species',
             'model_parameters'
             'time',
+            # 'boundary_species',
             # 'compartments',
             # 'parameters',
             # 'stoichiometries',
