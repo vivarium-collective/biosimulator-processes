@@ -1,6 +1,7 @@
 """
-Demo process for Copasi/Basico
+Biosimulator process for Copasi/Basico
 """
+from process_bigraph import Process, Composite, pf
 
 
 from basico import (
@@ -13,7 +14,6 @@ from basico import (
                 get_compartments,
                 model_info
             )
-from process_bigraph import Process
 
 
 class CopasiProcess(Process):
@@ -117,3 +117,66 @@ class CopasiProcess(Process):
             for mol_id in self.floating_species_list}
 
         return results
+
+def test_process(
+        model_filepath: str = 'biosimulator_processes/model_files/Caravagna2010.xml'
+):
+    # 1. Define the sim state schema:
+    initial_sim_state = {
+        'copasi': {
+            '_type': 'process',
+            'address': 'local:copasi',
+            'config': {
+                'model_file': model_filepath
+            },
+            'inputs': {
+                'floating_species': ['floating_species_store'],
+                # 'boundary_species': ['boundary_species_store'],
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                # 'compartments': ['compartments_store'],
+                # 'parameters': ['parameters_store'],
+                # 'stoichiometries': ['stoichiometries_store']
+            },
+            'outputs': {
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store'],
+            }
+        },
+        'emitter': {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'ports': {
+                    'inputs': {
+                        'floating_species': 'tree[float]',
+                        'time': 'float'
+                    },
+                    'output': {
+                        'floating_species': 'tree[float]',
+                        'time': 'float'
+                    }
+                }
+            },
+            'inputs': {
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store']
+            }
+        }
+    }
+
+    # 2. Make the composite:
+    workflow = Composite({
+        'state': initial_sim_state
+    })
+
+    # 3. Run the composite workflow:
+    workflow.run(10)
+
+    # 4. Gather and pretty print results
+    results = workflow.gather_results()
+    print(f'RESULTS: {pf(results)}')
+
+
+if __name__ == '__main__':
+    test_process()
