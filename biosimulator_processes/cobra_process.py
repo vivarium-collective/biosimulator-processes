@@ -26,7 +26,7 @@ bounds_tree_type = {
     '_type': 'tree[bounds]',  # TODO -- make this a dict, to make it only one level deep
 }
 sbml_type = {
-    '_type': 'string',
+    '_inherit': 'string',
     '_check': check_sbml,
     '_apply': 'set',
 }
@@ -124,7 +124,7 @@ def test_process():
             '_type': 'process',
             'address': 'local:cobra',
             'config': {
-                'model_file': 'cobra_process/models/e_coli_core.xml'
+                'model_file': 'model_files/e_coli_core.xml'
             },
             'wires': {
                 'fluxes': ['fluxes_store'],
@@ -132,24 +132,24 @@ def test_process():
                 'reaction_bounds': ['reaction_bounds_store'],
             }
         },
-        'emitter': {
-            '_type': 'step',
-            'address': 'local:ram-emitter',
-            'config': {
-                'ports': {
-                    'inputs': {
-                        'fluxes': 'tree[float]',
-                        'objective_value': 'tree[float]'
-                    }
-                }
-            },
-            'wires': {
-                'inputs': {
-                    'fluxes': ['fluxes_store'],
-                    'objective_value': ['objective_value_store']
-                }
-            }
-        }
+        # 'emitter': {
+        #     '_type': 'step',
+        #     'address': 'local:ram-emitter',
+        #     'config': {
+        #         'ports': {
+        #             'inputs': {
+        #                 'fluxes': 'tree[float]',
+        #                 'objective_value': 'tree[float]'
+        #             }
+        #         }
+        #     },
+        #     'wires': {
+        #         'inputs': {
+        #             'fluxes': ['fluxes_store'],
+        #             'objective_value': ['objective_value_store']
+        #         }
+        #     }
+        # }
     }
 
     # make the composite

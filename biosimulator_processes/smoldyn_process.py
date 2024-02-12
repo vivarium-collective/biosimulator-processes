@@ -327,9 +327,7 @@ class SmoldynProcess(Process):
 
 
 
-def test_process(
-        model_filepath: str = 'biosimulator_processes/tests/model_files/minE_model.txt'
-):
+def test_process():
     """Test the smoldyn process using the crowding model."""
 
     # this is the instance for the composite process to run
@@ -338,7 +336,7 @@ def test_process(
             '_type': 'process',
             'address': 'local:smoldyn',
             'config': {
-                'model_filepath': model_filepath,
+                'model_filepath': 'model_files/minE_model.txt',
                 'animate': False,
             },
             'inputs': {

@@ -118,16 +118,14 @@ class CopasiProcess(Process):
 
         return results
 
-def test_process(
-        model_filepath: str = 'biosimulator_processes/model_files/Caravagna2010.xml'
-):
+def test_process():
     # 1. Define the sim state schema:
     initial_sim_state = {
         'copasi': {
             '_type': 'process',
             'address': 'local:copasi',
             'config': {
-                'model_file': model_filepath
+                'model_file': 'model_files/Caravagna2010.xml'
             },
             'inputs': {
                 'floating_species': ['floating_species_store'],
@@ -143,26 +141,26 @@ def test_process(
                 'time': ['time_store'],
             }
         },
-        'emitter': {
-            '_type': 'step',
-            'address': 'local:ram-emitter',
-            'config': {
-                'ports': {
-                    'inputs': {
-                        'floating_species': 'tree[float]',
-                        'time': 'float'
-                    },
-                    'output': {
-                        'floating_species': 'tree[float]',
-                        'time': 'float'
-                    }
-                }
-            },
-            'inputs': {
-                'floating_species': ['floating_species_store'],
-                'time': ['time_store']
-            }
-        }
+        # 'emitter': {
+        #     '_type': 'step',
+        #     'address': 'local:ram-emitter',
+        #     'config': {
+        #         'ports': {
+        #             'inputs': {
+        #                 'floating_species': 'tree[float]',
+        #                 'time': 'float'
+        #             },
+        #             'output': {
+        #                 'floating_species': 'tree[float]',
+        #                 'time': 'float'
+        #             }
+        #         }
+        #     },
+        #     'inputs': {
+        #         'floating_species': ['floating_species_store'],
+        #         'time': ['time_store']
+        #     }
+        # }
     }
 
     # 2. Make the composite:
