@@ -184,7 +184,7 @@ def test_process():
         # 'run_time_store': 1,
         # 'results_store': None,  # TODO -- why is this not automatically added into the schema because of tellurium schema?
         'tellurium': {
-            '_type': 'step',
+            '_type': 'process',
             'address': 'local:tellurium',  # using a local toy process
             'config': {
                 'sbml_model_path': 'model_files/BIOMD0000000061_url.xml',
