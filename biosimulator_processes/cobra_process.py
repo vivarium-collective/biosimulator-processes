@@ -122,34 +122,24 @@ def test_process():
     instance = {
         'fba': {
             '_type': 'process',
-            'address': 'local:cobra',
+            'address': 'local:cobra',  # TODO 'biosimulators:cobra[1.0]',
             'config': {
                 'model_file': 'model_files/e_coli_core.xml'
             },
-            'wires': {
+            'inputs': {
+                'model': ['model_store'],
+                'reaction_bounds': ['reaction_bounds_store'],
+                'objective_reaction': ['objective_reaction_store'],
+            },
+            'outputs': {
                 'fluxes': ['fluxes_store'],
                 'objective_value': ['objective_value_store'],
-                'reaction_bounds': ['reaction_bounds_store'],
+                'reaction_dual_values': ['reaction_dual_values_store'],
+                'metabolite_dual_values': ['metabolite_dual_values_store'],
+                'status': ['status_store'],
             }
         },
-        # 'emitter': {
-        #     '_type': 'step',
-        #     'address': 'local:ram-emitter',
-        #     'config': {
-        #         'ports': {
-        #             'inputs': {
-        #                 'fluxes': 'tree[float]',
-        #                 'objective_value': 'tree[float]'
-        #             }
-        #         }
-        #     },
-        #     'wires': {
-        #         'inputs': {
-        #             'fluxes': ['fluxes_store'],
-        #             'objective_value': ['objective_value_store']
-        #         }
-        #     }
-        # }
+        # insert emitter schema
     }
 
     # make the composite

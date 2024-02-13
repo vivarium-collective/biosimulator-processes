@@ -180,28 +180,26 @@ def test_process():
 
     # this is the instance for the composite process to run
     instance = {
-        'start_time_store': 0,
-        'run_time_store': 1,
-        'results_store': None,  # TODO -- why is this not automatically added into the schema because of tellurium schema?
+        # 'start_time_store': 0,
+        # 'run_time_store': 1,
+        # 'results_store': None,  # TODO -- why is this not automatically added into the schema because of tellurium schema?
         'tellurium': {
             '_type': 'step',
             'address': 'local:tellurium',  # using a local toy process
             'config': {
                 'sbml_model_path': 'model_files/BIOMD0000000061_url.xml',
             },
-            'wires': {
-                'inputs': {
-                    'time': ['start_time_store'],
-                    'run_time': ['run_time_store'],
-                    'floating_species': ['floating_species_store'],
-                    'boundary_species': ['boundary_species_store'],
-                    'model_parameters': ['model_parameters_store'],
-                    'reactions': ['reactions_store'],
-                    # 'interval': ['interval'],
-                },
-                'outputs': {
-                    'results': ['results_store'],
-                }
+            'inputs': {
+                'time': ['start_time_store'],
+                'run_time': ['run_time_store'],
+                'floating_species': ['floating_species_store'],
+                'boundary_species': ['boundary_species_store'],
+                'model_parameters': ['model_parameters_store'],
+                'reactions': ['reactions_store'],
+                'interval': ['interval_store'],
+            },
+            'outputs': {
+                'results': ['results_store'],
             }
         }
     }
