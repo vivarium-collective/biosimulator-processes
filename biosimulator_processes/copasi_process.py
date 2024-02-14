@@ -25,27 +25,9 @@ class CopasiProcess(Process):
         # Load the single cell model into Basico
         self.copasi_model_object = load_model(self.config['model_file'])
 
-        # TODO -- make this configurable.
-        self.input_ports = [
-            'floating_species',
-            'model_parameters',
-            'time',
-            # 'boundary_species',
-            # 'compartments',
-            # 'parameters',
-            # 'stoichiometries',
-        ]
-
-        self.output_ports = [
-            'floating_species',
-            'time',
-        ]
-
-        # Get the species (floating and boundary)
+        # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
-        # self.boundary_species_list = get_species(model=self.copasi_model_object).index.tolist()
-        # self.boundary_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
 
         # Get the list of parameters and their values
         self.model_parameters_list = get_parameters(model=self.copasi_model_object).index.tolist()
@@ -59,12 +41,10 @@ class CopasiProcess(Process):
 
     def initial_state(self):
         floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
-        # boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
         model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
         return {
             'time': 0.0,
             'floating_species': floating_species_dict,
-            # 'boundary_species': boundary_species_dict,
             'model_parameters': model_parameters_dict
         }
 
@@ -78,9 +58,6 @@ class CopasiProcess(Process):
         return {
             'time': 'float',
             'floating_species': floating_species_type,
-            # TODO -- this should be a float with a set updater
-            # 'boundary_species': {
-            #     species_id: 'float' for species_id in self.boundary_species_list},
             'model_parameters': {
                 param_id: 'float' for param_id in self.model_parameters_list},
             'reactions': {
@@ -102,10 +79,8 @@ class CopasiProcess(Process):
     def update(self, inputs, interval):
 
         # set copasi values according to what is passed in states
-        for port_id, values in inputs.items():
-            if port_id in self.input_ports:  # only update from input ports
-                for cat_id, value in values.items():
-                    set_species(name=cat_id, initial_concentration=value, model=self.copasi_model_object)
+        for cat_id, value in inputs['floating_species'].items():
+            set_species(name=cat_id, initial_concentration=value, model=self.copasi_model_object)
 
         # run model for "interval" length; we only want the state at the end
         timecourse = run_time_course(

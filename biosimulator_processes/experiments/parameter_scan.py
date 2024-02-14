@@ -25,16 +25,13 @@ def test_param_scan_copasi():
             '_type': 'process',
             'address': 'local:copasi',
             'config': {
-                'model_file': 'tests/model_files/Caravagna2010.xml'
+                'model_file': 'model_files/Caravagna2010.xml'
             },
             'inputs': {
                 'floating_species': ['floating_species_store'],
-                # 'boundary_species': ['boundary_species_store'],
                 'model_parameters': ['model_parameters_store'],
                 'time': ['time_store'],
-                # 'compartments': ['compartments_store'],
-                # 'parameters': ['parameters_store'],
-                # 'stoichiometries': ['stoichiometries_store']
+                'reactions': ['reactions_store']
             },
             'outputs': {
                 'floating_species': ['floating_species_store'],
@@ -62,7 +59,7 @@ def run_param_scan_cobra():
             '_type': 'process',
             'address': 'local:cobra',
             'config': {
-                'model_file': 'tests/model_files/e_coli_core.xml'
+                'model_file': 'model_files/e_coli_core.xml'
             },
             'inputs': {
                 'model': ['model_store'],
