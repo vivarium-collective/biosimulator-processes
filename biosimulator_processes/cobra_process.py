@@ -69,32 +69,33 @@ class CobraProcess(Process):
             state['outputs']['fluxes'][reaction.id] = optimized_fluxes[reaction.id]
         return state
 
-    def schema(self):
+    def inputs(self):
         return {
-            'inputs': {
-                'model': 'sbml',
-                'reaction_bounds': {
-                    reaction.id: 'bounds' for reaction in self.reactions
-                },
-                'objective_reaction': {
-                    '_type': 'string',
-                    '_default': self.objective
-                },
+            'model': 'sbml',
+            'reaction_bounds': {
+                reaction.id: 'bounds' for reaction in self.reactions
             },
-            'outputs': {
-                'fluxes': {
-                    reaction.id: 'float' for reaction in self.reactions
-                },
-                'objective_value': 'float',
-                'reaction_dual_values': {
-                    reaction.id: 'float' for reaction in self.reactions
-                },
-                'metabolite_dual_values': {
-                    metabolite.id: 'float' for metabolite in self.metabolites
-                },
-                'status': 'string',
-            }
+            'objective_reaction': {
+                '_type': 'string',
+                '_default': self.objective
+            },
         }
+
+    def outputs(self):
+        return {
+            'fluxes': {
+                reaction.id: 'float' for reaction in self.reactions
+            },
+            'objective_value': 'float',
+            'reaction_dual_values': {
+                reaction.id: 'float' for reaction in self.reactions
+            },
+            'metabolite_dual_values': {
+                metabolite.id: 'float' for metabolite in self.metabolites
+            },
+            'status': 'string',
+        }
+
 
     def update(self, inputs, interval):
 

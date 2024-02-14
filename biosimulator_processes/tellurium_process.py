@@ -58,19 +58,26 @@ class TelluriumStep(Step):
             },
         }
 
-    def schema(self):
+    def inputs(self):
         return {
-            'inputs': {
-                'time': 'float',
-                'run_time': 'float',
-            },
-            'outputs': {
-                'results': {'_type': 'numpy_array', '_apply': 'set'}  # This is a roadrunner._roadrunner.NamedArray
-            }
+            'time': 'float',
+            'run_time': 'float',
+        }
+
+    def outputs(self):
+        return {
+            'results': {
+                '_type': 'numpy_array',
+                '_apply': 'set'
+            }  # This is a roadrunner._roadrunner.NamedArray
         }
 
     def update(self, inputs):
-        results = self.simulator.simulate(inputs['time'], inputs['run_time'], 10)  # TODO -- adjust the number of saves teps
+        results = self.simulator.simulate(
+            inputs['time'],
+            inputs['run_time'],
+            10
+        )  # TODO -- adjust the number of saves teps
         return {
             'results': results}
 
@@ -133,26 +140,27 @@ class TelluriumProcess(Process):
             'model_parameters': model_parameters_dict
         }
 
-    def schema(self):
+    def inputs(self):
         float_set = {'_type': 'float', '_apply': 'set'}
         return {
-            'inputs': {
-                'time': 'float',
-                'floating_species': {
-                    species_id: float_set for species_id in self.floating_species_list},
-                'boundary_species': {
-                    species_id: float_set for species_id in self.boundary_species_list},
-                'model_parameters': {
-                    param_id: float_set for param_id in self.model_parameters_list},
-                'reactions': {
-                    reaction_id: float_set for reaction_id in self.reaction_list},
-            },
-            'outputs': {
-                'floating_species': {
-                    species_id: float_set for species_id in self.floating_species_list},
-                'time': 'float'
-            }
+            'time': 'float',
+            'run_time': 'float',
+            'floating_species': {
+                species_id: float_set for species_id in self.floating_species_list},
+            'boundary_species': {
+                species_id: float_set for species_id in self.boundary_species_list},
+            'model_parameters': {
+                param_id: float_set for param_id in self.model_parameters_list},
+            'reactions': {
+                reaction_id: float_set for reaction_id in self.reaction_list},
+        }
 
+    def outputs(self):
+        float_set = {'_type': 'float', '_apply': 'set'}
+        return {
+            'floating_species': {
+                species_id: float_set for species_id in self.floating_species_list},
+            'time': 'float'
         }
 
     def update(self, inputs, interval):

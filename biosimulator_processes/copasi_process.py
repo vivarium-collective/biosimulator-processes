@@ -68,30 +68,35 @@ class CopasiProcess(Process):
             'model_parameters': model_parameters_dict
         }
 
-    def schema(self):
+    def inputs(self):
         floating_species_type = {
             species_id: {
                 '_type': 'float',
                 '_apply': 'set',
             } for species_id in self.floating_species_list
         }
-
         return {
-            'inputs': {
-                'time': 'float',
-                'floating_species': floating_species_type,
-                # TODO -- this should be a float with a set updater
-                # 'boundary_species': {
-                #     species_id: 'float' for species_id in self.boundary_species_list},
-                'model_parameters': {
-                    param_id: 'float' for param_id in self.model_parameters_list},
-                'reactions': {
-                    reaction_id: 'float' for reaction_id in self.reaction_list},
-            },
-            'outputs': {
-                'time': 'float',
-                'floating_species': floating_species_type
-            }
+            'time': 'float',
+            'floating_species': floating_species_type,
+            # TODO -- this should be a float with a set updater
+            # 'boundary_species': {
+            #     species_id: 'float' for species_id in self.boundary_species_list},
+            'model_parameters': {
+                param_id: 'float' for param_id in self.model_parameters_list},
+            'reactions': {
+                reaction_id: 'float' for reaction_id in self.reaction_list},
+        }
+
+    def outputs(self):
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set',
+            } for species_id in self.floating_species_list
+        }
+        return {
+            'time': 'float',
+            'floating_species': floating_species_type
         }
 
     def update(self, inputs, interval):
@@ -131,36 +136,14 @@ def test_process():
                 'floating_species': ['floating_species_store'],
                 'model_parameters': ['model_parameters_store'],
                 'time': ['time_store'],
-                # 'boundary_species': ['boundary_species_store'],
-                # 'compartments': ['compartments_store'],
-                # 'parameters': ['parameters_store'],
-                # 'stoichiometries': ['stoichiometries_store']
+                'reactions': ['reactions_store']
             },
             'outputs': {
                 'floating_species': ['floating_species_store'],
                 'time': ['time_store'],
             }
         },
-        # 'emitter': {
-        #     '_type': 'step',
-        #     'address': 'local:ram-emitter',
-        #     'config': {
-        #         'ports': {
-        #             'inputs': {
-        #                 'floating_species': 'tree[float]',
-        #                 'time': 'float'
-        #             },
-        #             'output': {
-        #                 'floating_species': 'tree[float]',
-        #                 'time': 'float'
-        #             }
-        #         }
-        #     },
-        #     'inputs': {
-        #         'floating_species': ['floating_species_store'],
-        #         'time': ['time_store']
-        #     }
-        # }
+        # add emitter schema
     }
 
     # 2. Make the composite:
