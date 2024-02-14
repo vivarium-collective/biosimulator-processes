@@ -10,7 +10,9 @@ class ParameterScan(Step):
         super().__init__(config)
 
     def inputs(self):
-        return {}
+        return {
+            'parameters': ''
+        }
 
     def outputs(self):
         return {}
@@ -21,6 +23,17 @@ class ParameterScan(Step):
 
 def test_param_scan_copasi():
     initial_sim_state = {
+        'parameter_scan': {
+            '_type': 'step',
+            'address': 'local:!biosimulator_processes.experiments.parameter_scan.ParameterScan',
+            'config': {},
+            'inputs': {
+                'parameters': {}
+            },
+            'outputs': {
+                'simulations': {}
+            }
+        },
         'copasi': {
             '_type': 'process',
             'address': 'local:copasi',
