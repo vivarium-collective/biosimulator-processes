@@ -48,6 +48,7 @@
 
 """
 
+from process_bigraph import Process, Composite, pf, pp
 
 from typing import *
 from uuid import uuid4
@@ -323,3 +324,66 @@ class SmoldynProcess(Process):
         # TODO -- post processing to get effective rates
 
         return simulation_state
+
+
+
+def test_process():
+    """Test the smoldyn process using the crowding model."""
+
+    # this is the instance for the composite process to run
+    instance = {
+        'smoldyn': {
+            '_type': 'process',
+            'address': 'local:smoldyn',
+            'config': {
+                'model_filepath': 'model_files/minE_model.txt',
+                'animate': False,
+            },
+            'inputs': {
+                'species_counts': ['species_counts_store'],
+                'molecules': ['molecules_store'],
+            },
+            'outputs': {
+                'species_counts': ['species_counts_store'],
+                'molecules': ['molecules_store'],
+            }
+        },
+        'emitter': {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'ports': {
+                    'inputs': {
+                        'species_counts': 'tree[any]',
+                        'molecules': 'tree[any]'
+                    },
+                    'outputs': {
+                        'species_counts': 'tree[any]',
+                        'molecules': 'tree[any]'
+                    },
+                }
+            },
+            'inputs': {
+                'species_counts': ['species_counts_store'],
+                'molecules': ['molecules_store'],
+            }
+        }
+    }
+
+    total_time = 1
+
+    # make the composite
+    workflow = Composite({
+        'state': instance
+    })
+
+    # run
+    workflow.run(total_time)
+
+    # gather results
+    results = workflow.gather_results()
+    pp(f'RESULTS: {pf(results)}')
+
+
+if __name__ == '__main__':
+    test_process()

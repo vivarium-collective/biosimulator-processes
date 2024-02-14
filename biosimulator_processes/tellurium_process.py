@@ -2,6 +2,7 @@
 Tellurium Process
 """
 
+from process_bigraph import Process, Composite, pf
 
 import numpy as np
 import tellurium as te
@@ -57,19 +58,26 @@ class TelluriumStep(Step):
             },
         }
 
-    def schema(self):
+    def inputs(self):
         return {
-            'inputs': {
-                'time': 'float',
-                'run_time': 'float',
-            },
-            'outputs': {
-                'results': {'_type': 'numpy_array', '_apply': 'set'}  # This is a roadrunner._roadrunner.NamedArray
-            }
+            'time': 'float',
+            'run_time': 'float',
+        }
+
+    def outputs(self):
+        return {
+            'results': {
+                '_type': 'numpy_array',
+                '_apply': 'set'
+            }  # This is a roadrunner._roadrunner.NamedArray
         }
 
     def update(self, inputs):
-        results = self.simulator.simulate(inputs['time'], inputs['run_time'], 10)  # TODO -- adjust the number of saves teps
+        results = self.simulator.simulate(
+            inputs['time'],
+            inputs['run_time'],
+            10
+        )  # TODO -- adjust the number of saves teps
         return {
             'results': results}
 
@@ -132,26 +140,27 @@ class TelluriumProcess(Process):
             'model_parameters': model_parameters_dict
         }
 
-    def schema(self):
+    def inputs(self):
         float_set = {'_type': 'float', '_apply': 'set'}
         return {
-            'inputs': {
-                'time': 'float',
-                'floating_species': {
-                    species_id: float_set for species_id in self.floating_species_list},
-                'boundary_species': {
-                    species_id: float_set for species_id in self.boundary_species_list},
-                'model_parameters': {
-                    param_id: float_set for param_id in self.model_parameters_list},
-                'reactions': {
-                    reaction_id: float_set for reaction_id in self.reaction_list},
-            },
-            'outputs': {
-                'floating_species': {
-                    species_id: float_set for species_id in self.floating_species_list},
-                'time': 'float'
-            }
+            'time': 'float',
+            'run_time': 'float',
+            'floating_species': {
+                species_id: float_set for species_id in self.floating_species_list},
+            'boundary_species': {
+                species_id: float_set for species_id in self.boundary_species_list},
+            'model_parameters': {
+                param_id: float_set for param_id in self.model_parameters_list},
+            'reactions': {
+                reaction_id: float_set for reaction_id in self.reaction_list},
+        }
 
+    def outputs(self):
+        float_set = {'_type': 'float', '_apply': 'set'}
+        return {
+            'floating_species': {
+                species_id: float_set for species_id in self.floating_species_list},
+            'time': 'float'
         }
 
     def update(self, inputs, interval):
@@ -173,3 +182,52 @@ class TelluriumProcess(Process):
                 for cat_id in values.keys():
                     update[port_id][cat_id] = self.simulator.getValue(cat_id)
         return update
+
+
+def test_process():
+
+    # this is the instance for the composite process to run
+    instance = {
+        # 'start_time_store': 0,
+        # 'run_time_store': 1,
+        # 'results_store': None,  # TODO -- why is this not automatically added into the schema because of tellurium schema?
+        'tellurium': {
+            '_type': 'process',
+            'address': 'local:tellurium',  # using a local toy process
+            'config': {
+                'sbml_model_path': 'model_files/BIOMD0000000061_url.xml',
+            },
+            'inputs': {
+                'time': ['start_time_store'],
+                'run_time': ['run_time_store'],
+                'floating_species': ['floating_species_store'],
+                'boundary_species': ['boundary_species_store'],
+                'model_parameters': ['model_parameters_store'],
+                'reactions': ['reactions_store'],
+                'interval': ['interval_store'],
+            },
+            'outputs': {
+                'results': ['results_store'],
+            }
+        }
+    }
+
+    # make the composite
+    workflow = Composite({
+        'state': instance
+    })
+
+    # initial_state = workflow.initial_state()
+
+    # run
+    update = workflow.run(10)
+
+    print(f'UPDATE: {update}')
+
+    # gather results
+    # results = workflow.gather_results()
+    # print(f'RESULTS: {pf(results)}')
+
+
+if __name__ == '__main__':
+    test_process()

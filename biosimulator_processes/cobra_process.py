@@ -1,6 +1,8 @@
 """
 COBRA FBA Process
 """
+from process_bigraph import Process, Composite, pf, pp
+
 import cobra.io
 from process_bigraph import Process, core
 from cobra.io import read_sbml_model
@@ -24,7 +26,7 @@ bounds_tree_type = {
     '_type': 'tree[bounds]',  # TODO -- make this a dict, to make it only one level deep
 }
 sbml_type = {
-    '_type': 'string',
+    '_inherit': 'string',
     '_check': check_sbml,
     '_apply': 'set',
 }
@@ -67,32 +69,33 @@ class CobraProcess(Process):
             state['outputs']['fluxes'][reaction.id] = optimized_fluxes[reaction.id]
         return state
 
-    def schema(self):
+    def inputs(self):
         return {
-            'inputs': {
-                'model': 'sbml',
-                'reaction_bounds': {
-                    reaction.id: 'bounds' for reaction in self.reactions
-                },
-                'objective_reaction': {
-                    '_type': 'string',
-                    '_default': self.objective
-                },
+            'model': 'sbml',
+            'reaction_bounds': {
+                reaction.id: 'bounds' for reaction in self.reactions
             },
-            'outputs': {
-                'fluxes': {
-                    reaction.id: 'float' for reaction in self.reactions
-                },
-                'objective_value': 'float',
-                'reaction_dual_values': {
-                    reaction.id: 'float' for reaction in self.reactions
-                },
-                'metabolite_dual_values': {
-                    metabolite.id: 'float' for metabolite in self.metabolites
-                },
-                'status': 'string',
-            }
+            'objective_reaction': {
+                '_type': 'string',
+                '_default': self.objective
+            },
         }
+
+    def outputs(self):
+        return {
+            'fluxes': {
+                reaction.id: 'float' for reaction in self.reactions
+            },
+            'objective_value': 'float',
+            'reaction_dual_values': {
+                reaction.id: 'float' for reaction in self.reactions
+            },
+            'metabolite_dual_values': {
+                metabolite.id: 'float' for metabolite in self.metabolites
+            },
+            'status': 'string',
+        }
+
 
     def update(self, inputs, interval):
 
@@ -115,3 +118,43 @@ class CobraProcess(Process):
             'metabolite_dual_values': solution.shadow_prices.to_dict(),
             'status': solution.status,
         }
+
+def test_process():
+    instance = {
+        'fba': {
+            '_type': 'process',
+            'address': 'local:cobra',  # TODO 'biosimulators:cobra[1.0]',
+            'config': {
+                'model_file': 'model_files/e_coli_core.xml'
+            },
+            'inputs': {
+                'model': ['model_store'],
+                'reaction_bounds': ['reaction_bounds_store'],
+                'objective_reaction': ['objective_reaction_store'],
+            },
+            'outputs': {
+                'fluxes': ['fluxes_store'],
+                'objective_value': ['objective_value_store'],
+                'reaction_dual_values': ['reaction_dual_values_store'],
+                'metabolite_dual_values': ['metabolite_dual_values_store'],
+                'status': ['status_store'],
+            }
+        },
+        # insert emitter schema
+    }
+
+    # make the composite
+    workflow = Composite({
+        'state': instance
+    })
+
+    # run
+    workflow.run(1)
+
+    # gather results
+    results = workflow.gather_results()
+    print(f'RESULTS: {pf(results)}')
+
+
+if __name__ == '__main__':
+    test_process()

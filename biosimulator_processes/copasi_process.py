@@ -1,6 +1,7 @@
 """
-Demo process for Copasi/Basico
+Biosimulator process for Copasi/Basico
 """
+from process_bigraph import Process, Composite, pf
 
 
 from basico import (
@@ -13,7 +14,6 @@ from basico import (
                 get_compartments,
                 model_info
             )
-from process_bigraph import Process
 
 
 class CopasiProcess(Process):
@@ -28,7 +28,7 @@ class CopasiProcess(Process):
         # TODO -- make this configurable.
         self.input_ports = [
             'floating_species',
-            'model_parameters'
+            'model_parameters',
             'time',
             # 'boundary_species',
             # 'compartments',
@@ -68,30 +68,35 @@ class CopasiProcess(Process):
             'model_parameters': model_parameters_dict
         }
 
-    def schema(self):
+    def inputs(self):
         floating_species_type = {
             species_id: {
                 '_type': 'float',
                 '_apply': 'set',
             } for species_id in self.floating_species_list
         }
-
         return {
-            'inputs': {
-                'time': 'float',
-                'floating_species': floating_species_type,
-                # TODO -- this should be a float with a set updater
-                # 'boundary_species': {
-                #     species_id: 'float' for species_id in self.boundary_species_list},
-                'model_parameters': {
-                    param_id: 'float' for param_id in self.model_parameters_list},
-                'reactions': {
-                    reaction_id: 'float' for reaction_id in self.reaction_list},
-            },
-            'outputs': {
-                'time': 'float',
-                'floating_species': floating_species_type
-            }
+            'time': 'float',
+            'floating_species': floating_species_type,
+            # TODO -- this should be a float with a set updater
+            # 'boundary_species': {
+            #     species_id: 'float' for species_id in self.boundary_species_list},
+            'model_parameters': {
+                param_id: 'float' for param_id in self.model_parameters_list},
+            'reactions': {
+                reaction_id: 'float' for reaction_id in self.reaction_list},
+        }
+
+    def outputs(self):
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set',
+            } for species_id in self.floating_species_list
+        }
+        return {
+            'time': 'float',
+            'floating_species': floating_species_type
         }
 
     def update(self, inputs, interval):
@@ -117,3 +122,42 @@ class CopasiProcess(Process):
             for mol_id in self.floating_species_list}
 
         return results
+
+def test_process():
+    # 1. Define the sim state schema:
+    initial_sim_state = {
+        'copasi': {
+            '_type': 'process',
+            'address': 'local:copasi',
+            'config': {
+                'model_file': 'model_files/Caravagna2010.xml'
+            },
+            'inputs': {
+                'floating_species': ['floating_species_store'],
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                'reactions': ['reactions_store']
+            },
+            'outputs': {
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store'],
+            }
+        },
+        # add emitter schema
+    }
+
+    # 2. Make the composite:
+    workflow = Composite({
+        'state': initial_sim_state
+    })
+
+    # 3. Run the composite workflow:
+    workflow.run(10)
+
+    # 4. Gather and pretty print results
+    results = workflow.gather_results()
+    print(f'RESULTS: {pf(results)}')
+
+
+if __name__ == '__main__':
+    test_process()
