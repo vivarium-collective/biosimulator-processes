@@ -16,8 +16,8 @@ class TelluriumStep(Step):
         'antimony_string': 'string',
     }
 
-    def __init__(self, config=None):
-        super().__init__(config)
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
 
         # initialize a tellurium(roadrunner) simulation object. Load the model in using either sbml(default) or antimony
         if self.config.get('antimony_string') and not self.config.get('sbml_model_path'):

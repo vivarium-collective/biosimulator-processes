@@ -100,7 +100,7 @@ class SmoldynProcess(Process):
         'animate': 'bool',
     }
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Dict[str, Any] = None, core=None):
         """A new instance of `SmoldynProcess` based on the `config` that is passed. The schema for the config to be passed in
             this object's constructor is as follows:
 
@@ -108,10 +108,9 @@ class SmoldynProcess(Process):
                 'model_filepath': 'string',  <-- analogous to python `str`
                 'animate': 'bool'  <-- of type `bigraph_schema.base_types.bool`
 
-
             # TODO: It would be nice to have classes associated with this.
         """
-        super().__init__(config)
+        super().__init__(config, core)
 
         # specify the model fp for clarity
         self.model_filepath = self.config.get('model_filepath')

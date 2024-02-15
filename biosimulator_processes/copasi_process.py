@@ -19,8 +19,8 @@ from basico import (
 class CopasiProcess(Process):
     config_schema = {'model_file': 'string'}
 
-    def __init__(self, config=None):
-        super().__init__(config)
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
 
         # Load the single cell model into Basico
         self.copasi_model_object = load_model(self.config['model_file'])

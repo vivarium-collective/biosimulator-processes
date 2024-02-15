@@ -41,8 +41,8 @@ class CobraProcess(Process):
         'model_file': 'sbml',
     }
 
-    def __init__(self, config=None):
-        super().__init__(config)
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
         self.model = read_sbml_model(self.config['model_file'])
         self.reactions = self.model.reactions
         self.metabolites = self.model.metabolites
