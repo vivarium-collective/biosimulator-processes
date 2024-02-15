@@ -195,7 +195,7 @@ def test_process():
             '_type': 'process',
             'address': 'local:tellurium',  # using a local toy process
             'config': {
-                'sbml_model_path': 'model_files/BIOMD0000000061_url.xml',
+                'sbml_model_path': 'biosimulator_processes/model_files/BIOMD0000000061_url.xml',
             },
             'inputs': {
                 'time': ['start_time_store'],

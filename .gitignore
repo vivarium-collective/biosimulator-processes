@@ -9,3 +9,10 @@ refresh-env.sh
 smoldyn-2.72-mac/
 build/
 pyproject.toml
+commit.sh
+install.sh
+push-image.sh
+release.sh
+run.sh
+run-docker.sh
+ray_job.sh

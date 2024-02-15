@@ -125,7 +125,7 @@ def test_process():
             '_type': 'process',
             'address': 'local:cobra',  # TODO 'biosimulators:cobra[1.0]',
             'config': {
-                'model_file': 'model_files/e_coli_core.xml'
+                'model_file': 'biosimulator_processes/model_files/e_coli_core.xml'
             },
             'inputs': {
                 'model': ['model_store'],

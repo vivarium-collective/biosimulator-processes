@@ -105,7 +105,7 @@ def test_process():
             '_type': 'process',
             'address': 'local:copasi',
             'config': {
-                'model_file': 'model_files/Caravagna2010.xml'
+                'model_file': 'biosimulator_processes/model_files/Caravagna2010.xml'
             },
             'inputs': {
                 'floating_species': ['floating_species_store'],
