@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     pkg-config \
     git \
+    libglib2.0-dev \
     golang-go \
     && rm -rf /var/lib/apt/lists/*
 
@@ -46,14 +47,14 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 # Verify Go installation
 RUN go version
 
-# Clone the Singularity repository
-RUN git clone https://github.com/sylabs/singularity.git && \
+# Clone the Singularity repository with submodules
+RUN git clone --recurse-submodules https://github.com/sylabs/singularity.git && \
     cd singularity && \
     git checkout v4.1.1
 
 WORKDIR /app/singularity
 
-# Run mconfig
+# Proceed with the Singularity build process
 RUN ./mconfig --prefix=/opt/singularity && \
     make -C builddir && \
     make -C builddir install
