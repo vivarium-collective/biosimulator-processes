@@ -182,9 +182,10 @@ class SmoldynProcess(Process):
         """Add a distribution of molecules to the solution in
             the simulation memory given a higher and lower bound x,y coordinate. Smoldyn assumes
             a global boundary versus individual species boundaries. Kills the molecule before dist if true.
+
             TODO: If pymunk expands the species compartment, account for
-            expanding `highpos` and `lowpos`. This method should be used within the body/logic of
-            the `update` class method.
+                  expanding `highpos` and `lowpos`. This method should be used within the body/logic of
+                  the `update` class method.
 
             Args:
                 species_name:`str`: name of the given molecule.

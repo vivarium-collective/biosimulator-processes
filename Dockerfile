@@ -1,70 +1,43 @@
-# TODO: Make this work for Smoldyn to be platform-agnostic
-
 FROM ubuntu:latest
-# FROM ghcr.io/biosimulators/biosimulators:latest
 
-# Implement the next two lines for use in Cloud
-# RUN useradd -m simuser
-
-# USER simuser
-
-WORKDIR /app
-
-COPY . /app
-
+RUN echo "Installing system dependencies..."
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
+    apt-get update && sudo apt-get install -y \
     build-essential \
     libssl-dev \
     uuid-dev \
-    make \
     libgpgme11-dev \
     squashfs-tools \
     libseccomp-dev \
     wget \
     pkg-config \
-    git \
-    libglib2.0-dev \
-    golang-go \
-    && rm -rf /var/lib/apt/lists/*
+    git
 
-# Optional: Create a symlink for python and pip if you want to use `python` and `pip` commands directly
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN echo "Installing Go..."
+RUN export VERSION=1.20 OS=linux ARCH=amd64 && \
+    wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz && \
+    tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz && \
+    rm go$VERSION.$OS-$ARCH.tar.gz
 
+RUN echo "Installing singularity..."
+RUN export VERSION=3.2.0 && # adjust this as necessary \
+    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz && \
+    tar -xzf singularity-${VERSION}.tar.gz && \
+    cd singularity
+
+WORKDIR /app
+
+COPY . /app
+
+RUN echo "Installing python content..."
 RUN pip install --upgrade pip \
     && pip install -U "ray[default]" \
     && ./scripts/install-smoldyn-mac-silicon.sh
 
-# Install Go for ARM64
-RUN wget https://go.dev/dl/go1.20.linux-arm64.tar.gz -O go.tar.gz && \
-    tar -C /usr/local -xzf go.tar.gz && \
-    rm go.tar.gz
-
-# Set Go environment variables
-ENV PATH="/usr/local/go/bin:${PATH}"
-
-# Verify Go installation
-RUN go version
-
-# Clone the Singularity repository with submodules
-RUN git clone --recurse-submodules https://github.com/sylabs/singularity.git && \
-    cd singularity && \
-    git checkout v4.1.1
-
-WORKDIR /app/singularity
-
-# Proceed with the Singularity build process
-RUN ./mconfig --prefix=/opt/singularity && \
-    make -C builddir && \
-    make -C builddir install
-
-WORKDIR /app
-
+RUN echo "Entering..."
 ENTRYPOINT ["/bin/bash"]
-
-
-
 
 
 # ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
