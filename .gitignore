@@ -16,3 +16,5 @@ release.sh
 run.sh
 run-docker.sh
 ray_job.sh
+__pycache__
+.pytest_cache
