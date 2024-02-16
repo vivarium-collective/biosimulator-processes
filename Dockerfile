@@ -35,8 +35,8 @@ RUN pip install --upgrade pip \
     && pip install -U "ray[default]" \
     && ./scripts/install-smoldyn-mac-silicon.sh
 
-# Install Go
-RUN wget https://go.dev/dl/go1.20.linux-amd64.tar.gz -O go.tar.gz && \
+# Install Go for ARM64
+RUN wget https://go.dev/dl/go1.20.linux-arm64.tar.gz -O go.tar.gz && \
     tar -C /usr/local -xzf go.tar.gz && \
     rm go.tar.gz
 

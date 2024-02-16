@@ -8,7 +8,6 @@ dist/
 refresh-env.sh
 smoldyn-2.72-mac/
 build/
-pyproject.toml
 commit.sh
 install.sh
 push-image.sh
