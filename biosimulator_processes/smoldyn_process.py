@@ -176,8 +176,8 @@ class SmoldynProcess(Process):
     def set_uniform(
             self,
             species_name: str,
-            kill_mol: bool = True,
-            **configuration_parameters: Dict[str, Union[List[float], int]]
+            count: int,
+            kill_mol: bool = True
             ) -> None:
         """Add a distribution of molecules to the solution in
             the simulation memory given a higher and lower bound x,y coordinate. Smoldyn assumes
@@ -189,7 +189,7 @@ class SmoldynProcess(Process):
 
             Args:
                 species_name:`str`: name of the given molecule.
-                **configuration_parameters:`Dict`: kwargs are as such: 'count'
+                count:`int`: number of molecules of the given `species_name` to add.
                 kill_mol:`bool`: kills the molecule based on the `name` argument, which effectively
                     removes the molecule from simulation memory.
         """
@@ -202,7 +202,7 @@ class SmoldynProcess(Process):
         # redistribute the molecule according to the bounds
         self.simulation.addSolutionMolecules(
             species=species_name,
-            number=configuration_parameters['count'],
+            number=count,
             highpos=self.boundaries['high'],
             lowpos=self.boundaries['low']
         )
@@ -226,22 +226,41 @@ class SmoldynProcess(Process):
             for spec_name in self.species_names
         }
 
+        print(f'INITAL: {initial_species_counts}')
+
         return {
             'species_counts': initial_species_counts,
-            'molecules': {}
+            'molecules': {
+                mol_id: {
+                    'coordinates': [0.0, 0.0, 0.0],
+                    'species_id': self.species_names[i],
+                    'state': 0
+                }
+                for i, mol_id in enumerate(self.molecule_ids)
+            }
         }
 
     def inputs(self):
         # TODO: include velocity and state to this schema (add to constructor as well)
+        counts_type = {
+            species_name: 'int'
+            for species_name in self.species_names
+        }
+
         return {
-            'species_counts': self.counts_type,
+            'species_counts': counts_type,
             'molecules': 'tree[string]'  # self.molecules_type
         }
 
     def outputs(self):
+        counts_type = {
+            species_name: 'int'
+            for species_name in self.species_names
+        }
+
         return {
-            'species_counts': self.counts_type,
-            'molecules': 'tree[string]'
+            'species_counts': counts_type,
+            'molecules': 'tree[string]'  # self.molecules_type
         }
 
     def update(self, inputs: Dict, interval: int) -> Dict:
@@ -262,7 +281,7 @@ class SmoldynProcess(Process):
             TODO: We must account for the mol_ids that are generated in the output based on the interval run,
                 i.e: Shorter intervals will yield both less output molecules and less unique molecule ids.
         """
-        # reset the molecules, distribute the mols according to self.boundaries
+        # reset the molecules, distribute the mols according to self.boundarieså
         for name in self.species_names:
             self.set_uniform(
                 species_name=name,
@@ -294,7 +313,9 @@ class SmoldynProcess(Process):
 
         # get and populate the species counts
         for index, name in enumerate(self.species_names):
-            simulation_state['species_counts'][name] = int(final_count[index]) - inputs['species_counts'][name]
+            input_counts = inputs['species_counts'][name]
+            print(f'INPUT COUNTS: {input_counts}')
+            simulation_state['species_counts'][name] = int(final_count[index]) - input_counts
 
         # clear the list of known molecule ids and update the list of known molecule ids (convert to an intstring)
         self.molecule_ids.clear()
@@ -318,50 +339,62 @@ class SmoldynProcess(Process):
         return simulation_state
 
 
+from process_bigraph import process_registry
+
+# Define a list of processes to attempt to import and register
+processes_to_register = [
+    ('smoldyn', 'smoldyn_process.SmoldynProcess'),
+]
+
+for process_name, process_path in processes_to_register:
+    module_name, class_name = process_path.rsplit('.', 1)
+    try:
+        # Dynamically import the module
+        process_module = __import__(f'biosimulator_processes.{module_name}', fromlist=[class_name])
+        # Get the class from the module
+        process_class = getattr(process_module, class_name)
+
+        # Register the process
+        process_registry.register(process_name, process_class)
+        print(f"{class_name} registered successfully.")
+    except ImportError as e:
+        print(f"{class_name} not available. Error: {e}")
+
+
 def test_process():
     """Test the smoldyn process using the crowding model."""
 
     # this is the instance for the composite process to run
+    print("RUNNING")
     instance = {
         'smoldyn': {
             '_type': 'process',
             'address': 'local:smoldyn',
             'config': {
                 'model_filepath': 'biosimulator_processes/model_files/minE_model.txt',
-                'animate': False,
-            },
+                'animate': False},
             'inputs': {
                 'species_counts': ['species_counts_store'],
-                'molecules': ['molecules_store'],
-            },
+                'molecules': ['molecules_store']},
             'outputs': {
                 'species_counts': ['species_counts_store'],
-                'molecules': ['molecules_store'],
-            }
+                'molecules': ['molecules_store']}
         },
         'emitter': {
             '_type': 'step',
             'address': 'local:ram-emitter',
             'config': {
-                'ports': {
-                    'inputs': {
-                        'species_counts': 'tree[any]',
-                        'molecules': 'tree[any]'
-                    },
-                    'outputs': {
-                        'species_counts': 'tree[any]',
-                        'molecules': 'tree[any]'
-                    },
-                }
+                'emit': {
+                    'species_counts': 'tree[string]',
+                    'molecules': 'tree[string]'}
             },
             'inputs': {
                 'species_counts': ['species_counts_store'],
-                'molecules': ['molecules_store'],
-            }
+                'molecules': ['molecules_store']}
         }
     }
 
-    total_time = 1
+    total_time = 2
 
     # make the composite
     workflow = Composite({
