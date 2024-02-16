@@ -159,6 +159,20 @@ class SmoldynProcess(Process):
         if self.config['animate']:
             self.simulation.addGraphics('opengl_better')
 
+        # create a re-usable counts and molecules type to be used by both inputs and outputs
+        self.counts_type = {
+            species_name: 'int'
+            for species_name in self.species_names
+        }
+
+        # self.molecules_type = {
+        #     mol_id: {
+        #         'coordinates': 'list[float]',
+        #         'species_id': 'string',
+        #         'state': 'string'
+        #     } for mol_id in self.molecule_ids
+        # }
+
     def set_uniform(
             self,
             species_name: str,
@@ -216,47 +230,25 @@ class SmoldynProcess(Process):
             'molecules': {}
         }
 
-    def schema(self) -> Dict[str, Union[Dict[str, str], Dict[str, Dict[str, str]]]]:
-        """Return a dictionary of molecule names and the expected input/output schema at simulation
-            runtime. NOTE: Smoldyn assumes a global high and low bounds and thus high and low
-            are specified alongside molecules.
-
-            PLEASE NOTE: the key 'counts' refers to the count of molecules for each molecular species. The number of
-                species_types in this regard does not change, even if that number drops to 0.
-        """
-        counts_type = {
-            species_name: 'int'
-            for species_name in self.species_names
-        }
-
-        molecules_type = {
-            mol_id: {
-                'coordinates': 'list[float]',
-                'species_id': 'string',
-                'state': 'string'
-            } for mol_id in self.molecule_ids
-        }
-
+    def inputs(self):
         # TODO: include velocity and state to this schema (add to constructor as well)
-
-        # return a generic tree of string for molecules
         return {
-            'inputs': {
-                'species_counts': counts_type,
-                'molecules': 'tree[string]'  # molecules_type
-            },
-            'outputs': {
-                'species_counts': counts_type,
-                'molecules': 'tree[string]'
-            }
+            'species_counts': self.counts_type,
+            'molecules': 'tree[string]'  # self.molecules_type
         }
 
-    def update(self, state: Dict, interval: int) -> Dict:
+    def outputs(self):
+        return {
+            'species_counts': self.counts_type,
+            'molecules': 'tree[string]'
+        }
+
+    def update(self, inputs: Dict, interval: int) -> Dict:
         """Callback method to be evoked at each Process interval. We want to get the
             last of each dataset type as that is the relevant data in regard to the Process timescale scope.
 
             Args:
-                state:`Dict`: current state of the Smoldyn simulation, expressed as a `Dict` whose
+                inputs:`Dict`: current state of the Smoldyn simulation, expressed as a `Dict` whose
                     schema matches that which is returned by the `self.schema()` API method.
                 interval:`int`: Analogous to Smoldyn's `time_stop`, this is the
                     timestep interval at which to provide the update as the output of this method.
@@ -273,7 +265,7 @@ class SmoldynProcess(Process):
         for name in self.species_names:
             self.set_uniform(
                 species_name=name,
-                count=state['species_counts'][name],
+                count=inputs['species_counts'][name],
             )
 
         # run the simulation for a given interval
@@ -301,7 +293,7 @@ class SmoldynProcess(Process):
 
         # get and populate the species counts
         for index, name in enumerate(self.species_names):
-            simulation_state['species_counts'][name] = int(final_count[index]) - state['species_counts'][name]
+            simulation_state['species_counts'][name] = int(final_count[index]) - inputs['species_counts'][name]
 
         # clear the list of known molecule ids and update the list of known molecule ids (convert to an intstring)
         self.molecule_ids.clear()
@@ -325,8 +317,7 @@ class SmoldynProcess(Process):
         return simulation_state
 
 
-
-'''def test_process():
+def test_process():
     """Test the smoldyn process using the crowding model."""
 
     # this is the instance for the composite process to run
@@ -385,4 +376,4 @@ class SmoldynProcess(Process):
 
 
 if __name__ == '__main__':
-    test_process()'''
+    test_process()

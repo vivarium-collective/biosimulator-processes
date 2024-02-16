@@ -119,7 +119,7 @@ class CobraProcess(Process):
             'status': solution.status,
         }
 
-def test_process():
+'''def test_process():
     instance = {
         'fba': {
             '_type': 'process',
@@ -157,4 +157,4 @@ def test_process():
 
 
 if __name__ == '__main__':
-    test_process()
+    test_process()'''

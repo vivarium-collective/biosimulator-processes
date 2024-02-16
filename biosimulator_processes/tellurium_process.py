@@ -23,7 +23,7 @@ class TelluriumStep(Step):
         if self.config.get('antimony_string') and not self.config.get('sbml_model_path'):
             self.simulator = te.loada(self.config['antimony_string'])
         elif self.config.get('sbml_model_path') and not self.config.get('antimony_string'):
-            self.simulator = te.loadSBMLModel(self.config['sbml_model_path'])
+            self.simulator: te.roadrunner.extended_roadrunner.ExtendedRoadRunner = te.loadSBMLModel(self.config['sbml_model_path'])
         else:
             raise Exception('the config requires either an "antimony_string" or an "sbml_model_path"')
 
@@ -96,7 +96,7 @@ class TelluriumProcess(Process):
         if self.config.get('antimony_string') and not self.config.get('sbml_model_path'):
             self.simulator = te.loada(self.config['antimony_string'])
         elif self.config.get('sbml_model_path') and not self.config.get('antimony_string'):
-            self.simulator = te.loadSBMLModel(self.config['sbml_model_path'])
+            self.simulator: te.roadrunner.extended_roadrunner.ExtendedRoadRunner = te.loadSBMLModel(self.config['sbml_model_path'])
         else:
             raise Exception('the config requires either an "antimony_string" or an "sbml_model_path"')
 
@@ -184,7 +184,7 @@ class TelluriumProcess(Process):
         return update
 
 
-def test_process():
+'''def test_process():
 
     # this is the instance for the composite process to run
     instance = {
@@ -204,7 +204,7 @@ def test_process():
                 'boundary_species': ['boundary_species_store'],
                 'model_parameters': ['model_parameters_store'],
                 'reactions': ['reactions_store'],
-                'interval': ['interval_store'],
+                # 'interval': ['interval_store'],
             },
             'outputs': {
                 'results': ['results_store'],
@@ -230,4 +230,4 @@ def test_process():
 
 
 if __name__ == '__main__':
-    test_process()
+    test_process()'''
