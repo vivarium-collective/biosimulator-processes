@@ -27,17 +27,16 @@ RUN python3 -m pip install poetry
 RUN poetry config virtualenvs.create false
 
 # RUN poetry run pip install smoldyn
-RUN curl -SL https://www.smoldyn.org/smoldyn-2.72.tgz -o smoldyn-2.72.tgz \
-    && tar -xzf smoldyn-2.72.tgz \
-    && rm smoldyn-2.72.tgz \
-    && mv smoldyn-2.72 smoldyn
+# RUN curl -SL https://www.smoldyn.org/smoldyn-2.72.tgz -o smoldyn-2.72.tgz \
+#     && tar -xzf smoldyn-2.72.tgz \
+#     && rm smoldyn-2.72.tgz \
+#     && mv smoldyn-2.72 smoldyn
 
-ENV PATH="/app/smoldyn:${PATH}"
+# ENV PATH="/app/smoldyn:${PATH}"
 
-RUN poetry add tellurium
+RUN poetry add tellurium && poetry add smoldyn
 
 RUN poetry install
 
-ENV DEBIAN_FRONTEND=interactive
-
 ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+
