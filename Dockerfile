@@ -1,49 +1,73 @@
+# FROM ubuntu:latest
+# # FROM ghcr.io/biosimulators/biosimulators:latest
+#
+# WORKDIR /app
+#
+# COPY . /app
+#
+# RUN apt-get update && apt-get install -y \
+#     build-essential \
+#     cmake \
+#     gcc \
+#     && rm -rf /var/lib/apt/lists/*
+#
+# RUN pip install --upgrade pip \
+#     && pip install poetry
+#
+# RUN poetry run pip install --upgrade pip \
+#     && poetry run pip install smoldyn \
+#     && poetry install
+#     # && pip install .
+
+# Start with the latest Ubuntu base image
 FROM ubuntu:latest
 
-RUN echo "Installing singularity..."
-RUN apt-get update -y && apt-get install -y \
-            build-essential \
-            libseccomp-dev \
-            pkg-config \
-            squashfs-tools
-            # cryptsetup
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV GO_VERSION "1.20"
-ENV SINGULARITY_VERSION "3.9.5"
-ENV OS "linux"
-ENV ARCH "amd64"
-
-RUN echo "Installing Go..." \
-RUN wget https://dl.google.com/go/go$GO_VERSION.$OS-$ARCH.tar.gz \
-  && tar -C /usr/local -xzvf go$GO_VERSION.$OS-$ARCH.tar.gz \
-  && rm go$GO_VERSION.$OS-$ARCH.tar.gz \
-  && echo 'export PATH=/usr/local/go/bin:$PATH' >> ~/.bashrc \
-  && source ~/.bashrc \
-  && echo "/usr/local/go/bin" >> $GITHUB_PATH \
-  && echo "Installing Singularity..." \
-  && wget https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-  && tar -xzf singularity-ce-${SINGULARITY_VERSION}.tar.gz \
-  && cd singularity-ce-${SINGULARITY_VERSION} \
-  && ./mconfig \
-  && make -C builddir \
-  && make -C builddir install
-
-RUN echo "Installing python system dependencies..."
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip
-
+# Set the working directory in the container
 WORKDIR /app
 
+# Copy the current directory contents into the container at /app
 COPY . /app
 
-RUN echo "Installing python content..."
-RUN pip install --upgrade pip \
-    && pip install -U "ray[default]" \
-    && ./scripts/install-smoldyn-mac-silicon.sh
+# Install Python 3.9, pip, Python development package, and other dependencies
+RUN apt-get update && apt-get install -y \
+    # software-properties-common \
+    # && add-apt-repository -y ppa:deadsnakes/ppa \
+    # && apt-get update \
+    # && apt-get install -y \
+    # python3.9 \
+    # python3.9-distutils \
+    # python3.9-venv \
+    # python3.9-dev \
+    python3 \
+    python3-pip \
+    build-essential \
+    libncurses5 \
+    cmake \
+    gcc \
+    swig \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN echo "Entering..."
-ENTRYPOINT ["/bin/bash"]
+# Update alternatives to use Python 3.9
+# RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 \
+#     && update-alternatives --set python3 /usr/bin/python3.9
 
+# Install pip for Python 3.9
+RUN apt-get update && apt-get install -y python3-pip
 
-# ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+# Install Poetry
+RUN python3 -m pip install poetry
+
+# Avoid creating virtual environments as Docker provides isolation
+RUN poetry config virtualenvs.create false
+
+RUN poetry run pip install smoldyn
+
+# Install project dependencies using Poetry
+RUN poetry install
+
+ENV DEBIAN_FRONTEND=interactive
+
+ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]

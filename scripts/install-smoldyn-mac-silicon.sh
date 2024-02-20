@@ -14,7 +14,7 @@ if [ "$(pwd)" == "/Users/alex/desktop/biosimulators-composer/scripts" ]; then
 fi
 
 # uninstall existing version
-pip uninstall smoldyn || return
+pip uninstall smoldyn
 
 # download the appropriate distribution from smoldyn
 wget $dist_url

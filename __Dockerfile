@@ -1,0 +1,36 @@
+# Use the latest Ubuntu image as the base
+FROM ubuntu:latest
+
+WORKDIR /app
+
+COPY . /app
+
+RUN apt-get update && apt-get install -y \
+    python3.9 \
+    python3-pip \
+    build-essential \
+    cmake \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+###################################
+# setup headless for NEURON, Smoldyn
+# RUN apt-get -y update \
+#     \
+#     && apt-get install --no-install-recommends -y \
+#         xvfb \
+#     && mkdir /tmp/.X11-unix \
+#     && chmod 1777 /tmp/.X11-unix \
+#     \
+#     && rm -rf /var/lib/apt/lists/*
+#
+# ENV XVFB_RES="1920x1080x24" \
+#     XVFB_ARGS=""
+
+RUN pip3 install poetry
+
+RUN poetry run pip install --upgrade pip \
+    && poetry run pip install smoldyn \
+    && poetry install  # --no-dev
+
+ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]

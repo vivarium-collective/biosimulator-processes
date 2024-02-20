@@ -2,7 +2,7 @@ import re
 from setuptools import setup, find_packages
 
 
-__version__ = "0.0.14"
+__version__ = "0.0.15"
 
 with open("README.md", "r") as readme:
     description = readme.read()
@@ -40,7 +40,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     install_requires=[
         "bigraph-schema",
         "process-bigraph",

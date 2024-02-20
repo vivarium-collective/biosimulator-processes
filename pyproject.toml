@@ -1,31 +1,27 @@
 [tool.poetry]
 name = "biosimulator-processes"
-version = "0.0.14"
+version = "0.0.15"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
 packages = [{include = "biosimulator_processes"}]
 
 [tool.poetry.dependencies]
-python = ">=3.6"
+python = ">=3.9"
 zarr = "*"
-python-libcombine = "*"
-kisao = "*"
+# kisao = ">=2.33"
 termcolor = "*"
-ipython = "*"
-notebook = "*"
 jupyterlab = "*"
-pyvista = "*"
 bigraph-schema = "*"
 process-bigraph = "*"
-numpy = "*"
-tellurium = "*"
+numpy = "*" # "^1.26.4"
+# tellurium = "*"  # "2.2.8"
 copasi-basico = "*"
 cobra = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
-mypy = "*"
+mypy = ">=1.8.0"
 flake8 = "*"
 twine = "*"
 
