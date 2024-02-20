@@ -19,6 +19,7 @@ copasi-basico = "*"
 cobra = "*"
 tellurium = "*"
 smoldyn = "*"
+bigraph-viz = "^0.0.31"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"

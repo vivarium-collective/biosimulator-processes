@@ -257,6 +257,21 @@ pint = "*"
 pytest = "*"
 
 [[package]]
+name = "bigraph-viz"
+version = "0.0.31"
+description = "A graphviz-based plotting tool for compositional bigraph schema"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "bigraph-viz-0.0.31.tar.gz", hash = "sha256:ec3c5c1a37c651fe4e0a07f01a18ba0d35c780b53557f588e9bd9080bdc50ba7"},
+]
+
+[package.dependencies]
+bigraph-schema = "*"
+graphviz = "*"
+numpy = "*"
+
+[[package]]
 name = "bleach"
 version = "6.1.0"
 description = "An easy safelist-based HTML-sanitizing tool."
@@ -941,6 +956,22 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 files = [
     {file = "future-0.18.3.tar.gz", hash = "sha256:34a17436ed1e96697a86f9de3d15a3b0be01d8bc8de9c1dffd59fb8234ed5307"},
 ]
+
+[[package]]
+name = "graphviz"
+version = "0.20.1"
+description = "Simple Python interface for Graphviz"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "graphviz-0.20.1-py3-none-any.whl", hash = "sha256:587c58a223b51611c0cf461132da386edd896a029524ca61a1462b880bf97977"},
+    {file = "graphviz-0.20.1.zip", hash = "sha256:8c58f14adaa3b947daf26c19bc1e98c4e0702cdc31cf99153e6f06904d492bf8"},
+]
+
+[package.extras]
+dev = ["flake8", "pep8-naming", "tox (>=3)", "twine", "wheel"]
+docs = ["sphinx (>=5)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
+test = ["coverage", "mock (>=4)", "pytest (>=7)", "pytest-cov", "pytest-mock (>=3)"]
 
 [[package]]
 name = "h11"
@@ -4484,4 +4515,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "a1cf6024bf448790eb95abf55317ddeef2c2e219e1111610c67db12b190f0d1d"
+content-hash = "8b52839909eb18add4e66ecff926d3f738bacb68f02043a7eab698c0072dc341"
