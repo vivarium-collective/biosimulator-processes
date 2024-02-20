@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     curl \
     tar \
+    libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y python3-pip
@@ -34,7 +35,7 @@ RUN poetry config virtualenvs.create false
 
 # ENV PATH="/app/smoldyn:${PATH}"
 
-RUN poetry add tellurium && poetry add smoldyn
+# RUN poetry add tellurium && poetry add smoldyn
 
 RUN poetry install
 
