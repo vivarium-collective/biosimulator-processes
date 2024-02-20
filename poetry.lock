@@ -1039,9 +1039,6 @@ files = [
     {file = "importlib_resources-6.1.1.tar.gz", hash = "sha256:3893a00122eafde6894c59914446a512f728a0c1a45f9bb9b63721b6bacf0b4a"},
 ]
 
-[package.dependencies]
-zipp = {version = ">=3.1.0", markers = "python_version < \"3.10\""}
-
 [package.extras]
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
 testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff", "zipp (>=3.17)"]
@@ -1092,13 +1089,13 @@ test = ["flaky", "ipyparallel", "pre-commit", "pytest (>=7.0)", "pytest-asyncio 
 
 [[package]]
 name = "ipython"
-version = "8.18.1"
+version = "8.21.0"
 description = "IPython: Productive Interactive Computing"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 files = [
-    {file = "ipython-8.18.1-py3-none-any.whl", hash = "sha256:e8267419d72d81955ec1177f8a29aaa90ac80ad647499201119e2f05e99aa397"},
-    {file = "ipython-8.18.1.tar.gz", hash = "sha256:ca6f079bb33457c66e233e4580ebfc4128855b4cf6370dddd73842a9563e8a27"},
+    {file = "ipython-8.21.0-py3-none-any.whl", hash = "sha256:1050a3ab8473488d7eee163796b02e511d0735cf43a04ba2a8348bd0f2eaf8a5"},
+    {file = "ipython-8.21.0.tar.gz", hash = "sha256:48fbc236fbe0e138b88773fa0437751f14c3645fb483f1d4c5dee58b37e5ce73"},
 ]
 
 [package.dependencies]
@@ -1112,20 +1109,19 @@ prompt-toolkit = ">=3.0.41,<3.1.0"
 pygments = ">=2.4.0"
 stack-data = "*"
 traitlets = ">=5"
-typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
 
 [package.extras]
-all = ["black", "curio", "docrepr", "exceptiongroup", "ipykernel", "ipyparallel", "ipywidgets", "matplotlib", "matplotlib (!=3.2.0)", "nbconvert", "nbformat", "notebook", "numpy (>=1.22)", "pandas", "pickleshare", "pytest (<7)", "pytest (<7.1)", "pytest-asyncio (<0.22)", "qtconsole", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "stack-data", "testpath", "trio", "typing-extensions"]
+all = ["black", "curio", "docrepr", "exceptiongroup", "ipykernel", "ipyparallel", "ipywidgets", "matplotlib", "matplotlib (!=3.2.0)", "nbconvert", "nbformat", "notebook", "numpy (>=1.23)", "pandas", "pickleshare", "pytest (<8)", "pytest-asyncio (<0.22)", "qtconsole", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "stack-data", "testpath", "trio", "typing-extensions"]
 black = ["black"]
-doc = ["docrepr", "exceptiongroup", "ipykernel", "matplotlib", "pickleshare", "pytest (<7)", "pytest (<7.1)", "pytest-asyncio (<0.22)", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "stack-data", "testpath", "typing-extensions"]
+doc = ["docrepr", "exceptiongroup", "ipykernel", "matplotlib", "pickleshare", "pytest (<8)", "pytest-asyncio (<0.22)", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "stack-data", "testpath", "typing-extensions"]
 kernel = ["ipykernel"]
 nbconvert = ["nbconvert"]
 nbformat = ["nbformat"]
 notebook = ["ipywidgets", "notebook"]
 parallel = ["ipyparallel"]
 qtconsole = ["qtconsole"]
-test = ["pickleshare", "pytest (<7.1)", "pytest-asyncio (<0.22)", "testpath"]
-test-extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.22)", "pandas", "pickleshare", "pytest (<7.1)", "pytest-asyncio (<0.22)", "testpath", "trio"]
+test = ["pickleshare", "pytest (<8)", "pytest-asyncio (<0.22)", "testpath"]
+test-extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.23)", "pandas", "pickleshare", "pytest (<8)", "pytest-asyncio (<0.22)", "testpath", "trio"]
 
 [[package]]
 name = "isoduration"
@@ -1290,7 +1286,6 @@ files = [
 ]
 
 [package.dependencies]
-importlib-metadata = {version = ">=4.8.3", markers = "python_version < \"3.10\""}
 jupyter-core = ">=4.12,<5.0.dev0 || >=5.1.dev0"
 python-dateutil = ">=2.8.2"
 pyzmq = ">=23.0"
@@ -1358,7 +1353,6 @@ files = [
 ]
 
 [package.dependencies]
-importlib-metadata = {version = ">=4.8.3", markers = "python_version < \"3.10\""}
 jupyter-server = ">=1.1.2"
 
 [[package]]
@@ -1430,7 +1424,6 @@ files = [
 [package.dependencies]
 async-lru = ">=1.0.0"
 httpx = ">=0.25.0"
-importlib-metadata = {version = ">=4.8.3", markers = "python_version < \"3.10\""}
 ipykernel = "*"
 jinja2 = ">=3.0.3"
 jupyter-core = "*"
@@ -1473,7 +1466,6 @@ files = [
 
 [package.dependencies]
 babel = ">=2.10"
-importlib-metadata = {version = ">=4.8.3", markers = "python_version < \"3.10\""}
 jinja2 = ">=3.0.3"
 json5 = ">=0.9.0"
 jsonschema = ">=4.18.0"
@@ -1790,7 +1782,6 @@ files = [
 contourpy = ">=1.0.1"
 cycler = ">=0.10"
 fonttools = ">=4.22.0"
-importlib-resources = {version = ">=3.2.0", markers = "python_version < \"3.10\""}
 kiwisolver = ">=1.3.1"
 numpy = ">=1.21,<2"
 packaging = ">=20.0"
@@ -1968,7 +1959,6 @@ files = [
 beautifulsoup4 = "*"
 bleach = "!=5.0.0"
 defusedxml = "*"
-importlib-metadata = {version = ">=3.6", markers = "python_version < \"3.10\""}
 jinja2 = ">=3.0"
 jupyter-core = ">=4.7"
 jupyterlab-pygments = "*"
@@ -3935,18 +3925,6 @@ files = [
 ]
 
 [[package]]
-name = "sbml2matlab"
-version = "1.2.3.1"
-description = "An SBML to MATLAB translator"
-optional = false
-python-versions = "*"
-files = [
-    {file = "sbml2matlab-1.2.3.1-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:ce9d4e788df3dbc767dcb4c1272e0edc4a9547568b9e411f08eff36c7e431522"},
-    {file = "sbml2matlab-1.2.3.1-cp37-cp37m-macosx_10_12_x86_64.whl", hash = "sha256:3a1b428c487b2ae17ec6605635721f7cfc62cf42851fe9179e5520ae52a7a06f"},
-    {file = "sbml2matlab-1.2.3.1-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:98b6a4cf122a045f03876dc5013fedaab0669600f7af1a2a8ad0a20ebe8f6655"},
-]
-
-[[package]]
 name = "scipy"
 version = "1.12.0"
 description = "Fundamental algorithms for scientific computing in Python"
@@ -4029,6 +4007,36 @@ files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
+
+[[package]]
+name = "smoldyn"
+version = "2.72"
+description = "Python package for the Smoldyn simulator"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "smoldyn-2.72-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:bdbcede86832b8dd583e7f413b32b0b3e8242b959d8d688b143549a7cb3b151e"},
+    {file = "smoldyn-2.72-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:413affe17e3fb55426ddf68be8e4e415500d751af9a4eab236c61fa01c8378e8"},
+    {file = "smoldyn-2.72-cp310-cp310-win_amd64.whl", hash = "sha256:1b614a3bdb6cbe398074704fc104a1e565402fd04b9cf5a1cb5855ded3564396"},
+    {file = "smoldyn-2.72-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:1a45fbf5e428a6e9e04dd4aa40474aca70203042957c2703cb7d284665285f3b"},
+    {file = "smoldyn-2.72-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d0d0020c6262f80201a76ea28a5f108974de6d9079d96fd59e77cba08d726ce5"},
+    {file = "smoldyn-2.72-cp311-cp311-win_amd64.whl", hash = "sha256:680065f2ffe0f6d844bce9deacbf9932f09cd625986863bf22a1a9dac5d411b9"},
+    {file = "smoldyn-2.72-cp37-cp37m-macosx_11_0_x86_64.whl", hash = "sha256:71ded9847ba6fd938f91f8c9045fd870417c9d10e143a0eddf8904c4663c2248"},
+    {file = "smoldyn-2.72-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b33f6c74c2230a86e1be8ad2c0a1ddde9ee9cced168151b7e29d380eb0c9e68"},
+    {file = "smoldyn-2.72-cp37-cp37m-win_amd64.whl", hash = "sha256:883fa49928e9fa91754ae8c6433a57a5f09f8bae2c59c2af17af147bf81425f8"},
+    {file = "smoldyn-2.72-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:a510fd915d8b0933eba1658db86c68594cc972edcbe7400537e0a3f072a47e79"},
+    {file = "smoldyn-2.72-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c91194441765cbb6a0c7f03ca59007f6b23604f25e631af937fb4194998ea84c"},
+    {file = "smoldyn-2.72-cp38-cp38-win_amd64.whl", hash = "sha256:01c82dda3a71bec7553618fe530e13ee7e7bd48c248a4d11c7dc33b76e4650dc"},
+    {file = "smoldyn-2.72-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:a877e484002c575c97dde7483d6785308a7819d5a3170bc75ff1b470598ad2a0"},
+    {file = "smoldyn-2.72-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5ee082991b4fe1947e0743906a3b8d3dc5fd81a779fd0b7962eccdb780b922d7"},
+    {file = "smoldyn-2.72-cp39-cp39-win_amd64.whl", hash = "sha256:e00e644610c9795bea62e661ab5bed3bdce3e71f48520b1a9426add8878cb2cd"},
+]
+
+[package.extras]
+biosimulators = ["biosimulators-utils[logging] (>=0.1.124)", "numpy", "pandas"]
+biosimulators-dev = ["flake8"]
+biosimulators-tests = ["python-dateutil"]
+dev = ["black", "flaky", "matplotlib", "mypy", "numpy", "pyflakes"]
 
 [[package]]
 name = "sniffio"
@@ -4183,7 +4191,6 @@ python-libsbml = ">=5.18.0"
 python-libsedml = ">=2.0.17"
 requests = "*"
 rrplugins = {version = ">=2.1", markers = "platform_system == \"Windows\""}
-sbml2matlab = {version = ">=0.9.1", markers = "python_version < \"3.10\" and platform_machine != \"arm64\""}
 scipy = ">=1.5.1"
 
 [[package]]
@@ -4476,5 +4483,5 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.9"
-content-hash = "e10de40025c04aa5e82f7eebe3bae476cd3854e10ab63ed6fcf1a546770dba9e"
+python-versions = ">=3.10"
+content-hash = "a1cf6024bf448790eb95abf55317ddeef2c2e219e1111610c67db12b190f0d1d"

@@ -12,6 +12,11 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libncurses5 \
     cmake \
+    make \
+    ibx11-dev \
+    libc6-dev \
+    libx11-6 \
+    libc6 \
     gcc \
     swig \
     pkg-config \
@@ -24,24 +29,25 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get update && apt-get install -y python3-pip
 
-RUN python3 -m pip install poetry
+RUN pip install --upgrade pip && pip install poetry
+
+# Add Poetry to PATH
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Avoid creating virtual environments as Docker provides isolation
 RUN poetry config virtualenvs.create false
 
-# RUN poetry run pip install smoldyn
-# RUN curl -SL https://www.smoldyn.org/smoldyn-2.72.tgz -o smoldyn-2.72.tgz \
-#     && tar -xzf smoldyn-2.72.tgz \
-#     && rm smoldyn-2.72.tgz \
-#     && mv smoldyn-2.72 smoldyn0
-
-RUN ./scripts/install-smoldyn-mac-silicon.sh
-
+# Add the script directory to PATH
+#ENV PATH="/app/scripts:${PATH}"
 ENV PATH="/app/smoldyn:${PATH}"
+
+# RUN poetry run ./scripts/install-smoldyn-mac-silicon.sh
 
 # RUN poetry add tellurium && poetry add smoldyn
 
-RUN poetry install
+RUN poetry run pip install --upgrade pip \
+    && poetry run pip install python-libnuml --use-pep517 \
+    && poetry install
 
 ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
 

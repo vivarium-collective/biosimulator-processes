@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "biosimulator_processes"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.10"
 zarr = "*"
 # kisao = ">=2.33"
 termcolor = "*"
@@ -17,7 +17,8 @@ process-bigraph = "*"
 numpy = "*" # "^1.26.4"
 copasi-basico = "*"
 cobra = "*"
-tellurium = "^2.2.10"
+tellurium = "*"
+smoldyn = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
