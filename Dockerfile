@@ -30,7 +30,7 @@ RUN poetry config virtualenvs.create false
 # RUN curl -SL https://www.smoldyn.org/smoldyn-2.72.tgz -o smoldyn-2.72.tgz \
 #     && tar -xzf smoldyn-2.72.tgz \
 #     && rm smoldyn-2.72.tgz \
-#     && mv smoldyn-2.72 smoldyn
+#     && mv smoldyn-2.72 smoldyn0
 
 # ENV PATH="/app/smoldyn:${PATH}"
 
