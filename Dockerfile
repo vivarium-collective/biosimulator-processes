@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     tar \
     libgl1-mesa-glx \
+    libice6 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y python3-pip
@@ -33,7 +34,9 @@ RUN poetry config virtualenvs.create false
 #     && rm smoldyn-2.72.tgz \
 #     && mv smoldyn-2.72 smoldyn0
 
-# ENV PATH="/app/smoldyn:${PATH}"
+RUN ./scripts/install-smoldyn-mac-silicon.sh
+
+ENV PATH="/app/smoldyn:${PATH}"
 
 # RUN poetry add tellurium && poetry add smoldyn
 

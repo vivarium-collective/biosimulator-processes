@@ -4031,36 +4031,6 @@ files = [
 ]
 
 [[package]]
-name = "smoldyn"
-version = "2.72"
-description = "Python package for the Smoldyn simulator"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "smoldyn-2.72-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:bdbcede86832b8dd583e7f413b32b0b3e8242b959d8d688b143549a7cb3b151e"},
-    {file = "smoldyn-2.72-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:413affe17e3fb55426ddf68be8e4e415500d751af9a4eab236c61fa01c8378e8"},
-    {file = "smoldyn-2.72-cp310-cp310-win_amd64.whl", hash = "sha256:1b614a3bdb6cbe398074704fc104a1e565402fd04b9cf5a1cb5855ded3564396"},
-    {file = "smoldyn-2.72-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:1a45fbf5e428a6e9e04dd4aa40474aca70203042957c2703cb7d284665285f3b"},
-    {file = "smoldyn-2.72-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d0d0020c6262f80201a76ea28a5f108974de6d9079d96fd59e77cba08d726ce5"},
-    {file = "smoldyn-2.72-cp311-cp311-win_amd64.whl", hash = "sha256:680065f2ffe0f6d844bce9deacbf9932f09cd625986863bf22a1a9dac5d411b9"},
-    {file = "smoldyn-2.72-cp37-cp37m-macosx_11_0_x86_64.whl", hash = "sha256:71ded9847ba6fd938f91f8c9045fd870417c9d10e143a0eddf8904c4663c2248"},
-    {file = "smoldyn-2.72-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b33f6c74c2230a86e1be8ad2c0a1ddde9ee9cced168151b7e29d380eb0c9e68"},
-    {file = "smoldyn-2.72-cp37-cp37m-win_amd64.whl", hash = "sha256:883fa49928e9fa91754ae8c6433a57a5f09f8bae2c59c2af17af147bf81425f8"},
-    {file = "smoldyn-2.72-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:a510fd915d8b0933eba1658db86c68594cc972edcbe7400537e0a3f072a47e79"},
-    {file = "smoldyn-2.72-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c91194441765cbb6a0c7f03ca59007f6b23604f25e631af937fb4194998ea84c"},
-    {file = "smoldyn-2.72-cp38-cp38-win_amd64.whl", hash = "sha256:01c82dda3a71bec7553618fe530e13ee7e7bd48c248a4d11c7dc33b76e4650dc"},
-    {file = "smoldyn-2.72-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:a877e484002c575c97dde7483d6785308a7819d5a3170bc75ff1b470598ad2a0"},
-    {file = "smoldyn-2.72-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5ee082991b4fe1947e0743906a3b8d3dc5fd81a779fd0b7962eccdb780b922d7"},
-    {file = "smoldyn-2.72-cp39-cp39-win_amd64.whl", hash = "sha256:e00e644610c9795bea62e661ab5bed3bdce3e71f48520b1a9426add8878cb2cd"},
-]
-
-[package.extras]
-biosimulators = ["biosimulators-utils[logging] (>=0.1.124)", "numpy", "pandas"]
-biosimulators-dev = ["flake8"]
-biosimulators-tests = ["python-dateutil"]
-dev = ["black", "flaky", "matplotlib", "mypy", "numpy", "pyflakes"]
-
-[[package]]
 name = "sniffio"
 version = "1.3.0"
 description = "Sniff out which async library your code is running under"
@@ -4507,4 +4477,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9"
-content-hash = "04bbe0568d3e15b2da52324edd8bed583816c706d40d08dadbb48bb080c898fb"
+content-hash = "e10de40025c04aa5e82f7eebe3bae476cd3854e10ab63ed6fcf1a546770dba9e"

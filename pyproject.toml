@@ -18,7 +18,6 @@ numpy = "*" # "^1.26.4"
 copasi-basico = "*"
 cobra = "*"
 tellurium = "^2.2.10"
-smoldyn = "^2.72"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
