@@ -15,11 +15,11 @@ There are two primary methods of interaction with `biosimulator-processes`:
    1. Ensure that the Docker Daemon is running. Most users do this by opening the Docker Desktop application.
    2. Pull the image from `ghcr.io`:
          
-            docker pull ghcr.io/biosimulators/biosimulator-processes:0.0.1
+            docker pull ghcr.io/biosimulators/biosimulator-processes:latest
    
    3. Run the image, ensuring that the running of the container is platform-agnostic:
    
-            docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:0.0.1
+            docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:latest 
    
    As an alternative, there is a helper script that does this and more. To use this script:
    
