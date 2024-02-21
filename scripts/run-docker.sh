@@ -1,5 +1,12 @@
 #!/bin/bash
 
+version="$1"
+
+if [ "${version}" == "" ]; then
+  echo "You must pass the container version you wish to run as an argument to this script. Exiting."
+  exit 1
+fi
+
 echo "Push container to GHCR after building? (y/N): "
 read -r push
 
@@ -24,13 +31,15 @@ docker buildx inspect --bootstrap
 
 if [ "${push}" == 'y' ]; then
   docker buildx build --platform linux/amd64 \
-    -t ghcr.io/biosimulators/biosimulator-processes:0.0.1 . \
+    -t ghcr.io/biosimulators/biosimulator-processes:"${version}" . \
     --push
+  docker tag ghcr.io/biosimulators/biosimulator-processes:"${version}" ghcr.io/biosimulators/biosimulator-processes:latest
+  docker push ghcr.io/biosimulators/biosimulator-processes:latest
 else
-  docker buildx build --platform linux/amd64 -t ghcr.io/biosimulators/biosimulator-processes:0.0.1 .
+  docker buildx build --platform linux/amd64 -t ghcr.io/biosimulators/biosimulator-processes:"${version}" .
 fi
 
 
 if [ "${run_after}" == 'y' ]; then
-  docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:0.0.1
+  docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:"${version}"
 fi
