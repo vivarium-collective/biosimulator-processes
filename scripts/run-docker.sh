@@ -4,7 +4,7 @@
 version="$1"
 
 # PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.2
-current="0.0.2"
+current="0.0.1"
 
 if [ "${version}" == "" ]; then
   echo "You must pass the container version you wish to run as an argument to this script. Exiting."
