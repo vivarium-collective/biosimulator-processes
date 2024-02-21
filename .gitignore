@@ -13,12 +13,10 @@ install.sh
 push-image.sh
 release.sh
 run.sh
-run-docker.sh
 ray_job.sh
 __pycache__
 .pytest_cache
 submit-biosimulators-container.sh
-scripts/
-scripts/
-._vagrant
+install-smoldyn-mac-silicon.sh
+.vagrant
 ._vagrant

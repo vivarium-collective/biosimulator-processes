@@ -28,9 +28,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y python3-pip
+# RUN apt-get update && apt-get install -y python3-pip
 
-# setup headless for NEURON, Smoldyn
 RUN apt-get -y update \
     \
     && apt-get install --no-install-recommends -y \
@@ -39,11 +38,14 @@ RUN apt-get -y update \
     && chmod 1777 /tmp/.X11-unix \
     \
     && rm -rf /var/lib/apt/lists/*
-COPY xvfb-startup.sh /xvfb-startup.sh
+
+COPY scripts/xvfb-startup.sh /xvfb-startup.sh
+
 ENV XVFB_RES="1920x1080x24" \
     XVFB_ARGS=""
 
-RUN pip install --upgrade pip && pip install poetry
+RUN pip install --upgrade pip \
+    && pip install poetry
 
 # Add Poetry to PATH
 ENV PATH="/root/.local/bin:${PATH}"
