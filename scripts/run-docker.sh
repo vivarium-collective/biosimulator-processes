@@ -1,6 +1,10 @@
 #!/bin/bash
 
+
 version="$1"
+
+# PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.2
+current="0.0.2"
 
 if [ "${version}" == "" ]; then
   echo "You must pass the container version you wish to run as an argument to this script. Exiting."
@@ -30,6 +34,10 @@ docker buildx create --name biosimbuilder --use
 docker buildx inspect --bootstrap
 
 if [ "${push}" == 'y' ]; then
+  if [ "${version}" == "${current}" ]; then
+    echo "This version already exists on GHCR. Exiting."
+    exit 1
+  fi
   docker buildx build --platform linux/amd64 \
     -t ghcr.io/biosimulators/biosimulator-processes:"${version}" . \
     --push
