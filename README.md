@@ -2,7 +2,7 @@
 
 
 Core implementations of `process-bigraph.composite.Process()` aligning with BioSimulators simulator
-tools.
+tools. A Docker container complete with all required dependencies is available as part of the features of this tooling.
 
 
 ## Installation
@@ -13,9 +13,8 @@ core-processes with:
     pip install biosimulator-processes
 
 We recommend using an environment/package manager [like Conda](https://conda.io/projects/conda/en/latest/index.html) to 
-install the dependencies required for your use.
-
- Most of the direct UI content for this tooling will be in the form of a jupyter notebook.
+install the dependencies required for your use. Most of the direct UI content for this tooling will be in the form of
+a jupyter notebook. The installation for this notebook is provided below.
 
 ### Using `biosimulator_processes.smoldyn_process.SmoldynProcess()`: 
 
@@ -31,21 +30,46 @@ Mac, please adhere to the following instructions:
 
 1. Clone this repo from Github:
 
-        git clone https://github.com/vivarium-collective/biosimulator-processes.git
+        git clone https://github.com/biosimulators/biosimulator-processes.git
 
 2. Provide adminstrative access to the `scripts` directory within the cloned repo:
 
-        cd biosimulator-processes 
-        chmod +x scripts 
+        cd biosimulator-processes
 
 3. Look for the install-with-smoldyn-for-mac-<YOUR MAC PROCESSOR> shell script where <YOUR MAC PROCESSOR> corresponds 
     to your machine's processor:
 
-        ls scripts 
+        ls scripts | grep <YOUR MAC PROCESSOR>
+        chmod +x ./scripts/install-with-smoldyn-for-mac-<YOUR MAC PROCESSOR>
 
 4. Run the appropriate shell script (for example, using mac silicon):
 
-        scripts/install-with-smoldyn-for-mac-silicon.sh 
+        scripts/install-with-smoldyn-for-mac-silicon.sh
+
+## Accessing the containerized notebook/builder:
+
+One of the primary features of this tooling is a docker container complete with all dependencies along with scripts
+to interact/run the container. The image is available on `ghcr`. To access the container, complete the following steps:
+
+1. Ensure that the Docker Daemon is running. Most users do this by opening the Docker Desktop application.
+2. Pull the image from `ghcr.io`:
+         
+         docker pull ghcr.io/biosimulators/biosimulator-processes:0.0.1
+
+3. Run the image, ensuring that the running of the container is platform-agnostic:
+
+         docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:0.0.1
+
+As an alternative, there is a helper script that does this and more. To use this script:
+
+1. Add the appropriate permissions to the file:
+         
+         chmod +x ./scripts/run-docker.sh
+
+2. Run the script:
+
+         ./scripts/run-docker.sh
+
 
 ### Quick Start Example:
 

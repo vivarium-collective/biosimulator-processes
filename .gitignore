@@ -17,6 +17,5 @@ ray_job.sh
 __pycache__
 .pytest_cache
 submit-biosimulators-container.sh
-install-smoldyn-mac-silicon.sh
 .vagrant
 ._vagrant
