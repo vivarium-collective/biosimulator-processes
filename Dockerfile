@@ -54,6 +54,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 RUN poetry run pip install --upgrade pip \
     && poetry run pip install python-libnuml --use-pep517 \
+    && poetry run pip install jupyter \
     && poetry install
 
 RUN jupyter trust /app/builder
