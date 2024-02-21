@@ -18,5 +18,7 @@ ray_job.sh
 __pycache__
 .pytest_cache
 submit-biosimulators-container.sh
-__scripts/
-__scripts/
+scripts/
+scripts/
+._vagrant
+._vagrant
