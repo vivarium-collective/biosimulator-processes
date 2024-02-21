@@ -2,11 +2,10 @@
 Tellurium Process
 """
 
-from process_bigraph import Process, Composite, pf
 
 import numpy as np
 import tellurium as te
-from process_bigraph import Process, Step
+from process_bigraph import Process, Composite, pf, Step
 
 
 class TelluriumStep(Step):
@@ -184,9 +183,8 @@ class TelluriumProcess(Process):
         return update
 
 
-'''def test_process():
-
-    # this is the instance for the composite process to run
+def test_process():
+    # 1. define the instance of the Composite(in this case singular) by its schema
     instance = {
         # 'start_time_store': 0,
         # 'run_time_store': 1,
@@ -212,22 +210,14 @@ class TelluriumProcess(Process):
         }
     }
 
-    # make the composite
+    # 2. make the composite
     workflow = Composite({
         'state': instance
     })
 
-    # initial_state = workflow.initial_state()
-
-    # run
+    # 3. run
     update = workflow.run(10)
 
-    print(f'UPDATE: {update}')
-
-    # gather results
-    # results = workflow.gather_results()
-    # print(f'RESULTS: {pf(results)}')
-
-
-if __name__ == '__main__':
-    test_process()'''
+    # 4. gather results
+    results = workflow.gather_results()
+    print(f'RESULTS: {pf(results)}')

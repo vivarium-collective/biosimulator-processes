@@ -47,13 +47,9 @@
 
 
 """
-
-from process_bigraph import Process, Composite, pf, pp
-
 from typing import *
 from uuid import uuid4
-from process_bigraph import Process
-
+from process_bigraph import Process, Composite, pf, pp
 try:
     import smoldyn as sm
     from smoldyn._smoldyn import MolecState
@@ -339,28 +335,6 @@ class SmoldynProcess(Process):
         return simulation_state
 
 
-from process_bigraph import process_registry
-
-# Define a list of processes to attempt to import and register
-processes_to_register = [
-    ('smoldyn', 'smoldyn_process.SmoldynProcess'),
-]
-
-for process_name, process_path in processes_to_register:
-    module_name, class_name = process_path.rsplit('.', 1)
-    try:
-        # Dynamically import the module
-        process_module = __import__(f'biosimulator_processes.{module_name}', fromlist=[class_name])
-        # Get the class from the module
-        process_class = getattr(process_module, class_name)
-
-        # Register the process
-        process_registry.register(process_name, process_class)
-        print(f"{class_name} registered successfully.")
-    except ImportError as e:
-        print(f"{class_name} not available. Error: {e}")
-
-
 def test_process():
     """Test the smoldyn process using the crowding model."""
 
@@ -407,7 +381,3 @@ def test_process():
     # gather results
     results = workflow.gather_results()
     pp(f'RESULTS: {pf(results)}')
-
-
-if __name__ == '__main__':
-    test_process()

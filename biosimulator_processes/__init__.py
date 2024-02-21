@@ -1,5 +1,6 @@
 from process_bigraph import process_registry
 
+
 # Define a list of processes to attempt to import and register
 processes_to_register = [
     ('cobra', 'cobra_process.CobraProcess'),

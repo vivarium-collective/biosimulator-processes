@@ -1,11 +1,11 @@
 """
 COBRA FBA Process
 """
-from process_bigraph import Process, Composite, pf, pp
+
 
 import cobra.io
-from process_bigraph import Process, core
 from cobra.io import read_sbml_model
+from process_bigraph import Process, core, Composite, pf, pp
 
 
 def check_sbml(state, schema, core):
@@ -37,6 +37,7 @@ core.register('sbml', sbml_type)
 
 
 class CobraProcess(Process):
+
     config_schema = {
         'model_file': 'sbml',
     }
@@ -98,7 +99,6 @@ class CobraProcess(Process):
 
 
     def update(self, inputs, interval):
-
         # set reaction bounds
         reaction_bounds = inputs['reaction_bounds']
         for reaction_id, bounds in reaction_bounds.items():
@@ -119,7 +119,8 @@ class CobraProcess(Process):
             'status': solution.status,
         }
 
-'''def test_process():
+
+def test_process():
     instance = {
         'fba': {
             '_type': 'process',
@@ -154,7 +155,3 @@ class CobraProcess(Process):
     # gather results
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
-
-
-if __name__ == '__main__':
-    test_process()'''
