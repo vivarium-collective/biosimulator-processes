@@ -24,7 +24,7 @@ setup(
     description="",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/vivarium-collective/process-bigraph",
+    url="https://github.com/vivarium-collective/biosimulator-processes",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
