@@ -1,15 +1,15 @@
-# biosimulator-processes 
+# BioSimulator Processes
 
 
-Core implementations of `process-bigraph.composite.Process()` aligning with BioSimulators simulator
-tools. A Docker container complete with all required dependencies is available as part of the features of this tooling.
+Core implementations of `process-bigraph.composite.Process()` aligning with BioSimulators simulation 
+tools. A complete environment with version-controlled dependencies already installed is available as a Docker container on GHCR.
 
 
 ## Installation
 
 There are two primary methods of interaction with `biosimulator-processes`:
 
-### Via a container available on `ghcr`:
+### A container available on `ghcr`:
 
 
    1. Ensure that the Docker Daemon is running. Most users do this by opening the Docker Desktop application.
@@ -31,7 +31,7 @@ There are two primary methods of interaction with `biosimulator-processes`:
    
             ./scripts/run-docker.sh
 
-### Via the Python Package Index. You may download core-processes with: 
+### The Python Package Index. You may download BioSimulator Processes with: 
 
          pip install biosimulator-processes
 
