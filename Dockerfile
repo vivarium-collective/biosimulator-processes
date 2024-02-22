@@ -28,15 +28,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-# RUN apt-get update && apt-get install -y python3-pip
-
 RUN apt-get -y update \
     \
     && apt-get install --no-install-recommends -y \
         xvfb \
     && mkdir /tmp/.X11-unix \
     && chmod 1777 /tmp/.X11-unix \
-    \
     && rm -rf /var/lib/apt/lists/*
 
 COPY scripts/xvfb-startup.sh /xvfb-startup.sh
