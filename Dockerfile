@@ -54,10 +54,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 RUN poetry run pip install --upgrade pip \
     && poetry run pip install python-libnuml --use-pep517 \
-    && poetry run pip install jupyter \
     && poetry install
-
-RUN jupyter trust /app/builder
 
 ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
 

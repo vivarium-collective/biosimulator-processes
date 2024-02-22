@@ -20,6 +20,7 @@ cobra = "*"
 tellurium = "*"
 smoldyn = "*"
 bigraph-viz = "^0.0.31"
+python-libsbml = "^5.20.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
