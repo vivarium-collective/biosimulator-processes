@@ -19,7 +19,7 @@ There are two primary methods of interaction with `biosimulator-processes`:
    
    3. Run the image, ensuring that the running of the container is platform-agnostic:
    
-            docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:latest 
+            docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:latest
    
    As an alternative, there is a helper script that does this and more. To use this script:
    
