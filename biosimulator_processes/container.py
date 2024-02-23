@@ -2,6 +2,12 @@ import json
 import subprocess
 
 
+def write_config():
+    config = {}
+    with open('simulators.json', 'w') as fp:
+        json.dump(config, fp, indent=4)
+
+
 def load_config():
     # Load simulator configuration
     with open('simulators.json', 'r') as file:
