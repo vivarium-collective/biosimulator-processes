@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY . /app
 
+RUN rm -r /app/composer-api
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
@@ -44,14 +46,24 @@ ENV XVFB_RES="1920x1080x24" \
 RUN pip install --upgrade pip \
     && pip install poetry
 
+RUN poetry config virtualenvs.in-project true
+
 # Add Poetry to PATH
 ENV PATH="/root/.local/bin:${PATH}"
-
-# RUN poetry config virtualenvs.create false
 
 RUN poetry run pip install --upgrade pip \
     && poetry run pip install python-libnuml --use-pep517 \
     && poetry install
+
+# activate poetry virtualenv
+ENV PATH="/app/.venv/bin:$PATH"
+ENV CONFIG_ENV_FILE="/app/config/config.env"
+ENV SECRET_ENV_FILE="/app/secret/secret.env"
+ENV STORAGE_GCS_CREDENTIALS_FILE="/app/secret/gcs_credentials.json"
+ENV STORAGE_LOCAL_CACHE_DIR="/app/scratch"
+
+# activate the poetry virtualenv each new non-interative shell
+RUN echo "source /app/.venv/bin/activate" >> /etc/bash.bashrc
 
 ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
 

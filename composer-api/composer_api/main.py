@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Optional
-from your_module import CopasiProcess, Composite  # Adjust import path as needed
+from biosimulator_processes.copasi_process import CopasiProcess
+from process_bigraph import Composite
+
 
 app = FastAPI()
 
