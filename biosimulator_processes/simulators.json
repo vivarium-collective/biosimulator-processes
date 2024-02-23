@@ -1,0 +1,56 @@
+[[package]]
+name = "tellurium"
+version = "2.2.10"
+description = "Tellurium: An biological modeling environment for Python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "tellurium-2.2.10-py3-none-any.whl", hash = "sha256:078dbe5beeef49cc8caa9f626cb9c8e568752ecfaff3370acd32be123d6e24ae"},
+]
+
+[package.dependencies]
+antimony = ">=2.12.0"
+appdirs = ">=1.4.3"
+ipykernel = ">=4.6.1"
+ipython = "*"
+jinja2 = ">=3.0.0"
+jupyter-client = ">=5.1.0"
+jupyter-core = ">=4.3.0"
+libroadrunner = ">=2.1"
+matplotlib = ">=2.0.2"
+numpy = ">=1.23"
+pandas = ">=0.20.2"
+phrasedml = {version = ">=1.0.9", markers = "platform_machine != \"arm64\""}
+plotly = ">=2.0.12"
+pytest = "*"
+python-libcombine = ">=0.2.2"
+python-libnuml = ">=1.0.0"
+python-libsbml = ">=5.18.0"
+python-libsedml = ">=2.0.17"
+requests = "*"
+rrplugins = {version = ">=2.1", markers = "platform_system == \"Windows\""}
+scipy = ">=1.5.1"
+
+[[package]]
+name = "copasi-basico"
+version = "0.58"
+description = "Simplified COPASI interface for python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "copasi_basico-0.58-py3-none-any.whl", hash = "sha256:d85f4ab39e9ba8dc2ff19e31466883a22ac32a6dbdec9ac595a793507897fa9e"},
+    {file = "copasi_basico-0.58.tar.gz", hash = "sha256:f8766aac7afde62cb75fb6701cb868fc0e341c43a0099408dbf073845a146c1c"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+pandas = "*"
+python-copasi = "*"
+PyYAML = "*"
+scipy = "*"
+
+[package.extras]
+docs = ["sphinx", "sphinx-rtd-theme", "sphinxcontrib", "sphinxcontrib-bibtex", "sphinxcontrib-mermaid", "sphinxcontrib-plantuml", "sphinxcontrib-programoutput"]
+petab = ["copasi-petab-importer", "petab", "petab-select"]
+tqdm = ["tqdm"]

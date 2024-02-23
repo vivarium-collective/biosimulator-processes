@@ -1,5 +1,40 @@
 """
-Biosimulator process for Copasi/Basico
+Biosimulator process for Copasi/Basico.
+
+Now lets create a new model, passing along the name that we want to give it.
+Additional supported parameters for the model consist of:
+
+    quantity_unit: which sets the unit to use for species concentrations (defaults to mol)
+
+    volume_unit: the unit to use for three dimensional compartments (defaults to litre (l))
+
+    time_unit: the unit to use for time (defaults to second (s))
+
+    area_unit: the unit to use for two dimensional compartments
+
+    length_unit: the unit to use for one dimensional compartments
+
+    add_reaction('R1', 'A -> B');
+
+    Since we had a new model, this created the Species A and B as well as a compartment compartment, in which those
+    chemicals reside. The species have an initial concentration of 1.
+    To verify we can call get_species, which return
+
+    get_species().initial_concentration
+    name
+    A    1.0
+    B    1.0
+    Name: initial_concentration, dtype: float64
+    to change the initial concentration, we use set_species, and specify which property we want to change:
+
+    set_species('B', initial_concentration=0)
+    set_species('A', initial_concentration=10)
+    get_species().initial_concentration
+    name
+    A    10.0
+    B     0.0
+    Name: initial_concentration, dtype: float64
+    to see the kinetic paramters of our recation we can use get_reaction_parameters, and we see that the parameter has been created by default with a value of 0.1
 """
 
 
@@ -17,7 +52,15 @@ from process_bigraph import Process, Composite, pf
 
 
 class CopasiProcess(Process):
-    config_schema = {'model_file': 'string'}
+    config_schema = {
+        'model_file': 'string',
+        'name': 'string',
+        'reactions': 'list[string]',
+        'species_types': {
+            'name': 'string',
+            'initial_concentration': 'int'
+        }
+    }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
