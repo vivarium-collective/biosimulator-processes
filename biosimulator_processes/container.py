@@ -7,17 +7,19 @@ def load_config():
     with open('simulators.json', 'r') as file:
         return json.load(file)
 
-def add_installations_to_dockerfiile(dockerfile_contents: str):
-    # Add installations for each simulator and its dependencies
-    for simulator in config['simulators']:
-        # Example: Assuming dependencies can be installed via apt-get for simplicity
-        deps = ' '.join(simulator['deps'])
-        dockerfile_contents += f"    {deps} \\\n"
 
-    # Finish the Dockerfile
-    dockerfile_contents += """
-    # Add any additional setup here
-    """
+def add_installations_to_dockerfile(dockerfile_contents: str, config: dict):
+    # Iterate over each simulator and add installations for its dependencies
+    for simulator in config['simulators']:
+        deps = simulator.get('deps', {})
+        # Convert dependencies dict to a list of installation commands
+        for dep, version in deps.items():
+            # For simplicity, assuming all dependencies can be installed via pip
+            # This line might need adjustment based on actual package management needs
+            dockerfile_contents += f"RUN pip install {dep}{version} \\\n"
+
+    # Finish the Dockerfile with any additional setup
+    dockerfile_contents += "    # Add any additional setup here\n"
     return dockerfile_contents
 
 
@@ -28,21 +30,44 @@ def write_dockerfile(dockerfile_contents: str):
 
 
 def exec_container(name: str):
-    # Build the Docker image
-    subprocess.run(["docker", "build", "-t", "simulator_env", "."])
-    # Run the Docker container
-    subprocess.run(["docker", "run", "-d", "--name", "simulator_instance", f"{name}"])
+    build_command = f"docker buildx create --name biosimbuilder --use && docker buildx build --platform linux/amd64 -t {name}_env ."
+    subprocess.run(build_command.split())
+    run_command = f"docker run --platform linux/amd64 -it -p 8888:8888 {name}_env"
+    subprocess.run(run_command.split())
 
 
 def run(name: str):
     config = load_config()
 
     base_contents = """
-    FROM ubuntu:latest
-    RUN apt-get update && apt-get install -y \\
+    RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    build-essential \
+    libncurses5 \
+    cmake \
+    make \
+    libx11-dev \
+    libc6-dev \
+    libx11-6 \
+    libc6 \
+    gcc \
+    swig \
+    pkg-config \
+    curl \
+    tar \
+    libgl1-mesa-glx \
+    libice6 \
+    libpython3.10 \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
     """
-    dockerfile_contents = add_installations_to_dockerfiile(base_contents)
+    dockerfile_contents = add_installations_to_dockerfile(base_contents, config)
     write_dockerfile(dockerfile_contents)
     exec_container(name)
+
+
+if __name__ == '__main__':
+    run("composite")
 
 
