@@ -1,15 +1,16 @@
 openapi: 3.0.3
 info:
   title: process-bigraph
-  description: An API for running biosimulation processes.
+  description: An API for running biosimulation processes using Copasi/Basico.
   version: "1.0.0"
 servers:
-  - url: http://localhost:8000
+  - url: https://localhost:8000
     description: Local server
 paths:
   /initialize:
     post:
       summary: Initialize the simulation with a model file.
+      operationId: initializeSimulation
       requestBody:
         required: true
         content:
@@ -34,6 +35,7 @@ paths:
   /run:
     post:
       summary: Run the simulation for a given interval.
+      operationId: runSimulation
       requestBody:
         required: true
         content:
@@ -63,6 +65,7 @@ paths:
   /update:
     post:
       summary: Update the simulation state.
+      operationId: updateSimulation
       requestBody:
         required: true
         content:
@@ -79,6 +82,7 @@ paths:
   /results:
     get:
       summary: Fetch the simulation results.
+      operationId: fetchResults
       responses:
         '200':
           description: Results fetched successfully.
