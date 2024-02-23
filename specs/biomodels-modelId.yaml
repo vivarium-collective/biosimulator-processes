@@ -75,11 +75,11 @@ info:
     name: AGPL v3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
 servers:
-  - url: https://www.ebi.ac.uk/biomodels/
+  - url: https://www.ebi.ac.uk/biomodels
     description: The production API server
-  - url: https://wwwdev.ebi.ac.uk/biomodels/
+  - url: https://wwwdev.ebi.ac.uk/biomodels
     description: The development API server
-  - url: http://localhost:8080/biomodels/
+  - url: http://localhost:8080/biomodels
     description: The local development API server
 tags:
   - name: Model-related operations
@@ -114,6 +114,30 @@ paths:
                 $ref: '#/components/schemas/Model'
         '404':
           description: Invalid model id
+        '415':
+          description: Unsupported media type. Please see the content negotiation section.
+  /model/identifiers:
+    get:
+      tags: [Model-related operations]
+      operationId: getIdentifiers
+      summary: Fetch all publicly available model identifiers
+      parameters:
+        - in: query
+          name: format
+          required: true
+          schema:
+            type: string
+            enum: [json, xml, html]
+          description: The response format.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelIdentifiers'
+        '404':
+          description: Invalid operation
         '415':
           description: Unsupported media type. Please see the content negotiation section.
 components:
@@ -220,3 +244,14 @@ components:
         comment:
           type: string
           description: A comment regarding the revision.
+    ModelIdentifiers:
+      type: object
+      properties:
+        hits:
+          type: integer
+          description: Number of downloads
+        models:
+          type: array
+          items:
+            type: string
+          description: Each model in the database.
