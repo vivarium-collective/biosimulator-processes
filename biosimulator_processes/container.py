@@ -45,7 +45,9 @@ def exec_container(name: str):
 def run(name: str):
     config = load_config()
 
-    base_contents = """RUN apt-get update && apt-get install -y --no-install-recommends \\
+    base_contents = """
+    FROM ubuntu:latest \\
+    RUN apt-get update && apt-get install -y --no-install-recommends \\
     python3 \\
     python3-pip \\
     build-essential \\
