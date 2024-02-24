@@ -22,7 +22,7 @@ def add_installations_to_dockerfile(dockerfile_contents: str, config: dict):
         for dep, version in deps.items():
             # For simplicity, assuming all dependencies can be installed via pip
             # This line might need adjustment based on actual package management needs
-            dockerfile_contents += f"RUN pip install {dep}{version}\\n"
+            dockerfile_contents += f"RUN pip install {dep}{version}\n"
 
     # Finish the Dockerfile with any additional setup
     # dockerfile_contents += "    # Add any additional setup here\n"
