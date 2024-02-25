@@ -32,10 +32,10 @@ def find_package_info(package: str):
         pass
 
 
-def add_simulator_installations(base_path: str, config: dict):
+def add_simulator_installations(config: dict):
     """
         Args:
-            base_path:`str`: path to the base dockerfile on which to append installations.
+            # base_path:`str`: path to the base dockerfile on which to append installations.
             config:`dict`: a dictionary specifying simulator versions and their dependencies. The schema for
                  this dictionary should be (for example):
 
@@ -75,6 +75,8 @@ def add_simulator_installations(base_path: str, config: dict):
                   }
                 },
     """
+    
+    base_path = 'Dockerfile-base'
     # TODO: automate mapping simulators to poetry.lock: ie: simulators arg that searches the lock file
     with open(base_path, 'r') as fp:
         dockerfile_contents = fp.read()
