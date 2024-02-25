@@ -57,7 +57,7 @@ def build_image(name: str):
         tag=name)
         
 
-def exec_container(img_name: str):
+def execute_container(img_name: str):
     img = build_image(name)
     CLIENT.containers.run(img.id)
     
