@@ -23,11 +23,57 @@ def load_config():
         return json.load(file)
 
 
-def add_installations(base_path: str, config: dict):
+def find_package_info(package: str):
+    # TODO: Finish this
+    package = {}
+    with open('poetry.lock', 'r') as f:
+        pass
+
+
+def add_simulator_installations(base_path: str, config: dict):
     """
         Args:
+            base_path:`str`: path to the base dockerfile on which to append installations.
+            config:`dict`: a dictionary specifying simulator versions and their dependencies. The schema for
+                 this dictionary should be (for example):
 
+            {
+              "simulators": [
+                {
+                  "name": "tellurium",
+                  "version": "2.2.10",
+                  "deps": {
+                    "antimony": ">=2.12.0",
+                    "appdirs": ">=1.4.3",
+                    "ipykernel": ">=4.6.1",
+                    "ipython": "*",
+                    "jinja2": ">=3.0.0",
+                    "jupyter-client": ">=5.1.0",
+                    "jupyter-core": ">=4.3.0",
+                    "libroadrunner": ">=2.1",
+                    "matplotlib": ">=2.0.2",
+                    "numpy": ">=1.23",
+                    "pandas": ">=0.20.2",
+                    "phrasedml": {
+                      "version": ">=1.0.9",
+                      "markers": "platform_machine != \"arm64\""
+                    },
+                    "plotly": ">=2.0.12",
+                    "pytest": "*",
+                    "python-libcombine": ">=0.2.2",
+                    "python-libnuml": ">=1.0.0",
+                    "python-libsbml": ">=5.18.0",
+                    "python-libsedml": ">=2.0.17",
+                    "requests": "*",
+                    "rrplugins": {
+                      "version": ">=2.1",
+                      "markers": "platform_system == \"Windows\""
+                    },
+                    "scipy": ">=1.5.1"
+                  }
+                },
     """
+    # TODO: automate mapping simulators to poetry.lock: ie: simulators arg that searches the lock file
     with open(base_path, 'r') as fp:
         dockerfile_contents = fp.read()
         # Iterate over each simulator and add installations for its dependencies
@@ -159,7 +205,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \\
                        libpython3.10 \\
                        wget \\
                        && rm -rf /var/lib/apt/lists/*"""
-    dockerfile_contents = add_installations_to_dockerfile(base_contents, config)
+    # dockerfile_contents = add_installations_to_dockerfile(base_contents, config)
+
+    dockerfile_contents = add_simulator_installations(
+        base_path='Dockerfile-base',
+        config=config
+    )
     write_dockerfile(dockerfile_contents)
     # execute_container(name)
 
