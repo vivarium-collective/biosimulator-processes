@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import tempfile
 import docker
@@ -154,9 +155,9 @@ def add_installations_to_dockerfile(dockerfile_contents: str, config: dict):
     return dockerfile_contents
 
 
-def write_dockerfile(dockerfile_contents: str):
+def write_dockerfile(dockerfile_contents: str, path: str = 'biosimulator_processes/Dockerfile'):
     # Save the Dockerfile
-    with open('biosimulator_processes/Dockerfile', 'w') as file:
+    with open(path, 'w') as file:
         file.write(dockerfile_contents)
 
 
@@ -211,8 +212,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \\
         base_path='Dockerfile-base',
         config=config
     )
-    write_dockerfile(dockerfile_contents)
-    # execute_container(name)
+
+    container_dir = tempfile.mkdtemp()
+    write_dockerfile(dockerfile_contents, path=os.path.join(container_dir, 'Dockerfile'))
+    execute_container(name)
 
 
 if __name__ == '__main__':
