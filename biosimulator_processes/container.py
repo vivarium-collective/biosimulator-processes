@@ -1,5 +1,6 @@
 import json
-import subprocess 
+import subprocess
+import tempfile
 import docker
 
 '''unix:///var/run/docker.sock
@@ -166,14 +167,15 @@ def exec_container(name: str):
     subprocess.run(run_command.split())
 
 
-def build_image(name: str):
+def build_image(name: str, p: str = '.'):
     return CLIENT.images.build(
-        path='.',
+        path=p,
         tag=name)
         
 
 def execute_container(img_name: str):
-    img = build_image(name)
+    container_dir = tempfile.mkdtemp()
+    img = build_image(img_name)
     CLIENT.containers.run(img.id)
     
 
