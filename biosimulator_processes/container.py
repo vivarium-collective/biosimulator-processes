@@ -51,6 +51,16 @@ def exec_container(name: str):
     subprocess.run(run_command.split())
 
 
+def build_image(name: str):
+    return CLIENT.images.build(
+        path='.',
+        tag=name)
+        
+
+def exec_container(img_name: str):
+    img = build_image(name)
+    
+
 def run(name: str):
     config = load_config()
 
