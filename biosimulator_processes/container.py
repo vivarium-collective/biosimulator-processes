@@ -23,7 +23,78 @@ def load_config():
         return json.load(file)
 
 
+def add_installations(base_path: str, config: dict):
+    """
+        Args:
+
+    """
+    with open(base_path, 'r') as fp:
+        dockerfile_contents = fp.read()
+        # Iterate over each simulator and add installations for its dependencies
+        for simulator in config['simulators']:
+            deps = simulator.get('deps', {})
+            # Convert dependencies dict to a list of installation commands
+            for dep, version in deps.items():
+                # For simplicity, assuming all dependencies can be installed via pip
+                # This line might need adjustment based on actual package management needs
+                dockerfile_contents += f"RUN pip install {dep}{version}\n"
+
+        # common entrypoint used by all processes
+        dockerfile_contents += 'ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]'
+    return dockerfile_contents
+
 def add_installations_to_dockerfile(dockerfile_contents: str, config: dict):
+    """
+        Args:
+            dockerfile_contents:`str`: starting content for your dockerfile.
+            config:`dict`: simulator configuration containing simulator version and dependencies. Derived
+            possibly from poetry.lock. For example:
+
+            {
+              "simulators": [
+                {
+                  "name": "tellurium",
+                  "version": "2.2.10",
+                  "description": "Tellurium: An biological modeling environment for Python",
+                  "optional": false,
+                  "python-versions": "*",
+                  "files": [
+                    {
+                      "file": "tellurium-2.2.10-py3-none-any.whl",
+                      "hash": "sha256:078dbe5beeef49cc8caa9f626cb9c8e568752ecfaff3370acd32be123d6e24ae"
+                    }
+                  ],
+                  "deps": {
+                    "antimony": ">=2.12.0",
+                    "appdirs": ">=1.4.3",
+                    "ipykernel": ">=4.6.1",
+                    "ipython": "*",
+                    "jinja2": ">=3.0.0",
+                    "jupyter-client": ">=5.1.0",
+                    "jupyter-core": ">=4.3.0",
+                    "libroadrunner": ">=2.1",
+                    "matplotlib": ">=2.0.2",
+                    "numpy": ">=1.23",
+                    "pandas": ">=0.20.2",
+                    "phrasedml": {
+                      "version": ">=1.0.9",
+                      "markers": "platform_machine != \"arm64\""
+                    },
+                    "plotly": ">=2.0.12",
+                    "pytest": "*",
+                    "python-libcombine": ">=0.2.2",
+                    "python-libnuml": ">=1.0.0",
+                    "python-libsbml": ">=5.18.0",
+                    "python-libsedml": ">=2.0.17",
+                    "requests": "*",
+                    "rrplugins": {
+                      "version": ">=2.1",
+                      "markers": "platform_system == \"Windows\""
+                    },
+                    "scipy": ">=1.5.1"
+                  }
+                },
+    """
     # Iterate over each simulator and add installations for its dependencies
     for simulator in config['simulators']:
         deps = simulator.get('deps', {})
@@ -33,8 +104,8 @@ def add_installations_to_dockerfile(dockerfile_contents: str, config: dict):
             # This line might need adjustment based on actual package management needs
             dockerfile_contents += f"RUN pip install {dep}{version}\n"
 
-    # Finish the Dockerfile with any additional setup
-    # dockerfile_contents += "    # Add any additional setup here\n"
+    # common entrypoint used by all processes
+    dockerfile_contents += 'ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]'
     return dockerfile_contents
 
 
@@ -90,7 +161,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \\
                        && rm -rf /var/lib/apt/lists/*"""
     dockerfile_contents = add_installations_to_dockerfile(base_contents, config)
     write_dockerfile(dockerfile_contents)
-    # exec_container(name)
+    # execute_container(name)
 
 
 if __name__ == '__main__':
