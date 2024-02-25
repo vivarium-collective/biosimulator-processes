@@ -59,6 +59,7 @@ def build_image(name: str):
 
 def exec_container(img_name: str):
     img = build_image(name)
+    CLIENT.containers.run(img.id)
     
 
 def run(name: str):
