@@ -7,6 +7,10 @@ import docker
 instantiate DockerClient'''
 
 
+CLIENT = docker.DockerClient(
+    base_url='unix:///var/run/docker.sock'
+)
+
 def write_config():
     config = {}
     with open('biosimulator_processes/simulators.json', 'w') as fp:
