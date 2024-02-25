@@ -214,7 +214,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \\
     )
 
     container_dir = tempfile.mkdtemp()
-    write_dockerfile(dockerfile_contents, path=os.path.join(container_dir, 'Dockerfile'))
+    write_dockerfile(dockerfile_contents, path='Dockerfile')
     execute_container(name)
 
 
