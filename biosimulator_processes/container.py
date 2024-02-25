@@ -9,6 +9,8 @@ import docker
 instantiate DockerClient'''
 
 
+# TODO: Move Dockerfile-base to this dir
+
 CLIENT = docker.DockerClient(
     base_url='unix:///var/run/docker.sock'
 )
