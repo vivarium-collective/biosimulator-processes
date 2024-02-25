@@ -76,18 +76,16 @@ def add_simulator_installations(base_path: str, config: dict):
     # TODO: automate mapping simulators to poetry.lock: ie: simulators arg that searches the lock file
     with open(base_path, 'r') as fp:
         dockerfile_contents = fp.read()
-        # Iterate over each simulator and add installations for its dependencies
         for simulator in config['simulators']:
             deps = simulator.get('deps', {})
-            # Convert dependencies dict to a list of installation commands
             for dep, version in deps.items():
-                # For simplicity, assuming all dependencies can be installed via pip
-                # This line might need adjustment based on actual package management needs
-                dockerfile_contents += f"RUN pip install {dep}{version}\n"
+                # dockerfile_contents += f"RUN pip install {dep}{version}\n"
+                dockerfile_contents += f"RUN poetry add {dep}{version}\n"
 
         # common entrypoint used by all processes
         dockerfile_contents += 'ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]'
     return dockerfile_contents
+
 
 def add_installations_to_dockerfile(dockerfile_contents: str, config: dict):
     """
