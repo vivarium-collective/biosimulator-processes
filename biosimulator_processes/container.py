@@ -1,5 +1,10 @@
 import json
-import subprocess
+import subprocess 
+import docker
+
+'''unix:///var/run/docker.sock
+
+instantiate DockerClient'''
 
 
 def write_config():
