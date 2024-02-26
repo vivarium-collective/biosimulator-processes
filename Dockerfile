@@ -4,15 +4,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-COPY ./biosimulator_processes /app
+COPY ./biosimulator_processes /app/biosimulator_processes
 
 COPY ./pyproject.toml /app
 
 COPY ./poetry.lock /app
 
-# COPY ./scripts /app
-
-# RUN rm -r /app/composer-api
+COPY ./notebooks /app/notebooks
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
@@ -34,11 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libice6 \
     libpython3.10 \
     wget \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get -y update \
-    && apt-get install --no-install-recommends -y \
-        xvfb \
+    xvfb \
     && mkdir /tmp/.X11-unix \
     && chmod 1777 /tmp/.X11-unix \
     && rm -rf /var/lib/apt/lists/*
@@ -53,11 +47,8 @@ RUN pip install --upgrade pip \
 
 RUN poetry config virtualenvs.in-project true
 
-# Add Poetry to PATH
-ENV PATH="/root/.local/bin:${PATH}"
-
 RUN poetry run pip install --upgrade pip \
-     && poetry run pip install python-libnuml --use-pep517 \
+     && poetry add python-libnuml --use-pep517 \
      && poetry install
 
 # activate poetry virtualenv
@@ -69,5 +60,12 @@ ENV STORAGE_LOCAL_CACHE_DIR="/app/scratch"
 
 # activate the poetry virtualenv each new non-interative shell
 RUN echo "source /app/.venv/bin/activate" >> /etc/bash.bashrc
+
+# RUN rm /app/poetry.lock
+
+# RUN rm /app/pyproject.toml
+
+# TODO: ADD VOLUME MOUNT
+# VOLUME
 
 ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
