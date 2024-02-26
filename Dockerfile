@@ -126,7 +126,7 @@ RUN useradd -m -s /bin/bash jupyteruser && chown -R jupyteruser:jupyteruser /app
 
 USER jupyteruser
 
-RUN chmod +x /app/notebooks
+# RUN chmod +x /app/notebooks
 
 VOLUME /app/data
 

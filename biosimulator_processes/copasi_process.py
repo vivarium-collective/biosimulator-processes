@@ -47,6 +47,7 @@ from basico import (
                 run_time_course,
                 get_compartments,
                 model_info,
+                load_model_from_string,
                 biomodels
             )
 from process_bigraph import Process, Composite, pf
@@ -61,8 +62,10 @@ def fetch_model(term: str, index: int = 0):
 
         TODO: Implement a dynamic search of this
     """
-
-
+    models = find_models(term)
+    model = models[index]
+    sbml = biomodels.get_content_for_model(model['id'])
+    return load_model_from_string(sbml)
 
 
 class CopasiProcess(Process):
