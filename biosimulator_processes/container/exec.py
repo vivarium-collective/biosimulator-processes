@@ -1,7 +1,10 @@
 import toml
 import os
+import subprocess
+from tempfile import mkdtemp
 from typing import *
 from docker import DockerClient
+from biosimulator_processes.container.io import write_dockerfile
 
 
 CLIENT = DockerClient(base_url='unix:///var/run/docker.sock')
@@ -106,7 +109,7 @@ def build_image(name: str, p: str = '.'):
         tag=name)
 
 
-def execute_container(img_name: str):
+def execute_container(img_name: str = 'composition'):
     img = build_image(img_name)
     CLIENT.containers.run(img.id)
 
@@ -114,11 +117,20 @@ def execute_container(img_name: str):
 def run(simulators: List[str]):
     config = get_simulators(simulators)
     dockerfile_contents = generate_dockerfile_contents(config)
-    write_dockerfile(dockerfile_contents, path='Dockerfile')
-    execute_container(name)
+    dockerfile_dir = mkdtemp()
+    write_dockerfile(dockerfile_contents, out_path=os.path.join(dockerfile_dir, 'Dockerfile'))
+    return execute_container()
+
+
+def exec_container(name: str):
+    build_command = f"docker buildx build --platform linux/amd64 {name}_env ."
+    subprocess.run(build_command.split())
+    run_command = f"docker run --platform linux/amd64 -it -p 8888:8888 {name}_env"
+    subprocess.run(run_command.split())
 
 
 if __name__ == '__main__':
-    run("composite")
+    simulators = ["tellurium", "copasi-basico"]
+    run(simulators)
 
 
