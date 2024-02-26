@@ -1,5 +1,15 @@
 import json
-import toml
+
+
+def write_dockerfile(dockerfile_contents: str, out_path: str):
+    """
+        Args:
+            dockerfile_contents:`str`: content to write to Dockerfile
+            out_path:`str`: path to save the Dockerfile
+
+    """
+    with open(out_path, 'w') as file:
+        file.write(dockerfile_contents)
 
 
 def write_config():
@@ -12,17 +22,3 @@ def load_config():
     # Load simulator configuration
     with open('biosimulator_processes/simulators.json', 'r') as file:
         return json.load(file)
-
-
-def find_package_info(package: str):
-    # TODO: Finish this
-    package = {}
-    with open('poetry.lock', 'r') as f:
-        pass
-
-
-def write_dockerfile(dockerfile_contents: str, path: str = 'biosimulator_processes/Dockerfile'):
-    # Save the Dockerfile
-    with open(path, 'w') as file:
-        file.write(dockerfile_contents)
-
