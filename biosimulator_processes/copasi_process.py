@@ -110,6 +110,7 @@ class CopasiProcess(Process):
                 for reaction_name, reaction_spec in self.config['reactions'].items():
                     add_reaction(name=reaction_name, scheme=reaction_spec['scheme'])
         except:
+            # TODO: More completely and more gracefully handle these errors
             raise KeyError('You must enter either a model file or model name')
 
         # Get the species (floating only)  TODO: add boundary species
