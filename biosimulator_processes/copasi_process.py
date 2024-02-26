@@ -69,6 +69,10 @@ def fetch_model(term: str, index: int = 0):
     return load_model_from_string(sbml)
 
 
+# 1. Add useful config params
+# 2. Devise use cases
+# 3. Update constructor conditionally
+# 4. Devise parameter scan
 class CopasiProcess(Process):
     config_schema = {
         'model_file': 'string',
@@ -78,7 +82,13 @@ class CopasiProcess(Process):
             'name': 'string',
             'initial_concentration': 'int'
         },
-        'model_search_term': 'string'
+        'model_search_term': 'string',
+        'model_changes': {
+            'parameter': {
+                'new_value': 'float'
+            }
+        }
+
         # model_changes: dict paramName: new value
         # solver
     }

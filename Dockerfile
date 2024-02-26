@@ -17,7 +17,7 @@ COPY ./biosimulator_processes/processes /app/biosimulator_processes
 COPY ./notebooks /app/notebooks
 
 # copy files
-COPY ./pyproject.toml ./poetry.lock ./data /app/
+COPY ./pyproject.toml ./poetry.lock ./data ./scripts/trust-notebooks.sh /app/
 COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -46,11 +46,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --upgrade pip && pip install poetry \
     && poetry config virtualenvs.in-project true \
-    && poetry install
+    && poetry install \
+    && chmod +x /app/trust-notebooks.sh \
+    && /app/trust-notebook.sh
 
-RUN useradd -m -s /bin/bash jupyteruser && chown -R jupyteruser:jupyteruser /app
+# RUN useradd -m -s /bin/bash jupyteruser && chown -R jupyteruser:jupyteruser /app
 
-USER jupyteruser
+# USER jupyteruser
 
 # RUN chmod +x /app/notebooks
 
