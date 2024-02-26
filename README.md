@@ -176,3 +176,9 @@ A simplified view of the above script:
          >> workflow.run(10)
          >> results = workflow.gather_results()
          >> print(f'RESULTS: {pf(results)}')
+
+
+### A NOTE FOR DEVELOPERS:
+This tooling implements version control for dynamically-created composite containers through
+`poetry`. The version control for content on the Python Package Index is performed by 
+`setup.py`.
