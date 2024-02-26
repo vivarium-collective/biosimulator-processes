@@ -69,8 +69,8 @@ def fetch_biomodel(term: str, index: int = 0):
 # 1. Add useful config params
 # 2. Devise use cases
 # 3. Update constructor conditionally
-# 4. Devise parameter scan
-
+# 4. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
+    # and provides num iterations and parameter in model_changes
 
 class CopasiProcess(Process):
     # TODO: Update this in constructor

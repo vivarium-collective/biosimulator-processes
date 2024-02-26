@@ -58,3 +58,7 @@ CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-bro
 
 # PLEASE NOTE: We do not need to add a USER in the Dockerfile as Singularity will handle
  # such logic in conversion on the HPC.
+
+# type imports
+# dist
+# param scan demo/location
