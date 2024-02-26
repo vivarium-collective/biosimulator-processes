@@ -48,7 +48,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && poetry config virtualenvs.in-project true \
     && poetry install \
     && chmod +x ./trust-notebooks.sh \
-    && ./trust-notebook.sh
+    && ./trust-notebooks.sh \
+    && rm ./trust-notebooks.sh
 
 VOLUME /app/data
 
