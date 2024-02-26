@@ -39,9 +39,7 @@ RUN apt-get -y update \
     && chmod 1777 /tmp/.X11-unix \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ../scripts/xvfb-startup.sh /xvfb-startup.sh
-
-# RUN rm -r ./scripts
+COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
 ENV XVFB_RES="1920x1080x24" \
     XVFB_ARGS=""
@@ -55,8 +53,8 @@ RUN poetry config virtualenvs.in-project true
 ENV PATH="/root/.local/bin:${PATH}"
 
 RUN poetry run pip install --upgrade pip \
-    && poetry run pip install python-libnuml --use-pep517 \
-    && poetry install
+     && poetry run pip install python-libnuml --use-pep517 \
+     && poetry install
 
 # activate poetry virtualenv
 ENV PATH="/app/.venv/bin:$PATH"
@@ -68,4 +66,4 @@ ENV STORAGE_LOCAL_CACHE_DIR="/app/scratch"
 # activate the poetry virtualenv each new non-interative shell
 RUN echo "source /app/.venv/bin/activate" >> /etc/bash.bashrc
 
-# ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]

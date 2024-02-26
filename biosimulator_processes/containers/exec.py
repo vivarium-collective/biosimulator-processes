@@ -2,7 +2,7 @@ import toml
 import subprocess
 from typing import *
 from docker import DockerClient
-from biosimulator_processes.io import write_dockerfile
+from biosimulator_processes.containers.io import write_dockerfile
 
 
 CLIENT = DockerClient(base_url='unix:///var/run/docker.sock')
@@ -88,12 +88,13 @@ def generate_dockerfile_contents(config: dict) -> str:
                     complete_version = f'{dep}{version}'
                 else:
                     complete_version = f'{dep}'
-                dockerfile_contents += f"RUN poetry add {complete_version}\n"
+                # dockerfile_contents += f"RUN poetry add {complete_version}\n"
+                dockerfile_contents += f"RUN pip install {complete_version}\n"
             if name == 'copasi-basico':
                 name = 'copasi'
             dockerfile_contents += f"COPY ./biosimulator_processes/{simulator['name']}_process.py /app/{simulator['name']}_process.py\n"
         # common entrypoint used by all processes
-        dockerfile_contents += 'ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]'
+        dockerfile_contents += 'ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]'
     return dockerfile_contents
 
 
@@ -113,7 +114,7 @@ def run(simulators: List[str]):
     dockerfile_contents = generate_dockerfile_contents(config)
     dockerfile_path = 'Dockerfile'
     write_dockerfile(dockerfile_contents, out_path=dockerfile_path)
-    return execute_container()
+    # return execute_container()
 
 
 def exec_container(name: str):
@@ -124,4 +125,4 @@ def exec_container(name: str):
 
 
 
-run(['tellurium', 'copasi-basico'])
+# run(['tellurium', 'copasi-basico'])
