@@ -77,8 +77,8 @@
 #
 # CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
 
-# Use a more specific tag instead of latest for reproducibility
-FROM ubuntu:20.04
+# TODO: Use a more specific tag instead of latest for reproducibility
+FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive \
     XVFB_RES="1920x1080x24" \
@@ -125,6 +125,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN useradd -m -s /bin/bash jupyteruser && chown -R jupyteruser:jupyteruser /app
 
 USER jupyteruser
+
+RUN chmod +x /app/notebooks
 
 VOLUME /app/data
 

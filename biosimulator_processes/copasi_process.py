@@ -46,9 +46,23 @@ from basico import (
                 set_species,
                 run_time_course,
                 get_compartments,
-                model_info
+                model_info,
+                biomodels
             )
 from process_bigraph import Process, Composite, pf
+
+
+def find_models(term: str):
+    return biomodels.search_for_model(term)
+
+
+def fetch_model(term: str, index: int = 0):
+    """Searrch for models matching the term and return an instantiated model from BioModels.
+
+        TODO: Implement a dynamic search of this
+    """
+
+
 
 
 class CopasiProcess(Process):
