@@ -47,7 +47,6 @@ from basico import (
                 run_time_course,
                 get_compartments,
                 new_model,
-                add_reaction,
                 model_info,
                 load_model_from_string,
                 biomodels
@@ -55,62 +54,45 @@ from basico import (
 from process_bigraph import Process, Composite, pf
 
 
-def fetch_biomodel(term: str, index: int = 0):
-    """Search for models matching the term and return an instantiated model from BioModels.
+def find_models(term: str):
+    return biomodels.search_for_model(term)
+
+
+def fetch_model(term: str, index: int = 0):
+    """Searrch for models matching the term and return an instantiated model from BioModels.
 
         TODO: Implement a dynamic search of this
     """
-    models = biomodels.search_for_model(term)
+    models = find_models(term)
     model = models[index]
     sbml = biomodels.get_content_for_model(model['id'])
     return load_model_from_string(sbml)
 
 
-# 1. Add useful config params
-# 2. Devise use cases
-# 3. Update constructor conditionally
-# 4. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
-    # and provides num iterations and parameter in model_changes
-
 class CopasiProcess(Process):
-    # TODO: Update this in constructor
     config_schema = {
-        'model_file': {
-            '_type': 'string',
-            '_default': ''
-        },
-        'reactions': {
-            'name': {
-                'scheme': 'string'
-            },
-        },
+        'model_file': 'string',
+        'name': 'string',
+        'reactions': 'list[string]',
         'species_types': {
             'name': 'string',
             'initial_concentration': 'int'
         },
-        'model_search_term': 'string',
-        'model_changes': {
-            'parameter': {
-                'new_value': 'float'
-            }
-        },
-        'solver': 'string'
+        'model_search_term': 'string'
+        # model_changes: dict paramName: new value
+        # solver
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        # TODO: Update set/get with optional config params and make logic
         try:
             if self.config.get('model_file'):
+                # Load the single cell model into Basico
                 self.copasi_model_object = load_model(self.config['model_file'])
-                self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
             else:
-                self.copasi_model_object = new_model(name='CopasiProcess Model')
-                for reaction_name, reaction_spec in self.config['reactions'].items():
-                    add_reaction(name=reaction_name, scheme=reaction_spec['scheme'])
+                self.copasi_model_object = new_model(name=self.config['name'])
         except:
-            # TODO: More completely and more gracefully handle these errors
             raise KeyError('You must enter either a model file or model name')
 
         # Get the species (floating only)  TODO: add boundary species
@@ -122,7 +104,7 @@ class CopasiProcess(Process):
         self.model_parameter_values = get_parameters(model=self.copasi_model_object)['initial_value'].tolist()
 
         # Get a list of reactions
-        # self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()

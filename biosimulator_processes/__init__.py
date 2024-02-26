@@ -22,3 +22,9 @@ for process_name, process_path in processes_to_register:
         print(f"{class_name} registered successfully.")
     except ImportError as e:
         print(f"{class_name} not available. Error: {e}")
+
+
+from biosimulator_processes.copasi_process import CopasiProcess
+from biosimulator_processes.smoldyn_process import SmoldynProcess
+from biosimulator_processes.cobra_process import CobraProcess
+from biosimulator_processes.tellurium_process import TelluriumProcess

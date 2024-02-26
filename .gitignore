@@ -20,3 +20,4 @@ submit-biosimulators-container.sh
 .vagrant
 ._vagrant
 .THIS-IS-FOR-CONTAINER-DEV-ONLY
+buildDockerImage.yml

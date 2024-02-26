@@ -48,7 +48,8 @@ setup(
         "pytest>=6.2.5",
         "tellurium",
         "copasi-basico",
-        "cobra"
+        "cobra",
+        "docker"
     ],
     extras_require={
         "smoldyn": ["smoldyn", "simulariumio"],

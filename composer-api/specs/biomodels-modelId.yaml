@@ -1,0 +1,257 @@
+# openapi: 3.0.3
+# info:
+#   title: BioModels
+#   version: v1.0
+#   description: BioModels is a repository of mathematical models of biological and biomedical systems.
+#   termsOfService: https://www.ebi.ac.uk/data-protection/privacy-notice/embl-ebi-public-website
+#   contact:
+#     email: biomodels-developers@lists.sourceforge.net
+#   license:
+#     name: AGPL v3
+#     url: https://www.gnu.org/licenses/agpl-3.0.en.html
+# servers:
+#   - url: https://www.ebi.ac.uk/biomodels/
+#     description: The production API server
+#   - url: https://wwwdev.ebi.ac.uk/biomodels/
+#     description: The development API server
+#   - url: http://localhost:8080/biomodels/
+#     description: The local development API server
+# tags:
+#   - name: Model-related operations
+#     description: Retrieve information about a particular submission.
+# # Paths summary
+# paths:
+#   /{modelId}:
+#     get:
+#       tags: [Model-related operations]
+#       operationId: getModelById
+#       summary: Fetch information about a given model at a particular revision.
+#       parameters:
+#         - in: path
+#           name: modelId
+#           required: true
+#           schema:
+#             type: string
+#           description: The identifier of a public model in BioModels.
+#         - in: query
+#           name: format
+#           required: false
+#           schema:
+#             type: string
+#             enum: [json, xml, html]
+#           description: The response format.
+#       responses:
+#         '200':
+#           description: Successful operation
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/Model'
+#         '404':
+#           description: Invalid model id
+#         '415':
+#           description: Unsupported media type. Please see the content negotiation section.
+#   # Additional paths would be defined here following the same structure
+# components:
+#   schemas:
+#     Model:
+#       type: object
+#       properties:
+#         name:
+#           type: string
+#           description: The name of the model.
+#         # Additional properties would be defined here
+#
+
+openapi: 3.0.3
+info:
+  title: BioModels
+  version: v1.0
+  description: BioModels is a repository of mathematical models of biological and biomedical systems.
+  termsOfService: https://www.ebi.ac.uk/data-protection/privacy-notice/embl-ebi-public-website
+  contact:
+    email: biomodels-developers@lists.sourceforge.net
+  license:
+    name: AGPL v3
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+servers:
+  - url: https://www.ebi.ac.uk/biomodels
+    description: The production API server
+  - url: https://wwwdev.ebi.ac.uk/biomodels
+    description: The development API server
+  - url: http://localhost:8080/biomodels
+    description: The local development API server
+tags:
+  - name: Model-related operations
+    description: Retrieve information about a particular submission.
+# Paths summary
+paths:
+  /{modelId}:
+    get:
+      tags: [Model-related operations]
+      operationId: getModelById
+      summary: Fetch information about a given model at a particular revision.
+      parameters:
+        - in: path
+          name: modelId
+          required: true
+          schema:
+            type: string
+          description: The identifier of a public model in BioModels.
+        - in: query
+          name: format
+          required: false
+          schema:
+            type: string
+            enum: [json, xml, html]
+          description: The response format.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+        '404':
+          description: Invalid model id
+        '415':
+          description: Unsupported media type. Please see the content negotiation section.
+  /model/identifiers:
+    get:
+      tags: [Model-related operations]
+      operationId: getIdentifiers
+      summary: Fetch all publicly available model identifiers
+      parameters:
+        - in: query
+          name: format
+          required: true
+          schema:
+            type: string
+            enum: [json, xml, html]
+          description: The response format.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelIdentifiers'
+        '404':
+          description: Invalid operation
+        '415':
+          description: Unsupported media type. Please see the content negotiation section.
+components:
+  schemas:
+    Model:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the model.
+        description:
+          type: string
+          description: A detailed description of the model including its purpose and how it was tested.
+        format:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The format name of the model.
+            version:
+              type: string
+              description: The version of the format.
+        publication:
+          type: object
+          properties:
+            journal:
+              type: string
+            title:
+              type: string
+            affiliation:
+              type: string
+            synopsis:
+              type: string
+            year:
+              type: string
+            month:
+              type: string
+            volume:
+              type: string
+            pages:
+              type: string
+            link:
+              type: string
+            authors:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+        files:
+          type: object
+          properties:
+            main:
+              type: array
+              items:
+                $ref: '#/components/schemas/File'
+            additional:
+              type: array
+              items:
+                $ref: '#/components/schemas/File'
+        history:
+          type: object
+          properties:
+            revisions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Revision'
+        firstPublished:
+          type: integer
+          format: int64
+          description: Timestamp of the first publication.
+        submissionId:
+          type: string
+          description: Unique identifier for the submission.
+        publicationId:
+          type: string
+          description: Unique identifier for the publication associated with the model.
+    File:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The file name.
+        fileSize:
+          type: string
+          description: The size of the file in bytes.
+        description:
+          type: string
+          description: A description of the file.
+    Revision:
+      type: object
+      properties:
+        version:
+          type: integer
+          description: The version number of the revision.
+        submitted:
+          type: integer
+          format: int64
+          description: The timestamp when the revision was submitted.
+        submitter:
+          type: string
+          description: The name of the submitter.
+        comment:
+          type: string
+          description: A comment regarding the revision.
+    ModelIdentifiers:
+      type: object
+      properties:
+        hits:
+          type: integer
+          description: Number of downloads
+        models:
+          type: array
+          items:
+            type: string
+          description: Each model in the database.
