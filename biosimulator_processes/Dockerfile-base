@@ -39,7 +39,7 @@ RUN apt-get -y update \
     && chmod 1777 /tmp/.X11-unix \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ../../scripts/xvfb-startup.sh /xvfb-startup.sh
+COPY ../scripts/xvfb-startup.sh /xvfb-startup.sh
 
 # RUN rm -r ./scripts
 

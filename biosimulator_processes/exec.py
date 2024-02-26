@@ -1,30 +1,23 @@
 import toml
-import os
 import subprocess
-from tempfile import mkdtemp
 from typing import *
 from docker import DockerClient
-from biosimulator_processes.container.io import write_dockerfile
+from biosimulator_processes.io import write_dockerfile
 
 
 CLIENT = DockerClient(base_url='unix:///var/run/docker.sock')
 
 
-def get_simulators(simulators: List[str]):
+def get_simulators(sims: List[str]):
     """Get specified simulator installation information including required dependencies
         and format as a dictionary. This dictionary is used as configuration for the dynamic
         creation of containers.
-
-        Args:
-              simulators:`List[str]`: names of the simulators to be included within the
-                container.
-
     """
-    with open('biosimulator_processes/container-assets/poetry.lock') as file:
+    with open('biosimulator_processes/poetry.lock') as file:
         lock_data = toml.load(file)
 
     simulators = []
-    for sim in simulators:
+    for sim in sims:
         for package in lock_data.get('package', []):
             if package['name'] == sim:
                 simulators.append({
@@ -82,22 +75,23 @@ def generate_dockerfile_contents(config: dict) -> str:
                 },
     """
 
-    base_path = 'biosimulator_processes/container-assets/Dockerfile-base'
+    base_path = 'biosimulator_processes/Dockerfile-base'
     # TODO: automate mapping simulators to poetry.lock: ie: simulators arg that searches the lock file
     with open(base_path, 'r') as fp:
         dockerfile_contents = fp.read()
         for simulator in config['simulators']:
             # copy the appropriate process files
             name = simulator['name']
-            if name == 'copasi-basico':
-                name = 'copasi'
-            dockerfile_contents += f"COPY ./biosimulator_processes/{simulator['name']}_process.py"
-
             deps = simulator.get('deps', {})
             for dep, version in deps.items():
-                # dockerfile_contents += f"RUN pip install {dep}{version}\n"
-                dockerfile_contents += f"RUN poetry add {dep}{version}\n"
-
+                if not version == "*":
+                    complete_version = f'{dep}{version}'
+                else:
+                    complete_version = f'{dep}'
+                dockerfile_contents += f"RUN poetry add {complete_version}\n"
+            if name == 'copasi-basico':
+                name = 'copasi'
+            dockerfile_contents += f"COPY ./biosimulator_processes/{simulator['name']}_process.py /app/{simulator['name']}_process.py\n"
         # common entrypoint used by all processes
         dockerfile_contents += 'ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]'
     return dockerfile_contents
@@ -117,8 +111,8 @@ def execute_container(img_name: str = 'composition'):
 def run(simulators: List[str]):
     config = get_simulators(simulators)
     dockerfile_contents = generate_dockerfile_contents(config)
-    dockerfile_dir = mkdtemp()
-    write_dockerfile(dockerfile_contents, out_path=os.path.join(dockerfile_dir, 'Dockerfile'))
+    dockerfile_path = 'Dockerfile'
+    write_dockerfile(dockerfile_contents, out_path=dockerfile_path)
     return execute_container()
 
 
@@ -129,8 +123,5 @@ def exec_container(name: str):
     subprocess.run(run_command.split())
 
 
-if __name__ == '__main__':
-    simulators = ["tellurium", "copasi-basico"]
-    run(simulators)
 
-
+run(['tellurium', 'copasi-basico'])

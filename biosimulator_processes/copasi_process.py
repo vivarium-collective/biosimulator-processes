@@ -60,6 +60,8 @@ class CopasiProcess(Process):
             'name': 'string',
             'initial_concentration': 'int'
         }
+        # model_changes: dict paramName: new value
+        # solver
     }
 
     def __init__(self, config=None, core=None):
