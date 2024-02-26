@@ -47,15 +47,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && pip install --upgrade pip && pip install poetry \
     && poetry config virtualenvs.in-project true \
     && poetry install \
-    && chmod +x /app/trust-notebooks.sh \
-    && /app/trust-notebook.sh
-
-# RUN useradd -m -s /bin/bash jupyteruser && chown -R jupyteruser:jupyteruser /app
-
-# USER jupyteruser
-
-# RUN chmod +x /app/notebooks
+    && chmod +x ./trust-notebooks.sh \
+    && ./trust-notebook.sh
 
 VOLUME /app/data
 
 CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+
+
+# PLEASE NOTE: We do not need to add a USER in the Dockerfile as Singularity will handle
+ # such logic in conversion on the HPC.
