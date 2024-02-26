@@ -47,6 +47,7 @@ from basico import (
                 run_time_course,
                 get_compartments,
                 new_model,
+                add_reaction,
                 model_info,
                 load_model_from_string,
                 biomodels
@@ -74,9 +75,15 @@ def fetch_biomodel(term: str, index: int = 0):
 class CopasiProcess(Process):
     # TODO: Update this in constructor
     config_schema = {
-        'model_file': 'string',
-        'name': 'string',
-        'reactions': 'list[string]',
+        'model_file': {
+            '_type': 'string',
+            '_default': ''
+        },
+        'reactions': {
+            'name': {
+                'scheme': 'string'
+            },
+        },
         'species_types': {
             'name': 'string',
             'initial_concentration': 'int'
@@ -96,10 +103,12 @@ class CopasiProcess(Process):
         # TODO: Update set/get with optional config params and make logic
         try:
             if self.config.get('model_file'):
-                # Load the single cell model into Basico
                 self.copasi_model_object = load_model(self.config['model_file'])
+                self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
             else:
-                self.copasi_model_object = new_model(name=self.config['name'])
+                self.copasi_model_object = new_model(name='CopasiProcess Model')
+                for reaction_name, reaction_spec in self.config['reactions'].items():
+                    add_reaction(name=reaction_name, scheme=reaction_spec['scheme'])
         except:
             raise KeyError('You must enter either a model file or model name')
 
@@ -112,7 +121,7 @@ class CopasiProcess(Process):
         self.model_parameter_values = get_parameters(model=self.copasi_model_object)['initial_value'].tolist()
 
         # Get a list of reactions
-        self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        # self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
