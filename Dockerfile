@@ -61,10 +61,6 @@ ENV STORAGE_LOCAL_CACHE_DIR="/app/scratch"
 # activate the poetry virtualenv each new non-interative shell
 RUN echo "source /app/.venv/bin/activate" >> /etc/bash.bashrc
 
-# RUN rm /app/poetry.lock
-
-# RUN rm /app/pyproject.toml
-
 # TODO: ADD VOLUME MOUNT
 # VOLUME
 
