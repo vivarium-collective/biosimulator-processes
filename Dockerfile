@@ -6,6 +6,10 @@ WORKDIR /app
 
 COPY ./biosimulator_processes /app
 
+COPY ./pyproject.toml /app
+
+COPY ./poetry.lock /app
+
 # COPY ./scripts /app
 
 # RUN rm -r /app/composer-api
