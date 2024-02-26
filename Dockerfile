@@ -12,6 +12,8 @@ COPY ./poetry.lock /app
 
 COPY ./notebooks /app/notebooks
 
+COPY ./data /app/data
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
@@ -48,7 +50,6 @@ RUN pip install --upgrade pip \
 RUN poetry config virtualenvs.in-project true
 
 RUN poetry run pip install --upgrade pip \
-     && poetry add python-libnuml --use-pep517 \
      && poetry install
 
 # activate poetry virtualenv
@@ -61,7 +62,16 @@ ENV STORAGE_LOCAL_CACHE_DIR="/app/scratch"
 # activate the poetry virtualenv each new non-interative shell
 RUN echo "source /app/.venv/bin/activate" >> /etc/bash.bashrc
 
-# TODO: ADD VOLUME MOUNT
-# VOLUME
+# add volume mount for co-simulation data
+VOLUME /app/data
 
-ENTRYPOINT ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+# Using VOLUME allows different sim tools to share inputs and outputs
+# For example: docker volume create sim-data
+# docker run -v sim-data:/app/data --name simulator1 simulator1-image
+# docker run -v sim-data:/app/data --name simulator2 simulator2-image
+
+RUN useradd -m -s /bin/bash jupyteruser
+RUN chown -R jupyteruser:jupyteruser /app
+USER jupyteruser
+
+CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
