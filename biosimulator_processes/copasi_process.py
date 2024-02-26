@@ -54,16 +54,12 @@ from basico import (
 from process_bigraph import Process, Composite, pf
 
 
-def find_models(term: str):
-    return biomodels.search_for_model(term)
-
-
-def fetch_model(term: str, index: int = 0):
-    """Searrch for models matching the term and return an instantiated model from BioModels.
+def fetch_biomodel(term: str, index: int = 0):
+    """Search for models matching the term and return an instantiated model from BioModels.
 
         TODO: Implement a dynamic search of this
     """
-    models = find_models(term)
+    models = biomodels.search_for_model(term)
     model = models[index]
     sbml = biomodels.get_content_for_model(model['id'])
     return load_model_from_string(sbml)
@@ -73,7 +69,10 @@ def fetch_model(term: str, index: int = 0):
 # 2. Devise use cases
 # 3. Update constructor conditionally
 # 4. Devise parameter scan
+
+
 class CopasiProcess(Process):
+    # TODO: Update this in constructor
     config_schema = {
         'model_file': 'string',
         'name': 'string',
@@ -87,15 +86,14 @@ class CopasiProcess(Process):
             'parameter': {
                 'new_value': 'float'
             }
-        }
-
-        # model_changes: dict paramName: new value
-        # solver
+        },
+        'solver': 'string'
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
+        # TODO: Update set/get with optional config params and make logic
         try:
             if self.config.get('model_file'):
                 # Load the single cell model into Basico
