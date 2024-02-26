@@ -6,6 +6,8 @@ version="$1"
 # PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.3
 current="0.0.2"
 
+run="$2"
+
 set -e
 
 if [ "${version}" == "" ]; then
@@ -36,3 +38,7 @@ docker buildx build --platform linux/amd64 \
     --push
 docker tag ghcr.io/biosimulators/biosimulator-processes:"${version}" ghcr.io/biosimulators/biosimulator-processes:latest
 docker push ghcr.io/biosimulators/biosimulator-processes:latest
+
+if [ "${run}" == "-r" ]; then
+  ./scripts/run-container.sh "${version}"
+fi
