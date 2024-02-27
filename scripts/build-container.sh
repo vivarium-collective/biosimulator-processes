@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e 
-
 version="$1"
 
 run="$2"
@@ -14,6 +12,9 @@ fi
 yes | docker system prune
 docker buildx create --name biosimbuilder --use
 docker buildx inspect --bootstrap
+
+set -e
+
 docker buildx build --platform linux/amd64 \
     -t ghcr.io/biosimulators/biosimulator-processes:"${version}" .
 
