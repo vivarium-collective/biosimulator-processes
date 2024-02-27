@@ -17,9 +17,9 @@ from basico import (
 )
 from process_bigraph import Process, Composite, pf
 
-
-# 3. Update constructor conditionally
-# 4. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
+# 1. Map config_schema params to SEDML syntax/semantics (ie: 'model_file')
+# 2. Check if/how units are addressed in SEDML
+# 3. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
     # and provides num iterations and parameter in model_changes
 
 # define config schema type decs here
@@ -61,19 +61,59 @@ class CopasiProcess(Process):
                 'model_changes': {
                     'species': {
                         'name': {
-                            initial_conc: 22.24
-                            initial....etc
-                    'parameters': {}
-                    'reactions_to_add/remove': {
+                            unit
+                            initial_concentration
+                            initial_particle_number
+                            initial_expression
+                            expression
+                    'global_parameters': { <-- this is done with set_parameters(PARAM, kwarg=).
+                        name: {
+                            initial_value
+                            initial expression
+                            expression
+                            status
+                            type (fixed, assignment, reactions)
+                    },'
+                    'reactions': {
+                        'name': {
+                            'parameters': {
+                                name: new value  <-- this is done with set_reaction_parameters(name="(NAME).PARAM", value=)
+                            },
+                            'scheme': 'string'  <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+                        }
+                    }
 
 
                             ^ Here, the model changes would be applied after model instatiation in the constructor
             B. 'solver', changes the algorithm(s) used to solve the model
             C. 'units', (tree): quantity, volume, time, area, length
 
+        Justification:
+
+            As per SEDML v4 specifications (section2.2.4), p.32:sed-ml-L1V4 ->
+
+                The Model class definesthemodelsusedinasimulationexperiment(Figure2.9).
+                Each instanceof theModel classhas the requiredattributesid, source, andlanguage,
+                theoptional attributename,andtheoptionalchildlistOfChanges.
+                Thelanguageattributedefinestheformatthemodel isencodedin. TheModel
+                classreferstotheparticularmodelof interestthroughthesourceattribute.Therestrictions
+                onthemodel referenceare ˆ Themodelmustbeencodedinawell-definedformat. ˆ
+                Torefertothemodelencodinglanguage,areferencetoavaliddefinitionof that
+                formatmustbe given(languageattribute). ˆ Torefer toaparticularmodel
+                inanexternal resource, anunambiguous referencemustbegiven (sourceattribute).
     """
     # TODO: map this to SED syntax
     config_schema = {
+        'model': {
+            'model_id': 'string',  # could be used as the BioModels id
+            'model_source': 'string',  # could be used as the "model_file" below
+            'model_language': {  # could be used to load a different model
+                '_type': 'string',
+                '_default': 'sbml'
+            },
+            'model_name': 'string',
+            'model_changes': 'tree[string]'  # could be used as model changes
+        },
         'model_file': 'string',
         'reactions': 'tree[string]',
         'biomodel_id': 'string',
@@ -172,7 +212,6 @@ class CopasiProcess(Process):
         }
 
     def update(self, inputs, interval):
-
         # set copasi values according to what is passed in states
         for cat_id, value in inputs['floating_species'].items():
             set_species(name=cat_id, initial_concentration=value,
@@ -236,11 +275,7 @@ def test_process():
     workflow = Composite({
         'state': initial_sim_state
     })
-    workflow.run(10)  # /gather-results  #/publish  #/parameter-scan
+    workflow.run(10)
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
-    return results
-
-
-if __name__ == '__main__':
-    test_process()
+    assert ('emitter',) in results.keys(), "This instance was not properly configured with an emitter."
