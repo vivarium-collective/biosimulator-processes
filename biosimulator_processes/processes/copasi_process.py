@@ -1,40 +1,5 @@
 """
 Biosimulator process for Copasi/Basico.
-
-Now lets create a new model, passing along the name that we want to give it.
-Additional supported parameters for the model consist of:
-
-    quantity_unit: which sets the unit to use for species concentrations (defaults to mol)
-
-    volume_unit: the unit to use for three dimensional compartments (defaults to litre (l))
-
-    time_unit: the unit to use for time (defaults to second (s))
-
-    area_unit: the unit to use for two dimensional compartments
-
-    length_unit: the unit to use for one dimensional compartments
-
-    add_reaction('R1', 'A -> B');
-
-    Since we had a new model, this created the Species A and B as well as a compartment compartment, in which those
-    chemicals reside. The species have an initial concentration of 1.
-    To verify we can call get_species, which return
-
-    get_species().initial_concentration
-    name
-    A    1.0
-    B    1.0
-    Name: initial_concentration, dtype: float64
-    to change the initial concentration, we use set_species, and specify which property we want to change:
-
-    set_species('B', initial_concentration=0)
-    set_species('A', initial_concentration=10)
-    get_species().initial_concentration
-    name
-    A    10.0
-    B     0.0
-    Name: initial_concentration, dtype: float64
-    to see the kinetic paramters of our recation we can use get_reaction_parameters, and we see that the parameter has been created by default with a value of 0.1
 """
 
 
@@ -72,26 +37,36 @@ def fetch_biomodel(term: str, index: int = 0):
 # 4. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
     # and provides num iterations and parameter in model_changes
 
+
 class CopasiProcess(Process):
-    # TODO: Update this in constructor
+    """
+        Entrypoints:
+
+            A. SBML model file
+            B. Reactions (name: {scheme: reaction contents(also defines species))
+            C. Model search term (load preconfigured model from BioModels)
+
+        Optional Parameters:
+
+            A. 'model_changes', for example could be something like:
+                'model_changes': {
+                    'species_name': {
+                        'name': 'A',
+                        'initial_concentration': 22.24
+                            ^ Here, the model changes would be applied after model instatiation in the constructor
+            B. 'solver', changes the algorithm(s) used to solve the model
+            C. 'units', (tree): quantity, volume, time, area, length
+
+    """
     config_schema = {
         'model_file': 'string',
-        #
         'reactions': {
             'reaction_name': {
                 'scheme': 'string'
             },
         },
-        'species_types': {
-            'name': 'string',
-            'initial_concentration': 'int'
-        },
         'model_search_term': 'string',
-        'model_changes': {
-            'parameter': {
-                'new_value': 'float'
-            }
-        },
+        'model_changes': 'tree[string]',
         'solver': 'string'
     }
 
@@ -99,21 +74,21 @@ class CopasiProcess(Process):
         super().__init__(config, core)
 
         # TODO: Update set/get with optional config params and make logic
-        try:
-            if self.config.get('model_file'):
-                self.copasi_model_object = load_model(
-                    self.config['model_file'])
-                self.reaction_list = get_reactions(
-                    model=self.copasi_model_object).index.tolist()
-            else:
-                self.copasi_model_object = new_model(
-                    name='CopasiProcess Model')
-                for reaction_name, reaction_spec in self.config['reactions'].items():
-                    add_reaction(name=reaction_name,
-                                 scheme=reaction_spec['scheme'])
-        except:
-            # TODO: More completely and more gracefully handle these errors
-            raise KeyError('You must enter either a model file or model name')
+
+        if self.config.get('model_file'):
+            self.copasi_model_object = load_model(
+                self.config['model_file'])
+            self.reaction_list = get_reactions(
+                model=self.copasi_model_object).index.tolist()
+        else:
+            self.copasi_model_object = new_model(
+                name='CopasiProcess Model')
+
+        if self.config.get('reactions'):
+            for reaction_name, reaction_spec in self.config['reactions'].items():
+                add_reaction(name=reaction_name,
+                             scheme=reaction_spec['scheme'])
+
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(
@@ -128,7 +103,7 @@ class CopasiProcess(Process):
             'initial_value'].tolist()
 
         # Get a list of reactions
-        # self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
 
         # Get a list of compartments
         self.compartments_list = get_compartments(
@@ -199,7 +174,6 @@ class CopasiProcess(Process):
 
 
 def test_process():
-    # 1. Define the sim state schema:
     initial_sim_state = {
         'copasi': {
             '_type': 'process',
@@ -218,7 +192,6 @@ def test_process():
                 'time': ['time_store'],
             }
         },
-        # TODO: Add emitter schema
         'emitter': {
             '_type': 'step',
             'address': 'local:ram-emitter',
@@ -236,14 +209,10 @@ def test_process():
         }
     }
 
-    # 2. Make the composite:
     workflow = Composite({
         'state': initial_sim_state
     })
-
-    # 3. Run the composite workflow:
     workflow.run(10)
-
-    # 4. Gather and pretty print results
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
+    return results
