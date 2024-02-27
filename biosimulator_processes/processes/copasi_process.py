@@ -60,16 +60,16 @@ class CopasiProcess(Process):
             A. 'model_changes', for example could be something like:
                 'model_changes': {
                     'species': {
-                        'name': {
+                        'species_name': {
                             unit
                             initial_concentration
                             initial_particle_number
                             initial_expression
                             expression
                     'global_parameters': { <-- this is done with set_parameters(PARAM, kwarg=).
-                        name: {
-                            initial_value
-                            initial expression
+                        global_parameter_name: {
+                            initial_value: any
+                            initial_expression
                             expression
                             status
                             type (fixed, assignment, reactions)
@@ -77,7 +77,7 @@ class CopasiProcess(Process):
                     'reactions': {
                         'name': {
                             'parameters': {
-                                name: new value  <-- this is done with set_reaction_parameters(name="(NAME).PARAM", value=)
+                                parameter_name: new value('int')  <-- this is done with set_reaction_parameters(name="(NAME).PARAM", value=)
                             },
                             'scheme': 'string'  <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
                         }
