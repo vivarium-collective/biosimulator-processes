@@ -75,12 +75,10 @@ def fetch_biomodel(term: str, index: int = 0):
 class CopasiProcess(Process):
     # TODO: Update this in constructor
     config_schema = {
-        'model_file': {
-            '_type': 'string',
-            '_default': ''
-        },
+        'model_file': 'string',
+        #
         'reactions': {
-            'name': {
+            'reaction_name': {
                 'scheme': 'string'
             },
         },
