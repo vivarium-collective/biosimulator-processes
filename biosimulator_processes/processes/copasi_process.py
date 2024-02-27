@@ -47,11 +47,23 @@ def fetch_biomodel(model_id: str):
     return biomodels.get_content_for_model(model_id)
 
 
+MODEL_TYPE = {  # <-- sourced from SEDML L1v4
+    'model_id': 'maybe[string]',  # could be used as the BioModels id
+    'model_source': 'maybe[string]',  # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
+    'model_language': {  # could be used to load a different model language supported by COPASI/basico
+        '_type': 'string',
+        '_default': 'sbml'  # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
+    },
+    'model_name': 'maybe[string]',
+    'model_changes': 'maybe[tree[string]]'  # could be used as model changes  
+}
+
+
 class CopasiProcess(Process):
     """
         Entrypoints:
 
-            A. SBML model file
+            A. SBML model file: 
             B. Reactions (name: {scheme: reaction contents(also defines species))
             C. Model search term (load preconfigured model from BioModels)
 
@@ -110,31 +122,25 @@ class CopasiProcess(Process):
     """
     # TODO: map this to SED syntax
     config_schema = {
-        'model': {
-            'model_id': 'string',  # could be used as the BioModels id
-            'model_source': 'string',  # could be used as the "model_file" below
-            'model_language': {  # could be used to load a different model
-                '_type': 'string',
-                '_default': 'sbml'
-            },
-            'model_name': 'string',
-            'model_changes': 'tree[string]'  # could be used as model changes
+        'model': {  # <-- sourced from SEDML L1v4
+            '_type': 'tree[string]',
+            '_default': MODEL_TYPE
         },
-        'model_file': 'string',
-        'reactions': 'tree[string]',
-        'biomodel_id': 'string',
-        'model_changes': 'tree[string]',  # TODO: make this more specific(what does this look like in SEDML?)
-        'solver': {
+        'biomodel_id': 'string',  # <-- implies the lack of either model_file or model_reactions
+        'method': {
             '_type': 'string',
             '_default': 'lsoda'
         }
         # units:: check sedml
+        # 'model_file': 'string',
+        # 'reactions': 'tree[string]',
+        # 'model_changes': 'tree[string]',     
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        model_file = self.config.get('model_file')
+        model_file = self.config.get('model').get('model_source')
         biomodel_id = self.config.get('biomodel_id')
 
         assert not (model_file and biomodel_id), 'You can only pass either a model_file or a biomodel_id.'
@@ -175,7 +181,7 @@ class CopasiProcess(Process):
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
 
-        if self.config.get('solver'):
+        if self.config.get('method'):
             pass
 
     def initial_state(self):
