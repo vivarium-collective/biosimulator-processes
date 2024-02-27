@@ -51,50 +51,43 @@ class CopasiProcess(Process):
             },
         },
         'model_search_term': 'string',
-        'model_changes': 'tree[string]',
+        'model_changes': 'tree[string]',  # TODO: make this more specific
         'solver': 'string'
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        # TODO: Update set/get with optional config params and make logic
-
+        # enter with model_file
         if self.config.get('model_file'):
-            self.copasi_model_object = load_model(
-                self.config['model_file'])
-            self.reaction_list = get_reactions(
-                model=self.copasi_model_object).index.tolist()
+            self.copasi_model_object = load_model(self.config['model_file'])
+            self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        # enter with specific search term for a model
         elif self.config.get('model_search_term'):
             self.copasi_model_object = self.fetch_biomodel(term=self.config['model_search_term'])
+        # enter with a new model
         else:
-            self.copasi_model_object = new_model(
-                name='CopasiProcess Model')
-
-        if self.config.get('reactions'):
-            for reaction_name, reaction_spec in self.config['reactions'].items():
-                add_reaction(name=reaction_name,
-                             scheme=reaction_spec['scheme'])
-
+            self.copasi_model_object = new_model(name='CopasiProcess Model')
+            if self.config.get('reactions'):
+                for reaction_name, reaction_spec in self.config['reactions'].items():
+                    add_reaction(
+                        name=reaction_name,
+                        scheme=reaction_spec['scheme']
+                    )
 
         # Get the species (floating only)  TODO: add boundary species
-        self.floating_species_list = get_species(
-            model=self.copasi_model_object).index.tolist()
-        self.floating_species_initial = get_species(model=self.copasi_model_object)[
-            'concentration'].tolist()
+        self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
+        self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
 
         # Get the list of parameters and their values
-        self.model_parameters_list = get_parameters(
-            model=self.copasi_model_object).index.tolist()
-        self.model_parameter_values = get_parameters(model=self.copasi_model_object)[
-            'initial_value'].tolist()
+        self.model_parameters_list = get_parameters(model=self.copasi_model_object).index.tolist()
+        self.model_parameter_values = get_parameters(model=self.copasi_model_object)['initial_value'].tolist()
 
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
 
         # Get a list of compartments
-        self.compartments_list = get_compartments(
-            model=self.copasi_model_object).index.tolist()
+        self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
 
     @staticmethod
     def fetch_biomodel(term: str, index: int = 0):
