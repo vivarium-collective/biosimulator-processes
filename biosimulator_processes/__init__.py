@@ -1,7 +1,3 @@
-from biosimulator_processes.tellurium_process import TelluriumProcess
-from biosimulator_processes.cobra_process import CobraProcess
-from biosimulator_processes.smoldyn_process import SmoldynProcess
-from biosimulator_processes.copasi_process import CopasiProcess
 from process_bigraph import process_registry
 
 

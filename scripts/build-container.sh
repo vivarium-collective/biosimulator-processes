@@ -9,7 +9,7 @@ if [ "${version}" == "" ]; then
   exit 1
 fi
 
-yes | docker system prune
+yes | docker system prune && yes | docker buildx prune
 docker buildx create --name biosimbuilder --use
 docker buildx inspect --bootstrap
 
