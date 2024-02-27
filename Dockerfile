@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 WORKDIR /app
 
 # copy and make dirs
-COPY ./biosimulator_processes/processes /app/biosimulator_processes
+COPY ./biosimulator_processes /app/biosimulator_processes
 COPY ./notebooks /app/notebooks
 
 # copy files
@@ -57,7 +57,7 @@ CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-bro
 
 
 # PLEASE NOTE: We do not need to add a USER in the Dockerfile as Singularity will handle
- # such logic in conversion on the HPC.
+# such logic in conversion on the HPC.
 
 # type imports
 # dist
