@@ -20,6 +20,8 @@ COPY ./notebooks /app/notebooks
 COPY ./pyproject.toml ./poetry.lock ./data ./scripts/trust-notebooks.sh /app/
 COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
+VOLUME /app/data
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.10  \
     python3-pip  \
@@ -50,8 +52,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && chmod +x ./trust-notebooks.sh \
     && ./trust-notebooks.sh \
     && rm ./trust-notebooks.sh
-
-VOLUME /app/data
 
 CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
 
