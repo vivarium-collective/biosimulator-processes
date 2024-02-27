@@ -58,30 +58,32 @@ class CopasiProcess(Process):
         Optional Parameters:
 
             A. 'model_changes', for example could be something like:
-                'model_changes': {
-                    'species': {
-                        'species_name': {
-                            unit
-                            initial_concentration
-                            initial_particle_number
-                            initial_expression
-                            expression
-                    'global_parameters': { <-- this is done with set_parameters(PARAM, kwarg=).
-                        global_parameter_name: {
-                            initial_value: any
-                            initial_expression
-                            expression
-                            status
-                            type (fixed, assignment, reactions)
-                    },'
-                    'reactions': {
-                        'name': {
-                            'parameters': {
-                                parameter_name: new value('int')  <-- this is done with set_reaction_parameters(name="(NAME).PARAM", value=)
-                            },
-                            'scheme': 'string'  <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+            
+                    'model_changes': {
+                        'species_changes': {
+                            'species_name': {
+                                unit
+                                initial_concentration
+                                initial_particle_number
+                                initial_expression
+                                expression
+                        'global_parameter_changes': { <-- this is done with set_parameters(PARAM, kwarg=).
+                            global_parameter_name: {
+                                initial_value: any
+                                initial_expression
+                                expression
+                                status
+                                type (fixed, assignment, reactions)
+                            }
+                        },
+                        'reaction_changes': {
+                            'reaction_name': {
+                                'reaction_parameters': {
+                                    reaction_parameter_name: new_reaction_param_value('int') <-- this is done with set_reaction_parameters(name="(NAME).PARAM", value=)
+                                }, 
+                                'reaction_scheme': 'string'  <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+                            }
                         }
-                    }
 
 
                             ^ Here, the model changes would be applied after model instatiation in the constructor
