@@ -61,19 +61,24 @@ class CopasiProcess(Process):
         # enter with model_file
         if self.config.get('model_file'):
             self.copasi_model_object = load_model(self.config['model_file'])
-            self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
         # enter with specific search term for a model
         elif self.config.get('model_search_term'):
             self.copasi_model_object = self.fetch_biomodel(term=self.config['model_search_term'])
         # enter with a new model
         else:
-            self.copasi_model_object = new_model(name='CopasiProcess Model')
-            if self.config.get('reactions'):
-                for reaction_name, reaction_spec in self.config['reactions'].items():
-                    add_reaction(
-                        name=reaction_name,
-                        scheme=reaction_spec['scheme']
-                    )
+            if not self.config.get('reactions'):
+                raise AttributeError('You must pass a reactions configuration which defines reaction name, reaction scheme, and model species.')
+            else:
+                self.copasi_model_object = new_model(name='CopasiProcess Model')
+            
+
+        # add reactions 
+        if self.config.get('reactions'):
+            for reaction_name, reaction_spec in self.config['reactions'].items():
+                add_reaction(
+                    name=reaction_name,
+                    scheme=reaction_spec['scheme']
+                )
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
