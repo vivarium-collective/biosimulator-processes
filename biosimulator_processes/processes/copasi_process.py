@@ -60,33 +60,37 @@ class CopasiProcess(Process):
             A. 'model_changes', for example could be something like:
             
                     'model_changes': {
-                        'species_changes': {
+                        'species_changes': {  <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
                             'species_name': {
-                                unit
-                                initial_concentration
-                                initial_particle_number
-                                initial_expression
-                                expression
-                        'global_parameter_changes': { <-- this is done with set_parameters(PARAM, kwarg=).
+                                new_unit_for_species_name,
+                                new_initial_concentration_for_species_name,
+                                new_initial_particle_number_for_species_name,
+                                new_initial_expression_for_species_name,
+                                new_expression_for_species_name
+                            }
+                        },
+                        'global_parameter_changes': {  <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
                             global_parameter_name: {
-                                initial_value: any
-                                initial_expression
-                                expression
-                                status
-                                type (fixed, assignment, reactions)
+                                new_initial_value_for_global_parameter_name: 'any',
+                                new_initial_expression_for_global_parameter_name: 'string',
+                                new_expression_for_global_parameter_name: 'string',
+                                new_status_for_global_parameter_name: 'string',
+                                new_type_for_global_parameter_name: 'string' (fixed, assignment, reactions)
                             }
                         },
                         'reaction_changes': {
                             'reaction_name': {
                                 'reaction_parameters': {
-                                    reaction_parameter_name: new_reaction_param_value('int') <-- this is done with set_reaction_parameters(name="(NAME).PARAM", value=)
+                                    reaction_parameter_name: 'int' (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
                                 }, 
                                 'reaction_scheme': 'string'  <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
                             }
                         }
-
-
-                            ^ Here, the model changes would be applied after model instatiation in the constructor
+                        ^ Here, the model changes would be applied in either two ways:
+                            A. (model_file/biomodel_id is passed): after model instatiation in the constructor
+                            B. (no model_file or biomodel_id is passed): used to extract reactions. Since adding reactions to an empty model technically 
+                                is an act of "changing" the model (empty -> context), it is safe to say that you must pass 'model': {'model_changes': etc...} instead.
+                        
             B. 'solver', changes the algorithm(s) used to solve the model
             C. 'units', (tree): quantity, volume, time, area, length
 
