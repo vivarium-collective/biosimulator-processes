@@ -22,6 +22,30 @@ from process_bigraph import Process, Composite, pf
 # 4. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
     # and provides num iterations and parameter in model_changes
 
+# define config schema type decs here
+
+
+# TODO put in utils / SED-related
+def _fetch_biomodel(term: str, index: int = 0):
+    """Search for models matching the term and return an instantiated model from BioModels.
+
+        Args:
+            term:`str`: search term
+            index:`int`: selector index for model choice
+
+        Returns:
+            `CDataModel` instance of loaded model.
+        TODO: Implement a dynamic search of this
+    """
+    models = biomodels.search_for_model(term)
+    model = models[index]
+    sbml = biomodels.get_content_for_model(model['id'])
+    return load_model_from_string(sbml)
+
+
+def fetch_biomodel(model_id: str):
+    return biomodels.get_content_for_model(model_id)
+
 
 class CopasiProcess(Process):
     """
@@ -35,51 +59,60 @@ class CopasiProcess(Process):
 
             A. 'model_changes', for example could be something like:
                 'model_changes': {
-                    'species_name': {
-                        'name': 'A',
-                        'initial_concentration': 22.24
+                    'species': {
+                        'name': {
+                            initial_conc: 22.24
+                            initial....etc
+                    'parameters': {}
+                    'reactions_to_add/remove': {
+
+
                             ^ Here, the model changes would be applied after model instatiation in the constructor
             B. 'solver', changes the algorithm(s) used to solve the model
             C. 'units', (tree): quantity, volume, time, area, length
 
     """
+    # TODO: map this to SED syntax
     config_schema = {
         'model_file': 'string',
-        'reactions': {
-            'reaction_name': {
-                'scheme': 'string'
-            },
-        },
-        'model_search_term': 'string',
-        'model_changes': 'tree[string]',  # TODO: make this more specific
-        'solver': 'string'
+        'reactions': 'tree[string]',
+        'biomodel_id': 'string',
+        'model_changes': 'tree[string]',  # TODO: make this more specific(what does this look like in SEDML?)
+        'solver': {
+            '_type': 'string',
+            '_default': 'lsoda'
+        }
+        # units:: check sedml
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
+        model_file = self.config.get('model_file')
+        biomodel_id = self.config.get('biomodel_id')
+
+        assert not (model_file and biomodel_id), 'You can only pass either a model_file or a biomodel_id.'
+
         # enter with model_file
-        if self.config.get('model_file'):
+        if model_file:
             self.copasi_model_object = load_model(self.config['model_file'])
         # enter with specific search term for a model
-        elif self.config.get('model_search_term'):
-            self.copasi_model_object = self.fetch_biomodel(term=self.config['model_search_term'])
+        elif biomodel_id:
+            self.copasi_model_object = fetch_biomodel(model_id=self.config['biomodel_id'])
         # enter with a new model
         else:
-            if not self.config.get('reactions'):
-                raise AttributeError('You must pass a reactions configuration which defines reaction name, reaction scheme, and model species.')
-            else:
-                self.copasi_model_object = new_model(name='CopasiProcess Model')
-            
+            self.copasi_model_object = new_model(name='CopasiProcess Model')
 
         # add reactions 
         if self.config.get('reactions'):
             for reaction_name, reaction_spec in self.config['reactions'].items():
                 add_reaction(
                     name=reaction_name,
-                    scheme=reaction_spec['scheme']
+                    scheme=reaction_spec,
+                    model=self.copasi_model_object
                 )
 
+        # self.model_changes =
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
@@ -90,26 +123,14 @@ class CopasiProcess(Process):
 
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        if not self.reaction_list:
+            raise AttributeError('You must provide either a model filepath, a biomodel id, or reaction definitions.')
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
 
-    @staticmethod
-    def fetch_biomodel(term: str, index: int = 0):
-        """Search for models matching the term and return an instantiated model from BioModels.
-
-            Args:
-                term:`str`: search term
-                index:`int`: selector index for model choice
-
-            Returns:
-                `CDataModel` instance of loaded model.
-            TODO: Implement a dynamic search of this
-        """
-        models = biomodels.search_for_model(term)
-        model = models[index]
-        sbml = biomodels.get_content_for_model(model['id'])
-        return load_model_from_string(sbml)
+        if self.config.get('solver'):
+            pass
 
     def initial_state(self):
         floating_species_dict = dict(
@@ -161,9 +182,10 @@ class CopasiProcess(Process):
         timecourse = run_time_course(
             start_time=inputs['time'],
             duration=interval,
-            intervals=1,
+            # intervals=1,
             update_model=True,
             model=self.copasi_model_object)
+            #method=self.config['solver'])
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
@@ -214,7 +236,11 @@ def test_process():
     workflow = Composite({
         'state': initial_sim_state
     })
-    workflow.run(10)
+    workflow.run(10)  # /gather-results  #/publish  #/parameter-scan
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
     return results
+
+
+if __name__ == '__main__':
+    test_process()
