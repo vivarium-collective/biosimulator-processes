@@ -1,6 +1,4 @@
-"""
-Biosimulator process for Copasi/Basico.
-"""
+"""Biosimulator process for Copasi/Basico."""
 
 
 from basico import (
@@ -20,19 +18,6 @@ from basico import (
 from process_bigraph import Process, Composite, pf
 
 
-def fetch_biomodel(term: str, index: int = 0):
-    """Search for models matching the term and return an instantiated model from BioModels.
-
-        TODO: Implement a dynamic search of this
-    """
-    models = biomodels.search_for_model(term)
-    model = models[index]
-    sbml = biomodels.get_content_for_model(model['id'])
-    return load_model_from_string(sbml)
-
-
-# 1. Add useful config params
-# 2. Devise use cases
 # 3. Update constructor conditionally
 # 4. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
     # and provides num iterations and parameter in model_changes
@@ -80,6 +65,8 @@ class CopasiProcess(Process):
                 self.config['model_file'])
             self.reaction_list = get_reactions(
                 model=self.copasi_model_object).index.tolist()
+        elif self.config.get('model_search_term'):
+            self.copasi_model_object = self.fetch_biomodel(term=self.config['model_search_term'])
         else:
             self.copasi_model_object = new_model(
                 name='CopasiProcess Model')
@@ -108,6 +95,23 @@ class CopasiProcess(Process):
         # Get a list of compartments
         self.compartments_list = get_compartments(
             model=self.copasi_model_object).index.tolist()
+
+    @staticmethod
+    def fetch_biomodel(term: str, index: int = 0):
+        """Search for models matching the term and return an instantiated model from BioModels.
+
+            Args:
+                term:`str`: search term
+                index:`int`: selector index for model choice
+
+            Returns:
+                `CDataModel` instance of loaded model.
+            TODO: Implement a dynamic search of this
+        """
+        models = biomodels.search_for_model(term)
+        model = models[index]
+        sbml = biomodels.get_content_for_model(model['id'])
+        return load_model_from_string(sbml)
 
     def initial_state(self):
         floating_species_dict = dict(
