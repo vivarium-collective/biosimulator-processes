@@ -4,7 +4,7 @@
 version="$1"
 
 # PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.4
-current="0.0.3"
+current="0.0.4"
 
 run="$2"
 

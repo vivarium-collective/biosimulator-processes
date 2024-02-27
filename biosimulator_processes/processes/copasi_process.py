@@ -39,79 +39,108 @@ Additional supported parameters for the model consist of:
 
 
 from basico import (
-                load_model,
-                get_species,
-                get_parameters,
-                get_reactions,
-                set_species,
-                run_time_course,
-                get_compartments,
-                new_model,
-                model_info,
-                load_model_from_string,
-                biomodels
-            )
+    load_model,
+    get_species,
+    get_parameters,
+    get_reactions,
+    set_species,
+    run_time_course,
+    get_compartments,
+    new_model,
+    add_reaction,
+    model_info,
+    load_model_from_string,
+    biomodels
+)
 from process_bigraph import Process, Composite, pf
 
 
-def find_models(term: str):
-    return biomodels.search_for_model(term)
-
-
-def fetch_model(term: str, index: int = 0):
-    """Searrch for models matching the term and return an instantiated model from BioModels.
+def fetch_biomodel(term: str, index: int = 0):
+    """Search for models matching the term and return an instantiated model from BioModels.
 
         TODO: Implement a dynamic search of this
     """
-    models = find_models(term)
+    models = biomodels.search_for_model(term)
     model = models[index]
     sbml = biomodels.get_content_for_model(model['id'])
     return load_model_from_string(sbml)
 
 
+# 1. Add useful config params
+# 2. Devise use cases
+# 3. Update constructor conditionally
+# 4. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
+    # and provides num iterations and parameter in model_changes
+
 class CopasiProcess(Process):
+    # TODO: Update this in constructor
     config_schema = {
-        'model_file': 'string',
-        'name': 'string',
-        'reactions': 'list[string]',
+        'model_file': {
+            '_type': 'string',
+            '_default': ''
+        },
+        'reactions': {
+            'name': {
+                'scheme': 'string'
+            },
+        },
         'species_types': {
             'name': 'string',
             'initial_concentration': 'int'
         },
-        'model_search_term': 'string'
-        # model_changes: dict paramName: new value
-        # solver
+        'model_search_term': 'string',
+        'model_changes': {
+            'parameter': {
+                'new_value': 'float'
+            }
+        },
+        'solver': 'string'
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
+        # TODO: Update set/get with optional config params and make logic
         try:
             if self.config.get('model_file'):
-                # Load the single cell model into Basico
-                self.copasi_model_object = load_model(self.config['model_file'])
+                self.copasi_model_object = load_model(
+                    self.config['model_file'])
+                self.reaction_list = get_reactions(
+                    model=self.copasi_model_object).index.tolist()
             else:
-                self.copasi_model_object = new_model(name=self.config['name'])
+                self.copasi_model_object = new_model(
+                    name='CopasiProcess Model')
+                for reaction_name, reaction_spec in self.config['reactions'].items():
+                    add_reaction(name=reaction_name,
+                                 scheme=reaction_spec['scheme'])
         except:
+            # TODO: More completely and more gracefully handle these errors
             raise KeyError('You must enter either a model file or model name')
 
         # Get the species (floating only)  TODO: add boundary species
-        self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
-        self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
+        self.floating_species_list = get_species(
+            model=self.copasi_model_object).index.tolist()
+        self.floating_species_initial = get_species(model=self.copasi_model_object)[
+            'concentration'].tolist()
 
         # Get the list of parameters and their values
-        self.model_parameters_list = get_parameters(model=self.copasi_model_object).index.tolist()
-        self.model_parameter_values = get_parameters(model=self.copasi_model_object)['initial_value'].tolist()
+        self.model_parameters_list = get_parameters(
+            model=self.copasi_model_object).index.tolist()
+        self.model_parameter_values = get_parameters(model=self.copasi_model_object)[
+            'initial_value'].tolist()
 
         # Get a list of reactions
-        self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        # self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
 
         # Get a list of compartments
-        self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
+        self.compartments_list = get_compartments(
+            model=self.copasi_model_object).index.tolist()
 
     def initial_state(self):
-        floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
-        model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
+        floating_species_dict = dict(
+            zip(self.floating_species_list, self.floating_species_initial))
+        model_parameters_dict = dict(
+            zip(self.model_parameters_list, self.model_parameter_values))
         return {
             'time': 0.0,
             'floating_species': floating_species_dict,
@@ -150,7 +179,8 @@ class CopasiProcess(Process):
 
         # set copasi values according to what is passed in states
         for cat_id, value in inputs['floating_species'].items():
-            set_species(name=cat_id, initial_concentration=value, model=self.copasi_model_object)
+            set_species(name=cat_id, initial_concentration=value,
+                        model=self.copasi_model_object)
 
         # run model for "interval" length; we only want the state at the end
         timecourse = run_time_course(
@@ -163,7 +193,8 @@ class CopasiProcess(Process):
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
         results['floating_species'] = {
-            mol_id: float(get_species(name=mol_id, exact=True, model=self.copasi_model_object).concentration[0])
+            mol_id: float(get_species(name=mol_id, exact=True,
+                          model=self.copasi_model_object).concentration[0])
             for mol_id in self.floating_species_list}
 
         return results

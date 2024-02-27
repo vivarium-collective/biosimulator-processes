@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e 
+
 version="$1"
 
 run="$2"
