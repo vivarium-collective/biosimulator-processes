@@ -45,12 +45,9 @@ def generate_emitter_schema(
         '_type': 'step',
         'address': 'local:ram-emitter',
         'config': {
-            'emit': {
-                'floating_species': 'tree[float]',
-                'time': 'float',
-            },
+            'emit': {**emit_values_schema},
         },
-        'inputs': {
+        'inputs': {  # TODO: make this generalized
             'floating_species': ['floating_species_store'],
             'time': ['time_store'],
         }
@@ -73,7 +70,8 @@ def generate_composite_copasi_process_instance(instance_name: str, config: Dict,
         Args:
             instance_name:`str`: name of the new instance referenced by PBG.
             config:`Dict`: see `biosimulator_processes.processes.copasi_process.CopasiProcess`
-            add_emitter:`
+            add_emitter:`bool`: Adds emitter schema configured for CopasiProcess IO store if `True`. Defaults
+                to `True`.
     """
     instance = {}
     instance[instance_name] = {
@@ -91,38 +89,10 @@ def generate_composite_copasi_process_instance(instance_name: str, config: Dict,
             'time': ['time_store'],
         }
     }
+    if add_emitter:
+        instance['emitter'] = generate_copasi_process_emitter_schema()
 
-    return {
-        instance_name: {
-            '_type': 'process',
-            'address': 'local:copasi',
-            'config': config,
-            'inputs': {
-                'floating_species': ['floating_species_store'],
-                'model_parameters': ['model_parameters_store'],
-                'time': ['time_store'],
-                'reactions': ['reactions_store']
-            },
-            'outputs': {
-                'floating_species': ['floating_species_store'],
-                'time': ['time_store'],
-            }
-        },
-        'emitter': {
-            '_type': 'step',
-            'address': 'local:ram-emitter',
-            'config': {
-                'emit': {
-                    'floating_species': 'tree[float]',
-                    'time': 'float',
-                },
-            },
-            'inputs': {
-                'floating_species': ['floating_species_store'],
-                'time': ['time_store'],
-            }
-        }
-    }
+    return instance
 
 
 
