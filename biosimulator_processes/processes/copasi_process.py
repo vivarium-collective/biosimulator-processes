@@ -19,11 +19,6 @@ from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 
 
-# 1. Map config_schema params to SEDML syntax/semantics (ie: 'model_file')
-# 2. Check if/how units are addressed in SEDML
-# 3. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
-    # and provides num iterations and parameter in model_changes
-
 # define config schema type decs here
 
 
