@@ -10,17 +10,13 @@ from basico import (
     run_time_course,
     get_compartments,
     new_model,
-    add_reaction,
-    model_info,
-    load_model_from_string,
-    biomodels
+    add_reaction
 )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 
 
-# define config schema type decs here
-
+# The following types have been derived from both SEDML L1v4 and basico itself.
 
 MODEL_CHANGES_TYPE = {
     'model_changes': {
@@ -53,16 +49,20 @@ MODEL_CHANGES_TYPE = {
     }
 }
 
-MODEL_TYPE = {  # <-- sourced from SEDML L1v4
+
+MODEL_TYPE = {
     'model_id': 'maybe[string]',  # could be used as the BioModels id
     'model_source': 'maybe[string]',  # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
     'model_language': {  # could be used to load a different model language supported by COPASI/basico
         '_type': 'string',
         '_default': 'sbml'  # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
     },
-    'model_name': 'maybe[string]',
+    'model_name': {
+        '_type': 'string',
+        '_default': 'composite_process_model'
+    },
     'model_changes': {
-        '_type': 'maybe[tree[string]]',
+        '_type': 'tree[string]',
         '_default': MODEL_CHANGES_TYPE
     }
 }
@@ -149,10 +149,10 @@ class CopasiProcess(Process):
 
         # A. enter with model_file
         if model_file:
-            self.copasi_model_object = load_model(self.config['model_file'])
+            self.copasi_model_object = load_model(model_file)
         # B. enter with specific search term for a model
-        elif biomodel_id:
-            self.copasi_model_object = fetch_biomodel(model_id=self.config['biomodel_id'])
+        elif source_model_id:
+            self.copasi_model_object = fetch_biomodel(model_id=source_model_id)
         # C. enter with a new model
         else:
             self.copasi_model_object = new_model(name='CopasiProcess Model')
