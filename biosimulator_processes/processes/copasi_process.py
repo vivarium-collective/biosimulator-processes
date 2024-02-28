@@ -155,6 +155,9 @@ class CopasiProcess(Process):
         if isinstance(model_parameters, DataFrame):
             self.model_parameters_list = model_parameters.index.tolist()
             self.model_parameter_values = model_parameters['initial_value'].tolist()
+        else:
+            self.model_parameters_list = []
+            self.model_parameter_values = []
 
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
@@ -189,11 +192,17 @@ class CopasiProcess(Process):
                 '_apply': 'set',
             } for species_id in self.floating_species_list
         }
+        if self.model_parameters_list:
+            model_params_type = {
+                param_id: 'float' for param_id in self.model_parameters_list
+            }
+        else:
+            model_params_type = {}
+
         return {
             'time': 'float',
             'floating_species': floating_species_type,
-            'model_parameters': {
-                param_id: 'float' for param_id in self.model_parameters_list},
+            'model_parameters': model_params_type,
             'reactions': {
                 reaction_id: 'float' for reaction_id in self.reaction_list},
         }
