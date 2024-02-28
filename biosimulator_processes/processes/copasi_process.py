@@ -26,11 +26,14 @@ from basico import (
     run_time_course,
     get_compartments,
     new_model,
-    add_reaction
+    add_reaction,
+    T,
+    set_report_dict
 )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes.process_types import MODEL_TYPE
+import biosimulator_processes.processes
 
 
 class CopasiProcess(Process):
@@ -166,6 +169,7 @@ class CopasiProcess(Process):
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
 
         self.method = self.config.get('method')
+        # set_report_dict('Time-Course', task=T.TIME_COURSE, model=self.copasi_model_object, body=['Time'])
 
     def initial_state(self):
         floating_species_dict = dict(
@@ -215,24 +219,12 @@ class CopasiProcess(Process):
                 model=self.copasi_model_object)
 
         # run model for "interval" length; we only want the state at the end
-        timecourse_args = {
-            'start_time': inputs['time'],
-            'duration': interval,
-            'update_model': True,
-            # 'intervals': 1,
-            'model': self.copasi_model_object}
-
-        if self.method is not None:
-            timecourse_args['method'] = self.method
-
-        # run the time course with given kwargs
-        # timecourse = run_time_course(**timecourse_args)
         timecourse = run_time_course(
             start_time=inputs['time'],
             duration=interval,
             update_model=True,
-            model=self.copasi_model_object
-        )
+            model=self.copasi_model_object,
+            method=self.method)
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
@@ -284,10 +276,50 @@ def test_process():
         }
     }
 
+    instance = {
+        'copasi': {
+            '_type': 'process',
+            'address': 'local:copasi',
+            'config': {
+                'model': {
+                    'model_source': 'biosimulator_processes/model_files/Caravagna2010.xml'
+                }
+            },
+            'inputs': {
+                'floating_species': ['floating_species_store'],
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                'reactions': ['reactions_store']
+            },
+            'outputs': {
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store'],
+            }
+        },
+        'emitter': {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'emit': {
+                    'floating_species': 'tree[float]',
+                    'time': 'float',
+                },
+            },
+            'inputs': {
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store'],
+            }
+        }
+    }
+
     workflow = Composite({
-        'state': initial_sim_state
+        'state': instance  # initial_sim_state
     })
     workflow.run(10)
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
     assert ('emitter',) in results.keys(), "This instance was not properly configured with an emitter."
+
+
+if __name__ == "__main__":
+    test_process()
