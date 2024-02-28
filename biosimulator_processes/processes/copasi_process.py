@@ -130,9 +130,8 @@ class CopasiProcess(Process):
             '_type': 'string',
             '_default': 'lsoda'
         },
-        'units': 'tree[string]'
-
-        # 'model_file': 'string',
+        'units': 'tree[string]',
+        # 'model_file': 'string'
         # 'reactions': 'tree[string]',
         # 'model_changes': 'tree[string]',     
     }
