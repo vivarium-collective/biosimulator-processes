@@ -5,9 +5,18 @@
     # 'reactions': 'tree[string]',
     # 'model_changes': 'tree[string]',
 
+    # Newton/Raphson method  distance/rate: steady state  Use newton method and time course simulation
+
+    # try newton stopp if epsilon satistfies
+    # run tc for 0.1unit of time stop if ep satis
+    # try newton stop if e satisfied
+    # run tc for 10x longer time stop if e
+    # if time>10^10 units of time stop otherwise go back to number 3
+
 """
 
 
+from typing import Dict
 from basico import (
     load_model,
     get_species,
@@ -78,7 +87,7 @@ class CopasiProcess(Process):
             '_type': 'tree[string]',
             '_default': MODEL_TYPE
         },
-        'biomodel_id': 'string',  # <-- implies the lack of either model_file or model_reactions
+        'biomodel_id': 'maybe[string]',  # <-- implies the lack of either model_file or model_reactions
         'units': 'maybe[tree[string]]',
         'method': {
             '_type': 'string',
@@ -89,11 +98,13 @@ class CopasiProcess(Process):
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
+        # exact values from configuration
         model_file = self.config.get('model').get('model_source')
         sed_model_id = self.config.get('model').get('model_id')
         biomodel_id = self.config.get('biomodel_id')
         source_model_id = biomodel_id or sed_model_id
 
+        # ensure only model_file OR biomodel_id
         assert not (model_file and biomodel_id), 'You can only pass either a model_file or a biomodel_id.'
 
         # A. enter with model_file
@@ -106,16 +117,18 @@ class CopasiProcess(Process):
         else:
             self.copasi_model_object = new_model(name='CopasiProcess Model')
 
+        self.model_changes: Dict = self.config['model']['model_changes']
+        reaction_changes: Dict = self.model_changes.get('reaction_changes')
+
         # add reactions 
-        if self.config.get('reactions'):
-            for reaction_name, reaction_spec in self.config['reactions'].items():
+        if reaction_changes:
+            for reaction_name, reaction_spec in reaction_changes.items():
                 add_reaction(
                     name=reaction_name,
                     scheme=reaction_spec,
                     model=self.copasi_model_object
                 )
 
-        # self.model_changes =
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
@@ -127,13 +140,10 @@ class CopasiProcess(Process):
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
         if not self.reaction_list:
-            raise AttributeError('You must provide either a model filepath, a biomodel id, or reaction definitions.')
+            raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
-
-        if self.config.get('method'):
-            pass
 
     def initial_state(self):
         floating_species_dict = dict(
