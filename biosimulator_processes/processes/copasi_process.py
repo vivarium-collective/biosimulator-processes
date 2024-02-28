@@ -75,23 +75,43 @@ class CopasiProcess(Process):
 
                         
             B. 'method', changes the algorithm(s) used to solve the model
+                COPASI support many different simulations methods:
+                deterministic: using the COPASI LSODA implementation
+                stochastic: using the Gibson Bruck algorithm
+                directMethod: using the Gillespie direct method
+
             C. 'units', (tree): quantity, volume, time, area, length
 
         Justification:
 
             As per SEDML v4 specifications (section2.2.4), p.32:sed-ml-L1V4.
+
+        MODEL_TYPE = {
+            'model_id': 'string',    # could be used as the BioModels id
+            'model_source': 'string',    # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
+            'model_language': {    # could be used to load a different model language supported by COPASI/basico
+                '_type': 'string',
+                '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
+            },
+            'model_name': {
+                '_type': 'string',
+                '_default': 'composite_process_model'
+            },
+            'model_changes': {
+                'species_changes': 'tree[string]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+                'global_parameter_changes': 'tree[string]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+                'reaction_changes': 'tree[string]'
+            }
+        }
     """
 
     config_schema = {
-        'model': {
-            '_type': MODEL_TYPE,
-            '_default': {}
-        },
+        'model': MODEL_TYPE,
         'biomodel_id': 'maybe[string]',  # <-- implies the lack of either model_file or model_reactions
         'units': 'maybe[tree[string]]',
         'method': {
             '_type': 'string',
-            '_default': 'lsoda'
+            '_default': 'deterministic'
         }
     }
 
@@ -201,11 +221,18 @@ class CopasiProcess(Process):
             'update_model': True,
             # 'intervals': 1,
             'model': self.copasi_model_object}
-        if self.method:
+
+        if self.method is not None:
             timecourse_args['method'] = self.method
 
         # run the time course with given kwargs
-        timecourse = run_time_course(**timecourse_args)
+        # timecourse = run_time_course(**timecourse_args)
+        timecourse = run_time_course(
+            start_time=inputs['time'],
+            duration=interval,
+            update_model=True,
+            model=self.copasi_model_object
+        )
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
