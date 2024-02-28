@@ -84,16 +84,15 @@ class CopasiProcess(Process):
 
     config_schema = {
         'model': {
-            '_type': 'tree[string]',
-            '_default': MODEL_TYPE
+            '_type': MODEL_TYPE,
+            '_default': {}
         },
         'biomodel_id': 'maybe[string]',  # <-- implies the lack of either model_file or model_reactions
         'units': 'maybe[tree[string]]',
-        'method': 'maybe[string]'
-        # 'method': {
-        #     '_type': 'string',
-        #     '_default': 'lsoda'
-        # }
+        'method': {
+            '_type': 'maybe[string]',
+            '_default': 'lsoda'
+        }
     }
 
     def __init__(self, config=None, core=None):
