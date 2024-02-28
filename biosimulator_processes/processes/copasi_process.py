@@ -103,7 +103,7 @@ class CopasiProcess(Process):
                             B. (no model_file or biomodel_id is passed): used to extract reactions. Since adding reactions to an empty model technically 
                                 is an act of "changing" the model (empty -> context), it is safe to say that you must pass 'model': {'model_changes': etc...} instead.
                         
-            B. 'solver', changes the algorithm(s) used to solve the model
+            B. 'method', changes the algorithm(s) used to solve the model
             C. 'units', (tree): quantity, volume, time, area, length
 
         Justification:
@@ -130,8 +130,9 @@ class CopasiProcess(Process):
         'method': {
             '_type': 'string',
             '_default': 'lsoda'
-        }
-        # units:: check sedml
+        },
+        'units': 'tree[string]'
+
         # 'model_file': 'string',
         # 'reactions': 'tree[string]',
         # 'model_changes': 'tree[string]',     
