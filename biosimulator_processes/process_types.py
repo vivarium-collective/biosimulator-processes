@@ -1,4 +1,4 @@
-"""The following types have been derived from both SEDML L1v4 and basico itself.
+CHANGES_SCHEMA = """The following types have been derived from both SEDML L1v4 and basico itself.
 
         BASICO_MODEL_CHANGES_TYPE = {
             'species_changes': {   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
