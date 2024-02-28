@@ -89,10 +89,11 @@ class CopasiProcess(Process):
         },
         'biomodel_id': 'maybe[string]',  # <-- implies the lack of either model_file or model_reactions
         'units': 'maybe[tree[string]]',
-        'method': {
-            '_type': 'string',
-            '_default': 'lsoda'
-        }
+        'method': 'maybe[string]'
+        # 'method': {
+        #     '_type': 'string',
+        #     '_default': 'lsoda'
+        # }
     }
 
     def __init__(self, config=None, core=None):
@@ -117,7 +118,7 @@ class CopasiProcess(Process):
         else:
             self.copasi_model_object = new_model(name='CopasiProcess Model')
 
-        self.model_changes: Dict = self.config['model']['model_changes']
+        self.model_changes: Dict = self.config['model'].get('model_changes', {})
         reaction_changes: Dict = self.model_changes.get('reaction_changes')
 
         # add reactions 
@@ -144,6 +145,8 @@ class CopasiProcess(Process):
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
+
+        self.method = self.config.get('method')
 
     def initial_state(self):
         floating_species_dict = dict(
@@ -191,20 +194,28 @@ class CopasiProcess(Process):
                         model=self.copasi_model_object)
 
         # run model for "interval" length; we only want the state at the end
-        timecourse = run_time_course(
-            start_time=inputs['time'],
-            duration=interval,
-            # intervals=1,
-            update_model=True,
-            model=self.copasi_model_object)
-            #method=self.config['solver'])
+        timecourse_args = {
+            'start_time': inputs['time'],
+            'duration': interval,
+            'update_model': True,
+            # 'intervals': 1,
+            'model': self.copasi_model_object}
+        if self.method:
+            timecourse_args['method'] = self.method
+
+        # run the time course with given kwargs
+        timecourse = run_time_course(**timecourse_args)
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
         results['floating_species'] = {
-            mol_id: float(get_species(name=mol_id, exact=True,
-                          model=self.copasi_model_object).concentration[0])
-            for mol_id in self.floating_species_list}
+            mol_id: float(get_species(
+                name=mol_id,
+                exact=True,
+                model=self.copasi_model_object
+            ).concentration[0])
+            for mol_id in self.floating_species_list
+        }
 
         return results
 
