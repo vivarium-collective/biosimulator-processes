@@ -122,14 +122,11 @@ class CopasiProcess(Process):
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        # exact values from configuration
         model_file = self.config.get('model').get('model_source')
         sed_model_id = self.config.get('model').get('model_id')
         biomodel_id = self.config.get('biomodel_id')
         source_model_id = biomodel_id or sed_model_id
-
-        # ensure only model_file OR biomodel_id
-        assert not (model_file and biomodel_id), 'You can only pass either a model_file or a biomodel_id.'
+        assert not (model_file and biomodel_id), 'You cannot pass both a model_file and biomodel_id'
 
         # A. enter with model_file
         if model_file:
@@ -154,8 +151,10 @@ class CopasiProcess(Process):
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
 
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
-        self.model_parameters_list = get_parameters(model=self.copasi_model_object).index.tolist()
-        self.model_parameter_values = get_parameters(model=self.copasi_model_object)['initial_value'].tolist()
+        model_parameters = get_parameters(model=self.copasi_model_object)
+        if isinstance(model_parameters, DataFrame):
+            self.model_parameters_list = model_parameters.index.tolist()
+            self.model_parameter_values = model_parameters['initial_value'].tolist()
 
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
@@ -171,8 +170,12 @@ class CopasiProcess(Process):
     def initial_state(self):
         floating_species_dict = dict(
             zip(self.floating_species_list, self.floating_species_initial))
-        model_parameters_dict = dict(
-            zip(self.model_parameters_list, self.model_parameter_values))
+        # keep in mind that a valid simulation may not have global parameters
+        if self.model_parameters_list:
+            model_parameters_dict = dict(
+                zip(self.model_parameters_list, self.model_parameter_values))
+        else:
+            model_parameters_dict = {}
         return {
             'time': 0.0,
             'floating_species': floating_species_dict,
