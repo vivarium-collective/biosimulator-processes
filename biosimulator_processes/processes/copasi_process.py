@@ -90,7 +90,7 @@ class CopasiProcess(Process):
         'biomodel_id': 'maybe[string]',  # <-- implies the lack of either model_file or model_reactions
         'units': 'maybe[tree[string]]',
         'method': {
-            '_type': 'maybe[string]',
+            '_type': 'string',
             '_default': 'lsoda'
         }
     }
@@ -118,9 +118,9 @@ class CopasiProcess(Process):
             self.copasi_model_object = new_model(name='CopasiProcess Model')
 
         self.model_changes: Dict = self.config['model'].get('model_changes', {})
-        reaction_changes: Dict = self.model_changes.get('reaction_changes')
 
-        # add reactions 
+        # add reactions
+        reaction_changes: Dict = self.model_changes.get('reaction_changes')
         if reaction_changes:
             for reaction_name, reaction_spec in reaction_changes.items():
                 add_reaction(
@@ -189,8 +189,10 @@ class CopasiProcess(Process):
     def update(self, inputs, interval):
         # set copasi values according to what is passed in states
         for cat_id, value in inputs['floating_species'].items():
-            set_species(name=cat_id, initial_concentration=value,
-                        model=self.copasi_model_object)
+            set_species(
+                name=cat_id,
+                initial_concentration=value,
+                model=self.copasi_model_object)
 
         # run model for "interval" length; we only want the state at the end
         timecourse_args = {
