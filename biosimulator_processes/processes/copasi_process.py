@@ -17,6 +17,7 @@ from basico import (
 )
 from process_bigraph import Process, Composite, pf
 
+
 # 1. Map config_schema params to SEDML syntax/semantics (ie: 'model_file')
 # 2. Check if/how units are addressed in SEDML
 # 3. Devise parameter scan --> create Step() implementation that creates copasi1, 2, 3...
@@ -47,6 +48,37 @@ def fetch_biomodel(model_id: str):
     return biomodels.get_content_for_model(model_id)
 
 
+MODEL_CHANGES_TYPE = {
+    'model_changes': {
+         'species_changes': {   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+             'species_name': {
+                 'new_unit_for_species_name',
+                 'new_initial_concentration_for_species_name',
+                 'new_initial_particle_number_for_species_name',
+                 'new_initial_expression_for_species_name',
+                 'new_expression_for_species_name'
+             }
+         },
+         'global_parameter_changes': {   # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+             'global_parameter_name': {
+                 'new_initial_value_for_global_parameter_name': 'any',
+                 'new_initial_expression_for_global_parameter_name': 'string',
+                 'new_expression_for_global_parameter_name': 'string',
+                 'new_status_for_global_parameter_name': 'string',
+                 'new_type_for_global_parameter_name': 'string'  # (fixed, assignment, reactions)
+             }
+         },
+         'reaction_changes': {
+             'reaction_name': {
+                 'reaction_parameters': {
+                     'reaction_parameter_name': 'int'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
+                 },
+                 'reaction_scheme': 'string'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+             }
+         }
+    }
+}
+
 MODEL_TYPE = {  # <-- sourced from SEDML L1v4
     'model_id': 'maybe[string]',  # could be used as the BioModels id
     'model_source': 'maybe[string]',  # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
@@ -72,7 +104,7 @@ class CopasiProcess(Process):
             A. 'model_changes', for example could be something like:
             
                     'model_changes': {
-                        'species_changes': {  <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+                        'species_changes': {   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
                             'species_name': {
                                 new_unit_for_species_name,
                                 new_initial_concentration_for_species_name,
@@ -81,21 +113,21 @@ class CopasiProcess(Process):
                                 new_expression_for_species_name
                             }
                         },
-                        'global_parameter_changes': {  <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+                        'global_parameter_changes': {   # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
                             global_parameter_name: {
                                 new_initial_value_for_global_parameter_name: 'any',
                                 new_initial_expression_for_global_parameter_name: 'string',
                                 new_expression_for_global_parameter_name: 'string',
                                 new_status_for_global_parameter_name: 'string',
-                                new_type_for_global_parameter_name: 'string' (fixed, assignment, reactions)
+                                new_type_for_global_parameter_name: 'string'  # (fixed, assignment, reactions)
                             }
                         },
                         'reaction_changes': {
                             'reaction_name': {
                                 'reaction_parameters': {
-                                    reaction_parameter_name: 'int' (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
+                                    reaction_parameter_name: 'int'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
                                 }, 
-                                'reaction_scheme': 'string'  <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+                                'reaction_scheme': 'string'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
                             }
                         }
                         ^ Here, the model changes would be applied in either two ways:
@@ -108,17 +140,7 @@ class CopasiProcess(Process):
 
         Justification:
 
-            As per SEDML v4 specifications (section2.2.4), p.32:sed-ml-L1V4 ->
-
-                The Model class definesthemodelsusedinasimulationexperiment(Figure2.9).
-                Each instanceof theModel classhas the requiredattributesid, source, andlanguage,
-                theoptional attributename,andtheoptionalchildlistOfChanges.
-                Thelanguageattributedefinestheformatthemodel isencodedin. TheModel
-                classreferstotheparticularmodelof interestthroughthesourceattribute.Therestrictions
-                onthemodel referenceare ˆ Themodelmustbeencodedinawell-definedformat. ˆ
-                Torefertothemodelencodinglanguage,areferencetoavaliddefinitionof that
-                formatmustbe given(languageattribute). ˆ Torefer toaparticularmodel
-                inanexternal resource, anunambiguous referencemustbegiven (sourceattribute).
+            As per SEDML v4 specifications (section2.2.4), p.32:sed-ml-L1V4.
     """
     # TODO: map this to SED syntax
     config_schema = {
@@ -142,17 +164,19 @@ class CopasiProcess(Process):
         super().__init__(config, core)
 
         model_file = self.config.get('model').get('model_source')
+        sed_model_id = self.config.get('model').get('model_id')
         biomodel_id = self.config.get('biomodel_id')
+        source_model_id = biomodel_id or sed_model_id
 
         assert not (model_file and biomodel_id), 'You can only pass either a model_file or a biomodel_id.'
 
-        # enter with model_file
+        # A. enter with model_file
         if model_file:
             self.copasi_model_object = load_model(self.config['model_file'])
-        # enter with specific search term for a model
+        # B. enter with specific search term for a model
         elif biomodel_id:
             self.copasi_model_object = fetch_biomodel(model_id=self.config['biomodel_id'])
-        # enter with a new model
+        # C. enter with a new model
         else:
             self.copasi_model_object = new_model(name='CopasiProcess Model')
 
