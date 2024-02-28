@@ -143,5 +143,21 @@ def generate_parameter_scan_instance(
     return instance
 
 
+def generate_sed_model_config_schema(
+        entrypoint: Dict,  # per CopasiProcess config_schema; ie: {'biomodel_id': 'BIOMODEL>>>>'}
+        species_changes: Dict,  # ie: {'a': {'initial_concentration': 32.3}}
+        parameter_changes: Dict,
+        reaction_changes: Dict
+) -> Dict:
+    return {
+        **entrypoint,
+        'model': {
+            'model_changes': {
+                'species_changes': species_changes,
+
+            }
+        }
+    }
+
 def perturb_parameter(param: str, degree: float):
     pass
