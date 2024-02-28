@@ -1,4 +1,6 @@
+from typing import Dict
 from basico import biomodels, load_model_from_string
+from process_bigraph import Composite, pf
 
 
 def fetch_biomodel_by_term(term: str, index: int = 0):
@@ -18,11 +20,30 @@ def fetch_biomodel_by_term(term: str, index: int = 0):
 
 
 def fetch_biomodel(model_id: str):
+    # TODO: make this generalizable
     sbml = biomodels.get_content_for_model(model_id)
     return load_model_from_string(sbml)
 
 
-def generate_copasi_process_instance(config: dict, instance_name: str):
+def play_composition(instance: dict, duration: int):
+    """Configure and run a Composite workflow"""
+    workflow = Composite({
+        'state': instance
+    })
+    workflow.run(duration)
+    results = workflow.gather_results()
+    print(f'RESULTS: {pf(results)}')
+    return results
+
+
+def generate_copasi_process_instance(instance_name: str, config: Dict) -> Dict:
+    """Generate an instance of a single copasi process which is named `instance_name`
+        and configured by `config` formatted to the process bigraph Composite API.
+
+        Args:
+            instance_name:`str`: name of the new instance referenced by PBG.
+            config:`Dict`: see `biosimulator_processes.processes.copasi_process.CopasiProcess`
+    """
     return {
         instance_name: {
             '_type': 'process',
