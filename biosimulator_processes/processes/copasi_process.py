@@ -17,6 +17,7 @@
 
 
 from typing import Dict
+from pandas import DataFrame
 from basico import (
     load_model,
     get_species,
@@ -111,7 +112,7 @@ class CopasiProcess(Process):
     config_schema = {
         'model': MODEL_TYPE,
         'biomodel_id': 'maybe[string]',  # <-- implies the lack of either model_file or model_reactions
-        'units': 'maybe[tree[string]]',
+        'units': 'tree[string]',
         'method': {
             '_type': 'string',
             '_default': 'deterministic'
@@ -138,25 +139,21 @@ class CopasiProcess(Process):
             self.copasi_model_object = fetch_biomodel(model_id=source_model_id)
         # C. enter with a new model
         else:
-            self.copasi_model_object = new_model(name='CopasiProcess Model')
+            self.copasi_model_object = new_model(name='CopasiProcess Model', **self.config.get('units'))
 
         self.model_changes: Dict = self.config['model'].get('model_changes', {})
 
         # add reactions
-        reaction_changes: Dict = self.model_changes.get('reaction_changes')
-        if reaction_changes:
-            for reaction_name, reaction_spec in reaction_changes.items():
-                add_reaction(
-                    name=reaction_name,
-                    scheme=reaction_spec,
-                    model=self.copasi_model_object
-                )
+        reaction_changes: Dict = self.model_changes.get('reaction_changes', None)
+        if reaction_changes is not None:
+            for reaction_name, reaction_scheme in reaction_changes.items():
+                add_reaction(reaction_name, reaction_scheme, model=self.copasi_model_object)
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
 
-        # Get the list of parameters and their values
+        # Get the list of parameters and their values (it is possible to run a model without any parameters)
         self.model_parameters_list = get_parameters(model=self.copasi_model_object).index.tolist()
         self.model_parameter_values = get_parameters(model=self.copasi_model_object)['initial_value'].tolist()
 
