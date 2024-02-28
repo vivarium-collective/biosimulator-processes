@@ -20,13 +20,13 @@ def fetch_biomodel_by_term(term: str, index: int = 0):
 
 
 def fetch_biomodel(model_id: str):
-    # TODO: make this generalizable
+    # TODO: make this generalizable for those other than basico
     sbml = biomodels.get_content_for_model(model_id)
     return load_model_from_string(sbml)
 
 
 def play_composition(instance: dict, duration: int):
-    """Configure and run a Composite workflow"""
+    """Configure and run a Composite workflow."""
     workflow = Composite({
         'state': instance
     })
@@ -36,14 +36,62 @@ def play_composition(instance: dict, duration: int):
     return results
 
 
-def generate_copasi_process_instance(instance_name: str, config: Dict) -> Dict:
+def generate_emitter_schema(
+        emitter_address: str = "local",
+        emitter_type: str = "ram-emitter",
+        **emit_values_schema
+) -> Dict:
+    return {
+        '_type': 'step',
+        'address': 'local:ram-emitter',
+        'config': {
+            'emit': {
+                'floating_species': 'tree[float]',
+                'time': 'float',
+            },
+        },
+        'inputs': {
+            'floating_species': ['floating_species_store'],
+            'time': ['time_store'],
+        }
+    }
+
+
+def generate_copasi_process_emitter_schema():
+    return generate_emitter_schema(
+        emitter_address='local',
+        emitter_type='ram-emitter',
+        floating_species='tree[float]',
+        time='float'
+    )
+
+
+def generate_composite_copasi_process_instance(instance_name: str, config: Dict, add_emitter: bool = True) -> Dict:
     """Generate an instance of a single copasi process which is named `instance_name`
         and configured by `config` formatted to the process bigraph Composite API.
 
         Args:
             instance_name:`str`: name of the new instance referenced by PBG.
             config:`Dict`: see `biosimulator_processes.processes.copasi_process.CopasiProcess`
+            add_emitter:`
     """
+    instance = {}
+    instance[instance_name] = {
+        '_type': 'process',
+        'address': 'local:copasi',
+        'config': config,
+        'inputs': {
+            'floating_species': ['floating_species_store'],
+            'model_parameters': ['model_parameters_store'],
+            'time': ['time_store'],
+            'reactions': ['reactions_store']
+        },
+        'outputs': {
+            'floating_species': ['floating_species_store'],
+            'time': ['time_store'],
+        }
+    }
+
     return {
         instance_name: {
             '_type': 'process',
