@@ -1,4 +1,11 @@
-"""Biosimulator process for Copasi/Basico."""
+"""
+    Biosimulator process for Copasi/Basico.
+
+    # 'model_file': 'string'
+    # 'reactions': 'tree[string]',
+    # 'model_changes': 'tree[string]',
+
+"""
 
 
 from basico import (
@@ -14,58 +21,7 @@ from basico import (
 )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
-
-
-# The following types have been derived from both SEDML L1v4 and basico itself.
-
-MODEL_CHANGES_TYPE = {
-    'model_changes': {
-         'species_changes': {   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-             'species_name': {
-                 'new_unit_for_species_name',
-                 'new_initial_concentration_for_species_name',
-                 'new_initial_particle_number_for_species_name',
-                 'new_initial_expression_for_species_name',
-                 'new_expression_for_species_name'
-             }
-         },
-         'global_parameter_changes': {   # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
-             'global_parameter_name': {
-                 'new_initial_value_for_global_parameter_name': 'any',
-                 'new_initial_expression_for_global_parameter_name': 'string',
-                 'new_expression_for_global_parameter_name': 'string',
-                 'new_status_for_global_parameter_name': 'string',
-                 'new_type_for_global_parameter_name': 'string'  # (fixed, assignment, reactions)
-             }
-         },
-         'reaction_changes': {
-             'reaction_name': {
-                 'reaction_parameters': {
-                     'reaction_parameter_name': 'int'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
-                 },
-                 'reaction_scheme': 'string'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
-             }
-         }
-    }
-}
-
-
-MODEL_TYPE = {
-    'model_id': 'maybe[string]',  # could be used as the BioModels id
-    'model_source': 'maybe[string]',  # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
-    'model_language': {  # could be used to load a different model language supported by COPASI/basico
-        '_type': 'string',
-        '_default': 'sbml'  # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
-    },
-    'model_name': {
-        '_type': 'string',
-        '_default': 'composite_process_model'
-    },
-    'model_changes': {
-        '_type': 'tree[string]',
-        '_default': MODEL_CHANGES_TYPE
-    }
-}
+from biosimulator_processes.process_types import MODEL_TYPE
 
 
 class CopasiProcess(Process):
@@ -130,10 +86,7 @@ class CopasiProcess(Process):
             '_type': 'string',
             '_default': 'lsoda'
         },
-        'units': 'tree[string]',
-        # 'model_file': 'string'
-        # 'reactions': 'tree[string]',
-        # 'model_changes': 'tree[string]',     
+        'units': 'tree[string]'
     }
 
     def __init__(self, config=None, core=None):
