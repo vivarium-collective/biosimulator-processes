@@ -61,7 +61,10 @@ MODEL_TYPE = {  # <-- sourced from SEDML L1v4
         '_default': 'sbml'  # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
     },
     'model_name': 'maybe[string]',
-    'model_changes': 'maybe[tree[string]]'  # could be used as model changes  
+    'model_changes': {
+        '_type': 'maybe[tree[string]]',
+        '_default': MODEL_CHANGES_TYPE
+    }
 }
 
 
