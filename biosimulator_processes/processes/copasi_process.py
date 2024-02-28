@@ -29,7 +29,7 @@ class CopasiProcess(Process):
         Entrypoints:
 
             A. SBML model file: 
-            B. Reactions (name: {scheme: reaction contents(also defines species))
+            B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
             C. Model search term (load preconfigured model from BioModels)
 
         Optional Parameters:
@@ -63,10 +63,7 @@ class CopasiProcess(Process):
                                 'reaction_scheme': 'string'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
                             }
                         }
-                        ^ Here, the model changes would be applied in either two ways:
-                            A. (model_file/biomodel_id is passed): after model instatiation in the constructor
-                            B. (no model_file or biomodel_id is passed): used to extract reactions. Since adding reactions to an empty model technically 
-                                is an act of "changing" the model (empty -> context), it is safe to say that you must pass 'model': {'model_changes': etc...} instead.
+
                         
             B. 'method', changes the algorithm(s) used to solve the model
             C. 'units', (tree): quantity, volume, time, area, length
@@ -75,18 +72,18 @@ class CopasiProcess(Process):
 
             As per SEDML v4 specifications (section2.2.4), p.32:sed-ml-L1V4.
     """
-    # TODO: map this to SED syntax
+
     config_schema = {
-        'model': {  # <-- sourced from SEDML L1v4
+        'model': {
             '_type': 'tree[string]',
             '_default': MODEL_TYPE
         },
         'biomodel_id': 'string',  # <-- implies the lack of either model_file or model_reactions
+        'units': 'maybe[tree[string]]',
         'method': {
             '_type': 'string',
             '_default': 'lsoda'
-        },
-        'units': 'tree[string]'
+        }
     }
 
     def __init__(self, config=None, core=None):
