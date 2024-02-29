@@ -144,20 +144,47 @@ def generate_parameter_scan_instance(
 
 
 def generate_sed_model_config_schema(
-        entrypoint: Dict,  # per CopasiProcess config_schema; ie: {'biomodel_id': 'BIOMODEL>>>>'}
-        species_changes: Dict,  # ie: {'a': {'initial_concentration': 32.3}}
+        entrypoint: Dict,
+        species_changes: Dict,
         parameter_changes: Dict,
         reaction_changes: Dict
 ) -> Dict:
-    return {
-        **entrypoint,
+    """
+        Args:
+            entrypoint:`Dict[str, str]`: per CopasiProcess config_schema; ie: {'biomodel_id': 'BIOMODEL>>>>'}
+            species_changes:`Dict[str, Dict[str, any]]`: ie: {'a': {'initial_concentration': 32.3}}
+            parameter_changes:`Dict[str, Dict[str, any]]`: ie: {'x2': {'expression': '1 -> A..'}}
+            reaction_changes:`Dict[str, Union[str, Dict[str, Dict[str, any]]]`:
+                    reaction_changes = {
+                        'R1': {
+                            'reaction_parameters': {
+                                '(R1).k1': 23.2
+                            },
+                            'reaction_scheme': 'A -> B'
+                        }
+
+
+    """
+    instance_schema = {
         'model': {
             'model_changes': {
                 'species_changes': species_changes,
-
+                'parameter_changes': parameter_changes,
+                'reaction_changes': reaction_changes
             }
         }
     }
+
+    for param_name, param_val in entrypoint.items():
+        if 'biomodel' in param_name.lower():
+            instance_schema[param_name] = param_val
+        elif 'model_source' in param_name.lower():
+            instance_schema['model'][param_name] = {
+                param_name: param_val
+            }
+
+    return instance_schema
+
 
 def perturb_parameter(param: str, degree: float):
     pass
