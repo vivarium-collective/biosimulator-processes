@@ -45,7 +45,7 @@ def generate_copasi_process_emitter_schema():
     )
 
 
-def generate_composite_copasi_process_instance(instance_name: str, config: Dict, add_emitter: bool = True) -> Dict:
+def generate_single_copasi_process_instance(instance_name: str, config: Dict, add_emitter: bool = True) -> Dict:
     """Generate an instance of a single copasi process which is named `instance_name`
         and configured by `config` formatted to the process bigraph Composite API.
 
@@ -143,11 +143,39 @@ def generate_parameter_scan_instance(
     return instance
 
 
+def generate_copasi_parameter_scan_instance(
+        num_iterations: int,
+        entry_config: Dict,
+        # *parameters
+):
+    # TODO: select parameters
+    parameter_scan_instance = {}
+    origin_value = 3.00
+    for n in range(num_iterations):
+        iteration_model_config = generate_sed_model_config_schema(
+            entrypoint={'biomodel_id': 'BIOMD0000000051'},
+            species_changes={'Extracellular Glucose': {'initial_concentration': origin_value**n}},
+            parameter_changes={'catp': {'initial_value': (origin_value - n)**n}}
+        )
+        iteration_instance = generate_single_copasi_process_instance(
+            instance_name=f'copasi_{n}',
+            config=iteration_model_config
+        )
+        for iter_name, iter_config in iteration_instance:
+            parameter_scan_instance[iter_name] = iteration_instance
+
+    emitter_schema = generate_emitter_schema(floating_species='tree[float]', time='float')
+    parameter_scan_instance['emitter'] = emitter_schema
+
+    return parameter_scan_instance
+
+
+
 def generate_sed_model_config_schema(
         entrypoint: Dict,
         species_changes: Dict,
         parameter_changes: Dict,
-        reaction_changes: Dict
+        reaction_changes: Dict = None
 ) -> Dict:
     """
         Args:
@@ -163,7 +191,13 @@ def generate_sed_model_config_schema(
                             'reaction_scheme': 'A -> B'
                         }
 
-
+        Example:
+            sed_model = sed_schema(
+                entrypoint={'biomodel_id': 'BIOMD0000000051'},
+                species_changes={'Extracellular Glucose': {'initial_concentration': 5.00}},
+                parameter_changes={'catp': {'initial_value': 100.00}},
+                reaction_changes={'Aldolase': {'scheme': 'A -> B'}}
+            )
     """
     instance_schema = {
         'model': {
@@ -186,5 +220,5 @@ def generate_sed_model_config_schema(
     return instance_schema
 
 
-def perturb_parameter(param: str, degree: float):
+def perturb_parameter(param: str, degree: float, config: Dict):
     pass
