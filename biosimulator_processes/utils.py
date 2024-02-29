@@ -159,7 +159,8 @@ def generate_copasi_parameter_scan_instance(
         )
         iteration_instance = generate_single_copasi_process_instance(
             instance_name=f'copasi_{n}',
-            config=iteration_model_config
+            config=iteration_model_config,
+            add_emitter=False
         )
         for iter_name, iter_config in iteration_instance.items():
             parameter_scan_instance[iter_name] = iteration_instance
