@@ -71,7 +71,7 @@ class CopasiProcess(Process):
                         'reaction_changes': {
                             'reaction_name': {
                                 'reaction_parameters': {
-                                    reaction_parameter_name: 'int'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
+                                    reaction_parameter_name: 'float'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
                                 }, 
                                 'reaction_scheme': 'string'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
                             }
@@ -111,8 +111,6 @@ class CopasiProcess(Process):
 
     config_schema = {
         'model': MODEL_TYPE,
-        'biomodel_id': 'maybe[string]',  # <-- implies the lack of either model_file or model_reactions
-        'units': 'tree[string]',
         'method': {
             '_type': 'string',
             '_default': 'deterministic'

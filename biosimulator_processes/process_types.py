@@ -33,8 +33,8 @@ CHANGES_SCHEMA = """The following types have been derived from both SEDML L1v4 a
 
 # The first 3 params are NOT optional below for a Model in SEDML. model_source has been adapted to mean point of residence
 MODEL_TYPE = {
-    'model_id': 'string',    # could be used as the BioModels id
-    'model_source': 'string',    # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
+    'model_id': 'string',
+    'model_source': 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
     'model_language': {    # could be used to load a different model language supported by COPASI/basico
         '_type': 'string',
         '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
@@ -47,11 +47,6 @@ MODEL_TYPE = {
         'species_changes': 'tree[string]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
         'global_parameter_changes': 'tree[string]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
         'reaction_changes': 'tree[string]'
-    }
+    },
+    'model_units': 'tree[string]'
 }
-
-
-# ^ Here, the model changes would be applied in either two ways:
-#  A. (model_file/biomodel_id is passed): after model instatiation in the constructor
-#  B. (no model_file or biomodel_id is passed): used to extract reactions. Since adding reactions to an empty model technically
-#   is an act of "changing" the model (empty -> context), it is safe to say that you must pass 'model': {'model_changes': etc...} instead.

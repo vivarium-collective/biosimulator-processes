@@ -1,6 +1,7 @@
 from typing import Dict
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf
+from pydantic import BaseModel
 
 
 def fetch_biomodel_by_term(term: str, index: int = 0):
@@ -101,6 +102,12 @@ def generate_emitter_schema(
         emitter_type: str = "ram-emitter",
         **emit_values_schema
 ) -> Dict:
+    """
+        Args:
+            **emit_values_schema:`kwargs`: values to be emitted by the address
+
+
+    """
     return {
         '_type': 'step',
         'address': 'local:ram-emitter',
@@ -211,12 +218,9 @@ def generate_sed_model_config_schema(
     }
 
     for param_name, param_val in entrypoint.items():
-        if 'biomodel' in param_name.lower():
-            instance_schema[param_name] = param_val
-        elif 'model_source' in param_name.lower():
-            instance_schema['model'][param_name] = {
-                param_name: param_val
-            }
+        instance_schema['model'][param_name] = {
+            param_name: param_val
+        }
 
     return instance_schema
 
