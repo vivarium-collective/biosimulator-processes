@@ -22,7 +22,7 @@ for process_name, process_path in PROCESSES_TO_REGISTER:
         process_class = getattr(process_module, class_name)
 
         # Register the process
-        BIOSIMULATOR_PROCESS_BUILDER.register_process(process_name, process_class)
+        BIOSIMULATOR_PROCESS_BUILDER.register_process(class_name, process_class)
         print(f"{class_name} registered successfully.")
     except ImportError as e:
         print(f"{class_name} not available. Error: {e}")
