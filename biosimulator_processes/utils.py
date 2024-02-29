@@ -161,7 +161,7 @@ def generate_copasi_parameter_scan_instance(
             instance_name=f'copasi_{n}',
             config=iteration_model_config
         )
-        for iter_name, iter_config in iteration_instance:
+        for iter_name, iter_config in iteration_instance.items():
             parameter_scan_instance[iter_name] = iteration_instance
 
     emitter_schema = generate_emitter_schema(floating_species='tree[float]', time='float')
