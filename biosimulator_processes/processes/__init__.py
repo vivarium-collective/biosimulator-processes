@@ -1,15 +1,18 @@
-from process_bigraph import process_registry
+from builder import ProcessTypes, Builder
 
 
 # Define a list of processes to attempt to import and register
-processes_to_register = [
+PROCESSES_TO_REGISTER = [
     ('cobra', 'cobra_process.CobraProcess'),
     ('copasi', 'copasi_process.CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
 ]
 
-for process_name, process_path in processes_to_register:
+CORE = ProcessTypes()
+BIOSIMULATOR_PROCESS_BUILDER = Builder(core=CORE)
+
+for process_name, process_path in PROCESSES_TO_REGISTER:
     module_name, class_name = process_path.rsplit('.', 1)
     try:
         # Dynamically import the module
@@ -19,7 +22,7 @@ for process_name, process_path in processes_to_register:
         process_class = getattr(process_module, class_name)
 
         # Register the process
-        process_registry.register(process_name, process_class)
+        BIOSIMULATOR_PROCESS_BUILDER.register_process(process_name, process_class)
         print(f"{class_name} registered successfully.")
     except ImportError as e:
         print(f"{class_name} not available. Error: {e}")

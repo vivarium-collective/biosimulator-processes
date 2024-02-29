@@ -241,13 +241,27 @@ html5lib = ["html5lib"]
 lxml = ["lxml"]
 
 [[package]]
+name = "bigraph-builder"
+version = "0.0.4"
+description = ""
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "bigraph-builder-0.0.4.tar.gz", hash = "sha256:15801fb147e221cec09d9042af877281921d09bf69120f4103a6bdd10843f5e0"},
+]
+
+[package.dependencies]
+bigraph-viz = "*"
+process-bigraph = "*"
+
+[[package]]
 name = "bigraph-schema"
-version = "0.0.29"
+version = "0.0.30"
 description = "A serializable type schema for compositional systems biology"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "bigraph-schema-0.0.29.tar.gz", hash = "sha256:460bb5e2dd21c0044779024cf03a2a1b68e44f25da775f6bfc0c62ff79037667"},
+    {file = "bigraph-schema-0.0.30.tar.gz", hash = "sha256:dd7a2c047ff144f9e65236ad4cd93f51737cbefe8d1b531cf78d500e91371e38"},
 ]
 
 [package.dependencies]
@@ -258,12 +272,12 @@ pytest = "*"
 
 [[package]]
 name = "bigraph-viz"
-version = "0.0.31"
+version = "0.0.33"
 description = "A graphviz-based plotting tool for compositional bigraph schema"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "bigraph-viz-0.0.31.tar.gz", hash = "sha256:ec3c5c1a37c651fe4e0a07f01a18ba0d35c780b53557f588e9bd9080bdc50ba7"},
+    {file = "bigraph-viz-0.0.33.tar.gz", hash = "sha256:abec065149184247967c07dad0c9114a8ac379b331efebf829eecf057fe6dd9c"},
 ]
 
 [package.dependencies]
@@ -1533,13 +1547,13 @@ test = ["hatch", "ipykernel", "openapi-core (>=0.18.0,<0.19.0)", "openapi-spec-v
 
 [[package]]
 name = "keyring"
-version = "24.3.0"
+version = "24.3.1"
 description = "Store and access your passwords safely."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "keyring-24.3.0-py3-none-any.whl", hash = "sha256:4446d35d636e6a10b8bce7caa66913dd9eca5fd222ca03a3d42c38608ac30836"},
-    {file = "keyring-24.3.0.tar.gz", hash = "sha256:e730ecffd309658a08ee82535a3b5ec4b4c8669a9be11efb66249d8e0aeb9a25"},
+    {file = "keyring-24.3.1-py3-none-any.whl", hash = "sha256:df38a4d7419a6a60fea5cef1e45a948a3e8430dd12ad88b0f423c5c143906218"},
+    {file = "keyring-24.3.1.tar.gz", hash = "sha256:c3327b6ffafc0e8befbdb597cacdb4928ffe5c1212f7645f186e6d9957a898db"},
 ]
 
 [package.dependencies]
@@ -1552,7 +1566,7 @@ SecretStorage = {version = ">=3.2", markers = "sys_platform == \"linux\""}
 [package.extras]
 completion = ["shtab (>=1.1.0)"]
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
-testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
+testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [[package]]
 name = "kiwisolver"
@@ -2628,12 +2642,12 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "process-bigraph"
-version = "0.0.14"
+version = "0.0.15"
 description = ""
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "process-bigraph-0.0.14.tar.gz", hash = "sha256:d737b0f37e38e34bc67a5f7266e7aa2034d68758ab33b2a095c6aa46bf0ddaff"},
+    {file = "process-bigraph-0.0.15.tar.gz", hash = "sha256:8d002aa47ed9a966271f83626d391437d45f12cdf80e83c1dfed5723084797c1"},
 ]
 
 [package.dependencies]
@@ -2749,13 +2763,13 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.6.2"
+version = "2.6.3"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic-2.6.2-py3-none-any.whl", hash = "sha256:37a5432e54b12fecaa1049c5195f3d860a10e01bdfd24f1840ef14bd0d3aeab3"},
-    {file = "pydantic-2.6.2.tar.gz", hash = "sha256:a09be1c3d28f3abe37f8a78af58284b236a92ce520105ddc91a6d29ea1176ba7"},
+    {file = "pydantic-2.6.3-py3-none-any.whl", hash = "sha256:72c6034df47f46ccdf81869fddb81aade68056003900a8724a4f160700016a2a"},
+    {file = "pydantic-2.6.3.tar.gz", hash = "sha256:e07805c4c7f5c6826e33a1d4c9d47950d7eaf34868e2690f8594d2e30241f11f"},
 ]
 
 [package.dependencies]
@@ -3786,13 +3800,13 @@ files = [
 
 [[package]]
 name = "rich"
-version = "13.7.0"
+version = "13.7.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
-    {file = "rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
+    {file = "rich-13.7.1-py3-none-any.whl", hash = "sha256:4edbae314f59eb482f54e9e30bf00d33350aaa94f4bfcd4e9e3110e64d0d7222"},
+    {file = "rich-13.7.1.tar.gz", hash = "sha256:9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"},
 ]
 
 [package.dependencies]
@@ -4087,30 +4101,30 @@ files = [
 
 [[package]]
 name = "smoldyn"
-version = "2.72"
+version = "2.73"
 description = "Python package for the Smoldyn simulator"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "smoldyn-2.72-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:bdbcede86832b8dd583e7f413b32b0b3e8242b959d8d688b143549a7cb3b151e"},
-    {file = "smoldyn-2.72-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:413affe17e3fb55426ddf68be8e4e415500d751af9a4eab236c61fa01c8378e8"},
-    {file = "smoldyn-2.72-cp310-cp310-win_amd64.whl", hash = "sha256:1b614a3bdb6cbe398074704fc104a1e565402fd04b9cf5a1cb5855ded3564396"},
-    {file = "smoldyn-2.72-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:1a45fbf5e428a6e9e04dd4aa40474aca70203042957c2703cb7d284665285f3b"},
-    {file = "smoldyn-2.72-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d0d0020c6262f80201a76ea28a5f108974de6d9079d96fd59e77cba08d726ce5"},
-    {file = "smoldyn-2.72-cp311-cp311-win_amd64.whl", hash = "sha256:680065f2ffe0f6d844bce9deacbf9932f09cd625986863bf22a1a9dac5d411b9"},
-    {file = "smoldyn-2.72-cp37-cp37m-macosx_11_0_x86_64.whl", hash = "sha256:71ded9847ba6fd938f91f8c9045fd870417c9d10e143a0eddf8904c4663c2248"},
-    {file = "smoldyn-2.72-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b33f6c74c2230a86e1be8ad2c0a1ddde9ee9cced168151b7e29d380eb0c9e68"},
-    {file = "smoldyn-2.72-cp37-cp37m-win_amd64.whl", hash = "sha256:883fa49928e9fa91754ae8c6433a57a5f09f8bae2c59c2af17af147bf81425f8"},
-    {file = "smoldyn-2.72-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:a510fd915d8b0933eba1658db86c68594cc972edcbe7400537e0a3f072a47e79"},
-    {file = "smoldyn-2.72-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c91194441765cbb6a0c7f03ca59007f6b23604f25e631af937fb4194998ea84c"},
-    {file = "smoldyn-2.72-cp38-cp38-win_amd64.whl", hash = "sha256:01c82dda3a71bec7553618fe530e13ee7e7bd48c248a4d11c7dc33b76e4650dc"},
-    {file = "smoldyn-2.72-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:a877e484002c575c97dde7483d6785308a7819d5a3170bc75ff1b470598ad2a0"},
-    {file = "smoldyn-2.72-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5ee082991b4fe1947e0743906a3b8d3dc5fd81a779fd0b7962eccdb780b922d7"},
-    {file = "smoldyn-2.72-cp39-cp39-win_amd64.whl", hash = "sha256:e00e644610c9795bea62e661ab5bed3bdce3e71f48520b1a9426add8878cb2cd"},
+    {file = "smoldyn-2.73-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:071c5370390de1227197e5ae11b36bdfdd52e6595d9937a1a7b98e749aa69978"},
+    {file = "smoldyn-2.73-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:28f5ecf0f6c7b615c6dde85fa3a4a9c6798fe0bdbfcfd3f58b8c1eb7294425dc"},
+    {file = "smoldyn-2.73-cp310-cp310-win_amd64.whl", hash = "sha256:71bd38fd939ba33288364d6cbd25584ffd5a703eb45b6e55c9b2af4ba3a06369"},
+    {file = "smoldyn-2.73-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:61fd0dc7eae106318e958371991d4700e275ff41e20490f6629594e57219ece4"},
+    {file = "smoldyn-2.73-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3d4c689d8cd847171b0bda9934597dad209921febd47751759b9e22626b5ff10"},
+    {file = "smoldyn-2.73-cp311-cp311-win_amd64.whl", hash = "sha256:0d555c56f93c856455ecca33b8759bd3645db56b296ca2b01a3cd45760fb2ae4"},
+    {file = "smoldyn-2.73-cp37-cp37m-macosx_11_0_x86_64.whl", hash = "sha256:fbeff85915ed13561b138f574c86a46f05a4f4081d51b9aad63645c594fa3811"},
+    {file = "smoldyn-2.73-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:37dd581f0f97207b444739b4a75450b65e5d719baebae72d08e750ec751c43f1"},
+    {file = "smoldyn-2.73-cp37-cp37m-win_amd64.whl", hash = "sha256:949486b17fd890a99b695171627cd4e67c5102813918c8c6a97b33a9f500d096"},
+    {file = "smoldyn-2.73-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:e93df952d09d56af4823bda9b9be297f2c819cf2989806b5b7c5386b76f0adcb"},
+    {file = "smoldyn-2.73-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6fd90383ddd8d046b7e3dff9a3b46674eaf08c25565c08e57d2e08357dddb2b5"},
+    {file = "smoldyn-2.73-cp38-cp38-win_amd64.whl", hash = "sha256:7c9a01285da545034afeb308e5b27cfbaeec2d96b107a4737b782bd7e1715890"},
+    {file = "smoldyn-2.73-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:d357b8030166eb06f4b8fe391a6505c07a667774bfb87f06c4480c5ce8f1b348"},
+    {file = "smoldyn-2.73-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cb284adbb88dafa8691a4ec4d46b5046cbd31539ea2312c793538a09097f5c16"},
+    {file = "smoldyn-2.73-cp39-cp39-win_amd64.whl", hash = "sha256:f2163ba361de67ad0a22e624aa13178a8ba5b755866fdc4b56eaad32c56c1602"},
 ]
 
 [package.extras]
-biosimulators = ["biosimulators-utils[logging] (>=0.1.124)", "numpy", "pandas"]
+biosimulators = ["biosimulators-simularium (>=0.5.29)", "biosimulators-utils[logging] (>=0.1.124)", "numpy", "pandas"]
 biosimulators-dev = ["flake8"]
 biosimulators-tests = ["python-dateutil"]
 dev = ["black", "flaky", "matplotlib", "mypy", "numpy", "pyflakes"]
@@ -4561,4 +4575,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "f24925fdc46a84003419a4e719287f44d19cc2a9125408e16b5b1727eca26806"
+content-hash = "2967fe74b334c4632aef319ec7bf650b98366545b8e07c4b0ebb5896dbd8071d"

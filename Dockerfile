@@ -48,6 +48,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --upgrade pip && pip install poetry \
     && poetry config virtualenvs.in-project true \
+    # && poetry run pip install psutil \
+    && poetry update \
     && poetry install \
     && chmod +x ./trust-notebooks.sh \
     && ./trust-notebooks.sh \
