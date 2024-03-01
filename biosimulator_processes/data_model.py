@@ -102,7 +102,8 @@ class ReactionChanges(BaseModel):
     reaction_scheme: str
 
 
-# class ModelChanges:
+class ModelChanges:
+    pass
 
 
 
