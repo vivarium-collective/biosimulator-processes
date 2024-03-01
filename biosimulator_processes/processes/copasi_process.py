@@ -140,8 +140,19 @@ class CopasiProcess(Process):
         # add reactions
         reaction_changes: Dict = self.model_changes.get('reaction_changes', None)
         if reaction_changes is not None:
-            for reaction_name, reaction_scheme in reaction_changes.items():
-                add_reaction(reaction_name, reaction_scheme, model=self.copasi_model_object)
+            for reaction in reaction_changes:
+                for reaction_name, reaction_scheme in reaction.items():
+                    add_reaction(reaction_name, reaction_scheme, model=self.copasi_model_object)
+
+        species_changes = self.model_changes.get('species_changes', None)
+        if species_changes is not None:
+            if isinstance(species_changes, dict):
+                for name, change in species_changes.items():
+                    if change:
+                        set_species(name, change, model=self.copasi_model_object)
+            elif isinstance(species_changes, list):
+                for species_change in species_changes:
+                    set_species(**species_change, model=self.copasi_model_object)
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()

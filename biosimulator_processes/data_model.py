@@ -33,10 +33,10 @@ class BaseModel(Base):
 
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-    species_name: str
+    name: str
     unit: Union[str, NoneType] = Field(default='')
-    initial_concentration: float = None
-    initial_particle_number: Union[float, NoneType] = None
+    initial_concentration: Optional[float] = None
+    initial_particle_number: Optional[Union[float, NoneType]] = None
     initial_expression: Union[str, NoneType] = Field(default='')
     expression: Union[str, NoneType] = Field(default='')
 
@@ -291,7 +291,7 @@ class SedModel(FromDict):
 
 MODEL_TYPE = {
         'model_id': 'string',
-        'model_source': 'dict[string]',  # 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
+        'model_source': 'tree[string]',  # 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
         'model_language': {    # could be used to load a different model language supported by COPASI/basico
             '_type': 'string',
             '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
