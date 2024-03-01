@@ -34,20 +34,20 @@ class BaseModel(Base):
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
     species_name: str
-    unit: str
-    initial_concentration: float
-    initial_particle_number: float
-    initial_expression: str
-    expression: str
+    unit: Union[str, NoneType] = Field(default=None)
+    initial_concentration: Union[float, NoneType] = Field(default=None)
+    initial_particle_number: Union[float, NoneType] = Field(default=None)
+    initial_expression: Union[str, NoneType] = Field(default=None)
+    expression: Union[str, NoneType] = Field(default=None)
 
 
 class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
     parameter_name: str
-    initial_value: float
-    initial_expression: str
-    expression: str
-    status: str
-    param_type: str  # ie: fixed, assignment, reactions, etc
+    initial_value: Union[float, NoneType] = Field(default=None)
+    initial_expression: Union[str, NoneType] = Field(default=None)
+    expression: Union[str, NoneType] = Field(default=None)
+    status: Union[str, NoneType] = Field(default=None)
+    param_type: Union[str, NoneType] = Field(default=None)  # ie: fixed, assignment, reactions, etc
 
 
 class ReactionParameter(BaseModel):
@@ -57,22 +57,22 @@ class ReactionParameter(BaseModel):
 
 class ReactionChanges(BaseModel):
     reaction_name: str
-    reaction_parameters: Dict[str, ReactionParameter]
-    reaction_scheme: str
+    reaction_parameters: Union[NoneType, Dict[str, ReactionParameter]] = Field(default=None)
+    reaction_scheme: Union[NoneType, str] = Field(default=None)
 
 
 class ModelChanges:
-    species_changes: List[SpeciesChanges]
-    global_parameter_changes: List[GlobalParameterChanges]
-    reaction_changes: List[ReactionChanges]
+    species_changes: Union[NoneType, List[SpeciesChanges]] = Field(default=None)
+    global_parameter_changes: Union[NoneType, List[GlobalParameterChanges]] = Field(default=None)
+    reaction_changes: Union[NoneType, List[ReactionChanges]] = Field(default=None)
 
 
 class ModelSource(BaseModel):
-    value: str = None
+    value: str
 
 
 class BiomodelId(ModelSource):
-    value: str = None
+    value: str = Field(default='')
 
     @classmethod
     @field_validator('value')
@@ -82,7 +82,7 @@ class BiomodelId(ModelSource):
 
 
 class ModelFilepath(BaseModel):
-    value: str = None
+    value: str = Field(default='')
 
     @classmethod
     @field_validator('value')
@@ -92,7 +92,16 @@ class ModelFilepath(BaseModel):
 
 
 class Model(BaseModel):
-    """The data model declaration for process configuration schemas that support SED"""
+    """The data model declaration for process configuration schemas that support SED.
+
+        Parameters:
+            model_id: `str`
+            input_source: `str`
+            model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
+            model_language: `str`
+            model_name: `str`
+            model_changes: `biosimulator_processes.data_model.ModelChanges`
+    """
     model_id: str = Field(default='')
     input_source: str  # <-- user input
     model_source: Union[ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
