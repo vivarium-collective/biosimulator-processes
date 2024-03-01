@@ -6,7 +6,7 @@ COBRA FBA Process
 import cobra.io
 from cobra.io import read_sbml_model
 from process_bigraph import Process, Composite, pf, pp
-from biosimulator_processes.processes import BIOSIMULATOR_PROCESS_BUILDER
+from biosimulator_processes import CORE
 
 
 def check_sbml(state, schema, core):
@@ -33,8 +33,8 @@ sbml_type = {
 }
 
 # register new types
-BIOSIMULATOR_PROCESS_BUILDER.register_type('bounds', bounds_type)
-BIOSIMULATOR_PROCESS_BUILDER.register_type('sbml', sbml_type)
+CORE.type_registry.register('bounds', bounds_type)
+CORE.type_registry.register('sbml', sbml_type)
 
 
 class CobraProcess(Process):

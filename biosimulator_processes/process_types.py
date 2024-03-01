@@ -1,3 +1,77 @@
+from pydantic import BaseModel
+from typing import *
+from abc import ABC, abstractmethod
+
+
+class ModelChange(BaseModel):
+    config: Union[Dict[str, Dict[str, Dict[str, Union[float, str]]]], Dict[str, Dict[str, Union[Dict[str, float], str]]]]
+
+
+class ModelChanges(BaseModel):
+    species_changes: ModelChange = None
+    global_parameter_changes: ModelChange = None
+    reaction_changes: ModelChange = None
+
+
+class ModelSource(ABC):
+    value: str
+
+    def __init__(self):
+        super().__init__()
+
+    @abstractmethod
+    def check_value(self):
+        pass
+
+
+class BiomodelId(ModelSource, BaseModel):
+    value: str
+
+    def __init__(self):
+        super().__init__()
+        self.check_value()
+
+    def check_value(self):
+        assert '/' not in self.value
+
+
+class ModelFilepath(BaseModel):
+    value: str
+    
+    def __init__(self):
+        super().__init__()
+        self.check_value()
+
+    def check_value(self):
+        assert '/' in self.value
+    
+
+class SedModel(BaseModel):
+    model_id: Optional[str] = None
+    model_source: str
+    model_language: str = 'sbml'
+    model_name: str = 'composite_process_model'
+    model_changes: ModelChanges
+
+
+changes = {
+    'species_changes': {
+        'A': {
+            'initial_concent': 24.2,
+            'b': 'sbml'
+        }
+    }
+}
+
+r = {
+    'reaction_name': {
+        'parameters': {
+            'reaction_parameter_name': 23.2  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
+        },
+        'reaction_scheme': 'maybe[string]'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+    }
+}
+
 CHANGES_SCHEMA = """The following types have been derived from both SEDML L1v4 and basico itself.
 
         BASICO_MODEL_CHANGES_TYPE = {
