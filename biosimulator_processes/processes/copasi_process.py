@@ -135,7 +135,7 @@ class CopasiProcess(Process):
                 name='CopasiProcess Model',
                 **model_units)
 
-        self.model_changes: Dict = self.config['model'].get('model_changes', {})
+        self.model_changes = self.config['model'].get('model_changes', {})
 
         # add reactions
         reaction_changes: Dict = self.model_changes.get('reaction_changes', None)
@@ -147,9 +147,12 @@ class CopasiProcess(Process):
         species_changes = self.model_changes.get('species_changes', None)
         if species_changes is not None:
             if isinstance(species_changes, dict):
-                for name, change in species_changes.items():
-                    if change:
-                        set_species(name, change, model=self.copasi_model_object)
+                print(f'THE CHANGES: {species_changes}')
+                for param_name, change in species_changes.items():
+                    pass
+                    # if not change:
+                        # species_changes.pop(param_name)
+                # set_species(**species_changes, model=self.copasi_model_object)
             elif isinstance(species_changes, list):
                 for species_change in species_changes:
                     set_species(**species_change, model=self.copasi_model_object)
