@@ -3,8 +3,8 @@
 
 version="$1"
 
-# PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.4
-current="0.0.3"
+# PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.5
+current="0.0.4"
 
 run="$2"
 
@@ -28,7 +28,7 @@ else
   exit 1
 fi
 
-yes | docker system prune
+yes | docker system prune && yes | docker buildx prune
 docker buildx create --name biosimbuilder --use
 docker buildx inspect --bootstrap
 docker buildx build --platform linux/amd64 \

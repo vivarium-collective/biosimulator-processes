@@ -1,117 +1,182 @@
 """
-Biosimulator process for Copasi/Basico.
+    Biosimulator process for Copasi/Basico.
 
-Now lets create a new model, passing along the name that we want to give it.
-Additional supported parameters for the model consist of:
+    # 'model_file': 'string'
+    # 'reactions': 'tree[string]',
+    # 'model_changes': 'tree[string]',
 
-    quantity_unit: which sets the unit to use for species concentrations (defaults to mol)
+    # Newton/Raphson method  distance/rate: steady state  Use newton method and time course simulation
 
-    volume_unit: the unit to use for three dimensional compartments (defaults to litre (l))
+    # try newton stopp if epsilon satistfies
+    # run tc for 0.1unit of time stop if ep satis
+    # try newton stop if e satisfied
+    # run tc for 10x longer time stop if e
+    # if time>10^10 units of time stop otherwise go back to number 3
 
-    time_unit: the unit to use for time (defaults to second (s))
-
-    area_unit: the unit to use for two dimensional compartments
-
-    length_unit: the unit to use for one dimensional compartments
-
-    add_reaction('R1', 'A -> B');
-
-    Since we had a new model, this created the Species A and B as well as a compartment compartment, in which those
-    chemicals reside. The species have an initial concentration of 1.
-    To verify we can call get_species, which return
-
-    get_species().initial_concentration
-    name
-    A    1.0
-    B    1.0
-    Name: initial_concentration, dtype: float64
-    to change the initial concentration, we use set_species, and specify which property we want to change:
-
-    set_species('B', initial_concentration=0)
-    set_species('A', initial_concentration=10)
-    get_species().initial_concentration
-    name
-    A    10.0
-    B     0.0
-    Name: initial_concentration, dtype: float64
-    to see the kinetic paramters of our recation we can use get_reaction_parameters, and we see that the parameter has been created by default with a value of 0.1
 """
 
 
+from typing import Dict
+from pandas import DataFrame
 from basico import (
-                load_model,
-                get_species,
-                get_parameters,
-                get_reactions,
-                set_species,
-                run_time_course,
-                get_compartments,
-                new_model,
-                model_info,
-                load_model_from_string,
-                biomodels
-            )
+    load_model,
+    get_species,
+    get_parameters,
+    get_reactions,
+    set_species,
+    run_time_course,
+    get_compartments,
+    new_model,
+    add_reaction,
+    T,
+    set_report_dict
+)
 from process_bigraph import Process, Composite, pf
-
-
-def find_models(term: str):
-    return biomodels.search_for_model(term)
-
-
-def fetch_model(term: str, index: int = 0):
-    """Searrch for models matching the term and return an instantiated model from BioModels.
-
-        TODO: Implement a dynamic search of this
-    """
-    models = find_models(term)
-    model = models[index]
-    sbml = biomodels.get_content_for_model(model['id'])
-    return load_model_from_string(sbml)
+from biosimulator_processes.utils import fetch_biomodel
+from biosimulator_processes.process_types import MODEL_TYPE
+import biosimulator_processes.processes
 
 
 class CopasiProcess(Process):
+    """
+        Entrypoints:
+
+            A. SBML model file: 
+            B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
+            C. Model search term (load preconfigured model from BioModels)
+
+        Optional Parameters:
+
+            A. 'model_changes', for example could be something like:
+            
+                    'model_changes': {
+                        'species_changes': {   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+                            'species_name': {
+                                new_unit_for_species_name,
+                                new_initial_concentration_for_species_name,
+                                new_initial_particle_number_for_species_name,
+                                new_initial_expression_for_species_name,
+                                new_expression_for_species_name
+                            }
+                        },
+                        'global_parameter_changes': {   # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+                            global_parameter_name: {
+                                new_initial_value_for_global_parameter_name: 'any',
+                                new_initial_expression_for_global_parameter_name: 'string',
+                                new_expression_for_global_parameter_name: 'string',
+                                new_status_for_global_parameter_name: 'string',
+                                new_type_for_global_parameter_name: 'string'  # (fixed, assignment, reactions)
+                            }
+                        },
+                        'reaction_changes': {
+                            'reaction_name': {
+                                'reaction_parameters': {
+                                    reaction_parameter_name: 'float'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
+                                }, 
+                                'reaction_scheme': 'string'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+                            }
+                        }
+
+                        
+            B. 'method', changes the algorithm(s) used to solve the model
+                COPASI support many different simulations methods:
+                deterministic: using the COPASI LSODA implementation
+                stochastic: using the Gibson Bruck algorithm
+                directMethod: using the Gillespie direct method
+
+            C. 'units', (tree): quantity, volume, time, area, length
+
+        Justification:
+
+            As per SEDML v4 specifications (section2.2.4), p.32:sed-ml-L1V4.
+
+        MODEL_TYPE = {
+            'model_id': 'string',    # could be used as the BioModels id
+            'model_source': 'string',    # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
+            'model_language': {    # could be used to load a different model language supported by COPASI/basico
+                '_type': 'string',
+                '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
+            },
+            'model_name': {
+                '_type': 'string',
+                '_default': 'composite_process_model'
+            },
+            'model_changes': {
+                'species_changes': 'tree[string]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+                'global_parameter_changes': 'tree[string]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+                'reaction_changes': 'tree[string]'
+            }
+        }
+    """
+
     config_schema = {
-        'model_file': 'string',
-        'name': 'string',
-        'reactions': 'list[string]',
-        'species_types': {
-            'name': 'string',
-            'initial_concentration': 'int'
-        },
-        'model_search_term': 'string'
-        # model_changes: dict paramName: new value
-        # solver
+        'model': MODEL_TYPE,
+        'method': {
+            '_type': 'string',
+            '_default': 'deterministic'
+        }
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        try:
-            if self.config.get('model_file'):
-                # Load the single cell model into Basico
-                self.copasi_model_object = load_model(self.config['model_file'])
-            else:
-                self.copasi_model_object = new_model(name=self.config['name'])
-        except:
-            raise KeyError('You must enter either a model file or model name')
+        model_file = self.config.get('model').get('model_source')
+        sed_model_id = self.config.get('model').get('model_id')
+        biomodel_id = self.config.get('biomodel_id')
+        source_model_id = biomodel_id or sed_model_id
+        assert not (model_file and biomodel_id), 'You cannot pass both a model_file and biomodel_id'
+
+        # A. enter with model_file
+        if model_file:
+            self.copasi_model_object = load_model(model_file)
+        # B. enter with specific search term for a model
+        elif source_model_id:
+            self.copasi_model_object = fetch_biomodel(model_id=source_model_id)
+        # C. enter with a new model
+        else:
+            self.copasi_model_object = new_model(name='CopasiProcess Model', **self.config.get('units'))
+
+        self.model_changes: Dict = self.config['model'].get('model_changes', {})
+
+        # add reactions
+        reaction_changes: Dict = self.model_changes.get('reaction_changes', None)
+        if reaction_changes is not None:
+            for reaction_name, reaction_scheme in reaction_changes.items():
+                add_reaction(reaction_name, reaction_scheme, model=self.copasi_model_object)
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
 
-        # Get the list of parameters and their values
-        self.model_parameters_list = get_parameters(model=self.copasi_model_object).index.tolist()
-        self.model_parameter_values = get_parameters(model=self.copasi_model_object)['initial_value'].tolist()
+        # Get the list of parameters and their values (it is possible to run a model without any parameters)
+        model_parameters = get_parameters(model=self.copasi_model_object)
+        if isinstance(model_parameters, DataFrame):
+            self.model_parameters_list = model_parameters.index.tolist()
+            self.model_parameter_values = model_parameters['initial_value'].tolist()
+        else:
+            self.model_parameters_list = []
+            self.model_parameter_values = []
 
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        if not self.reaction_list:
+            raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
 
+        self.method = self.config.get('method')
+        # set_report_dict('Time-Course', task=T.TIME_COURSE, model=self.copasi_model_object, body=['Time'])
+
     def initial_state(self):
-        floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
-        model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
+        floating_species_dict = dict(
+            zip(self.floating_species_list, self.floating_species_initial))
+        # keep in mind that a valid simulation may not have global parameters
+        if self.model_parameters_list:
+            model_parameters_dict = dict(
+                zip(self.model_parameters_list, self.model_parameter_values))
+        else:
+            model_parameters_dict = {}
         return {
             'time': 0.0,
             'floating_species': floating_species_dict,
@@ -125,11 +190,17 @@ class CopasiProcess(Process):
                 '_apply': 'set',
             } for species_id in self.floating_species_list
         }
+        if self.model_parameters_list:
+            model_params_type = {
+                param_id: 'float' for param_id in self.model_parameters_list
+            }
+        else:
+            model_params_type = {}
+
         return {
             'time': 'float',
             'floating_species': floating_species_type,
-            'model_parameters': {
-                param_id: 'float' for param_id in self.model_parameters_list},
+            'model_parameters': model_params_type,
             'reactions': {
                 reaction_id: 'float' for reaction_id in self.reaction_list},
         }
@@ -147,30 +218,36 @@ class CopasiProcess(Process):
         }
 
     def update(self, inputs, interval):
-
         # set copasi values according to what is passed in states
         for cat_id, value in inputs['floating_species'].items():
-            set_species(name=cat_id, initial_concentration=value, model=self.copasi_model_object)
+            set_species(
+                name=cat_id,
+                initial_concentration=value,
+                model=self.copasi_model_object)
 
         # run model for "interval" length; we only want the state at the end
         timecourse = run_time_course(
             start_time=inputs['time'],
             duration=interval,
-            intervals=1,
             update_model=True,
-            model=self.copasi_model_object)
+            model=self.copasi_model_object,
+            method=self.method)
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
         results['floating_species'] = {
-            mol_id: float(get_species(name=mol_id, exact=True, model=self.copasi_model_object).concentration[0])
-            for mol_id in self.floating_species_list}
+            mol_id: float(get_species(
+                name=mol_id,
+                exact=True,
+                model=self.copasi_model_object
+            ).concentration[0])
+            for mol_id in self.floating_species_list
+        }
 
         return results
 
 
 def test_process():
-    # 1. Define the sim state schema:
     initial_sim_state = {
         'copasi': {
             '_type': 'process',
@@ -189,7 +266,6 @@ def test_process():
                 'time': ['time_store'],
             }
         },
-        # TODO: Add emitter schema
         'emitter': {
             '_type': 'step',
             'address': 'local:ram-emitter',
@@ -207,14 +283,50 @@ def test_process():
         }
     }
 
-    # 2. Make the composite:
+    instance = {
+        'copasi': {
+            '_type': 'process',
+            'address': 'local:copasi',
+            'config': {
+                'model': {
+                    'model_source': 'biosimulator_processes/model_files/Caravagna2010.xml'
+                }
+            },
+            'inputs': {
+                'floating_species': ['floating_species_store'],
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                'reactions': ['reactions_store']
+            },
+            'outputs': {
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store'],
+            }
+        },
+        'emitter': {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'emit': {
+                    'floating_species': 'tree[float]',
+                    'time': 'float',
+                },
+            },
+            'inputs': {
+                'floating_species': ['floating_species_store'],
+                'time': ['time_store'],
+            }
+        }
+    }
+
     workflow = Composite({
-        'state': initial_sim_state
+        'state': instance  # initial_sim_state
     })
-
-    # 3. Run the composite workflow:
     workflow.run(10)
-
-    # 4. Gather and pretty print results
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
+    assert ('emitter',) in results.keys(), "This instance was not properly configured with an emitter."
+
+
+# if __name__ == "__main__":
+#    test_process()

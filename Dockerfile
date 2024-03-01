@@ -13,16 +13,19 @@ ENV DEBIAN_FRONTEND=noninteractive \
 WORKDIR /app
 
 # copy and make dirs
-COPY ./biosimulator_processes/processes /app/biosimulator_processes
+COPY ./biosimulator_processes /app/biosimulator_processes
 COPY ./notebooks /app/notebooks
 
 # copy files
 COPY ./pyproject.toml ./poetry.lock ./data ./scripts/trust-notebooks.sh /app/
 COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
+VOLUME /app/data
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.10  \
     python3-pip  \
+    python3-dev \
     build-essential  \
     libncurses5  \
     cmake  \
@@ -46,18 +49,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --upgrade pip && pip install poetry \
     && poetry config virtualenvs.in-project true \
+    # && poetry run pip install psutil \
+    && poetry update \
     && poetry install \
     && chmod +x ./trust-notebooks.sh \
     && ./trust-notebooks.sh \
     && rm ./trust-notebooks.sh
 
-VOLUME /app/data
-
 CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
 
 
 # PLEASE NOTE: We do not need to add a USER in the Dockerfile as Singularity will handle
- # such logic in conversion on the HPC.
+# such logic in conversion on the HPC.
 
 # type imports
 # dist

@@ -21,3 +21,4 @@ submit-biosimulators-container.sh
 ._vagrant
 .THIS-IS-FOR-CONTAINER-DEV-ONLY
 buildDockerImage.yml
+.env

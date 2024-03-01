@@ -241,13 +241,27 @@ html5lib = ["html5lib"]
 lxml = ["lxml"]
 
 [[package]]
+name = "bigraph-builder"
+version = "0.0.4"
+description = ""
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "bigraph-builder-0.0.4.tar.gz", hash = "sha256:15801fb147e221cec09d9042af877281921d09bf69120f4103a6bdd10843f5e0"},
+]
+
+[package.dependencies]
+bigraph-viz = "*"
+process-bigraph = "*"
+
+[[package]]
 name = "bigraph-schema"
-version = "0.0.29"
+version = "0.0.30"
 description = "A serializable type schema for compositional systems biology"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "bigraph-schema-0.0.29.tar.gz", hash = "sha256:460bb5e2dd21c0044779024cf03a2a1b68e44f25da775f6bfc0c62ff79037667"},
+    {file = "bigraph-schema-0.0.30.tar.gz", hash = "sha256:dd7a2c047ff144f9e65236ad4cd93f51737cbefe8d1b531cf78d500e91371e38"},
 ]
 
 [package.dependencies]
@@ -258,12 +272,12 @@ pytest = "*"
 
 [[package]]
 name = "bigraph-viz"
-version = "0.0.31"
+version = "0.0.33"
 description = "A graphviz-based plotting tool for compositional bigraph schema"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "bigraph-viz-0.0.31.tar.gz", hash = "sha256:ec3c5c1a37c651fe4e0a07f01a18ba0d35c780b53557f588e9bd9080bdc50ba7"},
+    {file = "bigraph-viz-0.0.33.tar.gz", hash = "sha256:abec065149184247967c07dad0c9114a8ac379b331efebf829eecf057fe6dd9c"},
 ]
 
 [package.dependencies]
@@ -1083,18 +1097,18 @@ testing = ["flufl.flake8", "importlib-resources (>=1.3)", "packaging", "pyfakefs
 
 [[package]]
 name = "importlib-resources"
-version = "6.1.1"
+version = "6.1.2"
 description = "Read resources from Python packages"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "importlib_resources-6.1.1-py3-none-any.whl", hash = "sha256:e8bf90d8213b486f428c9c39714b920041cb02c184686a3dee24905aaa8105d6"},
-    {file = "importlib_resources-6.1.1.tar.gz", hash = "sha256:3893a00122eafde6894c59914446a512f728a0c1a45f9bb9b63721b6bacf0b4a"},
+    {file = "importlib_resources-6.1.2-py3-none-any.whl", hash = "sha256:9a0a862501dc38b68adebc82970140c9e4209fc99601782925178f8386339938"},
+    {file = "importlib_resources-6.1.2.tar.gz", hash = "sha256:308abf8474e2dba5f867d279237cd4076482c3de7104a40b41426370e891549b"},
 ]
 
 [package.extras]
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
-testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff", "zipp (>=3.17)"]
+testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy", "pytest-ruff (>=0.2.1)", "zipp (>=3.17)"]
 
 [[package]]
 name = "iniconfig"
@@ -1109,13 +1123,13 @@ files = [
 
 [[package]]
 name = "ipykernel"
-version = "6.29.2"
+version = "6.29.3"
 description = "IPython Kernel for Jupyter"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "ipykernel-6.29.2-py3-none-any.whl", hash = "sha256:50384f5c577a260a1d53f1f59a828c7266d321c9b7d00d345693783f66616055"},
-    {file = "ipykernel-6.29.2.tar.gz", hash = "sha256:3bade28004e3ff624ed57974948116670604ac5f676d12339693f3142176d3f0"},
+    {file = "ipykernel-6.29.3-py3-none-any.whl", hash = "sha256:5aa086a4175b0229d4eca211e181fb473ea78ffd9869af36ba7694c947302a21"},
+    {file = "ipykernel-6.29.3.tar.gz", hash = "sha256:e14c250d1f9ea3989490225cc1a542781b095a18a19447fcf2b5eaf7d0ac5bd2"},
 ]
 
 [package.dependencies]
@@ -1138,7 +1152,7 @@ cov = ["coverage[toml]", "curio", "matplotlib", "pytest-cov", "trio"]
 docs = ["myst-parser", "pydata-sphinx-theme", "sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-github-alt", "sphinxcontrib-spelling", "trio"]
 pyqt5 = ["pyqt5"]
 pyside6 = ["pyside6"]
-test = ["flaky", "ipyparallel", "pre-commit", "pytest (>=7.0)", "pytest-asyncio (==0.23.4)", "pytest-cov", "pytest-timeout"]
+test = ["flaky", "ipyparallel", "pre-commit", "pytest (>=7.0)", "pytest-asyncio (>=0.23.5)", "pytest-cov", "pytest-timeout"]
 
 [[package]]
 name = "ipython"
@@ -1396,13 +1410,13 @@ test = ["click", "pre-commit", "pytest (>=7.0)", "pytest-asyncio (>=0.19.0)", "p
 
 [[package]]
 name = "jupyter-lsp"
-version = "2.2.2"
+version = "2.2.3"
 description = "Multi-Language Server WebSocket proxy for Jupyter Notebook/Lab server"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter-lsp-2.2.2.tar.gz", hash = "sha256:256d24620542ae4bba04a50fc1f6ffe208093a07d8e697fea0a8d1b8ca1b7e5b"},
-    {file = "jupyter_lsp-2.2.2-py3-none-any.whl", hash = "sha256:3b95229e4168355a8c91928057c1621ac3510ba98b2a925e82ebd77f078b1aa5"},
+    {file = "jupyter-lsp-2.2.3.tar.gz", hash = "sha256:33dbcbc5df24237ff5c8b696b04ff4689fcd316cb8d4957d620fe5504d7d2c3f"},
+    {file = "jupyter_lsp-2.2.3-py3-none-any.whl", hash = "sha256:57dd90d0a2e2530831793550846168c81c952b49e187aa339e455027a5f0fd2e"},
 ]
 
 [package.dependencies]
@@ -1533,13 +1547,13 @@ test = ["hatch", "ipykernel", "openapi-core (>=0.18.0,<0.19.0)", "openapi-spec-v
 
 [[package]]
 name = "keyring"
-version = "24.3.0"
+version = "24.3.1"
 description = "Store and access your passwords safely."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "keyring-24.3.0-py3-none-any.whl", hash = "sha256:4446d35d636e6a10b8bce7caa66913dd9eca5fd222ca03a3d42c38608ac30836"},
-    {file = "keyring-24.3.0.tar.gz", hash = "sha256:e730ecffd309658a08ee82535a3b5ec4b4c8669a9be11efb66249d8e0aeb9a25"},
+    {file = "keyring-24.3.1-py3-none-any.whl", hash = "sha256:df38a4d7419a6a60fea5cef1e45a948a3e8430dd12ad88b0f423c5c143906218"},
+    {file = "keyring-24.3.1.tar.gz", hash = "sha256:c3327b6ffafc0e8befbdb597cacdb4928ffe5c1212f7645f186e6d9957a898db"},
 ]
 
 [package.dependencies]
@@ -1552,7 +1566,7 @@ SecretStorage = {version = ">=3.2", markers = "sys_platform == \"linux\""}
 [package.extras]
 completion = ["shtab (>=1.1.0)"]
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
-testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
+testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [[package]]
 name = "kiwisolver"
@@ -2092,6 +2106,29 @@ files = [
 ]
 
 [[package]]
+name = "notebook"
+version = "7.1.1"
+description = "Jupyter Notebook - A web-based notebook environment for interactive computing"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "notebook-7.1.1-py3-none-any.whl", hash = "sha256:197d8e0595acabf4005851c8716e952a81b405f7aefb648067a761fbde267ce7"},
+    {file = "notebook-7.1.1.tar.gz", hash = "sha256:818e7420fa21f402e726afb9f02df7f3c10f294c02e383ed19852866c316108b"},
+]
+
+[package.dependencies]
+jupyter-server = ">=2.4.0,<3"
+jupyterlab = ">=4.1.1,<4.2"
+jupyterlab-server = ">=2.22.1,<3"
+notebook-shim = ">=0.2,<0.3"
+tornado = ">=6.2.0"
+
+[package.extras]
+dev = ["hatch", "pre-commit"]
+docs = ["myst-parser", "nbsphinx", "pydata-sphinx-theme", "sphinx (>=1.3.6)", "sphinxcontrib-github-alt", "sphinxcontrib-spelling"]
+test = ["importlib-resources (>=5.0)", "ipykernel", "jupyter-server[test] (>=2.4.0,<3)", "jupyterlab-server[test] (>=2.22.1,<3)", "nbval", "pytest (>=7.0)", "pytest-console-scripts", "pytest-timeout", "pytest-tornasync", "requests"]
+
+[[package]]
 name = "notebook-shim"
 version = "0.2.4"
 description = "A shim layer for notebook traits and config"
@@ -2605,12 +2642,12 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "process-bigraph"
-version = "0.0.14"
+version = "0.0.15"
 description = ""
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "process-bigraph-0.0.14.tar.gz", hash = "sha256:d737b0f37e38e34bc67a5f7266e7aa2034d68758ab33b2a095c6aa46bf0ddaff"},
+    {file = "process-bigraph-0.0.15.tar.gz", hash = "sha256:8d002aa47ed9a966271f83626d391437d45f12cdf80e83c1dfed5723084797c1"},
 ]
 
 [package.dependencies]
@@ -2726,13 +2763,13 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.6.2"
+version = "2.6.3"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic-2.6.2-py3-none-any.whl", hash = "sha256:37a5432e54b12fecaa1049c5195f3d860a10e01bdfd24f1840ef14bd0d3aeab3"},
-    {file = "pydantic-2.6.2.tar.gz", hash = "sha256:a09be1c3d28f3abe37f8a78af58284b236a92ce520105ddc91a6d29ea1176ba7"},
+    {file = "pydantic-2.6.3-py3-none-any.whl", hash = "sha256:72c6034df47f46ccdf81869fddb81aade68056003900a8724a4f160700016a2a"},
+    {file = "pydantic-2.6.3.tar.gz", hash = "sha256:e07805c4c7f5c6826e33a1d4c9d47950d7eaf34868e2690f8594d2e30241f11f"},
 ]
 
 [package.dependencies]
@@ -3373,17 +3410,17 @@ files = [
 
 [[package]]
 name = "pywinpty"
-version = "2.0.12"
+version = "2.0.13"
 description = "Pseudo terminal support for Windows from Python."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pywinpty-2.0.12-cp310-none-win_amd64.whl", hash = "sha256:21319cd1d7c8844fb2c970fb3a55a3db5543f112ff9cfcd623746b9c47501575"},
-    {file = "pywinpty-2.0.12-cp311-none-win_amd64.whl", hash = "sha256:853985a8f48f4731a716653170cd735da36ffbdc79dcb4c7b7140bce11d8c722"},
-    {file = "pywinpty-2.0.12-cp312-none-win_amd64.whl", hash = "sha256:1617b729999eb6713590e17665052b1a6ae0ad76ee31e60b444147c5b6a35dca"},
-    {file = "pywinpty-2.0.12-cp38-none-win_amd64.whl", hash = "sha256:189380469ca143d06e19e19ff3fba0fcefe8b4a8cc942140a6b863aed7eebb2d"},
-    {file = "pywinpty-2.0.12-cp39-none-win_amd64.whl", hash = "sha256:7520575b6546db23e693cbd865db2764097bd6d4ef5dc18c92555904cd62c3d4"},
-    {file = "pywinpty-2.0.12.tar.gz", hash = "sha256:8197de460ae8ebb7f5d1701dfa1b5df45b157bb832e92acba316305e18ca00dd"},
+    {file = "pywinpty-2.0.13-cp310-none-win_amd64.whl", hash = "sha256:697bff211fb5a6508fee2dc6ff174ce03f34a9a233df9d8b5fe9c8ce4d5eaf56"},
+    {file = "pywinpty-2.0.13-cp311-none-win_amd64.whl", hash = "sha256:b96fb14698db1284db84ca38c79f15b4cfdc3172065b5137383910567591fa99"},
+    {file = "pywinpty-2.0.13-cp312-none-win_amd64.whl", hash = "sha256:2fd876b82ca750bb1333236ce98488c1be96b08f4f7647cfdf4129dfad83c2d4"},
+    {file = "pywinpty-2.0.13-cp38-none-win_amd64.whl", hash = "sha256:61d420c2116c0212808d31625611b51caf621fe67f8a6377e2e8b617ea1c1f7d"},
+    {file = "pywinpty-2.0.13-cp39-none-win_amd64.whl", hash = "sha256:71cb613a9ee24174730ac7ae439fd179ca34ccb8c5349e8d7b72ab5dea2c6f4b"},
+    {file = "pywinpty-2.0.13.tar.gz", hash = "sha256:c34e32351a3313ddd0d7da23d27f835c860d32fe4ac814d372a3ea9594f41dde"},
 ]
 
 [[package]]
@@ -3553,13 +3590,13 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "readme-renderer"
-version = "42.0"
+version = "43.0"
 description = "readme_renderer is a library for rendering readme descriptions for Warehouse"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "readme_renderer-42.0-py3-none-any.whl", hash = "sha256:13d039515c1f24de668e2c93f2e877b9dbe6c6c32328b90a40a49d8b2b85f36d"},
-    {file = "readme_renderer-42.0.tar.gz", hash = "sha256:2d55489f83be4992fe4454939d1a051c33edbab778e82761d060c9fc6b308cd1"},
+    {file = "readme_renderer-43.0-py3-none-any.whl", hash = "sha256:19db308d86ecd60e5affa3b2a98f017af384678c63c88e5d4556a380e674f3f9"},
+    {file = "readme_renderer-43.0.tar.gz", hash = "sha256:1818dd28140813509eeed8d62687f7cd4f7bad90d4db586001c5dc09d4fde311"},
 ]
 
 [package.dependencies]
@@ -3763,13 +3800,13 @@ files = [
 
 [[package]]
 name = "rich"
-version = "13.7.0"
+version = "13.7.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
-    {file = "rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
+    {file = "rich-13.7.1-py3-none-any.whl", hash = "sha256:4edbae314f59eb482f54e9e30bf00d33350aaa94f4bfcd4e9e3110e64d0d7222"},
+    {file = "rich-13.7.1.tar.gz", hash = "sha256:9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"},
 ]
 
 [package.dependencies]
@@ -4064,43 +4101,43 @@ files = [
 
 [[package]]
 name = "smoldyn"
-version = "2.72"
+version = "2.73"
 description = "Python package for the Smoldyn simulator"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "smoldyn-2.72-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:bdbcede86832b8dd583e7f413b32b0b3e8242b959d8d688b143549a7cb3b151e"},
-    {file = "smoldyn-2.72-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:413affe17e3fb55426ddf68be8e4e415500d751af9a4eab236c61fa01c8378e8"},
-    {file = "smoldyn-2.72-cp310-cp310-win_amd64.whl", hash = "sha256:1b614a3bdb6cbe398074704fc104a1e565402fd04b9cf5a1cb5855ded3564396"},
-    {file = "smoldyn-2.72-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:1a45fbf5e428a6e9e04dd4aa40474aca70203042957c2703cb7d284665285f3b"},
-    {file = "smoldyn-2.72-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d0d0020c6262f80201a76ea28a5f108974de6d9079d96fd59e77cba08d726ce5"},
-    {file = "smoldyn-2.72-cp311-cp311-win_amd64.whl", hash = "sha256:680065f2ffe0f6d844bce9deacbf9932f09cd625986863bf22a1a9dac5d411b9"},
-    {file = "smoldyn-2.72-cp37-cp37m-macosx_11_0_x86_64.whl", hash = "sha256:71ded9847ba6fd938f91f8c9045fd870417c9d10e143a0eddf8904c4663c2248"},
-    {file = "smoldyn-2.72-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b33f6c74c2230a86e1be8ad2c0a1ddde9ee9cced168151b7e29d380eb0c9e68"},
-    {file = "smoldyn-2.72-cp37-cp37m-win_amd64.whl", hash = "sha256:883fa49928e9fa91754ae8c6433a57a5f09f8bae2c59c2af17af147bf81425f8"},
-    {file = "smoldyn-2.72-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:a510fd915d8b0933eba1658db86c68594cc972edcbe7400537e0a3f072a47e79"},
-    {file = "smoldyn-2.72-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c91194441765cbb6a0c7f03ca59007f6b23604f25e631af937fb4194998ea84c"},
-    {file = "smoldyn-2.72-cp38-cp38-win_amd64.whl", hash = "sha256:01c82dda3a71bec7553618fe530e13ee7e7bd48c248a4d11c7dc33b76e4650dc"},
-    {file = "smoldyn-2.72-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:a877e484002c575c97dde7483d6785308a7819d5a3170bc75ff1b470598ad2a0"},
-    {file = "smoldyn-2.72-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5ee082991b4fe1947e0743906a3b8d3dc5fd81a779fd0b7962eccdb780b922d7"},
-    {file = "smoldyn-2.72-cp39-cp39-win_amd64.whl", hash = "sha256:e00e644610c9795bea62e661ab5bed3bdce3e71f48520b1a9426add8878cb2cd"},
+    {file = "smoldyn-2.73-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:071c5370390de1227197e5ae11b36bdfdd52e6595d9937a1a7b98e749aa69978"},
+    {file = "smoldyn-2.73-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:28f5ecf0f6c7b615c6dde85fa3a4a9c6798fe0bdbfcfd3f58b8c1eb7294425dc"},
+    {file = "smoldyn-2.73-cp310-cp310-win_amd64.whl", hash = "sha256:71bd38fd939ba33288364d6cbd25584ffd5a703eb45b6e55c9b2af4ba3a06369"},
+    {file = "smoldyn-2.73-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:61fd0dc7eae106318e958371991d4700e275ff41e20490f6629594e57219ece4"},
+    {file = "smoldyn-2.73-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3d4c689d8cd847171b0bda9934597dad209921febd47751759b9e22626b5ff10"},
+    {file = "smoldyn-2.73-cp311-cp311-win_amd64.whl", hash = "sha256:0d555c56f93c856455ecca33b8759bd3645db56b296ca2b01a3cd45760fb2ae4"},
+    {file = "smoldyn-2.73-cp37-cp37m-macosx_11_0_x86_64.whl", hash = "sha256:fbeff85915ed13561b138f574c86a46f05a4f4081d51b9aad63645c594fa3811"},
+    {file = "smoldyn-2.73-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:37dd581f0f97207b444739b4a75450b65e5d719baebae72d08e750ec751c43f1"},
+    {file = "smoldyn-2.73-cp37-cp37m-win_amd64.whl", hash = "sha256:949486b17fd890a99b695171627cd4e67c5102813918c8c6a97b33a9f500d096"},
+    {file = "smoldyn-2.73-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:e93df952d09d56af4823bda9b9be297f2c819cf2989806b5b7c5386b76f0adcb"},
+    {file = "smoldyn-2.73-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6fd90383ddd8d046b7e3dff9a3b46674eaf08c25565c08e57d2e08357dddb2b5"},
+    {file = "smoldyn-2.73-cp38-cp38-win_amd64.whl", hash = "sha256:7c9a01285da545034afeb308e5b27cfbaeec2d96b107a4737b782bd7e1715890"},
+    {file = "smoldyn-2.73-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:d357b8030166eb06f4b8fe391a6505c07a667774bfb87f06c4480c5ce8f1b348"},
+    {file = "smoldyn-2.73-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cb284adbb88dafa8691a4ec4d46b5046cbd31539ea2312c793538a09097f5c16"},
+    {file = "smoldyn-2.73-cp39-cp39-win_amd64.whl", hash = "sha256:f2163ba361de67ad0a22e624aa13178a8ba5b755866fdc4b56eaad32c56c1602"},
 ]
 
 [package.extras]
-biosimulators = ["biosimulators-utils[logging] (>=0.1.124)", "numpy", "pandas"]
+biosimulators = ["biosimulators-simularium (>=0.5.29)", "biosimulators-utils[logging] (>=0.1.124)", "numpy", "pandas"]
 biosimulators-dev = ["flake8"]
 biosimulators-tests = ["python-dateutil"]
 dev = ["black", "flaky", "matplotlib", "mypy", "numpy", "pyflakes"]
 
 [[package]]
 name = "sniffio"
-version = "1.3.0"
+version = "1.3.1"
 description = "Sniff out which async library your code is running under"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "sniffio-1.3.0-py3-none-any.whl", hash = "sha256:eecefdce1e5bbfb7ad2eeaabf7c1eeb404d7757c379bd1f7e5cce9d8bf425384"},
-    {file = "sniffio-1.3.0.tar.gz", hash = "sha256:e60305c5e5d314f5389259b7f22aaa33d8f7dee49763119234af3755c55b9101"},
+    {file = "sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2"},
+    {file = "sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc"},
 ]
 
 [[package]]
@@ -4395,13 +4432,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.9.0"
+version = "4.10.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.9.0-py3-none-any.whl", hash = "sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd"},
-    {file = "typing_extensions-4.9.0.tar.gz", hash = "sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783"},
+    {file = "typing_extensions-4.10.0-py3-none-any.whl", hash = "sha256:69b1a937c3a517342112fb4c6df7e72fc39a38e7891a5730ed4985b5214b5475"},
+    {file = "typing_extensions-4.10.0.tar.gz", hash = "sha256:b0abd7c89e8fb96f98db18d86106ff1d90ab692004eb746cf6eda2682f91b3cb"},
 ]
 
 [[package]]
@@ -4538,4 +4575,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "cd6d7425448035b909d563817fc0ff783d815426d50be25d0fb0efc100433b1a"
+content-hash = "2967fe74b334c4632aef319ec7bf650b98366545b8e07c4b0ebb5896dbd8071d"

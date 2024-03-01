@@ -4,8 +4,8 @@
 # The following script serves as a utility for installing this repository with the Smoldyn requirement on a Silicon Mac
 
 # set installation parameters
-dist_url=https://www.smoldyn.org/smoldyn-2.72-mac.tgz
-tarball_name=smoldyn-2.72-mac.tgz
+dist_url=https://www.smoldyn.org/smoldyn-2.73-mac.tgz
+tarball_name=smoldyn-2.73-mac.tgz
 dist_dir=${tarball_name%.tgz}
 
 # uninstall existing version

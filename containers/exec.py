@@ -122,7 +122,3 @@ def exec_container(name: str):
     subprocess.run(build_command.split())
     run_command = f"docker run --platform linux/amd64 -it -p 8888:8888 {name}_env"
     subprocess.run(run_command.split())
-
-
-
-# run(['tellurium', 'copasi-basico'])
