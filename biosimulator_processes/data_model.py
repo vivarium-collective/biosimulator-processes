@@ -35,7 +35,7 @@ class BaseModel(Base):
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
     species_name: str
     unit: Union[str, NoneType] = Field(default=None)
-    initial_concentration: Union[float, NoneType] = Field(default=None)
+    initial_concentration: float = None
     initial_particle_number: Union[float, NoneType] = Field(default=None)
     initial_expression: Union[str, NoneType] = Field(default=None)
     expression: Union[str, NoneType] = Field(default=None)
@@ -62,7 +62,7 @@ class ReactionChanges(BaseModel):
 
 
 class ModelChanges(BaseModel):
-    species_changes: Union[NoneType, List[SpeciesChanges]] = Field(default=None)
+    species_changes: Union[SpeciesChanges, List[SpeciesChanges]] = Field(default=[])
     global_parameter_changes: Union[NoneType, List[GlobalParameterChanges]] = Field(default=None)
     reaction_changes: Union[NoneType, List[ReactionChanges]] = Field(default=None)
 
@@ -102,23 +102,25 @@ class Model(BaseModel):
             model_changes: `biosimulator_processes.data_model.ModelChanges`
     """
     model_id: str = Field(default='')
-    model_source: str  # <-- SED type validated by constructor
+    model_source: Union[str, ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
     model_language: str = Field(default='sbml')
     model_name: str = Field(default='Unnamed Composite Process Model')
     model_changes: ModelChanges
 
-    @classmethod
     @field_validator('model_source')
-    def set_value(cls):
+    @classmethod
+    def set_value(cls, v: str):
         """Verify that the model source is set to only either a path or a biomodels id"""
         # if '/' in cls.model_source:
         #     return ModelFilepath(value=cls.model_source)
         # elif 'BIO' in cls.input_source:
         #     return BiomodelId(value=cls.model_source)
-        if '/' not in cls.model_source or 'BIO' not in cls.model_source:
-            raise AttributeError('You must pass either a model filepath or valid biomodel id.')
+        if '/' in v:
+            return ModelFilepath(value=v)
+        elif 'BIO' in v:
+            return BiomodelId(value=v)
         else:
-            return cls.model_source
+            raise AttributeError('You must pass either a model filepath or valid biomodel id.')
 
 
 class ProcessConfigSchema(BaseModel):
@@ -128,6 +130,11 @@ class ProcessConfigSchema(BaseModel):
 class CopasiProcessConfigSchema(BaseModel):
     method: str = Field(default='deterministic')
     model: Union[Model, Dict]
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if isinstance(self.model, Model):
+            self.model = self.model.model_dump()
 
     @classmethod
     @field_serializer('model')

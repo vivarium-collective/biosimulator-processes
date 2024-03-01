@@ -33,7 +33,7 @@ from basico import (
 )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
-from biosimulator_processes.process_types import MODEL_TYPE
+from biosimulator_processes.data_model import Model
 import biosimulator_processes.processes
 
 
@@ -110,7 +110,7 @@ class CopasiProcess(Process):
     """
 
     config_schema = {
-        'model': MODEL_TYPE,
+        'model': Model,
         'method': {
             '_type': 'string',
             '_default': 'deterministic'
