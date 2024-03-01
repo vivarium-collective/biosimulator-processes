@@ -1,7 +1,34 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 from types import NoneType
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, field_validator, field_serializer, Field
+from pydantic import BaseModel as Base, field_validator, field_serializer, Field, ConfigDict
+
+
+__all__ = [
+    'SpeciesChanges',
+    'GlobalParameterChanges',
+    'ReactionParameter',
+    'ReactionChanges',
+    'ModelChanges',
+    'ModelSource',
+    'BiomodelId',
+    'ModelFilepath',
+    'Model',
+    'ProcessConfigSchema',
+    'CopasiProcessConfigSchema',
+    'PortSchema',
+    'EmittedType',
+    'EmitterInstance',
+    'ProcessInstance',
+    'FromDict',
+    'BasicoModelChanges',
+    'SedModel'
+]
+
+
+class BaseModel(Base):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    protected_namespaces: Tuple = Field(default=())
 
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
@@ -39,20 +66,16 @@ class ModelChanges:
     reaction_changes: List[ReactionChanges]
 
 
-class ModelSource(ABC, BaseModel):
+class ModelSource(BaseModel):
     value: str = None
-
-    @field_validator('value')
-    @abstractmethod
-    def check_value(self, v):
-        pass
 
 
 class BiomodelId(ModelSource):
     value: str = None
 
+    @classmethod
     @field_validator('value')
-    def check_value(self, v):
+    def check_value(cls, v):
         assert '/' not in v, "value must not contain a path but rather a valid BioModels id like: 'BIOMODELS...'"
         return v
 
@@ -60,8 +83,9 @@ class BiomodelId(ModelSource):
 class ModelFilepath(BaseModel):
     value: str = None
 
+    @classmethod
     @field_validator('value')
-    def check_value(self, v):
+    def check_value(cls, v):
         assert '/' in v, "value must contain a path"
         return v
 
@@ -75,13 +99,14 @@ class Model(BaseModel):
     model_name: str = Field(default='Unnamed Composite Process Model')
     model_changes: ModelChanges
 
+    @classmethod
     @field_validator('model_source')
-    def set_value(self):
+    def set_value(cls):
         """Verify that the model source is set to only either a path or a biomodels id"""
-        if '/' in self.input_source:
-            return ModelFilepath(value=self.input_source)
-        elif 'BIO' in self.input_source:
-            return BiomodelId(value=self.input_source)
+        if '/' in cls.input_source:
+            return ModelFilepath(value=cls.input_source)
+        elif 'BIO' in cls.input_source:
+            return BiomodelId(value=cls.input_source)
 
 
 class ProcessConfigSchema(BaseModel):
@@ -94,14 +119,15 @@ class CopasiProcessConfigSchema(ProcessConfigSchema):
 
 
 class PortSchema(BaseModel):
-    input_value_names: [List[str]]  # user input
-    schema: Dict[str, List[str]]
+    input_value_names: List[str]  # user input
+    _schema: Dict[str, List[str]]
 
-    @field_validator('schema')
-    def set_value(self):
+    @classmethod
+    @field_validator('_schema')
+    def set_value(cls):
         return {
             input_value: [f'{input_value}_store']
-            for input_value in self.input_value_names}
+            for input_value in cls.input_value_names}
 
 
 class EmittedType:
@@ -116,12 +142,13 @@ class EmitterInstance:
     config: Dict[str, Dict[str, str]]
     inputs: PortSchema  # these names might be the same as self.config
 
+    @classmethod
     @field_validator('config')
-    def set_value(self):
+    def set_value(cls):
         config = {
             'emit': {
                 emit_type.value_name: emit_type._type
-                for emit_type in self.emit_types
+                for emit_type in cls.emit_types
             }
         }
 
@@ -134,12 +161,13 @@ class ProcessInstance:
     outputs: PortSchema
     emitter: Union[EmitterInstance, NoneType] = Field(default=None)
 
+    @classmethod
     @field_validator('address')
-    def check_value(self, v):
+    def check_value(cls, v):
         pass
 
 
-# FromDict classes
+# Non-Pydantic FromDict classes
 class FromDict(dict):
     def __init__(self, value: Dict):
         super().__init__(value)
