@@ -328,5 +328,5 @@ def test_process():
     assert ('emitter',) in results.keys(), "This instance was not properly configured with an emitter."
 
 
-if __name__ == "__main__":
-    test_process()
+# if __name__ == "__main__":
+#    test_process()

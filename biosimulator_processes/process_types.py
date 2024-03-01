@@ -3,7 +3,7 @@ from typing import *
 from abc import ABC, abstractmethod
 
 
-class ModelChange(BaseModel):
+'''class ModelChange(BaseModel):
     config: Union[Dict[str, Dict[str, Dict[str, Union[float, str]]]], Dict[str, Dict[str, Union[Dict[str, float], str]]]]
 
 
@@ -51,7 +51,7 @@ class SedModel(BaseModel):
     model_source: str
     model_language: str = 'sbml'
     model_name: str = 'composite_process_model'
-    model_changes: ModelChanges
+    model_changes: ModelChanges'''
 
 
 changes = {
@@ -72,10 +72,44 @@ r = {
     }
 }
 
+
+class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+    species_name: str
+    unit: str
+    initial_concentration: float
+    initial_particle_number: float
+    initial_expression: str
+    expression: str
+
+
+class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+    parameter_name: str
+    initial_value: float
+    initial_expression: str
+    expression: str
+    status: str
+    param_type: str  # ie: fixed, assignment, reactions, etc
+
+
+class ReactionParameter(BaseModel):
+    name: str
+    value: Union[float, int, str]
+
+
+class ReactionChanges(BaseModel):
+    reaction_name: str
+    reaction_parameters: Dict[str, ReactionParameter]
+    reaction_scheme: str
+
+
+# class ModelChanges:
+
+
+
 CHANGES_SCHEMA = """The following types have been derived from both SEDML L1v4 and basico itself.
 
         BASICO_MODEL_CHANGES_TYPE = {
-            'species_changes': {   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+            'species_changes': {   
                 'species_name': {
                     'unit': 'maybe[string]',
                     'initial_concentration': 'maybe[float]',
@@ -84,7 +118,7 @@ CHANGES_SCHEMA = """The following types have been derived from both SEDML L1v4 a
                     'expression': 'maybe[string]'
                 }
             },
-            'global_parameter_changes': {   # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+            'global_parameter_changes': {   
                 'global_parameter_name': {
                     'initial_value': 'maybe[float]',
                     'initial_expression': 'maybe[string]',
