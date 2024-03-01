@@ -143,6 +143,11 @@ class CopasiProcessConfigSchema(BaseModel):
     def serialize_model(cls):
         return cls.model.model_dump()
 
+    def get_config(self):
+        config = self.model_dump()
+        config.pop('process_name')
+        return config
+
     '''@classmethod
     @field_validator('model')
     def set_model(cls):
