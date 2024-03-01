@@ -67,6 +67,7 @@ class ModelFilepath(BaseModel):
 
 
 class Model(BaseModel):
+    """The data model declaration for process configuration schemas that support SED"""
     model_id: str = Field(default='')
     input_source: str  # <-- user input
     model_source: Union[ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
@@ -83,11 +84,11 @@ class Model(BaseModel):
             return BiomodelId(value=self.input_source)
 
 
-class ProcessConfig(BaseModel):
+class ProcessConfigSchema(BaseModel):
     config: Dict
 
 
-class CopasiProcessConfig(ProcessConfig):
+class CopasiProcessConfigSchema(ProcessConfigSchema):
     model: Union[Dict, Model]
     method: str = Field(default='deterministic')
 
@@ -101,7 +102,6 @@ class PortSchema(BaseModel):
         return {
             input_value: [f'{input_value}_store']
             for input_value in self.input_value_names}
-
 
 
 class EmittedType:
@@ -129,7 +129,7 @@ class EmitterInstance:
 class ProcessInstance:
     _type: str
     address: str
-    config: Union[CopasiProcessConfig, ProcessConfig]
+    config: Union[CopasiProcessConfigSchema, ProcessConfigSchema]
     inputs: PortSchema
     outputs: PortSchema
     emitter: Union[EmitterInstance, NoneType] = Field(default=None)
