@@ -26,6 +26,7 @@ __all__ = [
 ]
 
 
+# TODO: You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
 class BaseModel(Base):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     protected_namespaces: Tuple = Field(default=())
