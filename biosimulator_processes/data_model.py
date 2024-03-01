@@ -29,7 +29,7 @@ __all__ = [
 # TODO: You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
 class BaseModel(Base):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    protected_namespaces: Tuple = Field(default=())
+    # protected_namespaces: Tuple = Field(default=())
 
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
@@ -61,7 +61,7 @@ class ReactionChanges(BaseModel):
     reaction_scheme: Union[NoneType, str] = Field(default=None)
 
 
-class ModelChanges:
+class ModelChanges(BaseModel):
     species_changes: Union[NoneType, List[SpeciesChanges]] = Field(default=None)
     global_parameter_changes: Union[NoneType, List[GlobalParameterChanges]] = Field(default=None)
     reaction_changes: Union[NoneType, List[ReactionChanges]] = Field(default=None)
@@ -72,7 +72,7 @@ class ModelSource(BaseModel):
 
 
 class BiomodelId(ModelSource):
-    value: str = Field(default='')
+    value: str
 
     @classmethod
     @field_validator('value')
@@ -82,7 +82,7 @@ class BiomodelId(ModelSource):
 
 
 class ModelFilepath(BaseModel):
-    value: str = Field(default='')
+    value: str
 
     @classmethod
     @field_validator('value')
@@ -96,15 +96,13 @@ class Model(BaseModel):
 
         Parameters:
             model_id: `str`
-            input_source: `str`
             model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
             model_language: `str`
             model_name: `str`
             model_changes: `biosimulator_processes.data_model.ModelChanges`
     """
     model_id: str = Field(default='')
-    input_source: str  # <-- user input
-    model_source: Union[ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
+    model_source: str  # <-- SED type validated by constructor
     model_language: str = Field(default='sbml')
     model_name: str = Field(default='Unnamed Composite Process Model')
     model_changes: ModelChanges
@@ -113,19 +111,34 @@ class Model(BaseModel):
     @field_validator('model_source')
     def set_value(cls):
         """Verify that the model source is set to only either a path or a biomodels id"""
-        if '/' in cls.input_source:
-            return ModelFilepath(value=cls.input_source)
-        elif 'BIO' in cls.input_source:
-            return BiomodelId(value=cls.input_source)
+        # if '/' in cls.model_source:
+        #     return ModelFilepath(value=cls.model_source)
+        # elif 'BIO' in cls.input_source:
+        #     return BiomodelId(value=cls.model_source)
+        if '/' not in cls.model_source or 'BIO' not in cls.model_source:
+            raise AttributeError('You must pass either a model filepath or valid biomodel id.')
+        else:
+            return cls.model_source
 
 
 class ProcessConfigSchema(BaseModel):
-    config: Dict
+    config: Dict = Field(default={})
 
 
-class CopasiProcessConfigSchema(ProcessConfigSchema):
-    model: Union[Dict, Model]
+class CopasiProcessConfigSchema(BaseModel):
     method: str = Field(default='deterministic')
+    model: Union[Model, Dict]
+
+    @classmethod
+    @field_serializer('model')
+    def serialize_model(cls):
+        return cls.model.model_dump()
+
+    '''@classmethod
+    @field_validator('model')
+    def set_model(cls):
+        if isinstance(cls.model, Model):
+            return cls.model.model_dump()'''
 
 
 class PortSchema(BaseModel):
