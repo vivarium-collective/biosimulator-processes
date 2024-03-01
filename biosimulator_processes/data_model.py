@@ -276,7 +276,7 @@ class SedModel(FromDict):
             'global_parameter_changes': 'maybe[tree[string]]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
             'reaction_changes': 'maybe[tree[string]]'
         },
-        'model_units': 'tree[string]'
+        'model_units': 'maybe[tree[string]]'
     }
 
     def __init__(self, _type: Dict = MODEL_TYPE):
