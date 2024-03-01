@@ -92,7 +92,7 @@ class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters
 
 
 class ReactionParameter(BaseModel):
-    name: str
+    parameter_name: str
     value: Union[float, int, str]
 
 
@@ -103,41 +103,39 @@ class ReactionChanges(BaseModel):
 
 
 class ModelChanges:
-    pass
+    species_changes: List[SpeciesChanges]
+    global_parameter_changes: List[GlobalParameterChanges]
+    reaction_changes: List[ReactionChanges]
 
 
-
-CHANGES_SCHEMA = """The following types have been derived from both SEDML L1v4 and basico itself.
-
-        BASICO_MODEL_CHANGES_TYPE = {
-            'species_changes': {   
-                'species_name': {
-                    'unit': 'maybe[string]',
-                    'initial_concentration': 'maybe[float]',
-                    'initial_particle_number': 'maybe[float]',
-                    'initial_expression': 'maybe[string]',
-                    'expression': 'maybe[string]'
-                }
-            },
-            'global_parameter_changes': {   
-                'global_parameter_name': {
-                    'initial_value': 'maybe[float]',
-                    'initial_expression': 'maybe[string]',
-                    'expression': 'maybe[string]',
-                    'status': 'maybe[string]',
-                    'type': 'maybe[string]'  # (ie: fixed, assignment, reactions)
-                }
-            },
-            'reaction_changes': {
-                'reaction_name': {
-                    'parameters': {
-                        'reaction_parameter_name': 'maybe[int]'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
-                    },
-                    'reaction_scheme': 'maybe[string]'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
-                }
-            }
+BASICO_MODEL_CHANGES_TYPE = {
+    'species_changes': {
+        'species_name': {
+            'unit': 'maybe[string]',
+            'initial_concentration': 'maybe[float]',
+            'initial_particle_number': 'maybe[float]',
+            'initial_expression': 'maybe[string]',
+            'expression': 'maybe[string]'
         }
-"""
+    },
+    'global_parameter_changes': {
+        'global_parameter_name': {
+            'initial_value': 'maybe[float]',
+            'initial_expression': 'maybe[string]',
+            'expression': 'maybe[string]',
+            'status': 'maybe[string]',
+            'type': 'maybe[string]'  # (ie: fixed, assignment, reactions)
+        }
+    },
+    'reaction_changes': {
+        'reaction_name': {
+            'parameters': {
+                'reaction_parameter_name': 'maybe[int]'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
+            },
+            'reaction_scheme': 'maybe[string]'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
+        }
+    }
+}
 
 
 # The first 3 params are NOT optional below for a Model in SEDML. model_source has been adapted to mean point of residence
