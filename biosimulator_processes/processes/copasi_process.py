@@ -130,10 +130,10 @@ class CopasiProcess(Process):
             self.copasi_model_object = fetch_biomodel(model_id=model_source)
         # C. enter with a new model
         else:
+            model_units = self.config['model'].get('model_units', {})
             self.copasi_model_object = new_model(
                 name='CopasiProcess Model',
-                **self.config['model'].get('model_units', {})
-            )
+                **model_units)
 
         self.model_changes: Dict = self.config['model'].get('model_changes', {})
 
