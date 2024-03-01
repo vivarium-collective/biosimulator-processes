@@ -1,6 +1,7 @@
-from pydantic import BaseModel, field_validator, field_serializer, Field
-from typing import *
+from typing import Dict, List, Union
+from types import NoneType
 from abc import ABC, abstractmethod
+from pydantic import BaseModel, field_validator, field_serializer, Field
 
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
@@ -82,15 +83,60 @@ class Model(BaseModel):
             return BiomodelId(value=self.input_source)
 
 
+class ProcessConfig(BaseModel):
+    config: Dict
+
+
+class CopasiProcessConfig(ProcessConfig):
+    model: Union[Dict, Model]
+    method: str = Field(default='deterministic')
+
+
+class PortSchema(BaseModel):
+    input_value_names: [List[str]]  # user input
+    schema: Dict[str, List[str]]
+
+    @field_validator('schema')
+    def set_value(self):
+        return {
+            input_value: [f'{input_value}_store']
+            for input_value in self.input_value_names}
 
 
 
-'''class SedModel(BaseModel):
-    model_id: Optional[str] = None
-    model_source: str
-    model_language: str = 'sbml'
-    model_name: str = 'composite_process_model'
-    model_changes: ModelChanges'''
+class EmittedType:
+    value_name: str
+    _type: str  # ie: 'tree[float]'
+
+
+class EmitterInstance:
+    _type: str = Field(default='step')
+    address: str = Field(default='local:ram-emitter')
+    emit_types: List[EmittedType]
+    config: Dict[str, Dict[str, str]]
+    inputs: PortSchema  # these names might be the same as self.config
+
+    @field_validator('config')
+    def set_value(self):
+        config = {
+            'emit': {
+                emit_type.value_name: emit_type._type
+                for emit_type in self.emit_types
+            }
+        }
+
+
+class ProcessInstance:
+    _type: str
+    address: str
+    config: Union[CopasiProcessConfig, ProcessConfig]
+    inputs: PortSchema
+    outputs: PortSchema
+    emitter: Union[EmitterInstance, NoneType] = Field(default=None)
+
+    @field_validator('address')
+    def check_value(self, v):
+        pass
 
 
 # FromDict classes
