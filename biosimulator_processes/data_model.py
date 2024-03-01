@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator, field_serializer, Field
 from typing import *
 from abc import ABC, abstractmethod
 
@@ -38,43 +38,54 @@ class ModelChanges:
     reaction_changes: List[ReactionChanges]
 
 
-'''class ModelChange(BaseModel):
-    config: Union[Dict[str, Dict[str, Dict[str, Union[float, str]]]], Dict[str, Dict[str, Union[Dict[str, float], str]]]]
-
-
-class ModelChanges(BaseModel):
-    species_changes: ModelChange = None
-    global_parameter_changes: ModelChange = None
-    reaction_changes: ModelChange = None
-
-
 class ModelSource(ABC, BaseModel):
-    value: str
+    value: str = None
 
-    @validator('value')
-    @classmethod
+    @field_validator('value')
     @abstractmethod
-    def check_value(cls, v):
+    def check_value(self, v):
         pass
 
+
 class BiomodelId(ModelSource):
-    @validator('value')
-    @classmethod
-    def check_value(cls, v):
-        assert '/' not in v, "value must not contain '/'"
+    value: str = None
+
+    @field_validator('value')
+    def check_value(self, v):
+        assert '/' not in v, "value must not contain a path but rather a valid BioModels id like: 'BIOMODELS...'"
         return v
+
 
 class ModelFilepath(BaseModel):
-    value: str
+    value: str = None
 
-    @validator('value')
-    @classmethod
-    def check_value(cls, v):
-        assert '/' in v, "value must contain '/'"
+    @field_validator('value')
+    def check_value(self, v):
+        assert '/' in v, "value must contain a path"
         return v
-    
 
-class SedModel(BaseModel):
+
+class Model(BaseModel):
+    model_id: str = Field(default='')
+    input_source: str  # <-- user input
+    model_source: Union[ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
+    model_language: str = Field(default='sbml')
+    model_name: str = Field(default='Unnamed Composite Process Model')
+    model_changes: ModelChanges
+
+    @field_validator('model_source')
+    def set_value(self):
+        """Verify that the model source is set to only either a path or a biomodels id"""
+        if '/' in self.input_source:
+            return ModelFilepath(value=self.input_source)
+        elif 'BIO' in self.input_source:
+            return BiomodelId(value=self.input_source)
+
+
+
+
+
+'''class SedModel(BaseModel):
     model_id: Optional[str] = None
     model_source: str
     model_language: str = 'sbml'
@@ -82,7 +93,7 @@ class SedModel(BaseModel):
     model_changes: ModelChanges'''
 
 
-# FromDict CLASSES
+# FromDict classes
 class FromDict(dict):
     def __init__(self, value: Dict):
         super().__init__(value)
@@ -123,6 +134,26 @@ class BasicoModelChanges(FromDict):
 
 
 class SedModel(FromDict):
+    """
+        # examples
+            # changes = {
+            #     'species_changes': {
+            #         'A': {
+            #             'initial_concent': 24.2,
+            #             'b': 'sbml'
+            #         }
+            #     }
+            # }
+            #
+            # r = {
+            #     'reaction_name': {
+            #         'parameters': {
+            #             'reaction_parameter_name': 23.2
+            #         },
+            #         'reaction_scheme': 'maybe[string]'
+            #     }
+            # }
+    """
     # The first 3 params are NOT optional below for a Model in SEDML. model_source has been adapted to mean point of residence
     MODEL_TYPE = {
         'model_id': 'string',
@@ -147,21 +178,4 @@ class SedModel(FromDict):
         super().__init__(_type)
 
 
-# EXAMPLES
-changes = {
-    'species_changes': {
-        'A': {
-            'initial_concent': 24.2,
-            'b': 'sbml'
-        }
-    }
-}
 
-r = {
-    'reaction_name': {
-        'parameters': {
-            'reaction_parameter_name': 23.2
-        },
-        'reaction_scheme': 'maybe[string]'
-    }
-}
