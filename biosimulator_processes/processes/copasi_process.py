@@ -120,21 +120,20 @@ class CopasiProcess(Process):
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        model_file = self.config.get('model').get('model_source')
-        sed_model_id = self.config.get('model').get('model_id')
-        biomodel_id = self.config.get('biomodel_id')
-        source_model_id = biomodel_id or sed_model_id
-        assert not (model_file and biomodel_id), 'You cannot pass both a model_file and biomodel_id'
+        model_source = self.config['model']['model_source']['value']
 
         # A. enter with model_file
-        if model_file:
-            self.copasi_model_object = load_model(model_file)
+        if '/' in model_source:
+            self.copasi_model_object = load_model(model_source)
         # B. enter with specific search term for a model
-        elif source_model_id:
-            self.copasi_model_object = fetch_biomodel(model_id=source_model_id)
+        elif 'BIO' in model_source:
+            self.copasi_model_object = fetch_biomodel(model_id=model_source)
         # C. enter with a new model
         else:
-            self.copasi_model_object = new_model(name='CopasiProcess Model', **self.config.get('units'))
+            self.copasi_model_object = new_model(
+                name='CopasiProcess Model',
+                **self.config['model'].get('model_units', {})
+            )
 
         self.model_changes: Dict = self.config['model'].get('model_changes', {})
 
