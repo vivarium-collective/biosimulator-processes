@@ -34,11 +34,11 @@ class BaseModel(Base):
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
     species_name: str
-    unit: Union[str, NoneType] = Field(default=None)
+    unit: Union[str, NoneType] = Field(default='')
     initial_concentration: float = None
-    initial_particle_number: Union[float, NoneType] = Field(default=None)
-    initial_expression: Union[str, NoneType] = Field(default=None)
-    expression: Union[str, NoneType] = Field(default=None)
+    initial_particle_number: Union[float, NoneType] = None
+    initial_expression: Union[str, NoneType] = Field(default='')
+    expression: Union[str, NoneType] = Field(default='')
 
 
 class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
@@ -63,8 +63,8 @@ class ReactionChanges(BaseModel):
 
 class ModelChanges(BaseModel):
     species_changes: Union[SpeciesChanges, List[SpeciesChanges]] = Field(default=[])
-    global_parameter_changes: Union[NoneType, List[GlobalParameterChanges]] = Field(default=None)
-    reaction_changes: Union[NoneType, List[ReactionChanges]] = Field(default=None)
+    global_parameter_changes: Union[GlobalParameterChanges, List[GlobalParameterChanges]] = Field(default=[])
+    reaction_changes: Union[ReactionChanges, List[ReactionChanges]] = Field(default=[])
 
 
 class ModelSource(BaseModel):
@@ -289,4 +289,21 @@ class SedModel(FromDict):
         super().__init__(_type)
 
 
-
+MODEL_TYPE = {
+        'model_id': 'string',
+        'model_source': 'dict[string]',  # 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
+        'model_language': {    # could be used to load a different model language supported by COPASI/basico
+            '_type': 'string',
+            '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
+        },
+        'model_name': {
+            '_type': 'string',
+            '_default': 'composite_process_model'
+        },
+        'model_changes': {
+            'species_changes': 'maybe[tree[string]]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+            'global_parameter_changes': 'maybe[tree[string]]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+            'reaction_changes': 'maybe[tree[string]]'
+        },
+        'model_units': 'maybe[tree[string]]'
+    }
