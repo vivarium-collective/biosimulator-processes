@@ -1,4 +1,4 @@
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Optional
 from types import NoneType
 from abc import ABC, abstractmethod
 from pydantic import BaseModel as Base, field_validator, field_serializer, Field, ConfigDict
@@ -129,6 +129,7 @@ class ProcessConfigSchema(BaseModel):
 
 
 class CopasiProcessConfigSchema(BaseModel):
+    process_name: Optional[Union[str, NoneType]] = None
     method: str = Field(default='deterministic')
     model: Union[Model, Dict]
 
