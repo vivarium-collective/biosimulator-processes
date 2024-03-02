@@ -62,9 +62,9 @@ class ReactionChanges(BaseModel):
 
 
 class ModelChanges(BaseModel):
-    species_changes: Union[SpeciesChanges, List[SpeciesChanges]] = Field(default=[])
-    global_parameter_changes: Union[GlobalParameterChanges, List[GlobalParameterChanges]] = Field(default=[])
-    reaction_changes: Union[ReactionChanges, List[ReactionChanges]] = Field(default=[])
+    species_changes: List[SpeciesChanges] = Field(default=[])
+    global_parameter_changes: List[GlobalParameterChanges] = Field(default=[])
+    reaction_changes: List[ReactionChanges] = Field(default=[])
 
 
 class ModelSource(BaseModel):
