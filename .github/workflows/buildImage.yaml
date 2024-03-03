@@ -1,8 +1,7 @@
 name: Validate and/or commit simulator
 
 on:
-  issues:
-    types: [labeled, edited]
+  deployment 
 
 jobs:
   validateCommit:
@@ -27,7 +26,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
       #- name: Setup pip cache
       #  uses: actions/cache@v2
@@ -40,7 +39,7 @@ jobs:
       - name: Install pip and setuptools
         run: |
           wget https://bootstrap.pypa.io/get-pip.py
-          python get-pip.py pip==20.3.4
+          python get-pip.py pip>=21.0.0
           python -m pip install --upgrade setuptools
 
       - name: Install Java # for pyNeuroML
