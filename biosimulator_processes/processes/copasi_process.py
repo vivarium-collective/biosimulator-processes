@@ -138,14 +138,18 @@ class CopasiProcess(Process):
         if species_changes:
             for species_change in species_changes:
                 if isinstance(species_change, dict):
-                    set_species(**species_change, model=self.copasi_model_object)
+                    species_name = species_change.pop('name')
+                    changes_to_apply = {}
+                    for spec_param_type, spec_param_value in species_change.items():
+                        if spec_param_value:
+                            changes_to_apply[spec_param_type] = spec_param_value
+                    set_species(**changes_to_apply, model=self.copasi_model_object)
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
 
         # ----GLOBAL PARAMS: set global parameter changes
-        existing_global_parameters = get_parameters(model=self.copasi_model_object).index
         global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
         if global_parameter_changes:
             for param_change in global_parameter_changes:
@@ -156,9 +160,12 @@ class CopasiProcess(Process):
                     # handle changes to existing params
                     set_parameters(name=param_name, **param_change, model=self.copasi_model_object)
                     # set new params
-                    if param_name not in existing_global_parameters:
-                        assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
-                        add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
+                    global_params = get_parameters(model=self.copasi_model_object)
+                    if global_params:
+                        existing_global_parameters = global_params.index
+                        if param_name not in existing_global_parameters:
+                            assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
+                            add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
 
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
         model_parameters = get_parameters(model=self.copasi_model_object)
