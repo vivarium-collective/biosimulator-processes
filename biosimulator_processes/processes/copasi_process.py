@@ -174,8 +174,12 @@ class CopasiProcess(Process):
                 for param_type, param_value in param_change.items():
                     if not param_value:
                         param_change.pop(param_type)
-                    set_parameters(**param_change, model=self.copasi_model_object)
-
+                    # handle changes to existing params
+                    set_parameters(name=param_name, **param_change, model=self.copasi_model_object)
+                    # set new params
+                    if param_name not in existing_global_parameters:
+                        assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
+                        add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
