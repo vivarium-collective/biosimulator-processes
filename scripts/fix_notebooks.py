@@ -21,4 +21,5 @@ if __name__ == '__main__':
     for f in os.listdir(root):
         fp = os.path.join(root, f)
         print(fp)
-        fix_execution_count(fp)
+        if not os.path.isdir(fp):
+            fix_execution_count(fp)
