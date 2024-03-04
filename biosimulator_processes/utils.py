@@ -1,4 +1,5 @@
 from typing import Dict
+import os
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf
 import nbformat
@@ -241,3 +242,10 @@ def fix_execution_count(notebook_path):
 
     with open(notebook_path, 'w', encoding='utf-8') as f:
         nbformat.write(nb, f)
+
+
+def fix_notebooks_execution_count():
+    for root, _, files in os.walk('../notebooks'):
+        for _file in files:
+            notebook_path = os.path.join(root, _file)
+            fix_execution_count(notebook_path)
