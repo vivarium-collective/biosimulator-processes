@@ -140,24 +140,23 @@ class CopasiProcess(Process):
         self.model_changes = self.config['model'].get('model_changes', {})
 
         # set reactions
-        reaction_names = get_reactions(model=self.copasi_model_object).index
+        existing_reaction_names = get_reactions(model=self.copasi_model_object).index
         reaction_changes: Dict = self.model_changes.get('reaction_changes', [])
-        # handle changes to existing reactions
         if reaction_changes:
             for reaction_change in reaction_changes:
                 reaction_name: str = reaction_change['reaction_name']
                 param_changes: list[dict[str, float]] = reaction_change['parameter_changes']
                 scheme_change: str = reaction_change.get('reaction_scheme')
 
+                # handle changes to existing reactions
                 if param_changes:
                     for param_name, param_change_val in param_changes:
                         set_reaction_parameters(param_name, value=param_change_val, model=self.copasi_model_object)
                 if scheme_change:
                     set_reaction(name=reaction_name, scheme=scheme_change, model=self.copasi_model_object)
-        # handle new reactions
-
-
-
+                # handle new reactions
+                if reaction_name not in existing_reaction_names and scheme_change:
+                    add_reaction(reaction_name, scheme_change, model=self.copasi_model_object)
 
         # set species changes
         species_changes = self.model_changes.get('species_changes', [])
