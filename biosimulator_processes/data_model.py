@@ -1,7 +1,7 @@
 from typing import Dict, List, Union, Tuple, Optional
 from types import NoneType
 from abc import ABC, abstractmethod
-from pydantic import BaseModel as Base, field_validator, field_serializer, Field, ConfigDict
+from pydantic import BaseModel as _BaseModel, field_validator, field_serializer, Field, ConfigDict
 
 
 __all__ = [
@@ -26,10 +26,12 @@ __all__ = [
 ]
 
 
-# TODO: You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
-class BaseModel(Base):
+class BaseModel(_BaseModel):
+    """Custom implementation of `pydantic.BaseModel` that allows for arbitrary types in the data model.
+
+        TODO: add `protected_namespaces`
+    """
     model_config = ConfigDict(arbitrary_types_allowed=True, protected_namespaces=())
-    # protected_namespaces: Tuple = Field(default=())
 
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
