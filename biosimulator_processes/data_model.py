@@ -182,9 +182,14 @@ class PortSchema(BaseModel):
             for input_value in cls.input_value_names}
 
 
-class EmittedType:
+class EmittedType(BaseModel):
     value_name: str
     _type: str  # ie: 'tree[float]'
+
+
+class EmitterConfig(BaseModel):
+    name: str
+    emit: Dict[str, str]  # ie: 'floating_species': 'tree[float]',
 
 
 class EmitterInstance:
