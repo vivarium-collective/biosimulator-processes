@@ -239,6 +239,7 @@ def fix_execution_count(notebook_path):
         if cell['cell_type'] == 'code':
             if 'execution_count' not in cell:
                 cell['execution_count'] = None
+            print('execution_count' in cell)
 
     with open(notebook_path, 'w', encoding='utf-8') as f:
         nbformat.write(nb, f)
