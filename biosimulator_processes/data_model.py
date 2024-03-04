@@ -44,7 +44,7 @@ class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg
 
 
 class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
-    parameter_name: str
+    name: str
     initial_value: Union[float, NoneType] = Field(default=None)
     initial_expression: Union[str, NoneType] = Field(default=None)
     expression: Union[str, NoneType] = Field(default=None)

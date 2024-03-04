@@ -160,12 +160,22 @@ class CopasiProcess(Process):
 
         # set species changes
         species_changes = self.model_changes.get('species_changes', [])
-        if len(species_changes):
-            for change in species_changes:
-                if isinstance(change, dict):
-                    set_species(**change, model=self.copasi_model_object)
+        if species_changes:
+            for species_change in species_changes:
+                if isinstance(species_change, dict):
+                    set_species(**species_change, model=self.copasi_model_object)
 
         # set global parameter changes
+        existing_global_parameters = get_parameters(model=self.copasi_model_object).index
+        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
+        if global_parameter_changes:
+            for param_change in global_parameter_changes:
+                param_name = param_change.pop('name')
+                for param_type, param_value in param_change.items():
+                    if not param_value:
+                        param_change.pop(param_type)
+                    set_parameters(**param_change, model=self.copasi_model_object)
+
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
