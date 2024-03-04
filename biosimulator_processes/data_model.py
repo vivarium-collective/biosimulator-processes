@@ -114,7 +114,7 @@ class Model(BaseModel):
     model_source: Union[str, ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
     model_language: str = Field(default='sbml')
     model_name: str = Field(default='Unnamed Composite Process Model')
-    model_changes: ModelChanges
+    model_changes: ModelChanges = None
     model_units: Union[Dict[str, str], None] = None
 
     @field_validator('model_source')
@@ -129,8 +129,10 @@ class Model(BaseModel):
             return ModelFilepath(value=v)
         elif 'BIO' in v:
             return BiomodelId(value=v)
-        else:
-            raise AttributeError('You must pass either a model filepath or valid biomodel id.')
+        elif isinstance(v, ModelFilepath):
+            return v
+        # else:
+        #     raise AttributeError('You must pass either a model filepath or valid biomodel id.')
 
 
 class ProcessConfigSchema(BaseModel):
@@ -138,7 +140,7 @@ class ProcessConfigSchema(BaseModel):
 
 
 class CopasiProcessConfigSchema(BaseModel):
-    process_name: Optional[Union[str, NoneType]] = None
+    process_name: str
     method: str = Field(default='deterministic')
     model: Union[Model, Dict]
 
@@ -147,21 +149,25 @@ class CopasiProcessConfigSchema(BaseModel):
         if isinstance(self.model, Model):
             self.model = self.model.model_dump()
 
-    @classmethod
-    @field_serializer('model')
-    def serialize_model(cls):
-        return cls.model.model_dump()
+    # @field_serializer('model', when_used='json')
+    # @classmethod
+    # def serialize_model(cls, model):
+    #     return model.model_dump_json()
 
     def get_config(self):
+        """TODO: make deep copy before pop"""
         config = self.model_dump()
         config.pop('process_name')
         return config
 
-    '''@classmethod
-    @field_validator('model')
-    def set_model(cls):
-        if isinstance(cls.model, Model):
-            return cls.model.model_dump()'''
+    # @field_validator('model')
+    # @classmethod
+    # def validate_model_source(cls, v):
+    #     if isinstance(cls.model, Model):
+    #         if not v.model_source.value:
+    #             raise AttributeError('You must pass a valid model source type: either a model filepath or valid biomodel id')
+    #         else:
+    #             return v
 
 
 class PortSchema(BaseModel):

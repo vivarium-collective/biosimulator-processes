@@ -258,6 +258,7 @@ class CopasiProcess(Process):
             for mol_id in self.floating_species_list
         }
 
+        print(f'THE RESULTS AT INTERVAL {interval}:\n{results}')
         return results
 
 
