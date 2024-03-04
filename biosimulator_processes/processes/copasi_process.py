@@ -18,19 +18,21 @@
 
 from typing import Dict
 from pandas import DataFrame
-from basico import (
-    load_model,
-    get_species,
-    get_parameters,
-    get_reactions,
-    set_species,
-    run_time_course,
-    get_compartments,
-    new_model,
-    add_reaction,
-    T,
-    set_report_dict
-)
+from basico import *
+# from basico import (
+#     load_model,
+#     get_species,
+#     get_parameters,
+#     get_reactions,
+#     set_species,
+#     run_time_course,
+#     get_compartments,
+#     new_model,
+#     set_reaction_parameters,
+#     add_reaction,
+#     T,
+#     set_report_dict
+# )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes.data_model import Model, SedModel, MODEL_TYPE
@@ -138,14 +140,17 @@ class CopasiProcess(Process):
         self.model_changes = self.config['model'].get('model_changes', {})
 
         # set reactions
+        reaction_names = get_reactions(model=self.copasi_model_object).index
         reaction_changes: Dict = self.model_changes.get('reaction_changes', [])
-        if len(reaction_changes):
+        if reaction_changes:
             for reaction_change in reaction_changes:
-                for reaction_name, change in reaction_change.items():
-                        if isinstance(change, dict):
-                            add_reaction(reaction_name, change['value'], model=self.copasi_model_object)
-                        elif isinstance(change, str):
-                            add_reaction(reaction_name, change, model=self.copasi_model_object)
+                reaction_name: str = reaction_change['reaction_name']
+                param_changes: list[dict[str, float]] = reaction_change['parameter_changes']
+                scheme_changes: str = reaction_change['reaction_scheme']
+                if param_changes:
+                    for param_name, param_change_val in param_changes:
+                        set_reaction_parameters(param_name, value=param_change_val)
+
 
         # set species changes
         species_changes = self.model_changes.get('species_changes', [])

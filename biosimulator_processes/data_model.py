@@ -58,8 +58,15 @@ class ReactionParameter(BaseModel):
 
 
 class ReactionChanges(BaseModel):
+    """
+        Parameters:
+            reaction_name:`str`: name of the reaction you wish to change.
+            reaction_parameters:`List[ReactionParameter]`: list of parameters you want to change from
+                `reaction_name`. Defaults to `[]`, which denotes no parameter changes.
+
+    """
     reaction_name: str
-    reaction_parameters: Union[NoneType, Dict[str, ReactionParameter]] = Field(default=None)
+    parameter_changes: List[ReactionParameter] = Field(default=[])
     reaction_scheme: Union[NoneType, str] = Field(default=None)
 
 
