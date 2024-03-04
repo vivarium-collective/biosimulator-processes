@@ -137,25 +137,24 @@ class CopasiProcess(Process):
 
         self.model_changes = self.config['model'].get('model_changes', {})
 
-        # add reactions
-        reaction_changes: Dict = self.model_changes.get('reaction_changes', None)
-        if reaction_changes is not None:
-            for reaction in reaction_changes:
-                for reaction_name, reaction_scheme in reaction.items():
-                    add_reaction(reaction_name, reaction_scheme, model=self.copasi_model_object)
+        # set reactions
+        reaction_changes: Dict = self.model_changes.get('reaction_changes', [])
+        if len(reaction_changes):
+            for reaction_change in reaction_changes:
+                for reaction_name, change in reaction_change.items():
+                        if isinstance(change, dict):
+                            add_reaction(reaction_name, change['value'], model=self.copasi_model_object)
+                        elif isinstance(change, str):
+                            add_reaction(reaction_name, change, model=self.copasi_model_object)
 
-        species_changes = self.model_changes.get('species_changes', None)
-        if species_changes is not None:
-            if isinstance(species_changes, dict):
-                print(f'THE CHANGES: {species_changes}')
-                for param_name, change in species_changes.items():
-                    pass
-                    # if not change:
-                        # species_changes.pop(param_name)
-                # set_species(**species_changes, model=self.copasi_model_object)
-            elif isinstance(species_changes, list):
-                for species_change in species_changes:
-                    set_species(**species_change, model=self.copasi_model_object)
+        # set species changes
+        species_changes = self.model_changes.get('species_changes', [])
+        if len(species_changes):
+            for change in species_changes:
+                if isinstance(change, dict):
+                    set_species(**change, model=self.copasi_model_object)
+
+        # set global parameter changes
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
