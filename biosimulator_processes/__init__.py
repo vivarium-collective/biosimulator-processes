@@ -6,7 +6,7 @@ PROCESSES_TO_REGISTER = [
     ('cobra', 'cobra_process.CobraProcess'),
     ('copasi', 'copasi_process.CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
-    #('tellurium', 'tellurium_process.TelluriumProcess'),
+    ('tellurium', 'tellurium_process.TelluriumProcess'),
 ]
 
 CORE = ProcessTypes()
