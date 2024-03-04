@@ -213,6 +213,24 @@ class ProcessInstance:
         pass
 
 
+class DependencyFile(BaseModel):
+    name: str
+    hash: str
+
+
+class InstallationDependency(BaseModel):
+    name: str
+    version: str
+    markers: str = Field(default='')  # ie: "markers": "platform_system == \"Windows\""
+    files: List[DependencyFile] = Field(default=[])
+
+
+class Simulator(BaseModel):
+    name: str  # name installed by pip
+    version: str
+    deps: List[InstallationDependency]
+
+
 # Non-Pydantic FromDict classes
 class FromDict(dict):
     def __init__(self, value: Dict):
