@@ -63,6 +63,7 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
     config_schema = {
         'process_config': TimeCourseProcessConfigSchema().model_dump(),
         'n_iterations': 'int',
+        'iter_start': 'maybe[float]',
         'perturbation_magnitude': 'float',
         'parameters': 'list[object]'}
 
@@ -71,6 +72,7 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
         self.process = CopasiProcess(config=self.config.get('process_config'))
         self.params_to_scan: List[ModelParameter] = self.config.get('parameters', [])
         self.n_iterations = self.config['n_iterations']
+        self.iter_start = self.config.get('iter_start', 0.0)
 
 
     def initial_state(self):
@@ -92,7 +94,11 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
         """
         # set up parameters
         results = {}
-        scan_range = np.linspace(0, self.n_iterations, self.config['perturbation_magnitude']).tolist()
+        scan_range = np.linspace(
+            start=self.iter_start,
+            stop=self.n_iterations,
+            num=self.config['perturbation_magnitude']).tolist()
+
         for index, perturbed in enumerate(scan_range):
             interval = input['time']
             for param in self.params_to_scan:
