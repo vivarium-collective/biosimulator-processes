@@ -35,7 +35,7 @@ from basico import *
 # )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
-from biosimulator_processes.data_model import TimeCourseModelSchema
+from biosimulator_processes.data_model import TimeCourseProcessConfigSchema
 import biosimulator_processes.processes
 
 
@@ -80,13 +80,7 @@ class CopasiProcess(Process):
         }
     """
 
-    config_schema = {
-        'model': TimeCourseModelSchema().model_dump(),
-        'method': {
-            '_type': 'string',
-            '_default': 'deterministic'
-        }
-    }
+    config_schema = TimeCourseProcessConfigSchema().model_dump()
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)

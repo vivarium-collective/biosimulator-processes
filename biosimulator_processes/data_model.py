@@ -119,10 +119,10 @@ class TimeCourseModel(BaseModel):
     """
     model_id: str = Field(default='')
     model_source: Union[str, ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
-    model_language: str = Field(default='sbml')
-    model_name: str = Field(default='Unnamed Composite Process TimeCourseModel')
-    model_changes: TimeCourseModelChanges = None
-    model_units: Union[Dict[str, str], None] = None
+    model_language: Union[str, Dict[str, str]] = Field(default='sbml')
+    model_name: Union[str, Dict[str, str]] = Field(default='Unnamed Composite Process TimeCourseModel')
+    model_changes: Union[TimeCourseModelChanges, Dict[str, str]] = None
+    model_units: Union[Dict[str, str], str] = Field(default='_default')
 
     @field_validator('model_source')
     @classmethod
@@ -251,7 +251,9 @@ class TimeCourseModelSchema(BaseModel):
     model_units: str = 'maybe[tree[string]]'
 
 
-class TimeCourseMethodSchema(BaseModel):
+
+class TimeCourseProcessConfigSchema(BaseModel):
+    model: TimeCourseModelSchema = TimeCourseModelSchema()
     method: Dict[str, str] = {
         '_type': 'string',
         '_default': 'deterministic'}
