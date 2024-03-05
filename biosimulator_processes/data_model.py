@@ -24,7 +24,9 @@ __all__ = [
     'FromDict',
     'BasicoModelChanges',
     'SedModel',
-    'BaseModel'
+    'BaseModel',
+    'TimeCourseProcessConfigSchema',
+    'ModelParameter'
 ]
 
 
@@ -40,13 +42,19 @@ class BaseModel(_BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, protected_namespaces=())
 
 
+class ModelParameter(BaseModel):
+    name: str
+    value: Union[float, int, str]
+    scope: str
+
+
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
     name: str
-    unit: Union[str, NoneType] = Field(default='')
-    initial_concentration: Optional[float] = None
-    initial_particle_number: Optional[Union[float, NoneType]] = None
-    initial_expression: Union[str, NoneType] = Field(default='')
-    expression: Union[str, NoneType] = Field(default='')
+    unit: Union[str, NoneType, ModelParameter] = Field(default='')
+    initial_concentration: Optional[float, ModelParameter] = None
+    initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = None
+    initial_expression: Union[str, NoneType, ModelParameter] = Field(default='')
+    expression: Union[str, NoneType, ModelParameter] = Field(default='')
 
 
 class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
