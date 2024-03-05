@@ -18,11 +18,13 @@ __all__ = [
     'CopasiProcessConfigSchema',
     'PortSchema',
     'EmittedType',
+    'EmitterConfig',
     'EmitterInstance',
     'ProcessInstance',
     'FromDict',
     'BasicoModelChanges',
-    'SedModel'
+    'SedModel',
+    'BaseModel'
 ]
 
 
@@ -189,7 +191,7 @@ class EmittedType(BaseModel):
 
 class EmitterConfig(BaseModel):
     name: str
-    emit: Dict[str, str]  # ie: 'floating_species': 'tree[float]',
+    emit: Union[List[EmittedType], Dict[str, str]]  # ie: {'floating_species': 'tree[float]'},
 
 
 class EmitterInstance:

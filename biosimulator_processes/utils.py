@@ -1,5 +1,7 @@
 from typing import Dict
 import os
+
+import numpy as np
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf
 import nbformat
@@ -227,8 +229,17 @@ def generate_sed_model_config_schema(
     return instance_schema
 
 
-def perturb_parameter(param: str, degree: float, config: Dict):
-    pass
+def perturb_parameter(num_iterations: int, degree: float):
+    _range = []
+    for n in range(num_iterations):
+        if n > 0:
+            n = n * degree
+        _range.append(n)
+    return _range
+
+
+def perturb_parameter_numpy(num_iterations: int, degree: float):
+    return np.linspace(start=0, stop=num_iterations, num=degree)
 
 
 def fix_execution_count(notebook_path):
