@@ -70,3 +70,7 @@ class StochasticParameterScan(ParameterScan):
         'process_config': 'tree[string]'}
 
     pass
+
+
+def test_parameter_scan():
+    pass
