@@ -367,7 +367,7 @@ class RangeIterator(Composite):
 @ports({
     'inputs': {
         'trials': 'int',
-        'model_instance': 'Model',
+        'model_instance': 'TimeCourseModel',
     },
     'outputs': {
         'results': 'list'}})

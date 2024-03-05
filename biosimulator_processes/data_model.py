@@ -9,11 +9,11 @@ __all__ = [
     'GlobalParameterChanges',
     'ReactionParameter',
     'ReactionChanges',
-    'ModelChanges',
+    'TimeCourseModelChanges',
     'ModelSource',
     'BiomodelId',
     'ModelFilepath',
-    'Model',
+    'TimeCourseModel',
     'ProcessConfigSchema',
     'CopasiProcessConfigSchema',
     'PortSchema',
@@ -72,7 +72,7 @@ class ReactionChanges(BaseModel):
     reaction_scheme: Union[NoneType, str] = Field(default=None)
 
 
-class ModelChanges(BaseModel):
+class TimeCourseModelChanges(BaseModel):
     species_changes: List[SpeciesChanges] = Field(default=[])
     global_parameter_changes: List[GlobalParameterChanges] = Field(default=[])
     reaction_changes: List[ReactionChanges] = Field(default=[])
@@ -102,7 +102,7 @@ class ModelFilepath(BaseModel):
         return v
 
 
-class Model(BaseModel):
+class TimeCourseModel(BaseModel):
     """The data model declaration for process configuration schemas that support SED.
 
         Parameters:
@@ -110,13 +110,13 @@ class Model(BaseModel):
             model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
             model_language: `str`
             model_name: `str`
-            model_changes: `biosimulator_processes.data_model.ModelChanges`
+            model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
     """
     model_id: str = Field(default='')
     model_source: Union[str, ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
     model_language: str = Field(default='sbml')
-    model_name: str = Field(default='Unnamed Composite Process Model')
-    model_changes: ModelChanges = None
+    model_name: str = Field(default='Unnamed Composite Process TimeCourseModel')
+    model_changes: TimeCourseModelChanges = None
     model_units: Union[Dict[str, str], None] = None
 
     @field_validator('model_source')
@@ -144,11 +144,11 @@ class ProcessConfigSchema(BaseModel):
 class CopasiProcessConfigSchema(BaseModel):
     process_name: str
     method: str = Field(default='deterministic')
-    model: Union[Model, Dict]
+    model: Union[TimeCourseModel, Dict]
 
     def __init__(self, **data):
         super().__init__(**data)
-        if isinstance(self.model, Model):
+        if isinstance(self.model, TimeCourseModel):
             self.model = self.model.model_dump()
 
     # @field_serializer('model', when_used='json')
@@ -165,7 +165,7 @@ class CopasiProcessConfigSchema(BaseModel):
     # @field_validator('model')
     # @classmethod
     # def validate_model_source(cls, v):
-    #     if isinstance(cls.model, Model):
+    #     if isinstance(cls.model, TimeCourseModel):
     #         if not v.model_source.value:
     #             raise AttributeError('You must pass a valid model source type: either a model filepath or valid biomodel id')
     #         else:
@@ -305,7 +305,7 @@ class SedModel(FromDict):
             #     }
             # }
     """
-    # The first 3 params are NOT optional below for a Model in SEDML. model_source has been adapted to mean point of residence
+    # The first 3 params are NOT optional below for a TimeCourseModel in SEDML. model_source has been adapted to mean point of residence
     MODEL_TYPE = {
         'model_id': 'string',
         'model_source': 'dict[string]',  # 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?

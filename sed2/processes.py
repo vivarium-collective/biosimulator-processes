@@ -18,7 +18,7 @@ def load_model(filename):
     return document.getModel()
 
 
-class Model:
+class TimeCourseModel:
     def __init__(
             self,
             sbml_file: str
@@ -50,15 +50,15 @@ class Model:
 @ports({'inputs': {
         'path_to_sbml': 'str'},
     'outputs': {
-        'model': 'Model'}})
+        'model': 'TimeCourseModel'}})
 @annotate('sed:sbml_model_from_path')
 def sbml_model_from_path(path_to_sbml):
-    return Model(path_to_sbml)
+    return TimeCourseModel(path_to_sbml)
 
 
 
 @register('model_reset', sed_process_registry)
-@ports({'inputs': {'model_instance': 'Model'}})
+@ports({'inputs': {'model_instance': 'TimeCourseModel'}})
 @annotate('sed:model_reset')
 def model_reset(model_instance):
     model_instance.reset()
@@ -67,18 +67,18 @@ def model_reset(model_instance):
 @register('set_model', sed_process_registry)
 @ports({
     'inputs': {
-        'model_instance': 'Model',
+        'model_instance': 'TimeCourseModel',
         'element_id': 'str',
         'value': 'float'}})
 @annotate('sed:set_model')
-def model_set_value(model_instance: Model, element_id, value):
+def model_set_value(model_instance: TimeCourseModel, element_id, value):
     model_instance.set(element_id, value)
 
 
 @register('model_get', sed_process_registry)
 @ports({
     'inputs': {
-        'model_instance': 'Model',
+        'model_instance': 'TimeCourseModel',
         'element_id': 'str'},
     'outputs': {
         'value': 'float'}})
@@ -90,7 +90,7 @@ def model_get_value(model_instance, element_id):
 @register('uniform_time_course', sed_process_registry)
 @ports({
     'inputs': {
-        'model': 'Model',
+        'model': 'TimeCourseModel',
         'time_start': 'float',
         'time_end': 'float',
         'num_points': 'int',
@@ -152,7 +152,7 @@ class curve:
 @register('steady_state', sed_process_registry)
 @ports({
     'inputs': {
-        'model': 'Model',
+        'model': 'TimeCourseModel',
         'selection_list': 'list'},
     'outputs': {
         'results': 'dict'}})
@@ -171,7 +171,7 @@ def steady_state_values(model, selection_list):
 @register('is_steady_state', sed_process_registry)
 @ports({
     'inputs': {
-        'model': 'Model',
+        'model': 'TimeCourseModel',
         'tolerance': 'float'},
     'outputs': {
         'sum': 'float'}})
@@ -185,7 +185,7 @@ def is_steady_state(model, tolerance):
 @register('get_cc', sed_process_registry)
 @ports({
     'inputs': {
-        'model': 'Model',
+        'model': 'TimeCourseModel',
         'variable': 'string',
         'parameter': 'string'},
     'outputs': {
@@ -222,7 +222,7 @@ def report(results, title):
 @ports({
     'inputs': {
         'input_dict': 'dict',
-        'model': 'Model',
+        'model': 'TimeCourseModel',
         'data_description': 'pd.DataFrame',
         'time_start': 'float',
         'time_end': 'float',
@@ -254,7 +254,7 @@ def n_dimensional_scan(
 
 @register('repeated_simulation', sed_process_registry)
 @ports({
-    'inputs': {'model_instance': 'Model', 'config': 'dict'},
+    'inputs': {'model_instance': 'TimeCourseModel', 'config': 'dict'},
     'outputs': {'results': 'list'}})
 @annotate('sed:repeated_simulation')
 def repeated_simulation(model_instance, config):

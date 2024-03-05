@@ -35,7 +35,7 @@ from basico import *
 # )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
-from biosimulator_processes.data_model import Model, SedModel, MODEL_TYPE
+from biosimulator_processes.data_model import TimeCourseModel, SedModel, MODEL_TYPE
 import biosimulator_processes.processes
 
 
@@ -45,7 +45,7 @@ class CopasiProcess(Process):
 
             A. SBML model file: 
             B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
-            C. Model search term (load preconfigured model from BioModels)
+            C. TimeCourseModel search term (load preconfigured model from BioModels)
 
         Optional Parameters:
 
@@ -106,7 +106,7 @@ class CopasiProcess(Process):
                 raise AttributeError("You must pass a source of model changes specifying params, reactions, species or all three if starting from an empty model.")
             model_units = self.config['model'].get('model_units', {})
             self.copasi_model_object = new_model(
-                name='CopasiProcess Model',
+                name='CopasiProcess TimeCourseModel',
                 **model_units)
 
         # ----REACTIONS: set reactions
