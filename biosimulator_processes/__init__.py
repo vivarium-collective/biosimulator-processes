@@ -7,6 +7,7 @@ PROCESSES_TO_REGISTER = [
     ('copasi', 'copasi_process.CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
+    ('parameter_scan', 'parameter_scan.DeterministicTimeCourseParameterScan')
 ]
 
 CORE = ProcessTypes()
@@ -14,14 +15,19 @@ CORE = ProcessTypes()
 for process_name, process_path in PROCESSES_TO_REGISTER:
     module_name, class_name = process_path.rsplit('.', 1)
     try:
-        # Dynamically import the module
-        process_module = __import__(
-            f'biosimulator_processes.processes.{module_name}', fromlist=[class_name])
+        if 'parameter_scan' in process_name:
+            import_statement = f'biosimulator_processes.steps.{module_name}'
+        else:
+            import_statement = f'biosimulator_processes.processes.{module_name}'
+
+        module = __import__(
+            import_statement, fromlist=[class_name])
+
         # Get the class from the module
-        process_class = getattr(process_module, class_name)
+        bigraph_class = getattr(module, class_name)
 
         # Register the process
-        CORE.process_registry.register(class_name, process_class)
+        CORE.process_registry.register(class_name, bigraph_class)
         print(f"{class_name} registered successfully.")
     except ImportError as e:
         print(f"{class_name} not available. Error: {e}")

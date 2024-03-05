@@ -18,23 +18,24 @@
 
 from typing import Dict
 from pandas import DataFrame
-from basico import (
-    load_model,
-    get_species,
-    get_parameters,
-    get_reactions,
-    set_species,
-    run_time_course,
-    get_compartments,
-    new_model,
-    add_reaction,
-    T,
-    set_report_dict
-)
+from basico import *
+# from basico import (
+#     load_model,
+#     get_species,
+#     get_parameters,
+#     get_reactions,
+#     set_species,
+#     run_time_course,
+#     get_compartments,
+#     new_model,
+#     set_reaction_parameters,
+#     add_reaction,
+#     T,
+#     set_report_dict
+# )
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
-from biosimulator_processes.process_types import MODEL_TYPE
-import biosimulator_processes.processes
+from biosimulator_processes.data_model import TimeCourseProcessConfigSchema
 
 
 class CopasiProcess(Process):
@@ -43,47 +44,16 @@ class CopasiProcess(Process):
 
             A. SBML model file: 
             B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
-            C. Model search term (load preconfigured model from BioModels)
+            C. TimeCourseModel search term (load preconfigured model from BioModels)
 
         Optional Parameters:
 
-            A. 'model_changes', for example could be something like:
-            
-                    'model_changes': {
-                        'species_changes': {   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-                            'species_name': {
-                                new_unit_for_species_name,
-                                new_initial_concentration_for_species_name,
-                                new_initial_particle_number_for_species_name,
-                                new_initial_expression_for_species_name,
-                                new_expression_for_species_name
-                            }
-                        },
-                        'global_parameter_changes': {   # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
-                            global_parameter_name: {
-                                new_initial_value_for_global_parameter_name: 'any',
-                                new_initial_expression_for_global_parameter_name: 'string',
-                                new_expression_for_global_parameter_name: 'string',
-                                new_status_for_global_parameter_name: 'string',
-                                new_type_for_global_parameter_name: 'string'  # (fixed, assignment, reactions)
-                            }
-                        },
-                        'reaction_changes': {
-                            'reaction_name': {
-                                'reaction_parameters': {
-                                    reaction_parameter_name: 'float'  # (new reaction_parameter_name value)  <-- this is done with set_reaction_parameters(name="(REACTION_NAME).REACTION_NAME_PARAM", value=VALUE)
-                                }, 
-                                'reaction_scheme': 'string'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
-                            }
-                        }
-
-                        
+            A. 'model_changes', changes to be made to the model, even if starting from empty model.
             B. 'method', changes the algorithm(s) used to solve the model
-                COPASI support many different simulations methods:
-                deterministic: using the COPASI LSODA implementation
-                stochastic: using the Gibson Bruck algorithm
-                directMethod: using the Gillespie direct method
-
+                    COPASI support many different simulations methods:
+                        - deterministic: using the COPASI LSODA implementation
+                        - stochastic: using the Gibson Bruck algorithm
+                        - directMethod: using the Gillespie direct method
             C. 'units', (tree): quantity, volume, time, area, length
 
         Justification:
@@ -109,44 +79,86 @@ class CopasiProcess(Process):
         }
     """
 
-    config_schema = {
-        'model': MODEL_TYPE,
-        'method': {
-            '_type': 'string',
-            '_default': 'deterministic'
-        }
-    }
+    config_schema = TimeCourseProcessConfigSchema().model_dump()
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        model_file = self.config.get('model').get('model_source')
-        sed_model_id = self.config.get('model').get('model_id')
-        biomodel_id = self.config.get('biomodel_id')
-        source_model_id = biomodel_id or sed_model_id
-        assert not (model_file and biomodel_id), 'You cannot pass both a model_file and biomodel_id'
+        model_source = self.config['model']['model_source']['value']
+        self.model_changes = self.config['model'].get('model_changes', {})
 
         # A. enter with model_file
-        if model_file:
-            self.copasi_model_object = load_model(model_file)
+        if '/' in model_source:
+            self.copasi_model_object = load_model(model_source)
         # B. enter with specific search term for a model
-        elif source_model_id:
-            self.copasi_model_object = fetch_biomodel(model_id=source_model_id)
+        elif 'BIO' in model_source:
+            self.copasi_model_object = fetch_biomodel(model_id=model_source)
         # C. enter with a new model
         else:
-            self.copasi_model_object = new_model(name='CopasiProcess Model', **self.config.get('units'))
+            if not self.model_changes:
+                raise AttributeError("You must pass a source of model changes specifying params, reactions, species or all three if starting from an empty model.")
+            model_units = self.config['model'].get('model_units', {})
+            self.copasi_model_object = new_model(
+                name='CopasiProcess TimeCourseModel',
+                **model_units)
 
-        self.model_changes: Dict = self.config['model'].get('model_changes', {})
+        # ----REACTIONS: set reactions
+        existing_reaction_names = get_reactions(model=self.copasi_model_object).index
+        reaction_changes = self.model_changes.get('reaction_changes', [])
+        if reaction_changes:
+            for reaction_change in reaction_changes:
+                reaction_name: str = reaction_change['reaction_name']
+                param_changes: list[dict[str, float]] = reaction_change['parameter_changes']
+                scheme_change: str = reaction_change.get('reaction_scheme')
 
-        # add reactions
-        reaction_changes: Dict = self.model_changes.get('reaction_changes', None)
-        if reaction_changes is not None:
-            for reaction_name, reaction_scheme in reaction_changes.items():
-                add_reaction(reaction_name, reaction_scheme, model=self.copasi_model_object)
+                # handle changes to existing reactions
+                if param_changes:
+                    for param_name, param_change_val in param_changes:
+                        set_reaction_parameters(param_name, value=param_change_val, model=self.copasi_model_object)
+                if scheme_change:
+                    set_reaction(name=reaction_name, scheme=scheme_change, model=self.copasi_model_object)
+                # handle new reactions
+                if reaction_name not in existing_reaction_names and scheme_change:
+                    add_reaction(reaction_name, scheme_change, model=self.copasi_model_object)
+
+        # Get a list of reactions
+        self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        if not self.reaction_list:
+            raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
+
+        # ----SPECS: set species changes
+        species_changes = self.model_changes.get('species_changes', [])
+        if species_changes:
+            for species_change in species_changes:
+                if isinstance(species_change, dict):
+                    species_name = species_change.pop('name')
+                    changes_to_apply = {}
+                    for spec_param_type, spec_param_value in species_change.items():
+                        if spec_param_value:
+                            changes_to_apply[spec_param_type] = spec_param_value
+                    set_species(**changes_to_apply, model=self.copasi_model_object)
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
+
+        # ----GLOBAL PARAMS: set global parameter changes
+        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
+        if global_parameter_changes:
+            for param_change in global_parameter_changes:
+                param_name = param_change.pop('name')
+                for param_type, param_value in param_change.items():
+                    if not param_value:
+                        param_change.pop(param_type)
+                    # handle changes to existing params
+                    set_parameters(name=param_name, **param_change, model=self.copasi_model_object)
+                    # set new params
+                    global_params = get_parameters(model=self.copasi_model_object)
+                    if global_params:
+                        existing_global_parameters = global_params.index
+                        if param_name not in existing_global_parameters:
+                            assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
+                            add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
 
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
         model_parameters = get_parameters(model=self.copasi_model_object)
@@ -157,16 +169,11 @@ class CopasiProcess(Process):
             self.model_parameters_list = []
             self.model_parameter_values = []
 
-        # Get a list of reactions
-        self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
-        if not self.reaction_list:
-            raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
-
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
 
-        self.method = self.config.get('method')
-        # set_report_dict('Time-Course', task=T.TIME_COURSE, model=self.copasi_model_object, body=['Time'])
+        # ----SOLVER: Get the solver (defaults to deterministic)
+        self.method = self.config['method']
 
     def initial_state(self):
         floating_species_dict = dict(
@@ -244,6 +251,7 @@ class CopasiProcess(Process):
             for mol_id in self.floating_species_list
         }
 
+        print(f'THE RESULTS AT INTERVAL {interval}:\n{results}')
         return results
 
 

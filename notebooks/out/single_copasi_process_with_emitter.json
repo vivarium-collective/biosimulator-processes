@@ -1,0 +1,105 @@
+{
+  "single_copasi_process": {
+    "_type": "process",
+    "address": "local:CopasiProcess",
+    "config": {
+      "model": {
+        "model_id": "BIOMD0000000061",
+        "model_source": {
+          "value": "../biosimulator_processes/model_files/BIOMD0000000061_url.xml"
+        },
+        "model_language": "sbml",
+        "model_name": "Unnamed Composite Process TimeCourseModel",
+        "model_changes": {
+          "species_changes": null,
+          "global_parameter_changes": null,
+          "reaction_changes": null
+        },
+        "model_units": null
+      },
+      "method": "stochastic"
+    },
+    "inputs": {
+      "time": ["time_store"],
+      "floating_species": ["floating_species_store"],
+      "model_parameters": ["model_parameters_store"],
+      "reactions": ["reactions_store"]
+    },
+    "outputs": {
+      "time": ["time_store"],
+      "floating_species": ["floating_species_store"]
+    },
+    "interval": 1.0
+  },
+  "global_time": "0.0",
+  "time_store": "0.0",
+  "floating_species_store": {
+    "Extracellular glucose": "0.0",
+    "Cytosolic glucose": "0.0",
+    "ATP": "0.0",
+    "Glucose-6-Phosphate": "0.0",
+    "ADP": "0.0",
+    "Fructose-6-Phosphate": "0.0",
+    "Fructose 1,6-bisphosphate": "0.0",
+    "Glyceraldehyde 3-phosphate": "0.0",
+    "Dihydroxyacetone phosphate": "0.0",
+    "NAD": "0.0",
+    "1,3-Bisphosphoglycerate": "0.0",
+    "NADH": "0.0",
+    "Phosphoenolpyruvate": "0.0",
+    "Pyruvate": "0.0",
+    "Acetaldehyde": "0.0",
+    "EtOH": "0.0",
+    "Extracellular ethanol": "0.0",
+    "Glycerol": "0.0",
+    "Extracellular glycerol": "0.0",
+    "Extracellular acetaldehyde": "0.0",
+    "Extracellular cyanide": "0.0",
+    "AMP": "0.0",
+    "P": "0.0",
+    "Mixed flow cyanide": "0.0",
+    "Mixed flow glucose": "0.0"
+  },
+  "model_parameters_store": {},
+  "reactions_store": {
+    "Glucose Mixed flow to extracellular medium": "0.0",
+    "Glucose uptake": "0.0",
+    "Hexokinase": "0.0",
+    "Phosphoglucoisomerase": "0.0",
+    "Phosphofructokinase": "0.0",
+    "Aldolase": "0.0",
+    "Triosephosphate isomerase": "0.0",
+    "Glyceraldehyde 3-phosphate dehydrogenase": "0.0",
+    "Phosphoenolpyruvate synthesis": "0.0",
+    "Pyruvate kinase": "0.0",
+    "Pyruvate decarboxylase": "0.0",
+    "Alcohol dehydrogenase": "0.0",
+    "Ethanol out": "0.0",
+    "Ethanol flow": "0.0",
+    "Glycerol synthesis": "0.0",
+    "Glycerol out": "0.0",
+    "Glycerol flow": "0.0",
+    "Acetaldehyde out": "0.0",
+    "Acetaldehyde flow": "0.0",
+    "Cyanide-Acetaldehyde flow": "0.0",
+    "Cyanide flow": "0.0",
+    "Storage": "0.0",
+    "ATP consumption": "0.0",
+    "Adenylate kinase": "0.0"
+  },
+  "emitter": {
+    "_type": "step",
+    "address": "local:ram-emitter",
+    "config": {
+      "emit": {
+        "floating_species": "tree[float]",
+        "time": "float"
+      }
+    },
+    "inputs": {
+      "floating_species": ["floating_species_store"],
+      "time": ["time_store"]
+    },
+    "outputs": {}
+  }
+}

@@ -15,7 +15,7 @@ docker buildx inspect --bootstrap
 
 set -e
 
-docker buildx build --platform linux/amd64 \
+docker build --platform linux/amd64 \
     -t ghcr.io/biosimulators/biosimulator-processes:"${version}" .
 
 if [ "${run}" == "-r" ]; then

@@ -44,6 +44,7 @@ setup(
     install_requires=[
         "bigraph-schema",
         "process-bigraph",
+        "bigraph-builder",
         "numpy",
         "pytest>=6.2.5",
         "tellurium",

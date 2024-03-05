@@ -56,7 +56,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ./trust-notebooks.sh \
     && rm ./trust-notebooks.sh
 
-CMD ["poetry", "run", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+CMD ["poetry", "run", "jupyter", "lab", "--port=8888", "--no-browser", "--allow-root"]
 
 
 # PLEASE NOTE: We do not need to add a USER in the Dockerfile as Singularity will handle

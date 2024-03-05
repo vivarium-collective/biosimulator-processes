@@ -1,6 +1,10 @@
 from typing import Dict
+import os
+
+import numpy as np
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf
+import nbformat
 from pydantic import BaseModel
 
 
@@ -225,5 +229,35 @@ def generate_sed_model_config_schema(
     return instance_schema
 
 
-def perturb_parameter(param: str, degree: float, config: Dict):
-    pass
+def perturb_parameter(num_iterations: int, degree: float):
+    _range = []
+    for n in range(num_iterations):
+        if n > 0:
+            n = n * degree
+        _range.append(n)
+    return _range
+
+
+def perturb_parameter_numpy(num_iterations: int, degree: float):
+    return np.linspace(start=0, stop=num_iterations, num=degree)
+
+
+def fix_execution_count(notebook_path):
+    with open(notebook_path, 'r', encoding='utf-8') as f:
+        nb = nbformat.read(f, as_version=4)
+
+    for cell in nb['cells']:
+        if cell['cell_type'] == 'code':
+            if 'execution_count' not in cell:
+                cell['execution_count'] = None
+            print('execution_count' in cell)
+
+    with open(notebook_path, 'w', encoding='utf-8') as f:
+        nbformat.write(nb, f)
+
+
+def fix_notebooks_execution_count():
+    for root, _, files in os.walk('../notebooks'):
+        for _file in files:
+            notebook_path = os.path.join(root, _file)
+            fix_execution_count(notebook_path)
