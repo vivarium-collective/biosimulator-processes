@@ -28,6 +28,10 @@ __all__ = [
 ]
 
 
+# TODO: Parse this into sep. library datamodels
+
+
+# --- MODEL ATTRIBUTES
 class BaseModel(_BaseModel):
     """Custom implementation of `pydantic.BaseModel` that allows for arbitrary types in the data model.
 
@@ -63,7 +67,7 @@ class ReactionChanges(BaseModel):
     """
         Parameters:
             reaction_name:`str`: name of the reaction you wish to change.
-            reaction_parameters:`List[ReactionParameter]`: list of parameters you want to change from
+            parameter_changes:`List[ReactionParameter]`: list of parameters you want to change from
                 `reaction_name`. Defaults to `[]`, which denotes no parameter changes.
 
     """
@@ -102,6 +106,7 @@ class ModelFilepath(BaseModel):
         return v
 
 
+# --- TIME COURSE MODEL
 class TimeCourseModel(BaseModel):
     """The data model declaration for process configuration schemas that support SED.
 
@@ -137,6 +142,49 @@ class TimeCourseModel(BaseModel):
         #     raise AttributeError('You must pass either a model filepath or valid biomodel id.')
 
 
+# --- PORTS
+class PortSchema(BaseModel):
+    input_value_names: List[str]  # user input
+    _schema: Dict[str, List[str]]
+
+    @classmethod
+    @field_validator('_schema')
+    def set_value(cls):
+        return {
+            input_value: [f'{input_value}_store']
+            for input_value in cls.input_value_names}
+
+
+# --- EMITTERS
+class EmittedType(BaseModel):
+    value_name: str
+    _type: str  # ie: 'tree[float]'
+
+
+class EmitterConfig(BaseModel):
+    name: str
+    emit: Union[List[EmittedType], Dict[str, str]]  # ie: {'floating_species': 'tree[float]'},
+
+
+class EmitterInstance:
+    _type: str = Field(default='step')
+    address: str = Field(default='local:ram-emitter')
+    emit_types: List[EmittedType]
+    config: Dict[str, Dict[str, str]]
+    inputs: PortSchema  # these names might be the same as self.config
+
+    @classmethod
+    @field_validator('config')
+    def set_value(cls):
+        config = {
+            'emit': {
+                emit_type.value_name: emit_type._type
+                for emit_type in cls.emit_types
+            }
+        }
+
+
+# --- PROCESSES
 class ProcessConfigSchema(BaseModel):
     config: Dict = Field(default={})
 
@@ -172,47 +220,7 @@ class CopasiProcessConfigSchema(BaseModel):
     #             return v
 
 
-class PortSchema(BaseModel):
-    input_value_names: List[str]  # user input
-    _schema: Dict[str, List[str]]
-
-    @classmethod
-    @field_validator('_schema')
-    def set_value(cls):
-        return {
-            input_value: [f'{input_value}_store']
-            for input_value in cls.input_value_names}
-
-
-class EmittedType(BaseModel):
-    value_name: str
-    _type: str  # ie: 'tree[float]'
-
-
-class EmitterConfig(BaseModel):
-    name: str
-    emit: Union[List[EmittedType], Dict[str, str]]  # ie: {'floating_species': 'tree[float]'},
-
-
-class EmitterInstance:
-    _type: str = Field(default='step')
-    address: str = Field(default='local:ram-emitter')
-    emit_types: List[EmittedType]
-    config: Dict[str, Dict[str, str]]
-    inputs: PortSchema  # these names might be the same as self.config
-
-    @classmethod
-    @field_validator('config')
-    def set_value(cls):
-        config = {
-            'emit': {
-                emit_type.value_name: emit_type._type
-                for emit_type in cls.emit_types
-            }
-        }
-
-
-class ProcessInstance:
+class ProcessInstance(BaseModel):
     _type: str
     address: str
     config: Union[CopasiProcessConfigSchema, ProcessConfigSchema]
@@ -226,6 +234,30 @@ class ProcessInstance:
         pass
 
 
+# --- PROCESS CONFIG SCHEMAS
+class TimeCourseModelSchema(BaseModel):
+    model_id: str = 'string'
+    model_source: str = 'tree[string]'
+    model_language: Dict[str, str] = {
+        '_type': 'string',
+        '_default': 'sbml'}
+    model_name: Dict[str, str] = {
+        '_type': 'string',
+        '_default': 'composite_process_model'}
+    model_changes: Dict[str, str] = {
+        'species_changes': 'maybe[tree[string]]',
+        'global_parameter_changes': 'maybe[tree[string]]',
+        'reaction_changes': 'maybe[tree[string]]'}
+    model_units: str = 'maybe[tree[string]]'
+
+
+class TimeCourseMethodSchema(BaseModel):
+    method: Dict[str, str] = {
+        '_type': 'string',
+        '_default': 'deterministic'}
+
+
+# --- INSTALLATION
 class DependencyFile(BaseModel):
     name: str
     hash: str
@@ -244,7 +276,7 @@ class Simulator(BaseModel):
     deps: List[InstallationDependency]
 
 
-# Non-Pydantic FromDict classes
+# --- Non-Pydantic FromDict classes
 class FromDict(dict):
     def __init__(self, value: Dict):
         super().__init__(value)
