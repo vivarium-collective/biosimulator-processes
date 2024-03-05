@@ -63,6 +63,7 @@ class DeterministicTimeCourseParameterScan(Step):
     config_schema = {
         'process_config': TimeCourseProcessConfigSchema().model_dump(),
         'n_iterations': 'int',
+        'iter_stop': 'float',
         'iter_start': 'maybe[float]',
         'perturbation_magnitude': 'float',
         'parameters': 'list[object]'}
@@ -72,6 +73,7 @@ class DeterministicTimeCourseParameterScan(Step):
         self.params_to_scan: List[ModelParameter] = self.config.get('parameters', [])
         self.n_iterations = self.config['n_iterations']
         self.iter_start = self.config.get('iter_start', 0.0)
+        self.iter_stop = self.config['iter_stop']
 
 
     def initial_state(self):
@@ -95,8 +97,8 @@ class DeterministicTimeCourseParameterScan(Step):
         results = {}
         scan_range = np.linspace(
             start=self.iter_start,
-            stop=self.n_iterations,
-            num=self.config['perturbation_magnitude']).tolist()
+            stop=self.iter_stop,
+            num=self.n_iterations).tolist()
 
         for index, perturbed in enumerate(scan_range):
             interval = input['time']
