@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 import numpy as np
 from process_bigraph import Step
-from biosimulator_processes.data_model import *
+from biosimulator_processes.data_model import TimeCourseProcessConfigSchema, ModelParameter
 from biosimulator_processes.processes.copasi_process import CopasiProcess
 
 
@@ -92,20 +92,25 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
         """
         # set up parameters
         results = {}
-        scan_range = np.linspace(0, self.n_iterations, self.config['perturbation_magnitude'])
-        for perturbed in scan_range:
+        scan_range = np.linspace(0, self.n_iterations, self.config['perturbation_magnitude']).tolist()
+        for index, perturbed in enumerate(scan_range):
             interval = input['time']
             for param in self.params_to_scan:
                 if 'global' in param.scope:
-                    pass
+                    input_key = 'model_parameters'
                 elif 'species' in param.scope:
-                    for species_id, species_value in input['floating_species']:
-                        if param.name in species_id:
-                            input['floating_species'][species_id] = perturbed
+                    input_key = 'floating_species'
+                else:
+                    raise ValueError('Only global or species -level parameter scanning is currently supported.')
+
+                for input_id, input_value in input[input_key]:
+                    if param.name in input_id:
+                        input[input_key][input_id] = perturbed
+
                 r = self.process.update(
                     inputs=input,
                     interval=interval)
-                results[str(n)] = r
+                results[str(index)] = r
         return results
 
 
