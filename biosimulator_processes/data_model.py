@@ -51,7 +51,7 @@ class ModelParameter(BaseModel):
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
     name: str
     unit: Union[str, NoneType, ModelParameter] = Field(default='')
-    initial_concentration: Optional[float, ModelParameter] = None
+    initial_concentration: Optional[Union[float, ModelParameter]] = None
     initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = None
     initial_expression: Union[str, NoneType, ModelParameter] = Field(default='')
     expression: Union[str, NoneType, ModelParameter] = Field(default='')

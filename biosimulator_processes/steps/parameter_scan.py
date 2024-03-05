@@ -93,7 +93,7 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
         # set up parameters
         results = {}
         scan_range = np.linspace(0, self.n_iterations, self.config['perturbation_magnitude'])
-        for n in scan_range:
+        for perturbed in scan_range:
             interval = input['time']
             for param in self.params_to_scan:
                 if 'global' in param.scope:
@@ -101,13 +101,12 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
                 elif 'species' in param.scope:
                     for species_id, species_value in input['floating_species']:
                         if param.name in species_id:
-                            input['floating_species'][species_id] = n
+                            input['floating_species'][species_id] = perturbed
                 r = self.process.update(
                     inputs=input,
                     interval=interval)
                 results[str(n)] = r
         return results
-
 
 
 class StochasticParameterScan(ParameterScan):
