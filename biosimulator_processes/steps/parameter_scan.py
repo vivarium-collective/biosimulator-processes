@@ -61,7 +61,9 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
             used to run during update
     """
     config_schema = {
-        'process_config': TimeCourseProcessConfigSchema().model_dump(),
+        'process_config': {
+            '_default': TimeCourseProcessConfigSchema().model_dump(),
+            '_type': 'tree[string]'},
         'n_iterations': 'int',
         'iter_start': 'maybe[float]',
         'perturbation_magnitude': 'float',
