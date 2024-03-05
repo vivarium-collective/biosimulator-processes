@@ -36,7 +36,6 @@ from basico import *
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes.data_model import TimeCourseProcessConfigSchema
-import biosimulator_processes.processes
 
 
 class CopasiProcess(Process):
