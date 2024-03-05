@@ -44,6 +44,7 @@ class BaseModel(_BaseModel):
 
 class ModelParameter(BaseModel):
     name: str
+    feature: str
     value: Union[float, int, str]
     scope: str
 

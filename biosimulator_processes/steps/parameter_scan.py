@@ -52,7 +52,7 @@ class ParameterScan(Step):
         pass
 
 
-class DeterministicTimeCourseParameterScan(ParameterScan):
+class DeterministicTimeCourseParameterScan(Step):
     """Using CopasiProcess as the primary TimeCourse simulator.
 
         # TODO: enable multiple Simulator types.
@@ -61,16 +61,13 @@ class DeterministicTimeCourseParameterScan(ParameterScan):
             used to run during update
     """
     config_schema = {
-        'process_config': {
-            '_default': TimeCourseProcessConfigSchema().model_dump(),
-            '_type': 'tree[string]'},
+        'process_config': TimeCourseProcessConfigSchema().model_dump(),
         'n_iterations': 'int',
         'iter_start': 'maybe[float]',
         'perturbation_magnitude': 'float',
         'parameters': 'list[object]'}
 
-    def __init__(self, config=None):
-        super().__init__(config=config)
+    def __init__(self):
         self.process = CopasiProcess(config=self.config.get('process_config'))
         self.params_to_scan: List[ModelParameter] = self.config.get('parameters', [])
         self.n_iterations = self.config['n_iterations']

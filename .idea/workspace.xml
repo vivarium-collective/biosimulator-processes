@@ -5,6 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0b09f0c-19d0-4b22-b7e9-7eb0e3893827" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/biosimulator_processes/data_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/biosimulator_processes/data_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/biosimulator_processes/steps/parameter_scan.py" beforeDir="false" afterPath="$PROJECT_DIR$/biosimulator_processes/steps/parameter_scan.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notebooks/parameter_scan.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/parameter_scan.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -154,7 +157,7 @@
       <workItem from="1709560845160" duration="13216000" />
       <workItem from="1709575179051" duration="10177000" />
       <workItem from="1709645971220" duration="5986000" />
-      <workItem from="1709654330514" duration="12212000" />
+      <workItem from="1709654330514" duration="13905000" />
     </task>
     <servers />
   </component>
