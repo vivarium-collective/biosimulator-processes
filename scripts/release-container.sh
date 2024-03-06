@@ -3,8 +3,8 @@
 
 version="$1"
 
-# PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.2
-current="0.0.1"
+# PLEASE UPDATE THE LATEST VERSION HERE BEFORE RUNNING. CURRENT: 0.0.3
+current="0.0.2"
 
 if [ "${version}" == "" ]; then
   echo "You must pass the container version you wish to release as an argument to this script. Exiting."

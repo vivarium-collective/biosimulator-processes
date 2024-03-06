@@ -15,7 +15,7 @@ __all__ = [
     'ModelFilepath',
     'TimeCourseModel',
     'ProcessConfigSchema',
-    'CopasiProcessConfigSchema',
+    'CopasiProcessConfig',
     'PortSchema',
     'EmittedType',
     'EmitterConfig',
@@ -230,7 +230,7 @@ class CopasiProcessConfig(ProcessConfig):
 class ProcessInstance(BaseModel):
     _type: str
     address: str
-    config: Union[CopasiProcessConfigSchema, ProcessConfigSchema]
+    config: Union[CopasiProcessConfig, ProcessConfigSchema]
     inputs: PortSchema
     outputs: PortSchema
 
