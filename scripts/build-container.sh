@@ -17,6 +17,7 @@ docker buildx inspect --bootstrap
 set -e
 
 docker build \
+  --no-cache \
   --platform linux/amd64 \
   -t ghcr.io/vivarium-collective/biosimulator-processes:"${version}" .
 
