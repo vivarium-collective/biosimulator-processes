@@ -16,7 +16,7 @@
 """
 
 
-from typing import Dict
+from typing import Dict, Union
 from pandas import DataFrame
 from basico import *
 # from basico import (
@@ -81,12 +81,17 @@ class CopasiProcess(Process):
 
     config_schema = TimeCourseProcessConfigSchema().model_dump()
 
-    def __init__(self, config: ProcessConfig=None, core=None):
+    def __init__(self,
+                 config: Union[CopasiProcessConfig, Dict] = None,
+                 core=None):
         super().__init__(config, core)
 
-
-        model_source = self.config['model']['model_source']['value']
-        self.model_changes = self.config['model'].get('model_changes', {})
+        if isinstance(self.config, dict):
+            model_source = self.config['model']['model_source']['value']
+            self.model_changes = self.config['model'].get('model_changes', {})
+        elif isinstance(self.config, CopasiProcessConfig):
+            model_source = self.config.model.model_source.value
+            self.model_changes = self.config.model.model_changes or {}
 
         # A. enter with model_file
         if '/' in model_source:

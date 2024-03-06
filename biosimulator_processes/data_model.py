@@ -27,7 +27,9 @@ __all__ = [
     'BaseModel',
     'TimeCourseProcessConfigSchema',
     'ModelParameter',
-    'ProcessConfig'
+    'ProcessConfig',
+    'Port',
+    'State'
 ]
 
 
@@ -195,6 +197,22 @@ class EmitterInstance:
 
 
 # --- TYPE REGISTRY
+class ProcessConfig(BaseModel):
+    value: Dict
+
+
+class Port(BaseModel):
+    value: Dict
+
+
+class State(BaseModel):
+    # THINK: builder_api LN.120: add_process. TODO: This should be parsable by the builder in add process.
+    _type: str
+    address: str
+    config: ProcessConfig
+    inputs: Port
+    outputs: Port
+
 
 # --- PROCESSES
 class ProcessConfigSchema(BaseModel):
