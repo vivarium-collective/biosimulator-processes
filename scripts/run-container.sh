@@ -10,5 +10,5 @@ fi
 docker run \
   --platform linux/amd64 \
   -p 8888:8888 \
-  ghcr.io/vivarium-collective/biosimulator-processes:"${version}" \
-  sh -c "poetry run jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root"
+  ghcr.io/vivarium-collective/biosimulator-processes:"${version}"
+#  sh -c "poetry run jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root"

@@ -43,7 +43,7 @@ setup(
     python_requires=">=3.10",
     install_requires=[
         "bigraph-schema",
-        # "process-bigraph",
+        "process-bigraph",
         "bigraph-builder",
         "numpy",
         "pytest>=6.2.5",
