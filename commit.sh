@@ -15,7 +15,7 @@ read -r msg
 #   echo "Notebooks not fixed."
 # fi
 
-poetry run python3 ./scripts/fix_notebooks.py
+python3 ./scripts/fix_notebooks.py
 git add --all
 git commit -m "${msg}"
 git push origin "${branch}"

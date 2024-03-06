@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f0b09f0c-19d0-4b22-b7e9-7eb0e3893827" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/container-assets/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/container-assets/poetry.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/container-assets/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/build-container.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/build-container.sh" afterDir="false" />
-    </list>
+    <list default="true" id="f0b09f0c-19d0-4b22-b7e9-7eb0e3893827" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -159,7 +153,7 @@
       <workItem from="1709575179051" duration="10177000" />
       <workItem from="1709645971220" duration="5986000" />
       <workItem from="1709654330514" duration="14028000" />
-      <workItem from="1709740597728" duration="5473000" />
+      <workItem from="1709740597728" duration="5549000" />
     </task>
     <servers />
   </component>
