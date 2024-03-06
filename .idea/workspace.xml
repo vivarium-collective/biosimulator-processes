@@ -6,11 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="f0b09f0c-19d0-4b22-b7e9-7eb0e3893827" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/run-container.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/run-container.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/container-assets/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/container-assets/poetry.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/container-assets/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/build-container.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/build-container.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,11 +65,11 @@
       <recent name="$PROJECT_DIR$/scripts" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/container-assets" />
       <recent name="$PROJECT_DIR$/biosimulator_processes/steps" />
       <recent name="$PROJECT_DIR$/biosimulator_processes/processes" />
       <recent name="$PROJECT_DIR$/biosimulator_processes" />
       <recent name="$PROJECT_DIR$/builder" />
-      <recent name="$PROJECT_DIR$/composer-api/composer_api" />
     </key>
   </component>
   <component name="RunManager" selected="Python.biosimulator-processes-process">
@@ -160,7 +159,7 @@
       <workItem from="1709575179051" duration="10177000" />
       <workItem from="1709645971220" duration="5986000" />
       <workItem from="1709654330514" duration="14028000" />
-      <workItem from="1709740597728" duration="5022000" />
+      <workItem from="1709740597728" duration="5473000" />
     </task>
     <servers />
   </component>

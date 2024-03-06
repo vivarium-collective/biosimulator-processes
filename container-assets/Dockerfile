@@ -10,14 +10,16 @@ ENV DEBIAN_FRONTEND=noninteractive
     # STORAGE_GCS_CREDENTIALS_FILE="/app/secret/gcs_credentials.json" \
     # STORAGE_LOCAL_CACHE_DIR="/app/scratch"
 
+RUN cd ..
+
 WORKDIR /app
 
 # copy and make dirs
 # COPY ./biosimulator_processes /app/biosimulator_processes
-COPY ./notebooks /app/notebooks
+COPY ../notebooks /app/notebooks
 
 # copy files
-COPY ./pyproject.toml ./poetry.lock ./data ./scripts/trust-notebooks.sh /app/
+COPY ./container-assets/pyproject.toml ./container-assets/poetry.lock ./data ./scripts/trust-notebooks.sh /app/
 # COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
 VOLUME /app/data
