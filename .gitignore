@@ -23,4 +23,5 @@ submit-biosimulators-container.sh
 .THIS-IS-FOR-CONTAINER-DEV-ONLY
 buildDockerImage.yml
 .env
-
+process-bigraph
+bigraph-schema
