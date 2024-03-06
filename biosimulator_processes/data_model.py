@@ -26,7 +26,8 @@ __all__ = [
     'SedModel',
     'BaseModel',
     'TimeCourseProcessConfigSchema',
-    'ModelParameter'
+    'ModelParameter',
+    'ProcessConfig'
 ]
 
 
@@ -192,6 +193,8 @@ class EmitterInstance:
             }
         }
 
+
+# --- TYPE REGISTRY
 
 # --- PROCESSES
 class ProcessConfigSchema(BaseModel):
