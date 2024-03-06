@@ -55,7 +55,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ./trust-notebooks.sh \
     && rm ./trust-notebooks.sh \
     && apt-get clean \
-    && apt-get autoclean \
+    && apt-get autoclean
 
 ENTRYPOINT ["/usr/local/bin/enter-lab.sh"]
 
