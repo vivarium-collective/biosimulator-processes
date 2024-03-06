@@ -2,7 +2,7 @@ import re
 from setuptools import setup, find_packages
 
 
-__version__ = "0.0.17"
+__version__ = "0.0.18"
 
 with open("README.md", "r") as readme:
     description = readme.read()
@@ -43,7 +43,7 @@ setup(
     python_requires=">=3.10",
     install_requires=[
         "bigraph-schema",
-        "process-bigraph",
+        # "process-bigraph",
         "bigraph-builder",
         "numpy",
         "pytest>=6.2.5",

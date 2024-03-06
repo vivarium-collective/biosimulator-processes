@@ -7,9 +7,6 @@ if [ "${version}" == "" ]; then
   exit 1
 fi
 
-docker run -d \
-  --platform linux/amd64 \
-  -p 8888:8888 \
-  --name biosimulator-processes-container \
-  ghcr.io/biosimulators/biosimulator-processes:"${version}" \
+docker exec \
+  -it biosimulator-processes-container \
   sh -c "poetry run jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root"
