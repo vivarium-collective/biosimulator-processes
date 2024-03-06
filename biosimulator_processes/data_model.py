@@ -198,15 +198,13 @@ class ProcessConfigSchema(BaseModel):
     config: Dict = Field(default={})
 
 
-class CopasiProcessConfigSchema(BaseModel):
+class ProcessConfig(BaseModel):
     process_name: str
-    method: str = Field(default='deterministic')
-    model: Union[TimeCourseModel, Dict]
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        if isinstance(self.model, TimeCourseModel):
-            self.model = self.model.model_dump()
+
+class CopasiProcessConfig(ProcessConfig):
+    method: str = Field(default='deterministic')
+    model: TimeCourseModel
 
     # @field_serializer('model', when_used='json')
     # @classmethod
@@ -235,7 +233,6 @@ class ProcessInstance(BaseModel):
     config: Union[CopasiProcessConfigSchema, ProcessConfigSchema]
     inputs: PortSchema
     outputs: PortSchema
-    emitter: Union[EmitterInstance, NoneType] = Field(default=None)
 
     @classmethod
     @field_validator('address')
