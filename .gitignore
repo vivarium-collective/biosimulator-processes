@@ -25,3 +25,4 @@ buildDockerImage.yml
 .env
 process-bigraph
 bigraph-schema
+bigraph-builder

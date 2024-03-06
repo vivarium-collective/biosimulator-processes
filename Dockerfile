@@ -1,5 +1,5 @@
 # TODO: Use a more specific tag instead of latest for reproducibility
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
     # XVFB_RES="1920x1080x24" \
