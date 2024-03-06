@@ -18,6 +18,7 @@ COPY notebooks /app/notebooks
 
 # copy files
 COPY pyproject.toml poetry.lock ./data ./scripts/trust-notebooks.sh /app/
+COPY ./scripts/enter-lab.sh /usr/local/bin/enter-lab.sh
 # COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
 VOLUME /app/data
@@ -50,17 +51,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && poetry update \
     && poetry install \
     && chmod +x ./trust-notebooks.sh \
+    && chmod +x /usr/local/bin/enter-lab.sh \
     && ./trust-notebooks.sh \
     && rm ./trust-notebooks.sh \
     && apt-get clean \
-    && apt-get autoclean
+    && apt-get autoclean \
 
-# CMD ["poetry", "run", "jupyter", "lab", "--port=8888", "--no-browser", "--allow-root"]
+ENTRYPOINT ["/usr/local/bin/enter-lab.sh"]
 
 
 # PLEASE NOTE: We do not need to add a USER in the Dockerfile as Singularity will handle
 # such logic in conversion on the HPC.
-
-# type imports
-# dist
-# param scan demo/location
