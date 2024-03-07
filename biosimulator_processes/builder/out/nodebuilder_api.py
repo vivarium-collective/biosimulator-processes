@@ -7,7 +7,7 @@ Python API.
 """
 
 from process_bigraph import Process, Composite, process_registry, types
-from bigraph_viz import plot_bigraph
+from biosimulator_processes.biosimulator_processes.biosimulator_processes.biosimulator_processes.bigraph_viz import plot_bigraph
 import pprint
 
 pretty = pprint.PrettyPrinter(indent=2)
