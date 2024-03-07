@@ -1,11 +1,13 @@
 import os
 import json
 import pprint
+from typing import *
 from biosimulator_processes.bigraph_schema.registry import get_path, set_path, deep_merge
 from biosimulator_processes.bigraph_schema import Edge
 from biosimulator_processes.bigraph_schema.protocols import local_lookup_module
 from biosimulator_processes.process_bigraph import Process, Step, Composite, ProcessTypes
 from biosimulator_processes.bigraph_viz.diagram import plot_bigraph
+from biosimulator_processes.data_model import *
 
 
 pretty = pprint.PrettyPrinter(indent=2)
@@ -117,10 +119,10 @@ class BuilderNode:
 
     def add_process(
             self,
-            name,
-            config=None,
-            inputs=None,
-            outputs=None,
+            name: str,
+            config: ProcessConfig = None,
+            inputs: Port = None,
+            outputs: Port = None,
             **kwargs
     ):
         """ Add a process to the tree """
@@ -304,7 +306,7 @@ class Builder:
 
 
 def test_builder():
-    from process_bigraph.experiments.minimal_gillespie import GillespieEvent, EXPORT  # , GillespieInterval
+    from biosimulator_processes.process_bigraph.experiments.minimal_gillespie import GillespieEvent, EXPORT  # , GillespieInterval
 
     core = ProcessTypes()
     core.import_types(EXPORT)  # TODO -- make this better
