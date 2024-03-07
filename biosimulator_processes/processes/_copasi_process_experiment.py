@@ -43,7 +43,7 @@ from biosimulator_processes.data_model import (
 )
 
 
-class CopasiProcess(Process):
+class _CopasiProcess(Process):
     """
         Entrypoints:
 
@@ -93,12 +93,12 @@ class CopasiProcess(Process):
 
         if isinstance(self.config, dict):
             self.model = TimeCourseModel(**self.config['model'])
-            # model_source = self.config['model']['model_source']['value']
-            # self.model_changes = self.config['model'].get('model_changes', {})
         elif isinstance(self.config, CopasiProcessConfig):
             self.model = self.config.model
         else:
             raise AttributeError("You must pass a model.")
+
+        self.model_changes = self.model.model_changes.model_dump()
 
         # A. enter with model_file
         if '/' in self.model.model_source:
