@@ -1,4 +1,5 @@
-parsimonious 
+# Deps of bigraph-schema and process-bigraph
+parsimonious
 fire 
 pytest 
 pint

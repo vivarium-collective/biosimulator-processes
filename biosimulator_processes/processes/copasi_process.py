@@ -98,6 +98,7 @@ class _CopasiProcess(Process):
         else:
             raise AttributeError("You must pass a model.")
 
+        # TODO: implement object ref instead of dict for change set/get
         self.model_changes = self.model.model_changes.model_dump()
 
         # A. enter with model_file
