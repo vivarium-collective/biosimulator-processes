@@ -27,3 +27,5 @@ process-bigraph
 bigraph-schema
 bigraph-builder
 commit.sh
+__pycache__/*
+__pycache__/*
