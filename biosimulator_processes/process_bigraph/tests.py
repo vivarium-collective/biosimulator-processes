@@ -5,8 +5,8 @@ Tests for Process Bigraph
 import random
 import pytest
 
-from process_bigraph.composite import Process, Step, Composite, merge_collections, ProcessTypes
-# from process_bigraph.type_system import ProcessTypes
+from biosimulator_processes.process_bigraph.composite import Process, Step, Composite, merge_collections, ProcessTypes
+# from biosimulator_processes.process_bigraph.type_system import ProcessTypes
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ def test_composite(core):
                 'exchange': ['value']}},
         'state': {
             'increase': {
-                'address': 'local:!process_bigraph.tests.IncreaseProcess',
+                'address': 'local:!biosimulator_processes.process_bigraph.tests.IncreaseProcess',
                 'config': {'rate': 0.3},
                 'interval': 1.0,
                 'inputs': {'level': ['value']},
@@ -125,7 +125,7 @@ def test_infer(core):
         'state': {
             'increase': {
                 '_type': 'process',
-                'address': 'local:!process_bigraph.tests.IncreaseProcess',
+                'address': 'local:!biosimulator_processes.process_bigraph.tests.IncreaseProcess',
                 'config': {'rate': '0.3'},
                 'inputs': {'level': ['value']},
                 'outputs': {'level': ['value']}},
@@ -176,7 +176,7 @@ def test_step_initialization(core):
             'B': 21,
             'step1': {
                 '_type': 'step',
-                'address': 'local:!process_bigraph.tests.OperatorStep',
+                'address': 'local:!biosimulator_processes.process_bigraph.tests.OperatorStep',
                 'config': {
                     'operator': '+'},
                 'inputs': {
@@ -186,7 +186,7 @@ def test_step_initialization(core):
                     'c': ['C']}},
             'step2': {
                 '_type': 'step',
-                'address': 'local:!process_bigraph.tests.OperatorStep',
+                'address': 'local:!biosimulator_processes.process_bigraph.tests.OperatorStep',
                 'config': {
                     'operator': '*'},
                 'inputs': {
@@ -206,7 +206,7 @@ def test_dependencies(core):
 
         '1': {
             '_type': 'step',
-            'address': 'local:!process_bigraph.tests.OperatorStep',
+            'address': 'local:!biosimulator_processes.process_bigraph.tests.OperatorStep',
             'config': {
                 'operator': '+'},
             'inputs': {
@@ -216,7 +216,7 @@ def test_dependencies(core):
                 'c': ['e']}},
         '2.1': {
             '_type': 'step',
-            'address': 'local:!process_bigraph.tests.OperatorStep',
+            'address': 'local:!biosimulator_processes.process_bigraph.tests.OperatorStep',
             'config': {
                 'operator': '-'},
             'inputs': {
@@ -226,7 +226,7 @@ def test_dependencies(core):
                 'c': ['f']}},
         '2.2': {
             '_type': 'step',
-            'address': 'local:!process_bigraph.tests.OperatorStep',
+            'address': 'local:!biosimulator_processes.process_bigraph.tests.OperatorStep',
             'config': {
                 'operator': '-'},
             'inputs': {
@@ -236,7 +236,7 @@ def test_dependencies(core):
                 'c': ['g']}},
         '3': {
             '_type': 'step',
-            'address': 'local:!process_bigraph.tests.OperatorStep',
+            'address': 'local:!biosimulator_processes.process_bigraph.tests.OperatorStep',
             'config': {
                 'operator': '*'},
             'inputs': {
@@ -246,7 +246,7 @@ def test_dependencies(core):
                 'c': ['h']}},
         '4': {
             '_type': 'step',
-            'address': 'local:!process_bigraph.tests.OperatorStep',
+            'address': 'local:!biosimulator_processes.process_bigraph.tests.OperatorStep',
             'config': {
                 'operator': '+'},
             'inputs': {
@@ -312,7 +312,7 @@ class SimpleCompartment(Process):
             #                 'inner': {
             #                     daughter_config['id']: {
             #                         '_type': 'process',
-            #                         'address': 'local:!process_bigraph.tests.SimpleCompartment',
+            #                         'address': 'local:!biosimulator_processes.process_bigraph.tests.SimpleCompartment',
             #                         'config': daughter_config,
             #                         'inner': daughter_inner,
             #                         'wires': {
@@ -359,13 +359,13 @@ def test_reaction():
                 'inner': {
                     'agent1': {
                         '_type': 'process',
-                        'address': 'local:!process_bigraph.tests.SimpleCompartment',
+                        'address': 'local:!biosimulator_processes.process_bigraph.tests.SimpleCompartment',
                         'config': {'id': '0'},
                         'concentrations': {},
                         'inner': {
                             'agent2': {
                                 '_type': 'process',
-                                'address': 'local:!process_bigraph.tests.SimpleCompartment',
+                                'address': 'local:!biosimulator_processes.process_bigraph.tests.SimpleCompartment',
                                 'config': {'id': '0'},
                                 'inner': {},
                                 'inputs': {

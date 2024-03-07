@@ -33,7 +33,7 @@ from basico import *
 #     T,
 #     set_report_dict
 # )
-from process_bigraph import Process, Composite, pf
+from biosimulator_processes.process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes.data_model import (
     TimeCourseModel,

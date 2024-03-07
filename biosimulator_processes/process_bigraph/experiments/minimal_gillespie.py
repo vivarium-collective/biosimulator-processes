@@ -11,7 +11,7 @@ general stochastic transcription.
 import numpy as np
 import pytest
 
-from process_bigraph import Step, Process, Composite, ProcessTypes
+from biosimulator_processes.process_bigraph import Step, Process, Composite, ProcessTypes
 
 
 # 'map[float](default:1.0|apply:set)'
@@ -225,7 +225,7 @@ def test_gillespie_composite(core):
         'state': {
             'interval': {
                 '_type': 'step',
-                'address': 'local:!process_bigraph.experiments.minimal_gillespie.GillespieInterval',
+                'address': 'local:!biosimulator_processes.process_bigraph.experiments.minimal_gillespie.GillespieInterval',
                 'config': {'ktsc': '6e0'},
                 'inputs': {
                     'DNA': ['DNA'],
@@ -235,7 +235,7 @@ def test_gillespie_composite(core):
 
             'event': {
                 '_type': 'process',
-                'address': 'local:!process_bigraph.experiments.minimal_gillespie.GillespieEvent',
+                'address': 'local:!biosimulator_processes.process_bigraph.experiments.minimal_gillespie.GillespieEvent',
                 'config': {'ktsc': 6e0},
                 'inputs': {
                     'DNA': ['DNA'],

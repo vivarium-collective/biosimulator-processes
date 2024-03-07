@@ -49,7 +49,7 @@
 """
 from typing import *
 from uuid import uuid4
-from process_bigraph import Process, Composite, pf, pp
+from biosimulator_processes.process_bigraph import Process, Composite, pf, pp
 try:
     import smoldyn as sm
     from smoldyn._smoldyn import MolecState

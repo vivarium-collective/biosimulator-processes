@@ -5,7 +5,7 @@ COBRA FBA Process
 
 import cobra.io
 from cobra.io import read_sbml_model
-from process_bigraph import Process, Composite, pf, pp
+from biosimulator_processes.process_bigraph import Process, Composite, pf, pp
 from biosimulator_processes import CORE
 
 

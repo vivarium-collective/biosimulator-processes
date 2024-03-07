@@ -5,7 +5,7 @@ Tellurium Process
 
 import numpy as np
 import tellurium as te
-from process_bigraph import Process, Composite, pf, Step
+from biosimulator_processes.process_bigraph import Process, Composite, pf, Step
 
 
 class TelluriumStep(Step):

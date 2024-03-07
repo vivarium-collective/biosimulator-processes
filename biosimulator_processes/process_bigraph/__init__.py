@@ -1,5 +1,5 @@
 import pprint
-from process_bigraph.composite import Process, Step, Composite, ProcessTypes
+from biosimulator_processes.process_bigraph.composite import Process, Step, Composite, ProcessTypes
 
 
 __all__ = [

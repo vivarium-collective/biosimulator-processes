@@ -1,4 +1,4 @@
-from process_bigraph import Composite, Step, pf
+from biosimulator_processes.process_bigraph import Composite, Step, pf
 
 
 class ParameterScan(Step):

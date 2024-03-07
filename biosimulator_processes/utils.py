@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 from basico import biomodels, load_model_from_string
-from process_bigraph import Composite, pf
+from biosimulator_processes.process_bigraph import Composite, pf
 import nbformat
 from pydantic import BaseModel
 

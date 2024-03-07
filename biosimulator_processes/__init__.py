@@ -1,4 +1,4 @@
-from builder import ProcessTypes
+from biosimulator_processes.builder import ProcessTypes
 
 
 # Define a list of processes to attempt to import and register

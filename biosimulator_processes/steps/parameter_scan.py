@@ -2,7 +2,7 @@ from typing import *
 from abc import abstractmethod
 
 import numpy as np
-from process_bigraph import Step
+from biosimulator_processes.process_bigraph import Step
 from biosimulator_processes.data_model import TimeCourseProcessConfigSchema, ModelParameter
 from biosimulator_processes.processes.copasi_process import CopasiProcess
 

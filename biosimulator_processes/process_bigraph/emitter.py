@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict, List, Optional, Tuple, Callable, Union
 import numpy as np
 from biosimulator_processes.bigraph_schema import get_path, set_path
-from process_bigraph.composite import Step, Process
+from biosimulator_processes.process_bigraph.composite import Step, Process
 
 
 class Emitter(Step):

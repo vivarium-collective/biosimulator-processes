@@ -13,7 +13,7 @@ from biosimulator_processes.data_model import *
 from biosimulator_processes.biosimulator_processes.bigraph_schema import Edge, TypeSystem, get_path, establish_path, set_path, deep_merge
 from biosimulator_processes.biosimulator_processes.bigraph_schema.registry import Registry, validate_merge
 
-from biosimulator_processes.process_bigraph.protocols import local_lookup, local_lookup_module
+from biosimulator_processes.biosimulator_processes.process_bigraph.protocols import local_lookup, local_lookup_module
 
 
 # TODO: implement these
@@ -509,7 +509,7 @@ class Defer:
             self.args)
 
 
-def find_instances(state, instance_type='process_bigraph.composite.Process'):
+def find_instances(state, instance_type='biosimulator_processes.process_bigraph.composite.Process'):
     process_class = local_lookup_module(instance_type)
     found = {}
 
@@ -520,14 +520,14 @@ def find_instances(state, instance_type='process_bigraph.composite.Process'):
 
 
 def find_processes(state):
-    return find_instances(state, 'process_bigraph.composite.Process')
+    return find_instances(state, 'biosimulator_processes.process_bigraph.composite.Process')
 
 
 def find_steps(state):
-    return find_instances(state, 'process_bigraph.composite.Step')
+    return find_instances(state, 'biosimulator_processes.process_bigraph.composite.Step')
 
 
-def find_instance_paths(state, instance_type='process_bigraph.composite.Process'):
+def find_instance_paths(state, instance_type='biosimulator_processes.process_bigraph.composite.Process'):
     instances = find_instances(state, instance_type)
     return hierarchy_depth(instances)
 
@@ -761,15 +761,15 @@ class Composite(Process):
         # find all processes, steps, and emitter in the state
         self.process_paths = find_instance_paths(
             state,
-            'process_bigraph.composite.Process')
+            'biosimulator_processes.process_bigraph.composite.Process')
 
         self.step_paths = find_instance_paths(
             state,
-            'process_bigraph.composite.Step')
+            'biosimulator_processes.process_bigraph.composite.Step')
 
         self.emitter_paths = find_instance_paths(
             state,
-            'process_bigraph.emitter.Emitter')
+            'biosimulator_processes.process_bigraph.emitter.Emitter')
 
         # merge the processes and steps into a single "edges" dict
         self.edge_paths = self.process_paths.copy()
