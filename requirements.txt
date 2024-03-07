@@ -1,0 +1,10 @@
+parsimonious 
+fire 
+pytest 
+pint
+bigraph-schema
+numpy
+pytest>=6.2.5
+pymongo
+orjson
+matplotlib

@@ -45,7 +45,7 @@ setup(
         # "bigraph-schema",
         # "process-bigraph",
         # "bigraph-builder",
-        # "bigraph-viz",
+        "bigraph-viz",
         "numpy",
         "pytest>=6.2.5",
         "tellurium",

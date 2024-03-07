@@ -6,7 +6,7 @@ Protocols for retrieving processes from address
 
 import importlib
 import sys
-from bigraph_schema.protocols import local_lookup_module
+from biosimulator_processes.bigraph_schema.protocols import local_lookup_module
 
 
 def local_lookup_registry(core, address):

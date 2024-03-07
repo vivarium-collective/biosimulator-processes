@@ -15,9 +15,9 @@ import numpy as np
 
 from pprint import pformat as pf
 
-from bigraph_schema.units import units, render_units_type
-from bigraph_schema.react import react_divide_counts
-from bigraph_schema.registry import (
+from biosimulator_processes.bigraph_schema.units import units, render_units_type
+from biosimulator_processes.bigraph_schema.react import react_divide_counts
+from biosimulator_processes.bigraph_schema.registry import (
     NONE_SYMBOL,
     Registry, TypeRegistry, 
     type_schema_keys, non_schema_keys,

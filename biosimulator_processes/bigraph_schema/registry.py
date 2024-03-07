@@ -12,8 +12,8 @@ import traceback
 
 from pprint import pformat as pf
 
-from bigraph_schema.parse import parse_expression
-from bigraph_schema.protocols import local_lookup_module, function_module
+from biosimulator_processes.bigraph_schema.parse import parse_expression
+from biosimulator_processes.bigraph_schema.protocols import local_lookup_module, function_module
 
 
 NONE_SYMBOL = '!nil'

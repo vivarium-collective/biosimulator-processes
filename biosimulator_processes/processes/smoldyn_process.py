@@ -102,7 +102,7 @@ class SmoldynProcess(Process):
 
             config_schema = {
                 'model_filepath': 'string',  <-- analogous to python `str`
-                'animate': 'bool'  <-- of type `bigraph_schema.base_types.bool`
+                'animate': 'bool'  <-- of type `biosimulator_processes.bigraph_schema.base_types.bool`
 
             # TODO: It would be nice to have classes associated with this.
         """
