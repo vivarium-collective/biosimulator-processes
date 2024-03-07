@@ -42,9 +42,10 @@ setup(
     ],
     python_requires=">=3.10",
     install_requires=[
-        "bigraph-schema",
-        "process-bigraph",
-        "bigraph-builder",
+        # "bigraph-schema",
+        # "process-bigraph",
+        # "bigraph-builder",
+        # "bigraph-viz",
         "numpy",
         "pytest>=6.2.5",
         "tellurium",
@@ -54,12 +55,10 @@ setup(
         "termcolor",
         "jupyterlab",
         "notebook",
-        "bigraph-viz",
-        "bigraph-builder",
+        "python-libnuml==1.1.6"  # ">=1.0.0"
         "python-libsbml"  # ==5.20.2",
         "docker>=7.0",
-        "toml",
-        "python-libnuml==1.1.6"  # ">=1.0.0"
+        "toml"
     ],
     extras_require={
         "smoldyn": ["smoldyn", "simulariumio"],

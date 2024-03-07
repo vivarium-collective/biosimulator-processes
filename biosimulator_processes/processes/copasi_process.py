@@ -43,11 +43,11 @@ from biosimulator_processes.data_model import (
 )
 
 
-class CopasiProcess(Process):
+class _CopasiProcess(Process):
     """
         Entrypoints:
 
-            A. SBML model file: 
+            A. SBML model file:
             B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
             C. TimeCourseModel search term (load preconfigured model from BioModels)
 
@@ -86,17 +86,26 @@ class CopasiProcess(Process):
 
     config_schema = TimeCourseProcessConfigSchema().model_dump()
 
-    def __init__(self, config: Dict = None, core=None):
+    def __init__(self,
+                 config: Union[CopasiProcessConfig, Dict] = None,
+                 core=None):
         super().__init__(config, core)
-        model_source = self.config['model']['model_source']['value']
-        self.model_changes = self.config['model'].get('model_changes', {})
+
+        if isinstance(self.config, dict):
+            self.model = TimeCourseModel(**self.config['model'])
+        elif isinstance(self.config, CopasiProcessConfig):
+            self.model = self.config.model
+        else:
+            raise AttributeError("You must pass a model.")
+
+        self.model_changes = self.model.model_changes.model_dump()
 
         # A. enter with model_file
-        if '/' in model_source:
-            self.copasi_model_object = load_model(model_source)
+        if '/' in self.model.model_source:
+            self.copasi_model_object = load_model(self.model.model_source)
         # B. enter with specific search term for a model
-        elif 'BIO' in model_source:
-            self.copasi_model_object = fetch_biomodel(model_id=model_source)
+        elif 'BIO' in self.model.model_source:
+            self.copasi_model_object = fetch_biomodel(model_id=self.model.model_source)
         # C. enter with a new model
         else:
             if not self.model_changes:
