@@ -3,7 +3,7 @@
 branch="$1"
 
 if [ "${branch}" == "" ]; then
-  branch="main"
+  branch="experimental-bigraph"
 fi
 
 echo "Enter commit message: "
