@@ -204,18 +204,22 @@ class EmitterInstance:
 
 
 # --- TYPE REGISTRY
-def dynamic_config(name: str, config: dict, **kwargs):
+def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
     config = config or {}
     config.update(kwargs)
     dynamic_config_types = {}
     for param_name, param_val in config.items():
         dynamic_config_types[param_name] = (type(param_val), ...)
 
-    name = name.replace(name[0], name[0].upper())
-    DynamicProcessConfig = create_model(
-            f'{name}ProcessConfig',
-            **dynamic_config_types
-    )
+    model_name = 'ProcessConfig'
+    if name is not None:
+        proc_name = name.replace(name[0], name[0].upper())
+        dynamic_name = proc_name + model_name
+    else:
+        dynamic_name = model_name
+
+    DynamicProcessConfig = create_model(__model_name=dynamic_name, **dynamic_config_types)
+
     return DynamicProcessConfig(**config)
 
 
