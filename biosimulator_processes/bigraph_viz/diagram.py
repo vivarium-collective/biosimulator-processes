@@ -2,7 +2,7 @@
 Bigraph diagram
 """
 import os
-from bigraph_schema import TypeSystem, Edge
+from biosimulator_processes.bigraph_schema import TypeSystem, Edge
 from biosimulator_processes.bigraph_viz.plot_old import absolute_path, make_label, check_if_path_in_removed_nodes
 import graphviz
 
