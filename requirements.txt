@@ -10,3 +10,4 @@ pymongo
 orjson
 matplotlib
 nbformat
+graphviz

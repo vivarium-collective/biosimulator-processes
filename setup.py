@@ -45,7 +45,7 @@ setup(
         # "bigraph-schema",
         # "process-bigraph",
         # "bigraph-builder",
-        "bigraph-viz",
+        # "bigraph-viz",
         "numpy",
         "pytest>=6.2.5",
         "tellurium",
@@ -55,8 +55,8 @@ setup(
         "termcolor",
         "jupyterlab",
         "notebook",
-        "python-libnuml==1.1.6"  # ">=1.0.0"
-        "python-libsbml"  # ==5.20.2",
+        "python-libnuml==1.1.6",  # ">=1.0.0"
+        "python-libsbml" , # ==5.20.2",
         "docker>=7.0",
         "toml"
     ],
