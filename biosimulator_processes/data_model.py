@@ -201,15 +201,19 @@ class ProcessConfig(BaseModel):
     value: Dict
 
 
-def dynamic_process_config(**params):
-    ignored_fields = []
-    for name, val in params.items():
-        ignored_fields.append(name)
+def dynamic_config(name: str, config: dict, **kwargs):
+    config = config or {}
+    config.update(kwargs)
+    dynamic_config_types = {}
+    for param_name, param_val in config.items():
+        dynamic_config_types[param_name] = (type(param_val), ...)
 
+    name = name.replace(name[0], name[0].upper())
     DynamicProcessConfig = create_model(
-        __model_name='DynamicProcessConfig',
-        field_definitions=params)
-    return DynamicProcessConfig
+            f'{name}ProcessConfig',
+            **dynamic_config_types
+    )
+    return DynamicProcessConfig(**config)
 
 
 class Port(BaseModel):
