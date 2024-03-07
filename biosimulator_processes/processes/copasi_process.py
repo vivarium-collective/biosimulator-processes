@@ -19,20 +19,6 @@
 from typing import Dict, Union
 from pandas import DataFrame
 from basico import *
-# from basico import (
-#     load_model,
-#     get_species,
-#     get_parameters,
-#     get_reactions,
-#     set_species,
-#     run_time_course,
-#     get_compartments,
-#     new_model,
-#     set_reaction_parameters,
-#     add_reaction,
-#     T,
-#     set_report_dict
-# )
 from biosimulator_processes.process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes.data_model import (

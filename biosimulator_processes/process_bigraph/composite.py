@@ -10,11 +10,9 @@ import math
 import collections
 from typing import Dict, List, Union
 from biosimulator_processes.data_model import *
-from biosimulator_processes.biosimulator_processes.bigraph_schema import Edge, TypeSystem, get_path, establish_path, set_path, deep_merge
-from biosimulator_processes.biosimulator_processes.bigraph_schema.registry import Registry, validate_merge
-
-from biosimulator_processes.biosimulator_processes.process_bigraph.protocols import local_lookup, local_lookup_module
-
+from biosimulator_processes.bigraph_schema import Edge, TypeSystem, get_path, establish_path, set_path, deep_merge
+from biosimulator_processes.bigraph_schema.registry import Registry, validate_merge
+from biosimulator_processes.process_bigraph.protocols import local_lookup, local_lookup_module
 
 # TODO: implement these
 def apply_process(schema, current, update, core):
