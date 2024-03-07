@@ -444,7 +444,7 @@ class Process(Edge):
             self.config_schema,
             config)
 
-        self.config = ProcessConfig(**proc_config)
+        self.config = dynamic_process_config(config=proc_config)
 
 
 

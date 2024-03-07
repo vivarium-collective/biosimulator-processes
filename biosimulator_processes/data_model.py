@@ -29,7 +29,8 @@ __all__ = [
     'ModelParameter',
     'ProcessConfig',
     'Port',
-    'State'
+    'State',
+    'dynamic_process_config'
 ]
 
 
@@ -201,16 +202,22 @@ class ProcessConfig(BaseModel):
     value: Dict
 
 
-def dynamic_config(name: str, config: dict, **kwargs):
+def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
     config = config or {}
     config.update(kwargs)
     dynamic_config_types = {}
     for param_name, param_val in config.items():
         dynamic_config_types[param_name] = (type(param_val), ...)
 
-    name = name.replace(name[0], name[0].upper())
+    model_name = 'ProcessConfig'
+    if name is not None:
+        proc_name = name.replace(name[0], name[0].upper())
+        dynamic_name = proc_name + model_name
+    else:
+        dynamic_name = model_name
+
     DynamicProcessConfig = create_model(
-            f'{name}ProcessConfig',
+            f'{dynamic_name}ProcessConfig',
             **dynamic_config_types
     )
     return DynamicProcessConfig(**config)
@@ -224,9 +231,22 @@ class State(BaseModel):
     # THINK: builder_api LN.120: add_process. TODO: This should be parsable by the builder in add process.
     _type: str
     address: str
-    config: ProcessConfig
-    inputs: Port
-    outputs: Port
+    config: BaseModel
+    inputs: Union[Port, Dict]
+    outputs: Union[Port, Dict]
+
+    @classmethod
+    def set_port(cls, v):
+        if isinstance(v, dict):
+            return Port(**v)
+        else:
+            return v
+
+    @field_validator('outputs')
+    @classmethod
+    def set_outputs(cls, v):
+        return cls.set_port(v)
+
 
 
 # --- PROCESSES

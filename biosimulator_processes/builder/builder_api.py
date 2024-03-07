@@ -130,32 +130,27 @@ class BuilderNode:
         # TODO -- assert this process is in the process_registry
         assert name, 'add_process requires a name as input'
         process_class = self.builder.core.process_registry.access(name)
-        config = config or {}
-        config.update(kwargs)
+        # config = config or {}
+        # config.update(kwargs)
 
-        dynamic_config_types = {}
-        for param_name, param_val in config.items():
-            dynamic_config_types[param_name] = (type(param_val), ...)
-
-        name = name.replace(name[0], name[0].upper())
-        DynamicProcessConfig = create_model(
-            f'{name}ProcessConfig',
-            **dynamic_config_types
-        )
+        # create a well-typed pydantic data model on the fly
+        process_config = dynamic_process_config(name=name, config=config, **kwargs)
 
         # what edge type is this? process or step
         edge_type = 'process'
         if issubclass(process_class, Step):
             edge_type = 'step'
 
+        inputs_config = {} if inputs is None else inputs
+        outputs_config = {} if outputs is None else outputs
+
         # make the process spec
-        state = {
-            '_type': edge_type,
-            'address': f'local:{name}',  # TODO -- only support local right now?
-            'config': config,
-            'inputs': {} if inputs is None else inputs,
-            'outputs': {} if outputs is None else outputs,
-        }
+        state = State(
+            _type=edge_type,
+            address=f'local:{name}',  # TODO -- only support local right now?
+            config=process_config,
+            inputs=inputs_config,
+            outputs=outputs_config)
 
         set_path(tree=self.builder.tree, path=self.path, value=state)
         self.builder.complete()
