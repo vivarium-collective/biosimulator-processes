@@ -1,7 +1,7 @@
 from typing import Dict, List, Union, Tuple, Optional
 from types import NoneType
 from abc import ABC, abstractmethod
-from pydantic import BaseModel as _BaseModel, field_validator, field_serializer, Field, ConfigDict
+from pydantic import BaseModel as _BaseModel, field_validator, field_serializer, Field, ConfigDict, create_model
 
 
 __all__ = [
@@ -199,6 +199,17 @@ class EmitterInstance:
 # --- TYPE REGISTRY
 class ProcessConfig(BaseModel):
     value: Dict
+
+
+def dynamic_process_config(**params):
+    ignored_fields = []
+    for name, val in params.items():
+        ignored_fields.append(name)
+
+    DynamicProcessConfig = create_model(
+        __model_name='DynamicProcessConfig',
+        field_definitions=params)
+    return DynamicProcessConfig
 
 
 class Port(BaseModel):

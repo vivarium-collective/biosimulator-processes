@@ -2,6 +2,7 @@ import os
 import json
 import pprint
 from typing import *
+from pydantic import create_model
 from biosimulator_processes.bigraph_schema.registry import get_path, set_path, deep_merge
 from biosimulator_processes.bigraph_schema import Edge
 from biosimulator_processes.bigraph_schema.protocols import local_lookup_module
@@ -120,7 +121,7 @@ class BuilderNode:
     def add_process(
             self,
             name: str,
-            config: ProcessConfig = None,
+            config: Union[ProcessConfig, Dict] = None,
             inputs: Port = None,
             outputs: Port = None,
             **kwargs
@@ -131,6 +132,16 @@ class BuilderNode:
         process_class = self.builder.core.process_registry.access(name)
         config = config or {}
         config.update(kwargs)
+
+        dynamic_config_types = {}
+        for param_name, param_val in config.items():
+            dynamic_config_types[param_name] = (type(param_val), ...)
+
+        name = name.replace(name[0], name[0].upper())
+        DynamicProcessConfig = create_model(
+            f'{name}ProcessConfig',
+            **dynamic_config_types
+        )
 
         # what edge type is this? process or step
         edge_type = 'process'

@@ -1,5 +1,5 @@
 from typing import *
-from biosimulator_processes.biosimulator_processes.builder import Builder
+from biosimulator_processes.builder import Builder
 from biosimulator_processes import CORE
 
 
