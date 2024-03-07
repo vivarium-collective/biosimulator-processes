@@ -86,21 +86,10 @@ class CopasiProcess(Process):
 
     config_schema = TimeCourseProcessConfigSchema().model_dump()
 
-    def __init__(self,
-                 config: Union[CopasiProcessConfig, Dict] = None,
-                 core=None):
+    def __init__(self, config: Dict = None, core=None):
         super().__init__(config, core)
-
-        if isinstance(self.config, dict):
-            model_source = self.config['model']['model_source']['value']
-            self.model_changes = self.config['model'].get('model_changes', {})
-            self.model = TimeCourseModel(**self.config['model'])
-        '''elif isinstance(self.config, CopasiProcessConfig):
-            model_source = self.config.model.model_source.value
-            self.model_changes = self.config.model.model_changes or {}
-        else:
-            raise AttributeError(
-                'You must pass a model source in your config. A valid model source includes either model filepath, biomodel id, or model changes(manually created).')'''
+        model_source = self.config['model']['model_source']['value']
+        self.model_changes = self.config['model'].get('model_changes', {})
 
         # A. enter with model_file
         if '/' in model_source:
