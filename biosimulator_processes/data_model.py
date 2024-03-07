@@ -216,10 +216,8 @@ def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
     else:
         dynamic_name = model_name
 
-    DynamicProcessConfig = create_model(
-            f'{dynamic_name}ProcessConfig',
-            **dynamic_config_types
-    )
+    DynamicProcessConfig = create_model(__model_name=dynamic_name, **dynamic_config_types)
+
     return DynamicProcessConfig(**config)
 
 
