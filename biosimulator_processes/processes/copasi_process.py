@@ -29,7 +29,7 @@ from biosimulator_processes.data_model import (
 )
 
 
-class _CopasiProcess(Process):
+class CopasiProcess(Process):
     """
         Entrypoints:
 
