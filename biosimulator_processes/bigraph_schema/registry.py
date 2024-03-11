@@ -321,15 +321,19 @@ def remove_path(tree, path):
     return tree
 
 
+from biosimulator_processes.data_model import BaseModel
+from typing import Type
+
+
 def map_type_to_pydantic(custom_type: str):
     """Map custom type strings to Pydantic types."""
     type_mapping = {
         'float': float,
         'int': int,
-        'any': Any
+        'any': Any,
         # Add more mappings as necessary
     }
-    return type_mapping.get(custom_type, str)  # Default to str if type is unknown
+    return type_mapping.get(custom_type, object)  # Default to str if type is unknown TODO: change this.
 
 class Registry(object):
     '''A Registry holds a collection of functions or objects'''
@@ -428,6 +432,8 @@ class Registry(object):
         return True
 
     def generate_pydantic_model(self, key):
+        from biosimulator_processes.data_model import CustomType
+
         found = self.access(key)
         if found is None:
             raise ValueError(f"Process '{key}' not found in the registry.")
@@ -438,9 +444,15 @@ class Registry(object):
         # Convert custom schema to Pydantic schema
         pydantic_fields = {}
         for field_name, field_info in config_schema.items():
-            field_type = field_info.get('_type')
-            default_value = field_info.get('_default')
-            print(f'THE FIELD TYPE: {field_type}')
+            if isinstance(field_info, CustomType):
+                field_type = field_info.type_declaration
+                default_value = field_info.default_value
+            else:
+                field_type = field_info.get('_type')
+                default_value = field_info.get('_default')
+
+            print(f'THE FIELD NAME: {field_name}')
+            print(f'THE FIELD TYPE: {field_type}, DEFAULT: {default_value}')
 
             # Map your custom types to Pydantic types here
             pydantic_type = map_type_to_pydantic(field_type)

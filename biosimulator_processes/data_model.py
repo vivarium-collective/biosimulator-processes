@@ -199,6 +199,16 @@ class ProcessConfig(BaseModel):
     value: Dict
 
 
+class CustomType(BaseModel):
+    type_declaration: str
+    default_value: any = None
+
+    @classmethod
+    @field_validator('_default')
+    def set_default(cls, v):
+        pass
+
+
 def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
     config = config or {}
     config.update(kwargs)
@@ -243,17 +253,16 @@ class State(BaseModel):
         return cls.set_port(v)
 
 
-
 # --- PROCESSES
 class ProcessConfigSchema(BaseModel):
     config: Dict = Field(default={})
 
 
-class ProcessConfig(BaseModel):
+class _ProcessConfig(BaseModel):
     process_name: str
 
 
-class CopasiProcessConfig(ProcessConfig):
+class CopasiProcessConfig(_ProcessConfig):
     method: str = Field(default='deterministic')
     model: TimeCourseModel
 
@@ -422,18 +431,18 @@ class SedModel(FromDict):
 
 MODEL_TYPE = {
         'model_id': 'string',
-        'model_source': 'tree[string]',  # 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
-        'model_language': {    # could be used to load a different model language supported by COPASI/basico
+        'model_source': 'tree[string]',
+        'model_language': {
             '_type': 'string',
-            '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
+            '_default': 'sbml'
         },
         'model_name': {
             '_type': 'string',
             '_default': 'composite_process_model'
         },
         'model_changes': {
-            'species_changes': 'maybe[tree[string]]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-            'global_parameter_changes': 'maybe[tree[string]]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+            'species_changes': 'maybe[tree[string]]',
+            'global_parameter_changes': 'maybe[tree[string]]',
             'reaction_changes': 'maybe[tree[string]]'
         },
         'model_units': 'maybe[tree[string]]'
