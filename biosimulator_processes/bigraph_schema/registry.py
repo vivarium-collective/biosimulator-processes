@@ -9,6 +9,9 @@ import copy
 import collections
 import pytest
 import traceback
+from pydantic import create_model, Field
+import inspect
+from typing import Any, Dict, List, Optional, Tuple, Callable, Union
 
 from pprint import pformat as pf
 
@@ -78,7 +81,7 @@ def non_schema_keys(schema):
         for element in schema.keys()
         if not element.startswith('_')]
 
-            
+
 def type_merge(dct, merge_dct, path=tuple(), merge_supers=False):
     """Recursively merge type definitions, never overwrite.
     Args:
@@ -111,7 +114,7 @@ def type_merge(dct, merge_dct, path=tuple(), merge_supers=False):
             raise ValueError(
                 f'cannot merge types at path {path + (k,)}:\n'
                 f'{dct}\noverwrites \'{k}\' from\n{merge_dct}')
-            
+
     return dct
 
 
@@ -259,7 +262,7 @@ def set_path(tree, path, value, top=None, cursor=None):
 
 def transform_path(tree, path, transform):
     '''
-    given a tree, a path, and a transform (function), 
+    given a tree, a path, and a transform (function),
     mutate the tree by replacing the subtree at the path by
     whatever is returned from applying the transform to the
     existing value
@@ -318,6 +321,16 @@ def remove_path(tree, path):
     return tree
 
 
+def map_type_to_pydantic(custom_type: str):
+    """Map custom type strings to Pydantic types."""
+    type_mapping = {
+        'float': float,
+        'int': int,
+        'any': Any
+        # Add more mappings as necessary
+    }
+    return type_mapping.get(custom_type, str)  # Default to str if type is unknown
+
 class Registry(object):
     '''A Registry holds a collection of functions or objects'''
 
@@ -326,6 +339,8 @@ class Registry(object):
         self.registry = {}
         self.main_keys = set([])
         self.function_keys = set(function_keys)
+
+        self.pydantic_models_cache = {}
 
     def register(self, key, item, alternate_keys=tuple(), strict=False):
         '''
@@ -386,7 +401,7 @@ class Registry(object):
         elif inspect.isfunction(function):
             found = function
             module_key = function_module(found)
-        
+
         function_name = module_key.split('.')[-1]
         self.register(function_name, found)
         self.register(module_key, found)
@@ -398,7 +413,7 @@ class Registry(object):
         for key, schema in schemas.items():
             self.register(key, schema, force=force)
 
-    def access(self, key):
+    def access(self, key: str):
         '''
         get an item by key from the registry.
         '''
@@ -409,7 +424,44 @@ class Registry(object):
         return list(self.main_keys)
 
     def validate(self, item):
+        # TODO -- need more to validate
         return True
+
+    def generate_pydantic_model(self, key):
+        found = self.access(key)
+        if found is None:
+            raise ValueError(f"Process '{key}' not found in the registry.")
+
+        # Assuming the process class or function has a 'config_schema' attribute
+        config_schema = getattr(found, 'config_schema', {})
+
+        # Convert custom schema to Pydantic schema
+        pydantic_fields = {}
+        for field_name, field_info in config_schema.items():
+            field_type = field_info.get('_type')
+            default_value = field_info.get('_default')
+            print(f'THE FIELD TYPE: {field_type}')
+
+            # Map your custom types to Pydantic types here
+            pydantic_type = map_type_to_pydantic(field_type)
+
+            # Use default value if specified
+            if default_value is not None:
+                pydantic_fields[field_name] = (pydantic_type, Field(default=default_value))
+            else:
+                pydantic_fields[field_name] = (pydantic_type, ...)
+
+        model_name = f"{key}ConfigModel"
+        model = create_model(model_name, **pydantic_fields)
+        return model
+
+    def get_pydantic_model(self, key):
+        if key in self.pydantic_models_cache:
+            return self.pydantic_models_cache[key]
+
+        model = self.generate_pydantic_model(key)
+        self.pydantic_models_cache[key] = model
+        return model
 
 
 def visit_method(schema, state, method, values, core):
@@ -1100,9 +1152,9 @@ class TypeRegistry(Registry):
                 except Exception:
                     print(f'type did not parse: {schema}')
                     traceback.print_exc()
-                    
+
         return found
-    
+
     def retrieve(self, schema):
         '''
         like access(schema) but raises an exception if nothing is found

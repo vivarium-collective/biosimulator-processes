@@ -139,17 +139,14 @@ class TimeCourseModel(BaseModel):
 
     @field_validator('model_source')
     @classmethod
-    def set_value(cls, v: str):
+    def set_value(cls, v):
         """Verify that the model source is set to only either a path or a biomodels id"""
-        # if '/' in cls.model_source:
-        #     return ModelFilepath(value=cls.model_source)
-        # elif 'BIO' in cls.input_source:
-        #     return BiomodelId(value=cls.model_source)
-        if '/' in v:
-            return ModelFilepath(value=v)
-        elif 'BIO' in v:
-            return BiomodelId(value=v)
-        elif isinstance(v, ModelFilepath):
+        if isinstance(v, str):
+            if '/' in v:
+                return ModelFilepath(value=v)
+            elif 'BIO' in v:
+                return BiomodelId(value=v)
+        elif isinstance(v, ModelFilepath) or isinstance(v, BiomodelId):
             return v
         # else:
         #     raise AttributeError('You must pass either a model filepath or valid biomodel id.')
