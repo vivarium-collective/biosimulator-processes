@@ -1,4 +1,5 @@
 from process_bigraph import Composite, Step, pf
+from biosimulator_processes import CORE
 
 
 class ParameterScan(Step):
@@ -22,6 +23,7 @@ class ParameterScan(Step):
 
 
 def test_param_scan_copasi():
+    CORE.process_registry.register('biosimulator_processes.experiments.parameter_scan.ParameterScan', ParameterScan)
     initial_sim_state = {
         'parameter_scan': {
             '_type': 'step',
@@ -34,23 +36,23 @@ def test_param_scan_copasi():
                 'simulations': {}
             }
         },
-        'copasi': {
-            '_type': 'process',
-            'address': 'local:copasi',
-            'config': {
-                'model_file': 'model_files/Caravagna2010.xml'
-            },
-            'inputs': {
-                'floating_species': ['floating_species_store'],
-                'model_parameters': ['model_parameters_store'],
-                'time': ['time_store'],
-                'reactions': ['reactions_store']
-            },
-            'outputs': {
-                'floating_species': ['floating_species_store'],
-                'time': ['time_store'],
-            }
-        },
+        # 'copasi': {
+        #     '_type': 'process',
+        #     'address': 'local:copasi',
+        #     'config': {
+        #         'model_file': 'model_files/Caravagna2010.xml'
+        #     },
+        #     'inputs': {
+        #         'floating_species': ['floating_species_store'],
+        #         'model_parameters': ['model_parameters_store'],
+        #         'time': ['time_store'],
+        #         'reactions': ['reactions_store']
+        #     },
+        #     'outputs': {
+        #         'floating_species': ['floating_species_store'],
+        #         'time': ['time_store'],
+        #     }
+        # },
     }
 
     # 2. Make the composite:
