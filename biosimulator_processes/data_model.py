@@ -54,6 +54,13 @@ class BaseModel(_BaseModel):
 
 
 class ModelParameter(BaseModel):
+    """
+        Attributes:
+            name:`str`
+            feature:`str`
+            value:`Union[float, int, str]`
+            scope:`str`
+    """
     name: str
     feature: str
     value: Union[float, int, str]
@@ -83,9 +90,20 @@ class ReactionParameter(BaseModel):
     value: Union[float, int, str]
 
 
+class ReactionModelParameter(ModelParameter):
+    """
+        Attributes:
+            name:`str`
+            feature:`str`
+            value:`Union[float, int, str]`
+            scope:`str` = 'reaction'
+    """
+    scope: str = 'reaction'
+
+
 class ReactionChanges(BaseModel):
     """
-        Parameters:
+        Attributes:
             reaction_name:`str`: name of the reaction you wish to change.
             parameter_changes:`List[ReactionParameter]`: list of parameters you want to change from
                 `reaction_name`. Defaults to `[]`, which denotes no parameter changes.
@@ -130,7 +148,7 @@ class ModelFilepath(BaseModel):
 class TimeCourseModel(BaseModel):
     """The data model declaration for process configuration schemas that support SED.
 
-        Parameters:
+        Attributes:
             model_id: `str`
             model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
             model_language: `str`
@@ -163,7 +181,7 @@ class TimeCourseConfig(BaseModel):
     """TimeCourse configuration with parameters which are parsable by '2D' time-course
         simulators such as COPASI and Tellurium.
 
-        Parameters:
+        Attributes:
             model:`Union[Dict[str, Any], TimeCourseModel]`: configuration of the time course
                 model. See `TimeCourseModel`.
             method:`str`: method by which the simulator solves the model. Options include
