@@ -37,9 +37,8 @@ from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes.data_model import (
     TimeCourseModel,
-    TimeCourseProcessConfigSchema,
-    CopasiProcessConfig,
-    ProcessConfig
+    TimeCourseProcessConfig,
+    MODEL_TYPE
 )
 
 
@@ -51,7 +50,7 @@ class CopasiProcess(Process):
             B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
             C. TimeCourseModel search term (load preconfigured model from BioModels)
 
-        Optional Parameters:
+        Optional Attributes:
 
             A. 'model_changes', changes to be made to the model, even if starting from empty model.
             B. 'method', changes the algorithm(s) used to solve the model
@@ -84,12 +83,22 @@ class CopasiProcess(Process):
         }
     """
 
-    config_schema = TimeCourseProcessConfigSchema().model_dump()
+    # config_schema = TimeCourseProcessConfigSchema().model_dump()
+    config_schema = {
+        'model': MODEL_TYPE,   # 'time_course_model',  # CustomType(type_declaration='time_course_model', default_value={}).model_dump(),
+        'method': {
+            '_type': 'string',
+            '_default': 'deterministic'
+        }
+    }
 
-    def __init__(self, config: Dict = None, core=None):
+    def __init__(self, config: Union[Dict, TimeCourseProcessConfig] = None, core=None):
         super().__init__(config, core)
+
+        # insert copasi process model config
         model_source = self.config['model']['model_source']['value']
-        self.model_changes = self.config['model'].get('model_changes', {})
+        model_changes = self.config['model'].get('model_changes', {})
+        self.model_changes = {} if model_changes is None else model_changes
 
         # A. enter with model_file
         if '/' in model_source:
