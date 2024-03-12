@@ -9,11 +9,11 @@ with open("README.md", "r") as readme:
     # Patch the relative links to absolute URLs that will work on PyPI.
     description2 = re.sub(
         r']\(([\w/.-]+\.png)\)',
-        r'](https://github.com/vivarium-collective/process-bigraph/raw/main/\1)',
+        r'](https://github.com/vivarium-collective/biosimulator-processes/raw/main/\1)',
         description)
     long_description = re.sub(
         r']\(([\w/.-]+)\)',
-        r'](https://github.com/vivarium-collective/process-bigraph/blob/main/\1)',
+        r'](https://github.com/vivarium-collective/biosimulator-processes/blob/main/\1)',
         description2)
 
 setup(
