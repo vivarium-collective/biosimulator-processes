@@ -5,7 +5,7 @@ from pydantic import (
     BaseModel as _BaseModel,
     field_validator,
     field_serializer,
-    root_validator,
+    model_validator,
     Field,
     ConfigDict,
     create_model,
@@ -181,10 +181,21 @@ class TimeCourseModel(BaseModel):
     @classmethod
     def set_id(cls, v):
         if v is None:
-            if isinstance(cls.model_source, str):
-                return v
-            else:
-                return cls.model_source.value
+            return cls.model_source
+        else:
+            return v
+
+    # @model_validator(mode='after')
+    # @classmethod
+    # def set_id(cls, data):
+    #     data_dict = data.model_dump()
+    #     v = data_dict.get('model_id')
+    #     if v is None:
+    #         if isinstance(data_dict['model_source'], str):
+    #             cls.model_id = v
+    #         else:
+    #             cls.model_id = cls.model_source.value
+    #     return data
 
 
 class TimeCourseProcessConfig(BaseModel):
