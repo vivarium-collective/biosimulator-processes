@@ -1,4 +1,5 @@
-from typing import Dict
+from typing import Dict, Union
+from types import FunctionType
 import os
 
 import numpy as np
@@ -261,3 +262,33 @@ def fix_notebooks_execution_count():
         for _file in files:
             notebook_path = os.path.join(root, _file)
             fix_execution_count(notebook_path)
+
+
+def get_copasi_parameter_type_default(
+        getter: FunctionType,
+        param_name: str,
+        copasi_model_object: object,
+        parameter_type: str
+) -> Union[str, int, float]:
+    """Return the default value of a given model parameter specified by `parameter_type`.
+
+        Args:
+            getter:`function`: basico callback with which to query the model. For example: `get_species`.
+            param_name:`str`: parameter name to use as an argument in the `getter`. For example, if getter=get_species, this would be a species name.
+            copasi_model_object:`CDataModel`: instance in memory which you are querying.
+            parameter_type:`str`: which type of parameter you wish to get the default of based on the getter and param_name.
+
+        For example:
+
+                `get_copasi_parameter_type_default(get_species, 'T', p.copasi_model_object, 'unit')`
+    """
+    return getter(param_name, model=copasi_model_object)[[parameter_type]].values.tolist()[0][0]
+
+
+def get_copasi_species_parameter_default(species_name: str, copasi_model_object: object, parameter_type: str):
+    from basico import get_species
+    return get_copasi_parameter_type_default(
+        getter=get_species,
+        param_name=species_name,
+        copasi_model_object=copasi_model_object,
+        parameter_type=parameter_type)
