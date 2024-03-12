@@ -39,7 +39,6 @@ from biosimulator_processes.data_model import (
     TimeCourseModel,
     TimeCourseProcessConfigSchema,
     CopasiProcessConfig,
-    ProcessConfig,
     MODEL_TYPE,
     CustomType
 )
@@ -88,7 +87,7 @@ class CopasiProcess(Process):
 
     # config_schema = TimeCourseProcessConfigSchema().model_dump()
     config_schema = {
-        'model': CustomType(type_declaration='time_course_model', default_value={}),
+        'model': MODEL_TYPE,   # 'time_course_model',  # CustomType(type_declaration='time_course_model', default_value={}).model_dump(),
         'method': {
             '_type': 'string',
             '_default': 'deterministic'
@@ -97,8 +96,10 @@ class CopasiProcess(Process):
 
     def __init__(self, config: Dict = None, core=None):
         super().__init__(config, core)
+
         model_source = self.config['model']['model_source']['value']
-        self.model_changes = self.config['model'].get('model_changes', {})
+        model_changes = self.config['model'].get('model_changes', {})
+        self.model_changes = {} if model_changes is None else model_changes
 
         # A. enter with model_file
         if '/' in model_source:
@@ -249,7 +250,7 @@ class CopasiProcess(Process):
         timecourse = run_time_course(
             start_time=inputs['time'],
             duration=interval,
-            update_model=True,
+            # update_model=True,
             model=self.copasi_model_object,
             method=self.method)
 
@@ -264,7 +265,6 @@ class CopasiProcess(Process):
             for mol_id in self.floating_species_list
         }
 
-        print(f'THE RESULTS AT INTERVAL {interval}:\n{results}')
         return results
 
 

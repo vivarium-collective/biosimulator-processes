@@ -27,7 +27,7 @@ __all__ = [
     'BaseModel',
     'TimeCourseProcessConfigSchema',
     'ModelParameter',
-    'ProcessConfig',
+    '__ProcessConfig',
     'Port',
     'State',
     'dynamic_process_config'
@@ -55,11 +55,11 @@ class ModelParameter(BaseModel):
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
     name: str
-    unit: Union[str, NoneType, ModelParameter] = Field(default='')
-    initial_concentration: Optional[Union[float, ModelParameter]] = None
-    initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = None
-    initial_expression: Union[str, NoneType, ModelParameter] = Field(default='')
-    expression: Union[str, NoneType, ModelParameter] = Field(default='')
+    unit: Union[str, NoneType, ModelParameter] = Field(default=None)
+    initial_concentration: Optional[Union[float, ModelParameter]] = Field(default=None)
+    initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = Field(default=None)
+    initial_expression: Union[str, NoneType, ModelParameter] = Field(default=None)
+    expression: Union[str, NoneType, ModelParameter] = Field(default=None)
 
 
 class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
@@ -119,6 +119,9 @@ class ModelFilepath(BaseModel):
         return v
 
 
+from pydantic import ValidationError
+
+
 # --- TIME COURSE MODEL
 class TimeCourseModel(BaseModel):
     """The data model declaration for process configuration schemas that support SED.
@@ -148,8 +151,6 @@ class TimeCourseModel(BaseModel):
                 return BiomodelId(value=v)
         elif isinstance(v, ModelFilepath) or isinstance(v, BiomodelId):
             return v
-        # else:
-        #     raise AttributeError('You must pass either a model filepath or valid biomodel id.')
 
 
 # --- PORTS
@@ -195,7 +196,7 @@ class EmitterInstance:
 
 
 # --- TYPE REGISTRY
-class ProcessConfig(BaseModel):
+class _ProcessConfig(BaseModel):
     value: Dict
 
 
@@ -258,11 +259,11 @@ class ProcessConfigSchema(BaseModel):
     config: Dict = Field(default={})
 
 
-class _ProcessConfig(BaseModel):
+class __ProcessConfig(BaseModel):
     process_name: str
 
 
-class CopasiProcessConfig(_ProcessConfig):
+class CopasiProcessConfig(__ProcessConfig):
     method: str = Field(default='deterministic')
     model: TimeCourseModel
 

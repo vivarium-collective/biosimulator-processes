@@ -335,6 +335,7 @@ def map_type_to_pydantic(custom_type: str):
     }
     return type_mapping.get(custom_type, object)  # Default to str if type is unknown TODO: change this.
 
+
 class Registry(object):
     '''A Registry holds a collection of functions or objects'''
 
@@ -445,11 +446,13 @@ class Registry(object):
         pydantic_fields = {}
         for field_name, field_info in config_schema.items():
             if isinstance(field_info, CustomType):
-                field_type = field_info.type_declaration
-                default_value = field_info.default_value
-            else:
-                field_type = field_info.get('_type')
-                default_value = field_info.get('_default')
+                field_info = field_info.model_dump()
+
+            if isinstance(field_info, str):
+                field_info = {'_type': field_info, '_default': {}}
+
+            field_type = field_info.get('_type')
+            default_value = field_info.get('_default')
 
             print(f'THE FIELD NAME: {field_name}')
             print(f'THE FIELD TYPE: {field_type}, DEFAULT: {default_value}')

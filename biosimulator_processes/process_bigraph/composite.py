@@ -425,14 +425,11 @@ class Process(Edge):
     """
     config_schema = {}
 
-    def __init__(self, config: Union[Dict, ProcessConfig] = None, core=None):
+    def __init__(self, config=None, core=None):
         self.core = core or ProcessTypes()
 
         if config is None:
             config = {}
-
-        if isinstance(config, ProcessConfig):
-            config = config.model_dump()
 
         # check that all keywords in config are in config_schema
         for key in config.keys():
@@ -440,12 +437,9 @@ class Process(Edge):
                 raise Exception(f'config key {key} not in config_schema for {self.__class__.__name__}')
 
         # fill in defaults for config
-        proc_config = self.core.fill(
+        self.config = self.core.fill(
             self.config_schema,
             config)
-
-        self.config = dynamic_process_config(config=proc_config)
-
 
 
     def initial_state(self):
@@ -458,7 +452,7 @@ class Process(Edge):
         return sync
 
 
-    def update(self, state: Union[Dict, State], interval):
+    def update(self, state, interval):
         return {}
 
 
@@ -1064,6 +1058,8 @@ class Composite(Process):
 
             if force_complete and self.state['global_time'] == end_time:
                 force_complete = False
+            if self.state['global_time'] == end_time:
+                print(f'THE FINAL STATE: {self.state}')
 
 
     def determine_steps(self):

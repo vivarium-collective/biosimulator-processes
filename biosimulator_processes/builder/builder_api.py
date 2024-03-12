@@ -7,6 +7,7 @@ from biosimulator_processes.bigraph_schema import Edge
 from biosimulator_processes.bigraph_schema.protocols import local_lookup_module
 from biosimulator_processes.process_bigraph import Process, Step, Composite, ProcessTypes
 from biosimulator_processes.bigraph_viz.diagram import plot_bigraph
+from biosimulator_processes.data_model import BaseModel as _BaseModel
 from pydantic import create_model, BaseModel
 
 
@@ -131,7 +132,7 @@ class BuilderNode:
         process_class = self.builder.core.process_registry.access(name)
 
         # Check if config is a Pydantic model and convert to dict if so
-        if isinstance(config, BaseModel):
+        if isinstance(config, BaseModel) or isinstance(config, _BaseModel):
             config = config.model_dump()
         else:
             config = config or {}
