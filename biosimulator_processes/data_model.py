@@ -1,4 +1,4 @@
-from typing import Dict, List, Union, Tuple, Optional
+from typing import Dict, List, Union, Tuple, Optional, Any
 from types import NoneType
 from abc import ABC, abstractmethod
 from pydantic import (
@@ -7,7 +7,8 @@ from pydantic import (
     field_serializer,
     Field,
     ConfigDict,
-    create_model
+    create_model,
+    ValidationError
 )
 
 
@@ -22,21 +23,21 @@ __all__ = [
     'ModelFilepath',
     'TimeCourseModel',
     'ProcessConfigSchema',
-    'CopasiProcessConfig',
     'PortSchema',
     'EmittedType',
     'EmitterConfig',
     'EmitterInstance',
-    'ProcessInstance',
+    'TimeCourseProcessInstance',
     'FromDict',
     'BasicoModelChanges',
     'SedModel',
     'BaseModel',
-    'TimeCourseProcessConfigSchema',
     'ModelParameter',
-    'ProcessConfig',
+    '__ProcessConfig',
     'Port',
-    'State'
+    'State',
+    'dynamic_process_config',
+    'TimeCourseProcessConfig'
 ]
 
 
@@ -53,6 +54,13 @@ class BaseModel(_BaseModel):
 
 
 class ModelParameter(BaseModel):
+    """
+        Attributes:
+            name:`str`
+            feature:`str`
+            value:`Union[float, int, str]`
+            scope:`str`
+    """
     name: str
     feature: str
     value: Union[float, int, str]
@@ -61,11 +69,11 @@ class ModelParameter(BaseModel):
 
 class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
     name: str
-    unit: Union[str, NoneType, ModelParameter] = Field(default='')
-    initial_concentration: Optional[Union[float, ModelParameter]] = None
-    initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = None
-    initial_expression: Union[str, NoneType, ModelParameter] = Field(default='')
-    expression: Union[str, NoneType, ModelParameter] = Field(default='')
+    unit: Union[str, NoneType, ModelParameter] = Field(default=None)
+    initial_concentration: Optional[Union[float, ModelParameter]] = Field(default=None)
+    initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = Field(default=None)
+    initial_expression: Union[str, NoneType, ModelParameter] = Field(default=None)
+    expression: Union[str, NoneType, ModelParameter] = Field(default=None)
 
 
 class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
@@ -82,9 +90,20 @@ class ReactionParameter(BaseModel):
     value: Union[float, int, str]
 
 
+class ReactionModelParameter(ModelParameter):
+    """
+        Attributes:
+            name:`str`
+            feature:`str`
+            value:`Union[float, int, str]`
+            scope:`str` = 'reaction'
+    """
+    scope: str = 'reaction'
+
+
 class ReactionChanges(BaseModel):
     """
-        Parameters:
+        Attributes:
             reaction_name:`str`: name of the reaction you wish to change.
             parameter_changes:`List[ReactionParameter]`: list of parameters you want to change from
                 `reaction_name`. Defaults to `[]`, which denotes no parameter changes.
@@ -129,7 +148,7 @@ class ModelFilepath(BaseModel):
 class TimeCourseModel(BaseModel):
     """The data model declaration for process configuration schemas that support SED.
 
-        Parameters:
+        Attributes:
             model_id: `str`
             model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
             model_language: `str`
@@ -145,20 +164,32 @@ class TimeCourseModel(BaseModel):
 
     @field_validator('model_source')
     @classmethod
-    def set_value(cls, v: str):
+    def set_value(cls, v):
         """Verify that the model source is set to only either a path or a biomodels id"""
-        # if '/' in cls.model_source:
-        #     return ModelFilepath(value=cls.model_source)
-        # elif 'BIO' in cls.input_source:
-        #     return BiomodelId(value=cls.model_source)
-        if '/' in v:
-            return ModelFilepath(value=v)
-        elif 'BIO' in v:
-            return BiomodelId(value=v)
-        elif isinstance(v, ModelFilepath):
+        if isinstance(v, str):
+            if '/' in v:
+                return ModelFilepath(value=v)
+            elif 'BIO' in v:
+                return BiomodelId(value=v)
+        elif isinstance(v, ModelFilepath) or isinstance(v, BiomodelId):
             return v
-        # else:
-        #     raise AttributeError('You must pass either a model filepath or valid biomodel id.')
+        else:
+            raise ValidationError('You must pass a valid model_source.')
+
+
+class TimeCourseProcessConfig(BaseModel):
+    """TimeCourse configuration with parameters which are parsable by '2D' time-course
+        simulators such as COPASI and Tellurium.
+
+        Attributes:
+            model:`Union[Dict[str, Any], TimeCourseModel]`: configuration of the time course
+                model. See `TimeCourseModel`.
+            method:`str`: method by which the simulator solves the model. Options include
+                stochastic, deterministic, hybrid, directMethod. See basico.run_time_course
+                for full options. Defaults to `'deterministic'`.
+    """
+    model: Union[Dict[str, Any], TimeCourseModel]
+    method: str = Field(default='deterministic')
 
 
 # --- PORTS
@@ -204,6 +235,20 @@ class EmitterInstance:
 
 
 # --- TYPE REGISTRY
+class _ProcessConfig(BaseModel):
+    value: Dict
+
+
+class CustomType(BaseModel):
+    type_declaration: str
+    default_value: any = None
+
+    @classmethod
+    @field_validator('default_value')
+    def set_default(cls, v):
+        pass
+
+
 def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
     config = config or {}
     config.update(kwargs)
@@ -223,10 +268,6 @@ def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
     return DynamicProcessConfig(**config)
 
 
-class ProcessConfig(BaseModel):
-    value: Dict
-
-
 class Port(BaseModel):
     value: Dict
 
@@ -235,9 +276,21 @@ class State(BaseModel):
     # THINK: builder_api LN.120: add_process. TODO: This should be parsable by the builder in add process.
     _type: str
     address: str
-    config: ProcessConfig
-    inputs: Port
-    outputs: Port
+    config: BaseModel
+    inputs: Union[Port, Dict]
+    outputs: Union[Port, Dict]
+
+    @classmethod
+    def set_port(cls, v):
+        if isinstance(v, dict):
+            return Port(**v)
+        else:
+            return v
+
+    @field_validator('outputs')
+    @classmethod
+    def set_outputs(cls, v):
+        return cls.set_port(v)
 
 
 # --- PROCESSES
@@ -245,39 +298,14 @@ class ProcessConfigSchema(BaseModel):
     config: Dict = Field(default={})
 
 
-class ProcessConfig(BaseModel):
+class __ProcessConfig(BaseModel):
     process_name: str
 
 
-class CopasiProcessConfig(ProcessConfig):
-    method: str = Field(default='deterministic')
-    model: TimeCourseModel
-
-    # @field_serializer('model', when_used='json')
-    # @classmethod
-    # def serialize_model(cls, model):
-    #     return model.model_dump_json()
-
-    def get_config(self):
-        """TODO: make deep copy before pop"""
-        config = self.model_dump()
-        config.pop('process_name')
-        return config
-
-    # @field_validator('model')
-    # @classmethod
-    # def validate_model_source(cls, v):
-    #     if isinstance(cls.model, TimeCourseModel):
-    #         if not v.model_source.value:
-    #             raise AttributeError('You must pass a valid model source type: either a model filepath or valid biomodel id')
-    #         else:
-    #             return v
-
-
-class ProcessInstance(BaseModel):
+class TimeCourseProcessInstance(BaseModel):
     _type: str
     address: str
-    config: Union[CopasiProcessConfig, ProcessConfigSchema]
+    config: TimeCourseProcessConfig
     inputs: PortSchema
     outputs: PortSchema
 
@@ -302,14 +330,6 @@ class TimeCourseModelSchema(BaseModel):
         'global_parameter_changes': 'maybe[tree[string]]',
         'reaction_changes': 'maybe[tree[string]]'}
     model_units: str = 'maybe[tree[string]]'
-
-
-
-class TimeCourseProcessConfigSchema(BaseModel):
-    model: TimeCourseModelSchema = TimeCourseModelSchema()
-    method: Dict[str, str] = {
-        '_type': 'string',
-        '_default': 'deterministic'}
 
 
 # --- INSTALLATION
@@ -418,18 +438,18 @@ class SedModel(FromDict):
 
 MODEL_TYPE = {
         'model_id': 'string',
-        'model_source': 'tree[string]',  # 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
-        'model_language': {    # could be used to load a different model language supported by COPASI/basico
+        'model_source': 'tree[string]',
+        'model_language': {
             '_type': 'string',
-            '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
+            '_default': 'sbml'
         },
         'model_name': {
             '_type': 'string',
             '_default': 'composite_process_model'
         },
         'model_changes': {
-            'species_changes': 'maybe[tree[string]]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-            'global_parameter_changes': 'maybe[tree[string]]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+            'species_changes': 'maybe[tree[string]]',
+            'global_parameter_changes': 'maybe[tree[string]]',
             'reaction_changes': 'maybe[tree[string]]'
         },
         'model_units': 'maybe[tree[string]]'
