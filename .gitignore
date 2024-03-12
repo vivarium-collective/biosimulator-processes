@@ -1,6 +1,6 @@
 buildImage.yaml
 .python-version
-__pycache__/
+*__pycache__/
 .idea/
 *.ipynb_checkpoints/
 dist/
@@ -15,7 +15,7 @@ push-image.sh
 release.sh
 run.sh
 ray_job.sh
-__pycache__
+biosimulator_processes/__pycache__
 .pytest_cache
 submit-biosimulators-container.sh
 .vagrant
