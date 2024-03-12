@@ -5,6 +5,7 @@ from pydantic import (
     BaseModel as _BaseModel,
     field_validator,
     field_serializer,
+    root_validator,
     Field,
     ConfigDict,
     create_model,
@@ -155,14 +156,14 @@ class TimeCourseModel(BaseModel):
             model_name: `str`
             model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
     """
-    model_id: str = Field(default='')
+    model_id: str = Field(default=None)
     model_source: Union[str, ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
     model_language: Union[str, Dict[str, str]] = Field(default='sbml')
     model_name: Union[str, Dict[str, str]] = Field(default='Unnamed Composite Process TimeCourseModel')
     model_changes: Union[TimeCourseModelChanges, Dict[str, str]] = None
     model_units: Union[Dict[str, str], str] = Field(default='_default')
 
-    @field_validator('model_source')
+    @field_validator('model_source', mode='before')
     @classmethod
     def set_value(cls, v):
         """Verify that the model source is set to only either a path or a biomodels id"""
@@ -175,6 +176,15 @@ class TimeCourseModel(BaseModel):
             return v
         else:
             raise ValidationError('You must pass a valid model_source.')
+
+    @field_validator('model_id', mode='after')
+    @classmethod
+    def set_id(cls, v):
+        if v is None:
+            if isinstance(cls.model_source, str):
+                return v
+            else:
+                return cls.model_source.value
 
 
 class TimeCourseProcessConfig(BaseModel):
@@ -305,7 +315,7 @@ class __ProcessConfig(BaseModel):
 class TimeCourseProcessInstance(BaseModel):
     _type: str
     address: str
-    config: TimeCourseConfig
+    config: TimeCourseProcessConfig
     inputs: PortSchema
     outputs: PortSchema
 
