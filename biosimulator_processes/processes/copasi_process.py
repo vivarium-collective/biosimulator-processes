@@ -37,8 +37,7 @@ from biosimulator_processes.process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes.data_model import (
     TimeCourseModel,
-    TimeCourseProcessConfigSchema,
-    CopasiProcessConfig,
+    TimeCourseProcessConfig,
     MODEL_TYPE,
     CustomType
 )
@@ -94,7 +93,7 @@ class CopasiProcess(Process):
         }
     }
 
-    def __init__(self, config: Union[Dict, TimeCourseConfig] = None, core=None):
+    def __init__(self, config: Union[Dict, TimeCourseProcessConfig] = None, core=None):
         super().__init__(config, core)
 
         # insert copasi process model config

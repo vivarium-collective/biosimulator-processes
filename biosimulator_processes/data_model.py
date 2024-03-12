@@ -37,7 +37,7 @@ __all__ = [
     'Port',
     'State',
     'dynamic_process_config',
-    'TimeCourseConfig'
+    'TimeCourseProcessConfig'
 ]
 
 
@@ -177,7 +177,7 @@ class TimeCourseModel(BaseModel):
             raise ValidationError('You must pass a valid model_source.')
 
 
-class TimeCourseConfig(BaseModel):
+class TimeCourseProcessConfig(BaseModel):
     """TimeCourse configuration with parameters which are parsable by '2D' time-course
         simulators such as COPASI and Tellurium.
 
