@@ -68,7 +68,7 @@ class DeterministicTimeCourseParameterScan(Step):
         'perturbation_magnitude': 'float',
         'parameters': 'list[object]'}
 
-    def __init__(self):
+    def __init__(self, config=None, core=None):
         self.process = CopasiProcess(config=self.config.get('process_config'))
         self.params_to_scan: List[ModelParameter] = self.config.get('parameters', [])
         self.n_iterations = self.config['n_iterations']

@@ -34,6 +34,13 @@ mypy = ">=1.8.0"
 flake8 = "*"
 twine = "*"
 
+[tool.pytest.ini_options]
+testpaths = ["biosimulator_processes"]
+addopts = "--ignore=setup.py"
+python_files = "*.py"
+# python_functions = test_*
+# markers = {'slow': 'indicates slow tests (deselect with '-m "not slow"')}
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

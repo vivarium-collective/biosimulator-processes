@@ -6,8 +6,8 @@ class ParameterScan(Step):
         'parameters': 'tree'  # this should be from parameter id to range of values
     }
 
-    def __init__(self, config=None):
-        super().__init__(config)
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
 
     def inputs(self):
         return {
