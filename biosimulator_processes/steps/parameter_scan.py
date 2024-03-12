@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 import numpy as np
 from process_bigraph import Step
-from biosimulator_processes.data_model import TimeCourseProcessConfigSchema, ModelParameter
+from biosimulator_processes.data_model import TimeCourseProcessConfig, ModelParameter
 from biosimulator_processes.processes.copasi_process import CopasiProcess
 
 
@@ -61,7 +61,7 @@ class DeterministicTimeCourseParameterScan(Step):
             used to run during update
     """
     config_schema = {
-        'process_config': TimeCourseProcessConfigSchema().model_dump(),
+        'process_config': 'tree[string]',
         'n_iterations': 'int',
         'iter_stop': 'float',
         'iter_start': 'maybe[float]',

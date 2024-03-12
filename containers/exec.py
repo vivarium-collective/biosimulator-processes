@@ -2,7 +2,7 @@ import toml
 import subprocess
 from typing import *
 from docker import DockerClient
-from biosimulator_processes.containers.io import write_dockerfile
+from containers.io import write_dockerfile
 
 
 CLIENT = DockerClient(base_url='unix:///var/run/docker.sock')
