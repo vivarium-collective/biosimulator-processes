@@ -6,7 +6,7 @@ import importlib
 PROCESSES_TO_REGISTER = [
     ('cobra', 'cobra_process.CobraProcess'),
     ('copasi', 'copasi_process.CopasiProcess'),
-    # ('smoldyn', 'smoldyn_process.SmoldynProcess'),
+    ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
     ('parameter_scan', 'parameter_scan.DeterministicTimeCourseParameterScan')
 ]

@@ -270,10 +270,11 @@ class CopasiProcess(Process):
 
 
 def test_process():
+    CORE.process_registry.register('biosimulator_processes.processes.copasi_process.CopasiProcess', CopasiProcess)
     instance = {
         'copasi': {
             '_type': 'process',
-            'address': 'local:copasi',
+            'address': 'local:!biosimulator_processes.processes.copasi_process.CopasiProcess',
             'config': {
                 'model': {
                     'model_source': {
@@ -309,7 +310,7 @@ def test_process():
 
     workflow = Composite(config={
         'state': instance  # initial_sim_state
-    }, core=CORE)
+    })
     workflow.run(10)
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')

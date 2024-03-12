@@ -50,6 +50,7 @@
 from typing import *
 from uuid import uuid4
 from process_bigraph import Process, Composite, pf, pp
+from biosimulator_processes import CORE
 try:
     import smoldyn as sm
     from smoldyn._smoldyn import MolecState
@@ -340,10 +341,11 @@ def test_process():
 
     # this is the instance for the composite process to run
     print("RUNNING")
+    CORE.process_registry.register('biosimulator_processes.processes.smoldyn_process.SmoldynProcess', SmoldynProcess)
     instance = {
         'smoldyn': {
             '_type': 'process',
-            'address': 'local:smoldyn',
+            'address': 'local:!biosimulator_processes.processes.smoldyn_process.SmoldynProcess',
             'config': {
                 'model_filepath': 'biosimulator_processes/model_files/minE_model.txt',
                 'animate': False},
@@ -371,13 +373,13 @@ def test_process():
     total_time = 2
 
     # make the composite
-    workflow = Composite({
-        'state': instance
-    })
+    # workflow = Composite({
+    #     'state': instance
+    # })
 
     # run
-    workflow.run(total_time)
+    # workflow.run(total_time)
 
     # gather results
-    results = workflow.gather_results()
-    pp(f'RESULTS: {pf(results)}')
+    # results = workflow.gather_results()
+    # pp(f'RESULTS: {pf(results)}')

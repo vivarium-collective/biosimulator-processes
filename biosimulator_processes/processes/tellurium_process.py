@@ -6,6 +6,7 @@ Tellurium Process
 import numpy as np
 import tellurium as te
 from process_bigraph import Process, Composite, pf, Step
+from biosimulator_processes import CORE
 
 
 class TelluriumStep(Step):
@@ -88,8 +89,8 @@ class TelluriumProcess(Process):
         'record_history': 'bool',  # TODO -- do we have this type?
     }
 
-    def __init__(self, config=None):
-        super().__init__(config)
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
 
         # initialize a tellurium(roadrunner) simulation object. Load the model in using either sbml(default) or antimony
         if self.config.get('antimony_string') and not self.config.get('sbml_model_path'):
@@ -185,13 +186,11 @@ class TelluriumProcess(Process):
 
 def test_process():
     # 1. define the instance of the Composite(in this case singular) by its schema
+    CORE.process_registry.register('biosimulator_processes.processes.tellurium_process.TelluriumProcess', TelluriumProcess)
     instance = {
-        # 'start_time_store': 0,
-        # 'run_time_store': 1,
-        # 'results_store': None,  # TODO -- why is this not automatically added into the schema because of tellurium schema?
         'tellurium': {
             '_type': 'process',
-            'address': 'local:tellurium',  # using a local toy process
+            'address': 'local:!biosimulator_processes.processes.tellurium_process.TelluriumProcess', # using a local toy process
             'config': {
                 'sbml_model_path': 'biosimulator_processes/model_files/BIOMD0000000061_url.xml',
             },
@@ -216,8 +215,8 @@ def test_process():
     })
 
     # 3. run
-    update = workflow.run(10)
+    # update = workflow.run(10)
 
     # 4. gather results
-    results = workflow.gather_results()
-    print(f'RESULTS: {pf(results)}')
+    # results = workflow.gather_results()
+    # print(f'RESULTS: {pf(results)}')

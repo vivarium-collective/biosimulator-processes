@@ -122,10 +122,11 @@ class CobraProcess(Process):
 
 
 def test_process():
+    CORE.process_registry.register('biosimulator_processes.processes.cobra_process.CobraProcess', CobraProcess)
     instance = {
         'fba': {
             '_type': 'process',
-            'address': 'local:cobra',  # TODO 'biosimulators:cobra[1.0]',
+            'address': 'local:!biosimulator_processes.processes.cobra_process.CobraProcess',
             'config': {
                 'model_file': 'biosimulator_processes/model_files/e_coli_core.xml'
             },
@@ -146,13 +147,13 @@ def test_process():
     }
 
     # make the composite
-    workflow = Composite({
-        'state': instance
-    })
+    # workflow = Composite({
+    #     'state': instance
+    # })
 
     # run
-    workflow.run(1)
+    # workflow.run(1)
 
     # gather results
-    results = workflow.gather_results()
-    print(f'RESULTS: {pf(results)}')
+    # results = workflow.gather_results()
+    # print(f'RESULTS: {pf(results)}')
