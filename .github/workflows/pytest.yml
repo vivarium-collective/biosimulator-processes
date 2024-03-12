@@ -1,20 +1,12 @@
 name: Tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  push
+    # branches: [main]
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-
-    services:
-      mongodb:
-        image: mongo
-        ports:
-          - 27017:27017
 
     steps:
     - name: Check out repository
