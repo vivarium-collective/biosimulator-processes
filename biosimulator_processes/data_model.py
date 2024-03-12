@@ -1,7 +1,15 @@
-from typing import Dict, List, Union, Tuple, Optional
+from typing import Dict, List, Union, Tuple, Optional, Any
 from types import NoneType
 from abc import ABC, abstractmethod
-from pydantic import BaseModel as _BaseModel, field_validator, field_serializer, Field, ConfigDict, create_model
+from pydantic import (
+    BaseModel as _BaseModel,
+    field_validator,
+    field_serializer,
+    Field,
+    ConfigDict,
+    create_model,
+    ValidationError
+)
 
 
 __all__ = [
@@ -15,22 +23,21 @@ __all__ = [
     'ModelFilepath',
     'TimeCourseModel',
     'ProcessConfigSchema',
-    'CopasiProcessConfig',
     'PortSchema',
     'EmittedType',
     'EmitterConfig',
     'EmitterInstance',
-    'ProcessInstance',
+    'TimeCourseProcessInstance',
     'FromDict',
     'BasicoModelChanges',
     'SedModel',
     'BaseModel',
-    'TimeCourseProcessConfigSchema',
     'ModelParameter',
     '__ProcessConfig',
     'Port',
     'State',
-    'dynamic_process_config'
+    'dynamic_process_config',
+    'TimeCourseConfig'
 ]
 
 
@@ -119,9 +126,6 @@ class ModelFilepath(BaseModel):
         return v
 
 
-from pydantic import ValidationError
-
-
 # --- TIME COURSE MODEL
 class TimeCourseModel(BaseModel):
     """The data model declaration for process configuration schemas that support SED.
@@ -151,6 +155,23 @@ class TimeCourseModel(BaseModel):
                 return BiomodelId(value=v)
         elif isinstance(v, ModelFilepath) or isinstance(v, BiomodelId):
             return v
+        else:
+            raise ValidationError('You must pass a valid model_source.')
+
+
+class TimeCourseConfig(BaseModel):
+    """TimeCourse configuration with parameters which are parsable by '2D' time-course
+        simulators such as COPASI and Tellurium.
+
+        Parameters:
+            model:`Union[Dict[str, Any], TimeCourseModel]`: configuration of the time course
+                model. See `TimeCourseModel`.
+            method:`str`: method by which the simulator solves the model. Options include
+                stochastic, deterministic, hybrid, directMethod. See basico.run_time_course
+                for full options. Defaults to `'deterministic'`.
+    """
+    model: Union[Dict[str, Any], TimeCourseModel]
+    method: str = Field(default='deterministic')
 
 
 # --- PORTS
@@ -205,7 +226,7 @@ class CustomType(BaseModel):
     default_value: any = None
 
     @classmethod
-    @field_validator('_default')
+    @field_validator('default_value')
     def set_default(cls, v):
         pass
 
@@ -263,35 +284,10 @@ class __ProcessConfig(BaseModel):
     process_name: str
 
 
-class CopasiProcessConfig(__ProcessConfig):
-    method: str = Field(default='deterministic')
-    model: TimeCourseModel
-
-    # @field_serializer('model', when_used='json')
-    # @classmethod
-    # def serialize_model(cls, model):
-    #     return model.model_dump_json()
-
-    def get_config(self):
-        """TODO: make deep copy before pop"""
-        config = self.model_dump()
-        config.pop('process_name')
-        return config
-
-    # @field_validator('model')
-    # @classmethod
-    # def validate_model_source(cls, v):
-    #     if isinstance(cls.model, TimeCourseModel):
-    #         if not v.model_source.value:
-    #             raise AttributeError('You must pass a valid model source type: either a model filepath or valid biomodel id')
-    #         else:
-    #             return v
-
-
-class ProcessInstance(BaseModel):
+class TimeCourseProcessInstance(BaseModel):
     _type: str
     address: str
-    config: Union[CopasiProcessConfig, ProcessConfigSchema]
+    config: TimeCourseConfig
     inputs: PortSchema
     outputs: PortSchema
 
@@ -316,14 +312,6 @@ class TimeCourseModelSchema(BaseModel):
         'global_parameter_changes': 'maybe[tree[string]]',
         'reaction_changes': 'maybe[tree[string]]'}
     model_units: str = 'maybe[tree[string]]'
-
-
-
-class TimeCourseProcessConfigSchema(BaseModel):
-    model: TimeCourseModelSchema = TimeCourseModelSchema()
-    method: Dict[str, str] = {
-        '_type': 'string',
-        '_default': 'deterministic'}
 
 
 # --- INSTALLATION

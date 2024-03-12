@@ -94,9 +94,10 @@ class CopasiProcess(Process):
         }
     }
 
-    def __init__(self, config: Dict = None, core=None):
+    def __init__(self, config: Union[Dict, TimeCourseConfig] = None, core=None):
         super().__init__(config, core)
 
+        # insert copasi process model config
         model_source = self.config['model']['model_source']['value']
         model_changes = self.config['model'].get('model_changes', {})
         self.model_changes = {} if model_changes is None else model_changes

@@ -333,7 +333,7 @@ def map_type_to_pydantic(custom_type: str):
         'any': Any,
         # Add more mappings as necessary
     }
-    return type_mapping.get(custom_type, object)  # Default to str if type is unknown TODO: change this.
+    return type_mapping.get(custom_type, Any)  # Default to str if type is unknown TODO: change this.
 
 
 class Registry(object):
