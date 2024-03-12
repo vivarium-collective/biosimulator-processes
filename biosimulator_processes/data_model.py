@@ -177,25 +177,13 @@ class TimeCourseModel(BaseModel):
         else:
             raise ValidationError('You must pass a valid model_source.')
 
-    @field_validator('model_id', mode='after')
+    @field_validator('model_id', mode='before')
     @classmethod
     def set_id(cls, v):
         if v is None:
             return cls.model_source
         else:
             return v
-
-    # @model_validator(mode='after')
-    # @classmethod
-    # def set_id(cls, data):
-    #     data_dict = data.model_dump()
-    #     v = data_dict.get('model_id')
-    #     if v is None:
-    #         if isinstance(data_dict['model_source'], str):
-    #             cls.model_id = v
-    #         else:
-    #             cls.model_id = cls.model_source.value
-    #     return data
 
 
 class TimeCourseProcessConfig(BaseModel):
@@ -262,7 +250,7 @@ class _ProcessConfig(BaseModel):
 
 class CustomType(BaseModel):
     type_declaration: str
-    default_value: any = None
+    default_value: Any = None
 
     @classmethod
     @field_validator('default_value')

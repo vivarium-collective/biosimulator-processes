@@ -86,16 +86,19 @@ class CopasiProcess(Process):
 
     # config_schema = TimeCourseProcessConfigSchema().model_dump()
     config_schema = {
-        'model': MODEL_TYPE,   # 'time_course_model',  # CustomType(type_declaration='time_course_model', default_value={}).model_dump(),
+        'model': {
+            '_type': MODEL_TYPE  # 'time_course_model',  # CustomType(type_declaration='time_course_model', default_value={}).model_dump(),
+        },
         'method': {
             '_type': 'string',
             '_default': 'deterministic'
         }
     }
 
-    def __init__(self, config: Union[Dict, TimeCourseProcessConfig] = None, core=None):
+    def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
+        # self.config = TimeCourseProcessConfig(**self.config)
         # insert copasi process model config
         model_source = self.config['model']['model_source']['value']
         model_changes = self.config['model'].get('model_changes', {})

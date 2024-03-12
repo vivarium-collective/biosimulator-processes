@@ -331,9 +331,16 @@ def map_type_to_pydantic(custom_type: str):
         'float': float,
         'int': int,
         'any': Any,
+        'tree': dict,
+        'list': list
         # Add more mappings as necessary
     }
-    return type_mapping.get(custom_type, Any)  # Default to str if type is unknown TODO: change this.
+    if 'tree' in custom_type:
+        return type_mapping['tree']
+    elif 'list' in custom_type:
+        return type_mapping['list']
+    else:
+        return type_mapping.get(custom_type, Any)  # Default to str if type is unknown TODO: change this.
 
 
 class Registry(object):
@@ -445,14 +452,8 @@ class Registry(object):
         # Convert custom schema to Pydantic schema
         pydantic_fields = {}
         for field_name, field_info in config_schema.items():
-            if isinstance(field_info, CustomType):
-                field_info = field_info.model_dump()
-
-            if isinstance(field_info, str):
-                field_info = {'_type': field_info, '_default': {}}
-
             field_type = field_info.get('_type')
-            default_value = field_info.get('_default')
+            default_value = field_info.get('_default', {})
 
             print(f'THE FIELD NAME: {field_name}')
             print(f'THE FIELD TYPE: {field_type}, DEFAULT: {default_value}')
