@@ -1,5 +1,6 @@
 from typing import Dict, List, Union, Tuple, Optional, Any
 from types import NoneType
+from dataclasses import dataclass, asdict
 from abc import ABC, abstractmethod
 from pydantic import (
     BaseModel as _BaseModel,
@@ -42,7 +43,6 @@ __all__ = [
 
 
 # TODO: Parse this into sep. library datamodels
-
 
 # --- MODEL ATTRIBUTES
 class BaseModel(_BaseModel):
@@ -142,6 +142,68 @@ class ModelFilepath(BaseModel):
     def check_value(cls, v):
         assert '/' in v, "value must contain a path"
         return v
+
+
+# --- DATACLASS MODELS
+@dataclass
+class BaseClass:
+    def to_dict(self):
+        return asdict(self)
+
+
+class ModelSource(BaseClass):
+    value: str
+
+    @abstractmethod
+    def validate_source(self):
+        pass
+
+
+class BiomodelID(ModelSource):
+    def __init__(self, value):
+        super().__init__(value)
+        self.validate_source()
+
+    def validate_source(self):
+        if 'BIO' not in self.value:
+            raise AttributeError('You must pass a valid biomodel id.')
+
+
+class ModelFilePath(ModelSource):
+    def __init__(self):
+        self.validate_source()
+
+    def validate_source(self):
+        if '/' not in self.value:
+            raise AttributeError('You must pass a valid model path.')
+
+
+class ModelChange(BaseClass):
+    name: str
+    scope: str
+    value: Dict
+
+
+class ModelChanges(BaseClass):
+    species_changes: List[ModelChange]
+    param_changes: List[ModelChange]
+    reaction_changes: List[ModelChange]
+
+
+class TimeCourseDataclass(BaseClass):
+    model_id: str = None
+    model_source: Union[BiomodelId, ModelFilepath, str]
+    model_language: str = 'sbml'
+    model_name: str = 'Unnamed TimeCourse Model'
+    model_changes: ModelChanges = None
+    model_units: Dict[str, str] = None
+
+    def __init__(self):
+        if self.model_id is None:
+            if isinstance(self.model_source, str):
+                self.model_id = self.model_source
+            else:
+                self.model_id = self.model_source.value
 
 
 # --- TIME COURSE MODEL
