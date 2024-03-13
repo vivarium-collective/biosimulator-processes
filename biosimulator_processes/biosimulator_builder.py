@@ -64,7 +64,7 @@ class BuildPrompter:
                 input_kwargs[key.strip()] = ast.literal_eval(value)
             except (ValueError, SyntaxError):
                 input_kwargs[key] = value
-        print(input_kwargs)
+        print(f'Input kwargs generated: {input_kwargs}')
         return input_kwargs
 
     def add_single_process(self) -> None:
