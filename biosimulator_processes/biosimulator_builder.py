@@ -50,8 +50,9 @@ class BuildPrompter:
         """
         self.builder_instance = builder_instance
         self.connect_all = connect_all
-        print('Starting up...')
-        self.run(num=num_additions, duration=additional_params.get('duration'))
+        if auto_run:
+            print('Autorun is turned on. Now starting...')
+            self.run(num=num_additions, duration=additional_params.get('duration'))
 
     @classmethod
     def generate_input_kwargs(cls) -> Dict[str, Any]:
@@ -116,6 +117,7 @@ class BuildPrompter:
                 **params:`kwargs`: Custom params. TODO: implement these.
         """
         # add processes
+        print('Run request initiated...')
         if num is None:
             num = input('How many processes would you like to add to the bigraph?')
         print(f'{num} processes will be added to the bi-graph.')
@@ -142,6 +144,6 @@ class BuildPrompter:
         print('Composite generated!')
         print(f'Running generated composite for an interval of {duration}')
         results = composite.run(duration)  # TODO: add handle force complete
-        print('Composite successfully run. Done.')
+        print('Composite successfully run. Request complete. Done.')
 
 
