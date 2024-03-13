@@ -24,7 +24,24 @@ class BiosimulatorBuilder(Builder):
 
 
 class BuildPrompter:
-    def __init__(self, builder_instance: Union[Builder, BiosimulatorBuilder]):
+    def __init__(self,
+                 builder_instance: Union[Builder, BiosimulatorBuilder],
+                 num_additions: int,
+                 connect_all: bool = True,
+                 edge_config: Dict[str, str] = None,
+                 **additional_params):
+        """
+            Parameters:
+                builder_instance:`Union[builder.Builder, BiosimulatorBuilder]`: builder object
+                    instance on which to base the bigraph on.
+                num_additions:`int`: number of processes to add and subsequently connect to the
+                    bigraph composition.
+                connect_all:`bool`: whether to use Builder.connect_all after adding processes. Defaults
+                    to `True`.
+                edge_config:`Dict[str, str]`: configuration details for edge/vertex connection if
+                    `connect_all` is set to `False`. Defaults to `None`.
+                **additional_params:`kwargs`: addition/custom parameter specifications. TODO: make use cases for this.
+        """
         self.builder_instance = builder_instance
 
     @classmethod
