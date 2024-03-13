@@ -3,7 +3,7 @@
 branch="$1"
 
 if [ "${branch}" == "" ]; then
-  echo "Please specify a branch"
+  echo "Please specify a branch..."
   read -r branch
 fi
 
