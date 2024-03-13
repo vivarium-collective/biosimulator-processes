@@ -50,6 +50,7 @@ class BuildPrompter:
         """
         self.builder_instance = builder_instance
         self.connect_all = connect_all
+        print('New prompter instance created!')
         if auto_run:
             print('Autorun is turned on. Now starting...')
             self.run(num=num_additions, duration=additional_params.get('duration'))
