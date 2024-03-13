@@ -202,6 +202,9 @@ class SedModel:
                 modId = self.model_source.value
             return f'{modId}_Model'
 
+    def to_dict(self):
+        return asdict(self)
+
 
 class TimeCourseDataclass(SedModel):
     """The data model declaration for process configuration schemas that support SED.
