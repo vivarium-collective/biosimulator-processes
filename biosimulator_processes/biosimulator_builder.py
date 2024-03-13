@@ -43,6 +43,7 @@ class BuildPrompter:
                 **additional_params:`kwargs`: addition/custom parameter specifications. TODO: make use cases for this.
         """
         self.builder_instance = builder_instance
+        self.connect_all = connect_all
 
     @classmethod
     def generate_input_kwargs(cls) -> Dict[str, Any]:
@@ -66,13 +67,21 @@ class BuildPrompter:
         print(input_kwargs)
         return input_kwargs
 
-    def add_single_process(self):
+    def add_single_process(self) -> None:
         process_type = input(
             f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
         builder_node_name = input('Please enter the name that you wish to assign to this process: ')
         input_kwargs = self.generate_input_kwargs()
         visualize = input('Do you wish to visualize this addition after (y/N): ')
         self.builder_instance.add_process(process_id=builder_node_name, name=process_type, config={**input_kwargs})
-        self.builder_instance.connect_all()
+        print(f'{builder_node_name} process successfully added to the bi-graph!')
+        if self.connect_all:
+            self.builder_instance.connect_all()
+            print(f'All nodes including the most recently added {builder_node_name} processes connected!')
         if 'N' in visualize:
+            print('Visualizing bigraph...')
             self.builder_instance.visualize()
+
+    def run(self, num: int, **params):
+        for n in range(num):
+            self.add_single_process()
