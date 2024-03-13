@@ -29,6 +29,7 @@ class BuildPrompter:
                  num_additions: int,
                  connect_all: bool = True,
                  edge_config: Dict[str, str] = None,
+                 auto_run: bool = False,
                  **additional_params):
         """
             Parameters:
@@ -40,6 +41,9 @@ class BuildPrompter:
                     to `True`.
                 edge_config:`Dict[str, str]`: configuration details for edge/vertex connection if
                     `connect_all` is set to `False`. Defaults to `None`.
+                auto_run:`bool`: Whether to automatically begin the prompting and running
+                    of the build. If set to `True`, BuildPrompter.run() is called last during
+                    object construction. Defaults to `False`.
                 **additional_params:`kwargs`: addition/custom parameter specifications.
                     Options include: duration (how long to run the composite for)
                     TODO: make more use cases for this.
