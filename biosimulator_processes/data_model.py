@@ -275,7 +275,7 @@ class TimeCourseProcessConfig(BaseModel):
                 stochastic, deterministic, hybrid, directMethod. See basico.run_time_course
                 for full options. Defaults to `'deterministic'`.
     """
-    model: Union[Dict[str, Any], TimeCourseModel]
+    model: Union[Dict[str, str], TimeCourseModel]
     method: str = Field(default='deterministic')
 
 
@@ -328,7 +328,7 @@ class _ProcessConfig(BaseModel):
 
 class CustomType(BaseModel):
     type_declaration: str
-    default_value: any = None
+    default_value: Dict = None
 
     @classmethod
     @field_validator('default_value')

@@ -1,4 +1,5 @@
 from typing import *
+import ast
 from builder import Builder
 from biosimulator_processes import CORE
 
@@ -22,6 +23,34 @@ class BiosimulatorBuilder(Builder):
             raise RuntimeError('Only one instance of this class can be created at a time.')
 
 
-# class BiosimulatorBuilder(Builder):
-#     def __init__(self, schema: Dict = None, tree: Dict = None, filepath: str = None):
-#         super().__init__(schema=schema, tree=tree, file_path=filepath, core=CORE)
+def generate_input_kwargs() -> Dict[str, Any]:
+    """Generate kwargs to be used as dynamic input for process configuration.
+
+        Args:
+            None.
+        Returns:
+            Dict[str, Any]: configuration kwargs for process construction.
+    """
+    process_kwargs = input('Please enter the process configuration keyword arguments: ')
+    process_args = process_kwargs.split(',')
+    input_kwargs = {}
+    for arg in process_args:
+        key, value = arg.split('=')
+        try:
+            # safely evaluate the value to its actual data type
+            input_kwargs[key.strip()] = ast.literal_eval(value)
+        except (ValueError, SyntaxError):
+            input_kwargs[key] = value
+    print(input_kwargs)
+    return input_kwargs
+
+
+def add_single_process(b: Builder):
+    process_type = input(f'Please enter one of the following process types that you wish to add:\n{b.list_processes()}\n:')
+    builder_node_name = input('Please enter the name that you wish to assign to this process: ')
+    input_kwargs = generate_input_kwargs()
+    visualize = input('Do you wish to visualize this addition after (y/N): ')
+    b.add_process(process_id=builder_node_name, name=process_type, config={**input_kwargs})
+    b.connect_all()
+    if 'N' in visualize:
+        b.visualize()
