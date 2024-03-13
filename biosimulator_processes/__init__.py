@@ -38,4 +38,7 @@ for process_name, process_path in PROCESSES_TO_REGISTER:
 
 """
  Builder(dataclasses) <- Implementation(dict) <- ProcessBigraph(dict) <- BigraphSchema(dict) 
+ 
+ the general builder should make/take dynamically created classes 
+ the biosimulator builder should make/take predefined classes
 """

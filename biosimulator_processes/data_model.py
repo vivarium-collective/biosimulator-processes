@@ -146,12 +146,12 @@ class ModelFilepath(BaseModel):
 
 # --- DATACLASS MODELS
 @dataclass
-class BaseClass:
+class _BaseClass:
     def to_dict(self):
         return asdict(self)
 
 
-class ModelSource(BaseClass):
+class ModelSource(_BaseClass):
     value: str
 
     @abstractmethod
@@ -178,32 +178,54 @@ class ModelFilePath(ModelSource):
             raise AttributeError('You must pass a valid model path.')
 
 
-class ModelChange(BaseClass):
+class ModelChange(_BaseClass):
     name: str
     scope: str
     value: Dict
 
 
-class ModelChanges(BaseClass):
+class ModelChanges(_BaseClass):
     species_changes: List[ModelChange]
     param_changes: List[ModelChange]
     reaction_changes: List[ModelChange]
 
 
-class TimeCourseDataclass(BaseClass):
-    model_id: str = None
-    model_source: Union[BiomodelId, ModelFilepath, str]
+@dataclass
+class SedModel:
+    model_source: Union[BiomodelID, ModelFilepath, str]
+
+    def set_id(self, model_id):
+        if model_id is None:
+            if isinstance(self.model_source, str):
+                modId = self.model_source
+            else:
+                modId = self.model_source.value
+            return f'{modId}_Model'
+
+
+class TimeCourseDataclass(SedModel):
+    """The data model declaration for process configuration schemas that support SED.
+
+        Attributes:
+            model_id: `str`
+            model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
+            model_language: `str`
+            model_name: `str`
+            model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
+    """
     model_language: str = 'sbml'
     model_name: str = 'Unnamed TimeCourse Model'
     model_changes: ModelChanges = None
     model_units: Dict[str, str] = None
 
-    def __init__(self):
-        if self.model_id is None:
-            if isinstance(self.model_source, str):
-                self.model_id = self.model_source
-            else:
-                self.model_id = self.model_source.value
+    def __init__(self, model_source, model_id=None):
+        """
+            Parameters:
+                model_source:`Union[str, ModelFilepath, BiomodelID`
+                model_id:`str`
+        """
+        super().__init__(model_source)
+        self.model_id = self.set_id(model_id)
 
 
 # --- TIME COURSE MODEL
