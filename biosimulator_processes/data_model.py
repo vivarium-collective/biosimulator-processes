@@ -497,7 +497,7 @@ class SedModel(FromDict):
     def __init__(self, _type: Dict = MODEL_TYPE):
         super().__init__(_type)
 
-Dict[str, Union[str, Dict[str, str], Dict[str, Dict[str]]]]
+
 MODEL_TYPE = {
         'model_id': 'string',
         'model_source': 'tree[string]',
