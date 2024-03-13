@@ -50,7 +50,8 @@ class BuildPrompter:
         return input_kwargs
 
     def add_single_process(self):
-        process_type = input(f'Please enter one of the following process types that you wish to add:\n{b.list_processes()}\n:')
+        process_type = input(
+            f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
         builder_node_name = input('Please enter the name that you wish to assign to this process: ')
         input_kwargs = self.generate_input_kwargs()
         visualize = input('Do you wish to visualize this addition after (y/N): ')
