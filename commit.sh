@@ -3,7 +3,8 @@
 branch="$1"
 
 if [ "${branch}" == "" ]; then
-  branch="main"
+  echo "Please specify a branch"
+  read -r branch
 fi
 
 echo "Enter commit message: "

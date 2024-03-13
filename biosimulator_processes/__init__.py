@@ -34,3 +34,8 @@ for process_name, process_path in PROCESSES_TO_REGISTER:
         print(f"{class_name} registered successfully.")
     except ImportError as e:
         print(f"{class_name} not available. Error: {e}")
+
+
+"""
+ Builder(dataclasses) <- Implementation(dict) <- ProcessBigraph(dict) <- BigraphSchema(dict) 
+"""
