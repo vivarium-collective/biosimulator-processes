@@ -71,17 +71,33 @@ class BuildPrompter:
         process_type = input(
             f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
         builder_node_name = input('Please enter the name that you wish to assign to this process: ')
+
         input_kwargs = self.generate_input_kwargs()
-        visualize = input('Do you wish to visualize this addition after (y/N): ')
-        self.builder_instance.add_process(process_id=builder_node_name, name=process_type, config={**input_kwargs})
+        self.builder_instance.add_process(
+            process_id=builder_node_name,
+            name=process_type,
+            config={**input_kwargs})
         print(f'{builder_node_name} process successfully added to the bi-graph!')
+
         if self.connect_all:
             self.builder_instance.connect_all()
             print(f'All nodes including the most recently added {builder_node_name} processes connected!')
-        if 'N' in visualize:
-            print('Visualizing bigraph...')
-            self.builder_instance.visualize()
+
+        while True:
+            visualize = input('Do you wish to visualize this addition after (y/n): ')
+            if 'y' in visualize.lower():
+                print('Visualizing bigraph...')
+                self.builder_instance.visualize()
+                break
+            elif 'n' or 'y' not in visualize.lower():
+                print('Please enter a valid choice: (y/n)')
+                continue
+            else:
+                break
 
     def run(self, num: int, **params):
         for n in range(num):
             self.add_single_process()
+        print('All processes added.')
+        # TODO: What other steps could possibly occur here? What about before?
+
