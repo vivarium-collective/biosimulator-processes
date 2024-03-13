@@ -30,7 +30,7 @@ for process_name, process_path in PROCESSES_TO_REGISTER:
         bigraph_class = getattr(module, class_name)
 
         # Register the process
-        CORE.process_registry.register(process_name, bigraph_class)
+        CORE.process_registry.register(class_name, bigraph_class)
         print(f"{class_name} registered successfully.")
     except ImportError as e:
         print(f"{class_name} not available. Error: {e}")
