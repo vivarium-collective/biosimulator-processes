@@ -93,6 +93,7 @@ class BuildPrompter:
                 print('Please enter a valid choice: (y/n)')
                 continue
             else:
+                print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
                 break
 
     def run(self, num: int, **params):
@@ -100,4 +101,5 @@ class BuildPrompter:
             self.add_single_process()
         print('All processes added.')
         # TODO: What other steps could possibly occur here? What about before?
+
 
