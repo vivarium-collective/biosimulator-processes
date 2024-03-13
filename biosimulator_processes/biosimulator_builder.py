@@ -51,6 +51,7 @@ class BuildPrompter:
 
             Args:
                 None.
+
             Returns:
                 Dict[str, Any]: configuration kwargs for process construction.
         """
@@ -96,10 +97,43 @@ class BuildPrompter:
                 print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
                 break
 
-    def run(self, num: int, **params):
+    def run(self, num: int = None, duration: int = None, **params) -> None:
+        """Get prompted for input data with which to build the bigraph, then visualize
+            and run the composite. All positional args and kwargs will be requeried in the
+            prompt if set to `None`.
+
+            Args:
+                num:`int`: number of processes to add. Defaults to `None`.
+                duration:`int`: interval to run process composite for. Defaults to `None`.
+                **params:`kwargs`: Custom params. TODO: implement these.
+        """
+        # add processes
+        if num is None:
+            num = input('How many processes would you like to add to the bigraph?')
+        print(f'{num} processes will be added to the bi-graph.')
+
+        if self.connect_all:
+            print('All processes will be connected as well.')
+
         for n in range(num):
             self.add_single_process()
         print('All processes added.')
+
+        # view composite
+        print('This is the composite that will be run: ')
+        self.builder_instance.visualize()
+
         # TODO: What other steps could possibly occur here? What about before?
+
+        # run composite
+        if duration is None:
+            duration = int(input('How long would you like to run this composite for?: '))
+
+        print('Generating composite...')
+        composite = self.builder_instance.generate()
+        print('Composite generated!')
+        print(f'Running generated composite for an interval of {duration}')
+        results = composite.run(duration)  # TODO: add handle force complete
+        print('Composite successfully run. Done.')
 
 
