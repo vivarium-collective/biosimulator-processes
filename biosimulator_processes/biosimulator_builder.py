@@ -40,10 +40,14 @@ class BuildPrompter:
                     to `True`.
                 edge_config:`Dict[str, str]`: configuration details for edge/vertex connection if
                     `connect_all` is set to `False`. Defaults to `None`.
-                **additional_params:`kwargs`: addition/custom parameter specifications. TODO: make use cases for this.
+                **additional_params:`kwargs`: addition/custom parameter specifications.
+                    Options include: duration (how long to run the composite for)
+                    TODO: make more use cases for this.
         """
         self.builder_instance = builder_instance
         self.connect_all = connect_all
+        print('Starting up...')
+        self.run(num=num_additions, duration=additional_params.get('duration'))
 
     @classmethod
     def generate_input_kwargs(cls) -> Dict[str, Any]:
