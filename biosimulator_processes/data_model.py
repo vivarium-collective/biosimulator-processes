@@ -166,7 +166,7 @@ class SedModel:
                 modId = self.model_source
             else:
                 modId = self.model_source.value
-            return f'{modId}_Model'
+            return f'model_from_{modId}'
         else:
             return model_id
 
@@ -179,14 +179,44 @@ class SedModel:
         else:
             return name
 
-
-    def dump(self):
+    def dump(self) -> Dict:
         return self.__dict__
 
 
 # TODO: Provide this model if 'CopasiProcess', etc is selected by the user in prompt.
 
+@dataclass
 class TimeCourseModel(SedModel):
+    model_language: str = None,
+    model_changes: ModelChanges = None,
+    model_units: ModelUnits = None
+
+    def __init__(self,
+                 model_source: Union[BiomodelID, ModelFilepath, str],
+                 model_id=None,
+                 model_name=None):
+        """Class which inherits SedModel."""
+        super().__init__(model_source, model_id, model_name)
+        # TODO: extract functionality for algorithms related to UTC sims
+        self.model_id = self.set_id(model_id)
+        self.model_name = self.set_name(model_name)
+
+
+class SteadyStateModel(SedModel):
+    def __init__(self,
+                 model_source: Union[BiomodelID, ModelFilepath, str],
+                 model_id=None,
+                 model_name=None,
+                 model_language: str = None,
+                 model_changes: ModelChanges = None,
+                 model_units: ModelUnits = None):
+        """Class which inherits SedModel. # TODO: expand this."""
+        super().__init__(model_source, model_id, model_name, model_language, model_changes, model_units)
+        self.model_id = self.set_id(model_id)
+        self.model_name = self.set_name(model_name)
+
+
+class SpatialModel(SedModel):
     def __init__(self,
                  model_source: Union[BiomodelID, ModelFilepath, str],
                  model_id=None,
