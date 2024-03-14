@@ -47,7 +47,7 @@ class BuildPrompter:
                 Dict[str, Any]: configuration kwargs for process construction.
         """
         input_kwargs = {**config_params}
-        process_kwargs = input('Please enter the process configuration keyword arguments. Press enter to skip: ')
+        process_kwargs = input('No config kwargs have yet been generated. Please enter the process configuration keyword arguments. Press enter to skip: ')
         if process_kwargs:
             process_args = process_kwargs.split(",")
             for i, arg in enumerate(process_args):
@@ -99,12 +99,14 @@ class BuildPrompter:
     def add_processes(self,
                       num: int,
                       builder: Union[Builder, BiosimulatorBuilder] = None,
+                      process_config: _BaseClass = None,
                       write_doc: bool = False) -> None:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 
             Args:
                 num:`int`: number of processes to add.
                 builder:`Builder`: instance with which we add processes to bigraph
+                process_config: used if not wanting to use input prompts.
                 write_doc: whether to write the doc. You will be re-prompted if False.
 
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
@@ -119,7 +121,7 @@ class BuildPrompter:
             print('Using edge configuration spec...')
 
         for n in range(num):
-            self.add_single_process()
+            self.add_single_process(builder=builder, process_config=process_config)
         print('All processes added.')
 
         if not write_doc:
