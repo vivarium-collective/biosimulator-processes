@@ -62,7 +62,8 @@ class CopasiProcess(Process):
         super().__init__(config, core)
 
         # insert copasi process model config
-        model_source = self.config['model']['model_source']['value']
+        model_source = self.config['model'].get('model_source')
+        assert model_source is not None, 'You must specify a model source of either a valid biomodel id or model filepath.'
         model_changes = self.config['model'].get('model_changes', {})
         self.model_changes = {} if model_changes is None else model_changes
 

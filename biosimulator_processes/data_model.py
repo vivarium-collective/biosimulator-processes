@@ -525,7 +525,7 @@ class SedModel(FromDict):
 
 MODEL_TYPE = {
         'model_id': 'string',
-        'model_source': 'tree[string]',
+        'model_source': 'string',  # 'tree[string]',
         'model_language': {
             '_type': 'string',
             '_default': 'sbml'
