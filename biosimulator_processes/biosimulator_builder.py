@@ -72,22 +72,22 @@ class BuildPrompter:
                         prompter.add_single_process(
                             CopasiProcess={
                                 'model': {
-                                    'model_source': {
-                                        'value': 'BIOMD0000000391'}
+                                    'model_source': 'BIOMD0000000391'}
 
             Returns:
                 Dict[str, Any]: configuration kwargs for process construction.
         """
         input_kwargs = {**config_params}
         process_kwargs = input('Please enter the process configuration keyword arguments: ')
-        process_args = process_kwargs.split(',')
-        for arg in process_args:
-            key, value = arg.split('=')
-            try:
-                # safely evaluate the value to its actual data type
-                input_kwargs[key.strip()] = ast.literal_eval(value)
-            except (ValueError, SyntaxError):
-                input_kwargs[key] = value
+        if process_kwargs:
+            process_args = process_kwargs.split(',')
+            for arg in process_args:
+                key, value = arg.split('=')
+                try:
+                    # safely evaluate the value to its actual data type
+                    input_kwargs[key.strip()] = ast.literal_eval(value)
+                except (ValueError, SyntaxError):
+                    input_kwargs[key] = value
         print(f'Input kwargs generated: {input_kwargs}')
         return input_kwargs
 
@@ -112,9 +112,13 @@ class BuildPrompter:
         """
         process_type = input(
             f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
+        if not process_type and config_params:
+            for process_type_kwarg, val in config_params.items():
+                process_type = process_type_kwarg
+
         builder_node_name = input('Please enter the name that you wish to assign to this process: ')
 
-        input_kwargs = self.generate_input_kwargs()
+        input_kwargs = self.generate_input_kwargs(**config_params)
         self.builder_instance.add_process(
             process_id=builder_node_name,
             name=process_type,
