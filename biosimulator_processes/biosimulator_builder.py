@@ -64,7 +64,7 @@ class BuildPrompter:
     def add_single_process(self,
                            builder: Union[Builder, BiosimulatorBuilder] = None,
                            process_type: str = None,
-                           process_config: _BaseClass = None,
+                           config: _BaseClass = None,
                            builder_node_name: str = None) -> None:
         """Get prompted through the steps of adding a single process to the bigraph via the builder."""
         if self.builder_instance is None:
@@ -80,7 +80,7 @@ class BuildPrompter:
         # generate input data from user prompt results and add processes to the bigraph  through pydantic model
         DynamicProcessConfig = self.builder_instance.get_pydantic_model(process_type)
 
-        input_kwargs = self.generate_input_kwargs() if process_config is None else process_config.model_dump()
+        input_kwargs = self.generate_input_kwargs() if config is None else config.model_dump()
         dynamic_config = DynamicProcessConfig(**input_kwargs)
         self.builder_instance.add_process(
             process_id=builder_node_name,
@@ -99,14 +99,15 @@ class BuildPrompter:
     def add_processes(self,
                       num: int,
                       builder: Union[Builder, BiosimulatorBuilder] = None,
-                      process_config: _BaseClass = None,
+                      config: _BaseClass = None,
                       write_doc: bool = False) -> None:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 
             Args:
                 num:`int`: number of processes to add.
                 builder:`Builder`: instance with which we add processes to bigraph
-                process_config: used if not wanting to use input prompts.
+                config: used if not wanting to use input prompts. For now, this applies the same
+                    config to each `num` of processes added. TODO: Expand this.
                 write_doc: whether to write the doc. You will be re-prompted if False.
 
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
@@ -121,7 +122,7 @@ class BuildPrompter:
             print('Using edge configuration spec...')
 
         for n in range(num):
-            self.add_single_process(builder=builder, process_config=process_config)
+            self.add_single_process(builder=builder, config=config)
         print('All processes added.')
 
         if not write_doc:
