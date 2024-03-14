@@ -74,12 +74,15 @@ class BuildPrompter:
         if not builder_node_name:
             builder_node_name = input('Please enter the name that you wish to assign to this process: ')
 
-        # generate input data from user prompt results and add processes to the bigraph
+        # generate input data from user prompt results and add processes to the bigraph  through pydantic model
+        ProcessConfig = self.builder_instance.get_pydantic_model(process_type)
         input_kwargs = self.generate_input_kwargs()
+        process_config = ProcessConfig(**input_kwargs)
         self.builder_instance.add_process(
             process_id=builder_node_name,
             name=process_type,
-            config={**input_kwargs})
+            config=process_config)  # {**input_kwargs})
+
         print(f'{builder_node_name} process successfully added to the bi-graph!\n')
 
         if self.connect_all:
