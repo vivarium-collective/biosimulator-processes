@@ -186,8 +186,8 @@ class BuildPrompter:
 
     @classmethod
     def yesno(cls, user_input: str) -> Union[bool, None]:
-        return True if 'n' in user_input.lower() \
-                else False if 'y' in user_input.lower() \
+        return True if 'y' in user_input.lower() \
+                else False if 'n' in user_input.lower() \
                 else None
 
 
