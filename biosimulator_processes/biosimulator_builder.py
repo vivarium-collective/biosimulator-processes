@@ -133,7 +133,7 @@ class BuildPrompter:
         print('All processes added.')
 
         write_doc = self.yesno(input('Save composition to document? (y/n): '))
-        if 'y' in write_doc:
+        if write_doc:
             doc = self.builder_instance.document()
             doc_fp = input('Please enter the save destination of this document: ')
             self.builder_instance.write(filename=doc_fp)
