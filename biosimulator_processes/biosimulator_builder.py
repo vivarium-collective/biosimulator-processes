@@ -110,7 +110,7 @@ class BuildPrompter:
         #         break
         return
 
-    def add_processes(self, num: int) -> Digraph:
+    def add_processes(self, num: int, **params) -> Digraph:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 
             Args:
@@ -119,17 +119,13 @@ class BuildPrompter:
             Returns:
                 graphviz.Digraph visualization
         """
-        # add processes
         print('Run request initiated...')
-        if num is None:
-            num = input('How many processes would you like to add to the bigraph?')
         print(f'{num} processes will be added to the bi-graph.')
 
-        # handle connections
         if self.connect_all:
             print('All processes will be connected as well.')
         else:
-            # TODO: implement this
+            # TODO: implement this through kwargs
             print('Using edge configuration spec...')
 
         for n in range(num):
@@ -140,20 +136,12 @@ class BuildPrompter:
         print('This is the composite that will be run: ')
         return self.builder_instance.visualize()
 
-    def run(self, num: int = None, duration: int = None, **params) -> None:
-        """Get prompted for input data with which to build the bigraph, then visualize
-            and run the composite. All positional args and kwargs will be requeried in the
-            prompt if set to `None`.
+    def generate_composite_run(self, duration: int = None, **params) -> None:
+        """Generate and run a composite.
 
             Args:
-                num:`int`: number of processes to add. Defaults to `None`.
-                duration:`int`: interval to run process composite for. Defaults to `None`.
-                **params:`kwargs`: Custom params. TODO: implement these.
+                duration:`int`: the interval for which to run the composite.
         """
-
-        # TODO: What other steps could possibly occur here? What about before?
-
-        # run composite
         if duration is None:
             duration = int(input('How long would you like to run this composite for?: '))
 
@@ -163,5 +151,24 @@ class BuildPrompter:
         print(f'Running generated composite for an interval of {duration}')
         results = composite.run(duration)  # TODO: add handle force complete
         print('Composite successfully run. Request complete. Done.')
+        return results
+
+
+    def run(self, num: int = None, duration: int = None, **params) -> None:
+        """Get prompted for input data with which to build the bigraph, then visualize
+            and run the composite. All positional args and kwargs will be requeried in the
+            prompt if set to `None`. TODO: What other steps could possibly occur here? What about before?
+
+            Args:
+                num:`int`: number of processes to add. Defaults to `None`.
+                duration:`int`: interval to run process composite for. Defaults to `None`.
+                **params:`kwargs`: Custom params. TODO: implement these.
+        """
+        if num is None:
+            num = input('How many processes would you like to add to the bigraph?')
+
+        self.add_processes(num)
+        return self.generate_composite_run()
+
 
 
