@@ -137,8 +137,21 @@ class ModelUnits:
 
 @dataclass
 class SedModel:
+    """The data model declaration for process configuration schemas that support SED.
+
+        Attributes:
+            model_id: `str`
+            model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
+            model_language: `str`
+            model_name: `str`
+            model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
+    """
     model_source: Union[BiomodelID, ModelFilepath, str]
     model_id: str = None
+    model_name: str = None
+    model_language: str = 'sbml'
+    model_changes: ModelChanges = None
+    model_units: ModelUnits = None
 
     def set_id(self, model_id=None):
         if model_id is None:
@@ -157,6 +170,16 @@ class SedModel:
         else:
             return model_id
 
+    def set_name(self, name=None):
+        if name is None:
+            if self.model_id is not None:
+                return self.model_id
+            else:
+                return 'Un-named model'
+        else:
+            return name
+
+
     def dump(self):
         return self.__dict__
 
@@ -164,30 +187,17 @@ class SedModel:
 # TODO: Provide this model if 'CopasiProcess', etc is selected by the user in prompt.
 
 class TimeCourseModel(SedModel):
-    """The data model declaration for process configuration schemas that support SED.
-
-        Attributes:
-            model_id: `str`
-            model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
-            model_language: `str`
-            model_name: `str`
-            model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
-    """
-    model_language: str = 'sbml'
-    model_name: str = 'Unnamed TimeCourse Model'
-    model_changes: ModelChanges = None
-    model_units: ModelUnits = None
-
     def __init__(self,
                  model_source: Union[BiomodelID, ModelFilepath, str],
-                 model_id=None):
-        """
-            Parameters:
-                model_source:`Union[str, ModelFilepath, BiomodelID`
-                model_id:`str`
-        """
-        super().__init__(model_source, model_id)
+                 model_id=None,
+                 model_name=None,
+                 model_language: str = None,
+                 model_changes: ModelChanges = None,
+                 model_units: ModelUnits = None):
+        """Class which inherits SedModel. # TODO: expand this."""
+        super().__init__(model_source, model_id, model_name, model_language, model_changes, model_units)
         self.model_id = self.set_id(model_id)
+        self.model_name = self.set_name(model_name)
 
 
 @dataclass
