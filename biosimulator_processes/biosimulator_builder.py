@@ -201,7 +201,7 @@ class BuildPrompter:
         print('Generating composite...')
         composite = self.builder_instance.generate()
         print('Composite generated!')
-        print(f'Running generated composite for an interval of {duration}'\n)
+        print(f'Running generated composite for an interval of {duration}\n')
         results = composite.run(duration)  # TODO: add handle force complete
         print('Composite successfully run. Request complete. Done.')
         return results
