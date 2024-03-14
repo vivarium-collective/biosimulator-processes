@@ -153,9 +153,8 @@ class BuildPrompter:
         print('Composite successfully run. Request complete. Done.')
         return results
 
-
     def run(self, num: int = None, duration: int = None, **params) -> None:
-        """Get prompted for input data with which to build the bigraph, then visualize
+        """Entrypoint to get prompted for input data with which to build the bigraph, then visualize
             and run the composite. All positional args and kwargs will be requeried in the
             prompt if set to `None`. TODO: What other steps could possibly occur here? What about before?
 
