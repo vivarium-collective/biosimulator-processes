@@ -2,6 +2,7 @@ from typing import *
 import ast
 from pydantic import BaseModel
 from graphviz import Digraph
+from process_bigraph import Composite
 from builder import Builder
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model import _BaseClass
@@ -85,7 +86,7 @@ class BuildPrompter:
         print(f'{builder_node_name} process successfully added to the bi-graph!')
 
         if self.connect_all:
-            self.builder_instance.connect_all(append_to_store_name='_store')
+            self.builder_instance.connect_all()
             print(f'All nodes including the most recently added {builder_node_name} processes connected!')
 
         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
@@ -132,6 +133,10 @@ class BuildPrompter:
         print('This is the composite: ')
         return self.visualize_bigraph()
 
+    def generate_engine(self, builder: Builder = None) -> Composite:
+        builder = builder or self.builder_instance
+        return builder.generate()
+
     def generate_composite_run(self, duration: int = None, **run_params) -> None:
         """Generate and run a composite.
 
@@ -142,10 +147,13 @@ class BuildPrompter:
             duration = int(input('How long would you like to run this composite for?: '))
 
         print('Generating composite...')
-        composite = self.builder_instance.generate()
+
+        engine = self.generate_engine()
         print('Composite generated!')
+
         print(f'Running generated composite for an interval of {duration}')
-        results = composite.run(duration)  # TODO: add handle force complete
+
+        results = engine.run(duration)  # TODO: add handle force complete
         print('Composite successfully run. Request complete. Done.')
         return results
 
@@ -170,7 +178,7 @@ class BuildPrompter:
                 duration:`int`: interval to run process composite for. Defaults to `None`.
                 **run_params:`kwargs`: Custom params. TODO: implement these.
         """
-        return self.generate_composite_run()
+        return self.generate_composite_run(duration=duration, **run_params)
 
     def execute(self, num: int = None, duration: int = None, **run_params) -> None:
         """For use as the highest level function called by the BioBuilder REST API."""
