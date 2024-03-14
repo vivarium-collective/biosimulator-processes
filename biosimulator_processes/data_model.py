@@ -162,6 +162,7 @@ class SedModel:
 
 
 # TODO: Provide this model if 'CopasiProcess', etc is selected by the user in prompt.
+
 class TimeCourseModel(SedModel):
     """The data model declaration for process configuration schemas that support SED.
 
@@ -178,11 +179,8 @@ class TimeCourseModel(SedModel):
     model_units: ModelUnits = None
 
     def __init__(self,
-                 model_source,
-                 model_id=None,
-                 model_language=model_language,
-                 model_changes=model_changes,
-                 model_units=model_units):
+                 model_source: Union[BiomodelID, ModelFilepath, str],
+                 model_id=None):
         """
             Parameters:
                 model_source:`Union[str, ModelFilepath, BiomodelID`
@@ -190,9 +188,6 @@ class TimeCourseModel(SedModel):
         """
         super().__init__(model_source, model_id)
         self.model_id = self.set_id(model_id)
-        self.model_language = model_language
-        self.model_changes = model_changes
-        self.model_units = model_units
 
 
 @dataclass
