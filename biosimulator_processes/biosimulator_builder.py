@@ -80,7 +80,7 @@ class BuildPrompter:
         # generate input data from user prompt results and add processes to the bigraph  through pydantic model
         DynamicProcessConfig = self.builder_instance.get_pydantic_model(process_type)
 
-        input_kwargs = self.generate_input_kwargs() if config is None else config.model_dump()
+        input_kwargs = self.generate_input_kwargs() if config is None else config.dump()
         dynamic_config = DynamicProcessConfig(**input_kwargs)
         self.builder_instance.add_process(
             process_id=builder_node_name,

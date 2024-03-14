@@ -136,7 +136,7 @@ class ModelUnits:
 
 
 @dataclass
-class SedModel:
+class SedModel(_BaseClass):
     """The data model declaration for process configuration schemas that support SED.
 
         Attributes:
