@@ -14,10 +14,14 @@ class BiosimulatorBuilder(Builder):
             super().__init__(schema=schema, tree=tree, file_path=filepath, core=CORE)
 
 
+def print(val):
+    return print(f'--- {val}')
+
+
 class BuildPrompter:
     def __init__(self,
-                 builder_instance: Union[Builder, BiosimulatorBuilder],
                  num_additions: int,
+                 builder_instance: Union[Builder, BiosimulatorBuilder],
                  connect_all: bool = True,
                  edge_config: Dict[str, str] = None,
                  auto_run: bool = False,
@@ -68,23 +72,12 @@ class BuildPrompter:
                 Dict[str, Any]: configuration kwargs for process construction.
         """
         input_kwargs = {**config_params}
-        process_kwargs = input('Please enter the process configuration keyword arguments: ')
+        process_kwargs = input('Please enter the process configuration keyword arguments. Press enter to skip: ')
         if process_kwargs:
             process_args = process_kwargs.split(",")
             for i, arg in enumerate(process_args):
                 arg = arg.strip()
-                # if i < (len(process_args) - 1):
-                #     if ":" in arg:
-                #         next_arg = process_args[i + 1]
-                #         arg += next_arg
-                #         arg += ','
-                #         arg = arg.replace(',', '')
-                #         # keyvalue = ast.literal_eval(arg)
-                #         process_args.pop(i)
-                #         process_args.insert(i, arg)
-                #         process_args.remove(next_arg)
                 key, value = arg.split('=')
-                print(f'Key: {key}, val: {value}')
                 try:
                     # safely evaluate the value to its actual data type
                     input_kwargs[key.strip()] = ast.literal_eval(value)
@@ -159,12 +152,12 @@ class BuildPrompter:
         if duration is None:
             duration = int(input('How long would you like to run this composite for?: '))
 
-        print('Generating composite...')
+        print('Generating composite...\n')
         composite = self.builder_instance.generate()
-        print('Composite generated!')
+        print('Composite generated!\n')
         print(f'Running generated composite for an interval of {duration}\n')
         results = composite.run(duration)  # TODO: add handle force complete
-        print('Composite successfully run. Request complete. Done.')
+        print('Composite successfully run. Request complete. Done.\n')
         return results
 
     def start(self, num: int = None):
@@ -179,13 +172,12 @@ class BuildPrompter:
             num = int(input('How many processes would you like to add to the bigraph?'))
         return self.add_processes(num)
 
-    def run(self, num: int = None, duration: int = None, **run_params) -> None:
+    def run(self, duration: int = None, **run_params) -> None:
         """Entrypoint to get prompted for input data with which to build the bigraph, then visualize
             and run the composite. All positional args and kwargs will be re-queried in the
             prompt if set to `None`. TODO: What other steps could possibly occur here? What about before?
 
             Args:
-                num:`int`: number of processes to add. Defaults to `None`.
                 duration:`int`: interval to run process composite for. Defaults to `None`.
                 **run_params:`kwargs`: Custom params. TODO: implement these.
         """
@@ -194,7 +186,7 @@ class BuildPrompter:
     def execute(self, num: int, duration: int, **run_params) -> None:
         """For use as the highest level function called by the BioBuilder REST API."""
         self.start(num)
-        return self.run(num, duration, **run_params)
+        return self.run(duration, **run_params)
 
     def visualize_bigraph(self):
         return self.builder_instance.visualize()
