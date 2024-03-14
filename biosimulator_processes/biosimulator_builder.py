@@ -107,8 +107,7 @@ class BuildPrompter:
                         prompter.add_single_process(
                             CopasiProcess={
                                 'model': {
-                                    'model_source': {
-                                        'value': 'BIOMD0000000391'}
+                                    'model_source': 'BIOMD0000000391'}
 
         """
         process_type = input(
@@ -144,8 +143,7 @@ class BuildPrompter:
                             CopasiProcess={
                                 1: {
                                     'model': {
-                                        'model_source': {
-                                            'value': 'BIOMD0000000391'}
+                                        'model_source': 'BIOMD0000000391'}
 
 
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
