@@ -203,7 +203,7 @@ class TimeCourseModel(SedModel):
 @dataclass
 class ExperimentMetadata(_BaseClass):
     def __init__(self):
-        raise NotImplementedError('Please not use yet. Thanks!')
+        raise NotImplementedError('Please do not use this class yet. Thanks!')
 
 
 @dataclass
