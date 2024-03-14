@@ -80,9 +80,21 @@ class BuildPrompter:
         input_kwargs = {**config_params}
         process_kwargs = input('Please enter the process configuration keyword arguments: ')
         if process_kwargs:
-            process_args = process_kwargs.split(',')
-            for arg in process_args:
+            process_args = process_kwargs.split(",")
+            for i, arg in enumerate(process_args):
+                arg = arg.strip()
+                # if i < (len(process_args) - 1):
+                #     if ":" in arg:
+                #         next_arg = process_args[i + 1]
+                #         arg += next_arg
+                #         arg += ','
+                #         arg = arg.replace(',', '')
+                #         # keyvalue = ast.literal_eval(arg)
+                #         process_args.pop(i)
+                #         process_args.insert(i, arg)
+                #         process_args.remove(next_arg)
                 key, value = arg.split('=')
+                print(f'Key: {key}, val: {value}')
                 try:
                     # safely evaluate the value to its actual data type
                     input_kwargs[key.strip()] = ast.literal_eval(value)
@@ -91,44 +103,18 @@ class BuildPrompter:
         print(f'Input kwargs generated: {input_kwargs}\n')
         return input_kwargs
 
-    def add_single_process(self, **config_params) -> None:
-        """Add a single process to the bigraph via the builder. Config params
-            can be passed in place of Prompter input prompts.
-
-            Args:
-                  **config_params:`kwargs`: to bypass this class' input prompts for kwarg-style
-                    process configuration declaration, pass the kwarg you want and press
-                    enter when prompted for the same kwarg. PLEASE NOTE: each kwarg value
-                    passed here should be a dictionary specifying the process name (according
-                    to the registry ie: `'CopasiProcess'`), and the process config kwarg.
-
-                    For example:
-
-                        prompter.add_single_process(
-                            CopasiProcess={
-                                'model': {
-                                    'model_source': 'BIOMD0000000391'}
-
-        """
+    def add_single_process(self) -> None:
+        """Get prompted through the steps of adding a single process to the bigraph via the builder."""
         process_type = input(
             f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
-        if not process_type and config_params:
-            for process_type_kwarg, val in config_params.items():
-                process_type = process_type_kwarg
 
         builder_node_name = input('Please enter the name that you wish to assign to this process: ')
 
-        input_kwargs = self.generate_input_kwargs(**config_params)
-        if process_type in input_kwargs.keys():
-            config_input = input_kwargs[process_type]
-        else:
-            config_input = {}
-
-        print(f'CONFIG INPUT GOING IN: {config_input}\n')
+        input_kwargs = self.generate_input_kwargs()
         self.builder_instance.add_process(
             process_id=builder_node_name,
             name=process_type,
-            config={**config_input})
+            config={**input_kwargs})
         print(f'{builder_node_name} process successfully added to the bi-graph!\n')
 
         if self.connect_all:
@@ -138,23 +124,11 @@ class BuildPrompter:
         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.\n')
         return
 
-    def add_processes(self, num: int, **config_params) -> None:
+    def add_processes(self, num: int) -> None:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 
             Args:
                 num:`int`: number of processes to add.
-                **config_params:`kwargs`: configuration params used in place of object
-                    prompting. See `self.add_single_process()`. PLEASE NOTE:
-                    There should be an extra layer of nesting as compared to the
-                    single process add to specify on which n of `num` to add the
-                    config params. For example:
-
-                    prompter.add_single_process(
-                            CopasiProcess={
-                                1: {
-                                    'model': {
-                                        'model_source': 'BIOMD0000000391'}
-
 
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
         """
@@ -168,14 +142,7 @@ class BuildPrompter:
             print('Using edge configuration spec...')
 
         for n in range(num):
-            # if config_params:
-            #     single_config_params = {}
-            #     for process_key, value in config_params:
-            #         if num in value.keys():
-            #             single_config_params.update(**value[str(num)])
-            #         else:
-            #             single_config_params = {**config_params}
-            self.add_single_process(**config_params)
+            self.add_single_process()
         print('All processes added.')
 
         write_doc = self.yesno(input('Save composition to document? (y/n): '))
@@ -189,7 +156,7 @@ class BuildPrompter:
         print('This is the composite: ')
         return self.visualize_bigraph()
 
-    def generate_composite_run(self, duration: int = None, **params) -> None:
+    def generate_composite_run(self, duration: int = None, **run_params) -> None:
         """Generate and run a composite.
 
             Args:
@@ -206,28 +173,27 @@ class BuildPrompter:
         print('Composite successfully run. Request complete. Done.')
         return results
 
-    def start(self, num: int = None, **config_params):
+    def start(self, num: int = None):
         """Entrypoint to get prompted for input data with which to build the bigraph, then visualize
             and run the composite. All positional args and kwargs will be re-queried in the
             prompt if set to `None`. TODO: What other steps could possibly occur here? What about before?
 
             Args:
                 num:`int`: number of processes to add. Defaults to `None`.
-                **config_params:`kwargs`: see add_processes.
         """
         if num is None:
             num = int(input('How many processes would you like to add to the bigraph?'))
-        return self.add_processes(num, **config_params)
+        return self.add_processes(num)
 
-    def run(self, num: int = None, duration: int = None, **params) -> None:
+    def run(self, num: int = None, duration: int = None, **run_params) -> None:
         """Entrypoint to get prompted for input data with which to build the bigraph, then visualize
-            and run the composite. All positional args and kwargs will be requeried in the
+            and run the composite. All positional args and kwargs will be re-queried in the
             prompt if set to `None`. TODO: What other steps could possibly occur here? What about before?
 
             Args:
                 num:`int`: number of processes to add. Defaults to `None`.
                 duration:`int`: interval to run process composite for. Defaults to `None`.
-                **params:`kwargs`: Custom params. TODO: implement these.
+                **run_params:`kwargs`: Custom params. TODO: implement these.
         """
         return self.generate_composite_run()
 
