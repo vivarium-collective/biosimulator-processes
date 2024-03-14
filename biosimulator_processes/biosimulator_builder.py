@@ -187,7 +187,8 @@ class BuildPrompter:
 
         # view composite
         print('This is the composite: ')
-        return self.builder_instance.visualize()
+        self.builder_instance.visualize()
+        return
 
     def generate_composite_run(self, duration: int = None, **params) -> None:
         """Generate and run a composite.
