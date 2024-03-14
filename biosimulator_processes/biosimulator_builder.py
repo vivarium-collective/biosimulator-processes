@@ -103,12 +103,14 @@ class BuildPrompter:
         print(f'Input kwargs generated: {input_kwargs}\n')
         return input_kwargs
 
-    def add_single_process(self) -> None:
+    def add_single_process(self, process_type: str = None, builder_node_name: str = None) -> None:
         """Get prompted through the steps of adding a single process to the bigraph via the builder."""
-        process_type = input(
-            f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
+        if not process_type:
+            process_type = input(
+                f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
 
-        builder_node_name = input('Please enter the name that you wish to assign to this process: ')
+        if not builder_node_name:
+            builder_node_name = input('Please enter the name that you wish to assign to this process: ')
 
         input_kwargs = self.generate_input_kwargs()
         self.builder_instance.add_process(
@@ -124,11 +126,12 @@ class BuildPrompter:
         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.\n')
         return
 
-    def add_processes(self, num: int) -> None:
+    def add_processes(self, num: int, write_doc: bool = False) -> None:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 
             Args:
                 num:`int`: number of processes to add.
+                write_doc: whether to write the doc. You will be re-prompted if False.
 
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
         """
@@ -145,7 +148,8 @@ class BuildPrompter:
             self.add_single_process()
         print('All processes added.')
 
-        write_doc = self.yesno(input('Save composition to document? (y/n): '))
+        if not write_doc:
+            write_doc = self.yesno(input('Save composition to document? (y/n): '))
         if write_doc:
             doc = self.builder_instance.document()
             doc_fp = input('Please enter the save destination of this document: ')
@@ -196,6 +200,11 @@ class BuildPrompter:
                 **run_params:`kwargs`: Custom params. TODO: implement these.
         """
         return self.generate_composite_run()
+
+    def execute(self, num: int, duration: int, **run_params) -> None:
+        """For use as the highest level function called by the BioBuilder REST API."""
+        self.start(num)
+        return self.run(num, duration, **run_params)
 
     def visualize_bigraph(self):
         return self.builder_instance.visualize()
