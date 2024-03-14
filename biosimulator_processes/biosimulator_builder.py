@@ -187,8 +187,7 @@ class BuildPrompter:
 
         # view composite
         print('This is the composite: ')
-        self.builder_instance.visualize()
-        return
+        return self.visualize_bigraph()
 
     def generate_composite_run(self, duration: int = None, **params) -> None:
         """Generate and run a composite.
@@ -231,6 +230,9 @@ class BuildPrompter:
                 **params:`kwargs`: Custom params. TODO: implement these.
         """
         return self.generate_composite_run()
+
+    def visualize_bigraph(self):
+        return self.builder_instance.visualize()
 
     @classmethod
     def yesno(cls, user_input: str) -> Union[bool, None]:
