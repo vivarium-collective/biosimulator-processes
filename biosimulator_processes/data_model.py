@@ -186,7 +186,7 @@ class SedModel(_BaseClass):
 
 
 @dataclass
-class TimeCourseDataclass(SedModel):
+class TimeCourseModel(SedModel):
     """The data model declaration for process configuration schemas that support SED.
 
         Attributes:
