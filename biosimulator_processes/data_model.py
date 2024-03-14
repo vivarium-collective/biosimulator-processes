@@ -169,6 +169,12 @@ class ModelChanges(_BaseClass):
     reaction_changes: List[ModelChange]
 
 
+class ModelUnit:
+    def __init__(self, **unit_config):
+        for k, v in unit_config:
+            self.__setattr__(k, v)
+
+
 @dataclass
 class SedModel(_BaseClass):
     model_source: Union[BiomodelID, ModelFilepath, str]
@@ -185,7 +191,6 @@ class SedModel(_BaseClass):
         return asdict(self)
 
 
-@dataclass
 class TimeCourseModel(SedModel):
     """The data model declaration for process configuration schemas that support SED.
 
@@ -199,9 +204,14 @@ class TimeCourseModel(SedModel):
     model_language: str = 'sbml'
     model_name: str = 'Unnamed TimeCourse Model'
     model_changes: ModelChanges = None
-    model_units: Dict[str, str] = None
+    model_units: List[ModelUnit] = None
 
-    def __init__(self, model_source, model_id=None):
+    def __init__(self,
+                 model_source,
+                 model_id=None,
+                 model_language=model_language,
+                 model_changes=model_changes,
+                 model_units=model_units):
         """
             Parameters:
                 model_source:`Union[str, ModelFilepath, BiomodelID`
@@ -209,6 +219,9 @@ class TimeCourseModel(SedModel):
         """
         super().__init__(model_source)
         self.model_id = self.set_id(model_id)
+        self.model_language = model_language
+        self.model_changes = model_changes
+        self.model_units = model_units
 
 
 def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
