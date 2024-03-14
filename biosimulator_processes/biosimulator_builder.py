@@ -15,13 +15,13 @@ class BiosimulatorBuilder(Builder):
 
 
 def print(val):
-    return print(f'--- {val}')
+    return print(f'--- {val}\n')
 
 
 class BuildPrompter:
     def __init__(self,
-                 num_additions: int,
-                 builder_instance: Union[Builder, BiosimulatorBuilder],
+                 num_additions: int = None,
+                 builder_instance: Union[Builder, BiosimulatorBuilder] = None,
                  connect_all: bool = True,
                  edge_config: Dict[str, str] = None,
                  auto_run: bool = False,
@@ -48,7 +48,9 @@ class BuildPrompter:
         print('New prompter instance created!')
         if auto_run:
             print('Autorun is turned on. Now starting...')
-            self.run(num=num_additions, duration=additional_params.get('duration'))
+            if not additional_params.get('duration'):
+                raise AttributeError('You must pass a value for the duration kwarg if using auto run.')
+            self.execute(num=num_additions, duration=additional_params['duration'])
 
     @classmethod
     def generate_input_kwargs(cls, **config_params) -> Dict[str, Any]:
