@@ -88,7 +88,7 @@ class BuildPrompter:
                     input_kwargs[key.strip()] = ast.literal_eval(value)
                 except (ValueError, SyntaxError):
                     input_kwargs[key] = value
-        print(f'Input kwargs generated: {input_kwargs}')
+        print(f'Input kwargs generated: {input_kwargs}\n')
         return input_kwargs
 
     def add_single_process(self, **config_params) -> None:
@@ -124,18 +124,18 @@ class BuildPrompter:
         else:
             config_input = {}
 
-        print(f'CONFIG INPUT GOING IN: {config_input}')
+        print(f'CONFIG INPUT GOING IN: {config_input}\n')
         self.builder_instance.add_process(
             process_id=builder_node_name,
             name=process_type,
             config={**config_input})
-        print(f'{builder_node_name} process successfully added to the bi-graph!')
+        print(f'{builder_node_name} process successfully added to the bi-graph!\n')
 
         if self.connect_all:
             self.builder_instance.connect_all()
-            print(f'All nodes including the most recently added {builder_node_name} processes connected!')
+            print(f'All nodes including the most recently added {builder_node_name} processes connected!\n')
 
-        print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
+        print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.\n')
         return
 
     def add_processes(self, num: int, **config_params) -> None:
@@ -159,10 +159,10 @@ class BuildPrompter:
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
         """
         print('Run request initiated...')
-        print(f'{num} processes will be added to the bi-graph.')
+        print(f'{num} processes will be added to the bi-graph.\n')
 
         if self.connect_all:
-            print('All processes will be connected as well.')
+            print('All processes will be connected as well.\n')
         else:
             # TODO: implement this through kwargs
             print('Using edge configuration spec...')
@@ -201,7 +201,7 @@ class BuildPrompter:
         print('Generating composite...')
         composite = self.builder_instance.generate()
         print('Composite generated!')
-        print(f'Running generated composite for an interval of {duration}')
+        print(f'Running generated composite for an interval of {duration}'\n)
         results = composite.run(duration)  # TODO: add handle force complete
         print('Composite successfully run. Request complete. Done.')
         return results
