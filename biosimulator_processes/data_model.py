@@ -1,3 +1,11 @@
+"""Data Model for the highest-level BioBuilder API
+
+author: Alex Patrie < alexanderpatrie@gmail.com >
+license: MIT
+created: 02/2024
+"""
+
+
 from typing import Dict, List, Union, Tuple, Optional, Any
 from types import NoneType
 from dataclasses import dataclass, asdict
@@ -11,9 +19,6 @@ from pydantic import (
     create_model,
     ValidationError
 )
-
-
-# TODO: Parse this into sep. library datamodels
 
 
 @dataclass
@@ -228,6 +233,12 @@ class SpatialModel(SedModel):
         super().__init__(model_source, model_id, model_name, model_language, model_changes, model_units)
         self.model_id = self.set_id(model_id)
         self.model_name = self.set_name(model_name)
+
+
+class TimeCourseProcess(_BaseClass):
+    """Used as config for BioBuilder API"""
+    model: SedModel
+    method: str = 'lsoda'
 
 
 @dataclass
