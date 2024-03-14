@@ -162,12 +162,13 @@ class BuildPrompter:
             print('Using edge configuration spec...')
 
         for n in range(num):
-            single_config_params = {}
-            for process_key, value in config_params:
-                if num in value.keys():
-                    single_config_params.update(**value[num])
-                else:
-                    single_config_params = {**config_params}
+            if config_params:
+                single_config_params = {}
+                for process_key, value in config_params:
+                    if num in value.keys():
+                        single_config_params.update(**value[str(num)])
+                    else:
+                        single_config_params = {**config_params}
             self.add_single_process(**config_params)
         print('All processes added.')
 
