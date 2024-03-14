@@ -5,8 +5,12 @@ from builder import Builder
 from biosimulator_processes import CORE
 
 
+def print(val):
+    """Quick helper for formatting"""
+    return print(f'--- {val}\n')
+
+
 class BiosimulatorBuilder(Builder):
-    _instance = None
     _is_initialized = False
 
     def __init__(self, schema: Dict = None, tree: Dict = None, filepath: str = None):
@@ -14,43 +18,10 @@ class BiosimulatorBuilder(Builder):
             super().__init__(schema=schema, tree=tree, file_path=filepath, core=CORE)
 
 
-def print(val):
-    return print(f'--- {val}\n')
-
-
 class BuildPrompter:
-    def __init__(self,
-                 num_additions: int = None,
-                 builder_instance: Union[Builder, BiosimulatorBuilder] = None,
-                 connect_all: bool = True,
-                 edge_config: Dict[str, str] = None,
-                 auto_run: bool = False,
-                 **additional_params):
-        """
-            Parameters:
-                builder_instance:`Union[builder.Builder, BiosimulatorBuilder]`: builder object
-                    instance on which to base the bigraph on.
-                num_additions:`int`: number of processes to add and subsequently connect to the
-                    bigraph composition.
-                connect_all:`bool`: whether to use Builder.connect_all after adding processes. Defaults
-                    to `True`.
-                edge_config:`Dict[str, str]`: configuration details for edge/vertex connection if
-                    `connect_all` is set to `False`. Defaults to `None`.
-                auto_run:`bool`: Whether to automatically begin the prompting and running
-                    of the build. If set to `True`, BuildPrompter.run() is called last during
-                    object construction. Defaults to `False`.
-                **additional_params:`kwargs`: addition/custom parameter specifications.
-                    Options include: duration (how long to run the composite for)
-                    TODO: make more use cases for this.
-        """
-        self.builder_instance = builder_instance
-        self.connect_all = connect_all
-        print('New prompter instance created!')
-        if auto_run:
-            print('Autorun is turned on. Now starting...')
-            if not additional_params.get('duration'):
-                raise AttributeError('You must pass a value for the duration kwarg if using auto run.')
-            self.execute(num=num_additions, duration=additional_params['duration'])
+    """Front-End user interaction controller for high-level BioBuilder API."""
+    builder_instance: Union[Builder, BiosimulatorBuilder] = None
+    connect_all: bool = True
 
     @classmethod
     def generate_input_kwargs(cls, **config_params) -> Dict[str, Any]:
@@ -88,8 +59,14 @@ class BuildPrompter:
         print(f'Input kwargs generated: {input_kwargs}\n')
         return input_kwargs
 
-    def add_single_process(self, process_type: str = None, builder_node_name: str = None) -> None:
+    def add_single_process(self,
+                           builder: Union[Builder, BiosimulatorBuilder] = None,
+                           process_type: str = None,
+                           builder_node_name: str = None) -> None:
         """Get prompted through the steps of adding a single process to the bigraph via the builder."""
+        if self.builder_instance is None:
+            self.builder_instance = builder or BiosimulatorBuilder()
+
         if not process_type:
             process_type = input(
                 f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
@@ -97,6 +74,7 @@ class BuildPrompter:
         if not builder_node_name:
             builder_node_name = input('Please enter the name that you wish to assign to this process: ')
 
+        # generate input data from user prompt results and add processes to the bigraph
         input_kwargs = self.generate_input_kwargs()
         self.builder_instance.add_process(
             process_id=builder_node_name,
@@ -111,11 +89,15 @@ class BuildPrompter:
         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.\n')
         return
 
-    def add_processes(self, num: int, write_doc: bool = False) -> None:
+    def add_processes(self,
+                      num: int,
+                      builder: Union[Builder, BiosimulatorBuilder] = None,
+                      write_doc: bool = False) -> None:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 
             Args:
                 num:`int`: number of processes to add.
+                builder:`Builder`: instance with which we add processes to bigraph
                 write_doc: whether to write the doc. You will be re-prompted if False.
 
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
@@ -185,7 +167,7 @@ class BuildPrompter:
         """
         return self.generate_composite_run()
 
-    def execute(self, num: int, duration: int, **run_params) -> None:
+    def execute(self, num: int = None, duration: int = None, **run_params) -> None:
         """For use as the highest level function called by the BioBuilder REST API."""
         self.start(num)
         return self.run(duration, **run_params)
