@@ -23,7 +23,7 @@ class _BaseClass:
 
 
 @dataclass
-class ModelParameter(_BaseClass):
+class SimulationModelParameter(_BaseClass):
     """
         Attributes:
             name:`str`
@@ -32,29 +32,30 @@ class ModelParameter(_BaseClass):
             scope:`str`
     """
     name: str
-    feature: str
     value: Union[float, int, str]
-    scope: str
+    feature: str
+    scope: str = None
+
+
+# TODO: what could this specific name be? Are these changes etc, unique to Time Course / '2d' simulation?
+@dataclass
+class SpeciesChange(_BaseClass):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+    species_name: str
+    unit: Union[str, NoneType, SimulationModelParameter] = None
+    initial_concentration: Optional[Union[float, SimulationModelParameter]] = None
+    initial_particle_number: Optional[Union[float, NoneType, SimulationModelParameter]] = None
+    initial_expression: Union[str, NoneType, SimulationModelParameter] = None
+    expression: Union[str, NoneType, SimulationModelParameter] = None
 
 
 @dataclass
-class SpeciesChanges(_BaseClass):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-    name: str
-    unit: Union[str, NoneType, ModelParameter] = Field(default=None)
-    initial_concentration: Optional[Union[float, ModelParameter]] = Field(default=None)
-    initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = Field(default=None)
-    initial_expression: Union[str, NoneType, ModelParameter] = Field(default=None)
-    expression: Union[str, NoneType, ModelParameter] = Field(default=None)
-
-
-@dataclass
-class GlobalParameterChanges(_BaseClass):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
-    name: str
-    initial_value: Union[float, NoneType] = Field(default=None)
-    initial_expression: Union[str, NoneType] = Field(default=None)
-    expression: Union[str, NoneType] = Field(default=None)
-    status: Union[str, NoneType] = Field(default=None)
-    param_type: Union[str, NoneType] = Field(default=None)  # ie: fixed, assignment, reactions, etc
+class GlobalParameterChange(_BaseClass):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+    parameter_name: str
+    initial_value: Union[float, NoneType] = None
+    initial_expression: Union[str, NoneType] = None
+    expression: Union[str, NoneType] = None
+    status: Union[str, NoneType] = None
+    param_type: Union[str, NoneType] = None  # ie: fixed, assignment, reactions, etc
 
 
 @dataclass
@@ -64,19 +65,7 @@ class ReactionParameter(_BaseClass):
 
 
 @dataclass
-class ReactionModelParameter(ModelParameter):
-    """
-        Attributes:
-            name:`str`
-            feature:`str`
-            value:`Union[float, int, str]`
-            scope:`str` = 'reaction'
-    """
-    scope: str = 'reaction'
-
-
-@dataclass
-class ReactionChanges(_BaseClass):
+class ReactionChange(_BaseClass):
     """
         Attributes:
             reaction_name:`str`: name of the reaction you wish to change.
@@ -91,9 +80,9 @@ class ReactionChanges(_BaseClass):
 
 @dataclass
 class TimeCourseModelChanges(_BaseClass):
-    species_changes: List[SpeciesChanges] = None
-    global_parameter_changes: List[GlobalParameterChanges] = None
-    reaction_changes: List[ReactionChanges] = None
+    species_changes: List[SpeciesChange] = None
+    global_parameter_changes: List[GlobalParameterChange] = None
+    reaction_changes: List[ReactionChange] = None
 
 
 @dataclass
@@ -135,9 +124,9 @@ class ModelChange(_BaseClass):
 
 @dataclass
 class ModelChanges(_BaseClass):
-    species_changes: List[ModelChange]
-    param_changes: List[ModelChange]
-    reaction_changes: List[ModelChange]
+    species_changes: List[ModelChange] = None
+    param_changes: List[ModelChange] = None
+    reaction_changes: List[ModelChange] = None
 
 
 class ModelUnits:
@@ -146,9 +135,10 @@ class ModelUnits:
             self.__setattr__(k, v)
 
 
+@dataclass
 class SedModel:
-    def __init__(self, model_source: Union[BiomodelID, ModelFilepath, str]):
-        self.model_source = model_source
+    model_source: Union[BiomodelID, ModelFilepath, str]
+    model_id: str = None
 
     def set_id(self, model_id):
         if model_id is None:
@@ -160,9 +150,6 @@ class SedModel:
 
     def dump(self):
         return self.__dict__
-
-    def to_dict(self):
-        return asdict(self)
 
 
 # TODO: Provide this model if 'CopasiProcess', etc is selected by the user in prompt.
@@ -197,6 +184,38 @@ class TimeCourseModel(SedModel):
         self.model_language = model_language
         self.model_changes = model_changes
         self.model_units = model_units
+
+
+@dataclass
+class ExperimentMetadata(_BaseClass):
+    def __init__(self):
+        raise NotImplementedError('Please not use yet. Thanks!')
+
+
+@dataclass
+class SimulationResult(_BaseClass):
+    value: Dict[str, Any]
+
+    def serialize(self):
+        pass
+
+
+@dataclass
+class Experiment:
+    """Consider this a 'simulation run'."""
+    simulation_model: Union[TimeCourseModel, Dict[str, Any]]  # where the theory/hypothesis lies. you're stating your biological case here.
+    duration: Union[int, float]  # one level above theory model. you're sure of your case and want to not tell but show it.
+    results: Dict[str, Union[NoneType, SimulationResult]] = None  # consider async
+    name: str = None
+    metadata: ExperimentMetadata = None
+
+    def get_results(self, source: Any):
+        return source.get('results', {})
+
+    def set_results(self):
+        source = None
+        results = self.get_results(source)
+        self.results = results
 
 
 def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
