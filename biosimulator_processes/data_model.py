@@ -235,6 +235,7 @@ class SpatialModel(SedModel):
         self.model_name = self.set_name(model_name)
 
 
+@dataclass
 class TimeCourseProcess(_BaseClass):
     """Used as config for BioBuilder API"""
     model: SedModel
