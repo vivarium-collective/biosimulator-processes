@@ -119,10 +119,16 @@ class BuildPrompter:
         builder_node_name = input('Please enter the name that you wish to assign to this process: ')
 
         input_kwargs = self.generate_input_kwargs(**config_params)
+        if process_type in input_kwargs.keys():
+            config_input = input_kwargs[process_type]
+        else:
+            config_input = {}
+
+        print(f'CONFIG INPUT GOING IN: {config_input}')
         self.builder_instance.add_process(
             process_id=builder_node_name,
             name=process_type,
-            config={**process_type[input_kwargs]})
+            config={**config_input})
         print(f'{builder_node_name} process successfully added to the bi-graph!')
 
         if self.connect_all:
