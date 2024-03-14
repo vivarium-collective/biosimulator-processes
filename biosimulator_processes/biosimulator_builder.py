@@ -1,5 +1,6 @@
 from typing import *
 import ast
+from graphviz import Digraph
 from builder import Builder
 from biosimulator_processes import CORE
 
@@ -94,18 +95,50 @@ class BuildPrompter:
             self.builder_instance.connect_all()
             print(f'All nodes including the most recently added {builder_node_name} processes connected!')
 
-        while True:
-            visualize = input('Do you wish to visualize this addition after (y/n): ')
-            if 'y' in visualize.lower():
-                print('Visualizing bigraph...')
-                self.builder_instance.visualize()
-                break
-            elif 'n' or 'y' not in visualize.lower():
-                print('Please enter a valid choice: (y/n)')
-                continue
-            else:
-                print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
-                break
+        print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
+        # while True:
+        #     visualize = input('Do you wish to visualize this addition after (y/n): ')
+        #     if 'y' in visualize.lower():
+        #         print('Visualizing bigraph...')
+        #         self.builder_instance.visualize()
+        #         break
+        #     elif 'n' or 'y' not in visualize.lower():
+        #         print('Please enter a valid choice: (y/n)')
+        #         continue
+        #     else:
+        #         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
+        #         break
+        return
+
+    def add_processes(self, num: int) -> Digraph:
+        """Get prompted for adding `num` processes to the bigraph and visualize the composite.
+
+            Args:
+                num:`int`: number of processes to add.
+
+            Returns:
+                graphviz.Digraph visualization
+        """
+        # add processes
+        print('Run request initiated...')
+        if num is None:
+            num = input('How many processes would you like to add to the bigraph?')
+        print(f'{num} processes will be added to the bi-graph.')
+
+        # handle connections
+        if self.connect_all:
+            print('All processes will be connected as well.')
+        else:
+            # TODO: implement this
+            print('Using edge configuration spec...')
+
+        for n in range(num):
+            self.add_single_process()
+        print('All processes added.')
+
+        # view composite
+        print('This is the composite that will be run: ')
+        return self.builder_instance.visualize()
 
     def run(self, num: int = None, duration: int = None, **params) -> None:
         """Get prompted for input data with which to build the bigraph, then visualize
@@ -117,22 +150,6 @@ class BuildPrompter:
                 duration:`int`: interval to run process composite for. Defaults to `None`.
                 **params:`kwargs`: Custom params. TODO: implement these.
         """
-        # add processes
-        print('Run request initiated...')
-        if num is None:
-            num = input('How many processes would you like to add to the bigraph?')
-        print(f'{num} processes will be added to the bi-graph.')
-
-        if self.connect_all:
-            print('All processes will be connected as well.')
-
-        for n in range(num):
-            self.add_single_process()
-        print('All processes added.')
-
-        # view composite
-        print('This is the composite that will be run: ')
-        self.builder_instance.visualize()
 
         # TODO: What other steps could possibly occur here? What about before?
 
