@@ -149,11 +149,13 @@ class SedModel:
                 else:
                     source = self.model_source
                 modId = source.split('/')[-1]
-            if isinstance(self.model_source, str):
+            elif isinstance(self.model_source, str):
                 modId = self.model_source
             else:
                 modId = self.model_source.value
             return f'{modId}_Model'
+        else:
+            return model_id
 
     def dump(self):
         return self.__dict__
