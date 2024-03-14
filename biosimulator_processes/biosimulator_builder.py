@@ -132,8 +132,15 @@ class BuildPrompter:
             self.add_single_process()
         print('All processes added.')
 
+        write_doc = self.yesno(input('Save composition to document? (y/n): '))
+        if write_doc:
+            doc = self.builder_instance.document()
+            doc_fp = input('Please enter the save destination of this document: ')
+            self.builder_instance.write(filename=doc_fp)
+            print('Composition written to document!')
+
         # view composite
-        print('This is the composite that will be run: ')
+        print('This is the composite: ')
         return self.builder_instance.visualize()
 
     def generate_composite_run(self, duration: int = None, **params) -> None:
@@ -153,6 +160,18 @@ class BuildPrompter:
         print('Composite successfully run. Request complete. Done.')
         return results
 
+    def start(self, num: int = None):
+        """Entrypoint to get prompted for input data with which to build the bigraph, then visualize
+            and run the composite. All positional args and kwargs will be re-queried in the
+            prompt if set to `None`. TODO: What other steps could possibly occur here? What about before?
+
+            Args:
+                num:`int`: number of processes to add. Defaults to `None`.
+        """
+        if num is None:
+            num = input('How many processes would you like to add to the bigraph?')
+        return self.add_processes(num)
+
     def run(self, num: int = None, duration: int = None, **params) -> None:
         """Entrypoint to get prompted for input data with which to build the bigraph, then visualize
             and run the composite. All positional args and kwargs will be requeried in the
@@ -163,11 +182,13 @@ class BuildPrompter:
                 duration:`int`: interval to run process composite for. Defaults to `None`.
                 **params:`kwargs`: Custom params. TODO: implement these.
         """
-        if num is None:
-            num = input('How many processes would you like to add to the bigraph?')
-
-        self.add_processes(num)
         return self.generate_composite_run()
+
+    @classmethod
+    def yesno(cls, user_input: str) -> Union[bool, None]:
+        return True if 'n' in user_input.lower() \
+                else False if 'y' in user_input.lower() \
+                else None
 
 
 
