@@ -169,15 +169,15 @@ class ModelChanges(_BaseClass):
     reaction_changes: List[ModelChange]
 
 
-class ModelUnit:
-    def __init__(self, **unit_config):
-        for k, v in unit_config:
+class ModelUnits:
+    def __init__(self, **units_config):
+        for k, v in units_config:
             self.__setattr__(k, v)
 
 
-@dataclass
-class SedModel(_BaseClass):
-    model_source: Union[BiomodelID, ModelFilepath, str]
+class SedModel:
+    def __init__(self, model_source: Union[BiomodelID, ModelFilepath, str]):
+        self.model_source = model_source
 
     def set_id(self, model_id):
         if model_id is None:
@@ -186,6 +186,9 @@ class SedModel(_BaseClass):
             else:
                 modId = self.model_source.value
             return f'{modId}_Model'
+
+    def dump(self):
+        return self.__dict__
 
     def to_dict(self):
         return asdict(self)
@@ -204,7 +207,7 @@ class TimeCourseModel(SedModel):
     model_language: str = 'sbml'
     model_name: str = 'Unnamed TimeCourse Model'
     model_changes: ModelChanges = None
-    model_units: List[ModelUnit] = None
+    model_units: ModelUnits = None
 
     def __init__(self,
                  model_source,
