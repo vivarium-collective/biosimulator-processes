@@ -7,11 +7,6 @@ from biosimulator_processes import CORE
 from biosimulator_processes.data_model import _BaseClass
 
 
-def print(val):
-    """Quick helper for formatting"""
-    return print(f'--- {val}\n')
-
-
 class BiosimulatorBuilder(Builder):
     _is_initialized = False
 
@@ -58,7 +53,7 @@ class BuildPrompter:
                     input_kwargs[key.strip()] = ast.literal_eval(value)
                 except (ValueError, SyntaxError):
                     input_kwargs[key] = value
-        print(f'Input kwargs generated: {input_kwargs}\n')
+        print(f'Input kwargs generated: {input_kwargs}')
         return input_kwargs
 
     def add_single_process(self,
@@ -87,13 +82,13 @@ class BuildPrompter:
             name=process_type,
             config=dynamic_config)  # {**input_kwargs})
 
-        print(f'{builder_node_name} process successfully added to the bi-graph!\n')
+        print(f'{builder_node_name} process successfully added to the bi-graph!')
 
         if self.connect_all:
             self.builder_instance.connect_all(append_to_store_name='_store')
-            print(f'All nodes including the most recently added {builder_node_name} processes connected!\n')
+            print(f'All nodes including the most recently added {builder_node_name} processes connected!')
 
-        print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.\n')
+        print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
         return
 
     def add_processes(self,
@@ -113,10 +108,10 @@ class BuildPrompter:
             # TODO: Allow for kwargs to be passed in place of input vals for process configs
         """
         print('Run request initiated...')
-        print(f'{num} processes will be added to the bi-graph.\n')
+        print(f'{num} processes will be added to the bi-graph.')
 
         if self.connect_all:
-            print('All processes will be connected as well.\n')
+            print('All processes will be connected as well.')
         else:
             # TODO: implement this through kwargs
             print('Using edge configuration spec...')
@@ -146,12 +141,12 @@ class BuildPrompter:
         if duration is None:
             duration = int(input('How long would you like to run this composite for?: '))
 
-        print('Generating composite...\n')
+        print('Generating composite...')
         composite = self.builder_instance.generate()
-        print('Composite generated!\n')
-        print(f'Running generated composite for an interval of {duration}\n')
+        print('Composite generated!')
+        print(f'Running generated composite for an interval of {duration}')
         results = composite.run(duration)  # TODO: add handle force complete
-        print('Composite successfully run. Request complete. Done.\n')
+        print('Composite successfully run. Request complete. Done.')
         return results
 
     def start(self, num: int = None):
