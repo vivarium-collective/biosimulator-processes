@@ -169,7 +169,7 @@ class BuildPrompter:
                 num:`int`: number of processes to add. Defaults to `None`.
         """
         if num is None:
-            num = input('How many processes would you like to add to the bigraph?')
+            num = int(input('How many processes would you like to add to the bigraph?'))
         return self.add_processes(num)
 
     def run(self, num: int = None, duration: int = None, **params) -> None:
