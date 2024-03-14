@@ -188,7 +188,7 @@ class TimeCourseModel(SedModel):
                 model_source:`Union[str, ModelFilepath, BiomodelID`
                 model_id:`str`
         """
-        super().__init__(model_source)
+        super().__init__(model_source, model_id)
         self.model_id = self.set_id(model_id)
         self.model_language = model_language
         self.model_changes = model_changes
