@@ -41,11 +41,22 @@ from biosimulator_processes.data_model import MODEL_TYPE
 
 class CopasiProcess(Process):
     """
-        Entrypoints:
+        Entrypoint Options:
 
-            A. SBML model file: 
-            B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
-            C. TimeCourseModel search term (load preconfigured model from BioModels)
+            A. Filepath whose reference is a valid SBML model file(`str`),
+            B. A valid BioModel id which will return a simulator-instance object(`str`),
+            C. A specification of model configuration parameters whose values reflect those required by BasiCo. This
+                specification requires the presence of reactions which inherently define species types and optionally
+                addition parameters. See Basico for more details. There are two types of objects that are accepted
+                for this specification:
+                    - A high-level api object from `biosimulator_processes.data_model`,
+                        ie: `TimeCourseModel` or `SedModel`. (Recommended for first-time users). The parameters with
+                        which these dataclasses are instantiated correspond to the `config_schema` for a given
+                        process implementation. In the config schema, the outermost keys could be considered
+                        parameters/kwargs for a process implementation's construction. The values are all terminally
+                        strings that define the parameter "type" according to bigraph-schema.
+                    - A dictionary which defines the same kwargs/values as the high-level objects. See
+                        `biosimulator_processes.data_model.MODEL_TYPE` for details.
     """
 
     config_schema = {
@@ -67,13 +78,15 @@ class CopasiProcess(Process):
         model_changes = self.config['model'].get('model_changes', {})
         self.model_changes = {} if model_changes is None else model_changes
 
-        # A. enter with model_file
+        # Option A:
         if '/' in model_source:
             self.copasi_model_object = load_model(model_source)
-        # B. enter with specific search term for a model
+
+        # Option B:
         elif 'BIO' in model_source:
             self.copasi_model_object = fetch_biomodel(model_id=model_source)
-        # C. enter with a new model
+
+        # Option C:
         else:
             if not self.model_changes:
                 raise AttributeError("You must pass a source of model changes specifying params, reactions, species or all three if starting from an empty model.")

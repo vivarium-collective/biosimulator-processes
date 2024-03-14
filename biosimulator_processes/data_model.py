@@ -194,6 +194,7 @@ class SedModel:
         return asdict(self)
 
 
+# TODO: Provide this model if 'CopasiProcess', etc is selected by the user in prompt.
 class TimeCourseModel(SedModel):
     """The data model declaration for process configuration schemas that support SED.
 
