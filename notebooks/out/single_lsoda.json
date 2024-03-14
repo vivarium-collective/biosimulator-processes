@@ -8,12 +8,12 @@
         "inputs": {},
         "outputs": {}
     },
-    "copasi": {
+    "simple1": {
         "_type": "process",
         "address": "local:CopasiProcess",
         "config": {
             "model": {
-                "model_source": "BIOMD0000000391",
+                "model_source": "BIOMD0000000364",
                 "model_id": "",
                 "model_language": "sbml",
                 "model_name": "composite_process_model",
@@ -24,7 +24,7 @@
                 },
                 "model_units": null
             },
-            "method": "directMethod"
+            "method": "lsoda"
         },
         "inputs": {
             "time": [

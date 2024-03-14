@@ -12,16 +12,6 @@ class BiosimulatorBuilder(Builder):
     def __init__(self, schema: Dict = None, tree: Dict = None, filepath: str = None):
         if not self._is_initialized:
             super().__init__(schema=schema, tree=tree, file_path=filepath, core=CORE)
-            # Perform your initialization here
-            self._is_initialized = True
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._is_initialized:
-            if not cls._instance:
-                cls._instance = super(BiosimulatorBuilder, cls).__new__(cls, *args, **kwargs)
-            return cls._instance
-        else:
-            raise RuntimeError('Only one instance of this class can be created at a time.')
 
 
 class BuildPrompter:
@@ -120,7 +110,7 @@ class BuildPrompter:
         print(f'{builder_node_name} process successfully added to the bi-graph!\n')
 
         if self.connect_all:
-            self.builder_instance.connect_all()
+            self.builder_instance.connect_all(append_to_store_name='_store')
             print(f'All nodes including the most recently added {builder_node_name} processes connected!\n')
 
         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.\n')

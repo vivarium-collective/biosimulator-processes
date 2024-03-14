@@ -52,7 +52,7 @@ class CopasiProcess(Process):
         'model': MODEL_TYPE,
         'method': {
             '_type': 'string',
-            '_default': 'deterministic'
+            '_default': 'lsoda'
         }
     }
 
