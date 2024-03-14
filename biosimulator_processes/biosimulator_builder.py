@@ -122,7 +122,7 @@ class BuildPrompter:
         self.builder_instance.add_process(
             process_id=builder_node_name,
             name=process_type,
-            config={**input_kwargs})
+            config={**process_type[input_kwargs]})
         print(f'{builder_node_name} process successfully added to the bi-graph!')
 
         if self.connect_all:
@@ -162,13 +162,13 @@ class BuildPrompter:
             print('Using edge configuration spec...')
 
         for n in range(num):
-            if config_params:
-                single_config_params = {}
-                for process_key, value in config_params:
-                    if num in value.keys():
-                        single_config_params.update(**value[str(num)])
-                    else:
-                        single_config_params = {**config_params}
+            # if config_params:
+            #     single_config_params = {}
+            #     for process_key, value in config_params:
+            #         if num in value.keys():
+            #             single_config_params.update(**value[str(num)])
+            #         else:
+            #             single_config_params = {**config_params}
             self.add_single_process(**config_params)
         print('All processes added.')
 
