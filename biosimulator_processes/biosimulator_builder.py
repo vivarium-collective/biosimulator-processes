@@ -57,18 +57,30 @@ class BuildPrompter:
             self.run(num=num_additions, duration=additional_params.get('duration'))
 
     @classmethod
-    def generate_input_kwargs(cls) -> Dict[str, Any]:
+    def generate_input_kwargs(cls, **config_params) -> Dict[str, Any]:
         """Generate kwargs to be used as dynamic input for process configuration.
 
             Args:
-                None.
+                **config_params:`kwargs`: values that would be otherwise defined by the user
+                    in the prompter input prompt can instead be defined as kwargs in this
+                    method. PLEASE NOTE: each kwarg value
+                    passed here should be a dictionary specifying the process name (according
+                    to the registry ie: `'CopasiProcess'`), and the process config kwarg.
+
+                    For example:
+
+                        prompter.add_single_process(
+                            CopasiProcess={
+                                'model': {
+                                    'model_source': {
+                                        'value': 'BIOMD0000000391'}
 
             Returns:
                 Dict[str, Any]: configuration kwargs for process construction.
         """
+        input_kwargs = {**config_params}
         process_kwargs = input('Please enter the process configuration keyword arguments: ')
         process_args = process_kwargs.split(',')
-        input_kwargs = {}
         for arg in process_args:
             key, value = arg.split('=')
             try:
@@ -79,7 +91,26 @@ class BuildPrompter:
         print(f'Input kwargs generated: {input_kwargs}')
         return input_kwargs
 
-    def add_single_process(self) -> None:
+    def add_single_process(self, **config_params) -> None:
+        """Add a single process to the bigraph via the builder. Config params
+            can be passed in place of Prompter input prompts.
+
+            Args:
+                  **config_params:`kwargs`: to bypass this class' input prompts for kwarg-style
+                    process configuration declaration, pass the kwarg you want and press
+                    enter when prompted for the same kwarg. PLEASE NOTE: each kwarg value
+                    passed here should be a dictionary specifying the process name (according
+                    to the registry ie: `'CopasiProcess'`), and the process config kwarg.
+
+                    For example:
+
+                        prompter.add_single_process(
+                            CopasiProcess={
+                                'model': {
+                                    'model_source': {
+                                        'value': 'BIOMD0000000391'}
+
+        """
         process_type = input(
             f'Please enter one of the following process types that you wish to add:\n{self.builder_instance.list_processes()}\n:')
         builder_node_name = input('Please enter the name that you wish to assign to this process: ')
@@ -96,28 +127,15 @@ class BuildPrompter:
             print(f'All nodes including the most recently added {builder_node_name} processes connected!')
 
         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
-        # while True:
-        #     visualize = input('Do you wish to visualize this addition after (y/n): ')
-        #     if 'y' in visualize.lower():
-        #         print('Visualizing bigraph...')
-        #         self.builder_instance.visualize()
-        #         break
-        #     elif 'n' or 'y' not in visualize.lower():
-        #         print('Please enter a valid choice: (y/n)')
-        #         continue
-        #     else:
-        #         print(f'Done adding single {builder_node_name} ({process_type}) to the bigraph.')
-        #         break
         return
 
-    def add_processes(self, num: int, **params) -> Digraph:
+    def add_processes(self, num: int, **params) -> None:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 
             Args:
                 num:`int`: number of processes to add.
 
-            Returns:
-                graphviz.Digraph visualization
+            # TODO: Allow for kwargs to be passed in place of input vals for process configs
         """
         print('Run request initiated...')
         print(f'{num} processes will be added to the bi-graph.')
