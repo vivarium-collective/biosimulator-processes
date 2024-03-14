@@ -140,8 +140,15 @@ class SedModel:
     model_source: Union[BiomodelID, ModelFilepath, str]
     model_id: str = None
 
-    def set_id(self, model_id):
+    def set_id(self, model_id=None):
         if model_id is None:
+            if isinstance(self.model_source, ModelFilepath) \
+                    or isinstance(self.model_source, str) and '/' in self.model_source:
+                if isinstance(self.model_source, ModelFilepath):
+                    source = self.model_source.value
+                else:
+                    source = self.model_source
+                modId = source.split('/')[-1]
             if isinstance(self.model_source, str):
                 modId = self.model_source
             else:
