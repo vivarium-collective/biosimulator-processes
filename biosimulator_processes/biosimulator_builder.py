@@ -1,8 +1,10 @@
 from typing import *
 import ast
+from pydantic import BaseModel
 from graphviz import Digraph
 from builder import Builder
 from biosimulator_processes import CORE
+from biosimulator_processes.data_model import _BaseClass
 
 
 def print(val):
@@ -62,6 +64,7 @@ class BuildPrompter:
     def add_single_process(self,
                            builder: Union[Builder, BiosimulatorBuilder] = None,
                            process_type: str = None,
+                           process_config: _BaseClass = None,
                            builder_node_name: str = None) -> None:
         """Get prompted through the steps of adding a single process to the bigraph via the builder."""
         if self.builder_instance is None:
@@ -75,13 +78,14 @@ class BuildPrompter:
             builder_node_name = input('Please enter the name that you wish to assign to this process: ')
 
         # generate input data from user prompt results and add processes to the bigraph  through pydantic model
-        ProcessConfig = self.builder_instance.get_pydantic_model(process_type)
-        input_kwargs = self.generate_input_kwargs()
-        process_config = ProcessConfig(**input_kwargs)
+        DynamicProcessConfig = self.builder_instance.get_pydantic_model(process_type)
+
+        input_kwargs = self.generate_input_kwargs() if process_config is None else process_config.model_dump()
+        dynamic_config = DynamicProcessConfig(**input_kwargs)
         self.builder_instance.add_process(
             process_id=builder_node_name,
             name=process_type,
-            config=process_config)  # {**input_kwargs})
+            config=dynamic_config)  # {**input_kwargs})
 
         print(f'{builder_node_name} process successfully added to the bi-graph!\n')
 
