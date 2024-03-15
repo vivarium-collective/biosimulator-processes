@@ -2,7 +2,7 @@ import re
 from setuptools import setup, find_packages
 
 
-__version__ = "0.0.19"
+__version__ = "0.0.20"
 
 with open("README.md", "r") as readme:
     description = readme.read()
