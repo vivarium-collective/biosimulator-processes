@@ -1,17 +1,9 @@
 """
-    Biosimulator process for Copasi/Basico.
 
-    # 'model_file': 'string'
-    # 'reactions': 'tree[string]',
-    # 'model_changes': 'tree[string]',
-
-    # Newton/Raphson method  distance/rate: steady state  Use newton method and time course simulation
-
-    # try newton stopp if epsilon satisfies
-    # run tc for 0.1unit of time stop if ep satis
-    # try newton stop if e satisfied
-    # run tc for 10x longer time stop if e
-    # if time>10^10 units of time stop otherwise go back to number 3
+    * `deterministic` / `lsoda`: the LSODA implementation
+       |   * `stochastic`: the Gibson & Bruck Gillespie implementation
+       |   * `directMethod`: Gillespie Direct Method
+       |   * others: `hybrid`, `hybridode45`, `hybridlsoda`, `adaptivesa`, `tauleap`, `radau5`, `sde`
 
 """
 
