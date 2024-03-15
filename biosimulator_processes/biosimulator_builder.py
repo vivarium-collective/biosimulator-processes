@@ -186,14 +186,27 @@ class BuildPrompter:
         self.start(num)
         return self.run(duration, **run_params)
 
+    def write_bigraph(self, fp: str, output_dir='out'):
+        """Use the builder instance attribute to write out the bigraph document to a fp."""
+        return self.builder_instance.write(filename=fp, outdir=output_dir)
+
     def wipe_builder(self):
         self.builder_instance = None
         print(f'Builder flushed! This is verified because builder is: {self.builder_instance}')
 
-    def flush(self, out_dir='out'):
+    def flush(self, out_dir='out', fp: str = None, write: bool = True) -> None:
+        """Optionally write the bigraph to document and wipe the current builder_instance instance.
+
+            Args:
+                out_dir:`str`: destination to which we save the document.
+                fp:`str`: path by which to save if write is true. Defaults to None.
+                write:`bool`: whether to write out the document before wiping. Defaults to `True`.
+        """
         from datetime import datetime
-        fp = f"BUILD_FLUSH_{str(datetime.now()).replace(' ', '__').replace(':', '_')}"
-        self.builder_instance.write(fp, out_dir)
+        if write:
+            if fp is None:
+                fp = f"BUILD_FLUSH_{str(datetime.now()).replace(' ', '__').replace(':', '_')}"
+            self.write_bigraph(fp, out_dir)
         return self.wipe_builder()
 
     def visualize_bigraph(self):

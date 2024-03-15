@@ -214,16 +214,26 @@ class SedModel(_BaseClass):
 
 @dataclass
 class TimeCourseModel(SedModel):
+    """The data model declaration for process configuration schemas that support SED.
+
+        Attributes:
+            model_id: `str`
+            model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
+            model_language: `str`
+            model_name: `str`
+            model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
+    """
     model_language: str = None,
     model_changes: TimeCourseModelChanges = None,
     model_units: ModelUnits = None
 
     def __init__(self,
                  model_source: Union[BiomodelID, ModelFilepath, str],
+                 model_changes=model_changes,
                  model_id=None,
                  model_name=None):
         """Class which inherits SedModel."""
-        super().__init__(model_source, model_id, model_name)
+        super().__init__(model_source, model_id, model_name, model_changes)
         # TODO: extract functionality for algorithms related to UTC sims
         self.model_id = self.set_id(model_id)
         self.model_name = self.set_name(model_name)
