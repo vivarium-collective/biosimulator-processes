@@ -1,5 +1,6 @@
 from builder import ProcessTypes
 import importlib
+from biosimulator_processes.data_model import SedDataModel
 
 
 # Define a list of processes to attempt to import and register

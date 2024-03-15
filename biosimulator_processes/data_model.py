@@ -361,6 +361,8 @@ class SedDataModel:
     ReactionParameter = ReactionParameter
     ReactionChange = ReactionChange
     ModelUnits = ModelUnits
+    ModelFilepath = ModelFilepath
+    BiomodelID = BiomodelID
 
 
 # --- Non-Pydantic FromDict classes
