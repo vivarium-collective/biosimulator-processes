@@ -339,7 +339,6 @@ class SedDataModel:
     ModelUnits = ModelUnits
 
 
-
 # --- Non-Pydantic FromDict classes
 class FromDict(dict):
     def __init__(self, value: Dict):
