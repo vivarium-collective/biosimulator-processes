@@ -1,7 +1,7 @@
 """Data Model for the highest-level BioBuilder API
 
 author: Alex Patrie < alexanderpatrie@gmail.com >
-license: MIT
+license: Apache 2.0
 created: 03/2024
 """
 
