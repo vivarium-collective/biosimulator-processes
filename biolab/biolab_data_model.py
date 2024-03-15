@@ -198,7 +198,7 @@ class SedModel(_BaseClass):
         """Currently only support BioModel id."""
         return validator(source, **kwargs)
 
-    def get_biomodel_model_source_info(self, biomodel_id: Union[BiomodelID, str]) -> Dict:
+    def get_biomodel_model_source_info(self, biomodel_id: Union[biolab.BiomodelID, str]) -> Dict:
         source_id = biomodel_id.value if isinstance(biomodel_id, biolab.BiomodelID) else biomodel_id
         return requests.get(
             url=f'https://www.ebi.ac.uk/biomodels/{source_idß}',

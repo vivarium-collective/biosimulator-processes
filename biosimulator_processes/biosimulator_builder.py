@@ -1,5 +1,6 @@
 from typing import *
 import ast
+import requests
 from pydantic import BaseModel
 from graphviz import Digraph
 from process_bigraph import Composite
