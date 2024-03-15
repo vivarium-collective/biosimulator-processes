@@ -8,7 +8,7 @@
         "inputs": {},
         "outputs": {}
     },
-    "tumor_control_model_composite": {
+    "simple_a": {
         "_type": "process",
         "address": "local:CopasiProcess",
         "config": {
@@ -24,7 +24,7 @@
                 },
                 "model_units": null
             },
-            "method": "hybridlsoda"
+            "method": "tauleap"
         },
         "inputs": {
             "time": [
@@ -50,13 +50,13 @@
         },
         "interval": 1.0
     },
-    "global_time": "5.0",
-    "time_store": "5.0",
+    "global_time": "2.0",
+    "time_store": "2.0",
     "floating_species_store": {
-        "E": "nan",
-        "R": "nan",
+        "E": "0.0",
+        "R": "0.0",
         "f": "nan",
-        "E'": "nan"
+        "E'": "0.0"
     },
     "model_parameters_store": {
         "B": "0.0",

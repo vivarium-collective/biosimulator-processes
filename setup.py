@@ -19,8 +19,8 @@ with open("README.md", "r") as readme:
 setup(
     name="biosimulator-processes",
     version=__version__,
-    author="Ryan Spangler, Eran Agmon, Alex Patrie",
-    author_email="ryan.spangler@gmail.com, agmon.eran@gmail.com, alexanderpatrie@gmail.com",
+    author="Alex Patrie, Eran Agmon, Ryan Spangler",
+    author_email=" alexanderpatrie@gmail.com, agmon.eran@gmail.com, ryan.spangler@gmail.com",
     description="",
     long_description=long_description,
     long_description_content_type="text/markdown",

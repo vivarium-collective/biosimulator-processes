@@ -185,6 +185,16 @@ class BuildPrompter:
         self.start(num)
         return self.run(duration, **run_params)
 
+    def wipe_builder(self):
+        self.builder_instance = None
+        print(f'Builder flushed! This is verified because builder is: {self.builder_instance}')
+
+    def flush(self, out_dir='out'):
+        from datetime import datetime
+        fp = f"BUILD_FLUSH_{str(datetime.now()).replace(' ', '__').replace(':', '_')}"
+        self.builder_instance.write(fp, out_dir)
+        return self.wipe_builder()
+
     def visualize_bigraph(self):
         return self.builder_instance.visualize()
 

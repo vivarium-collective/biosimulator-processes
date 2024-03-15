@@ -193,7 +193,7 @@ class SedModel(_BaseClass):
 @dataclass
 class TimeCourseModel(SedModel):
     model_language: str = None,
-    model_changes: ModelChanges = None,
+    model_changes: TimeCourseModelChanges = None,
     model_units: ModelUnits = None
 
     def __init__(self,
@@ -317,6 +317,27 @@ class Simulator(_BaseClass):
     name: str  # name installed by pip
     version: str
     deps: List[InstallationDependency]
+
+
+class SedDataModel:
+    TimeCourseModel = TimeCourseModel
+    TimeCourseModelChanges = TimeCourseModelChanges
+    ModelChanges = ModelChanges
+    ModelChange = ModelChange
+    TimeCourseProcess = TimeCourseProcess
+    SteadyStateModel = SteadyStateModel
+    SpatialModel = SpatialModel
+    ExperimentMetadata = ExperimentMetadata
+    Experiment = Experiment
+    SimulationResult = SimulationResult
+    SimulationModelParameter = SimulationModelParameter
+    SedModel = SedModel
+    SpeciesChange = SpeciesChange
+    GlobalParameterChange = GlobalParameterChange
+    ReactionParameter = ReactionParameter
+    ReactionChange = ReactionChange
+    ModelUnits = ModelUnits
+
 
 
 # --- Non-Pydantic FromDict classes
