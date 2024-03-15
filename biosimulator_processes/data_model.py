@@ -7,6 +7,7 @@ created: 03/2024
 
 
 from typing import Dict, List, Union, Tuple, Optional, Any
+import requests
 from types import NoneType
 from dataclasses import dataclass, asdict
 from abc import ABC, abstractmethod
@@ -198,10 +199,10 @@ class SedModel(_BaseClass):
         """Currently only support BioModel id."""
         return validator(source, **kwargs)
 
-    def get_biomodel_model_source_info(self, biomodel_id: Union[BiomodelID, str]) -> Dict:
-        source_id = biomodel_id.value if isinstance(biomodel_id, biolab.BiomodelID) else biomodel_id
+    def get_biomodel_model_source_info(self, biomodel_id: str) -> Dict:
+        """Return information about the BioModel ID passed."""
         return requests.get(
-            url=f'https://www.ebi.ac.uk/biomodels/{source_idß}',
+            url=f'https://www.ebi.ac.uk/biomodels/{biomodel_id}',
             headers={'accept': 'application/json'}).json()
 
     def set_model_source_info(self, **kwargs):
@@ -226,7 +227,11 @@ class TimeCourseModel(SedModel):
         # TODO: extract functionality for algorithms related to UTC sims
         self.model_id = self.set_id(model_id)
         self.model_name = self.set_name(model_name)
-        self.set_source()
+        source_id = self.model_source.value \
+            if isinstance(self.model_source, BiomodelID) or isinstance(self.model_source, ModelFilepath) \
+            else self.model_source
+        if 'BIOMD' in source_id:
+            self.source_info = self.get_biomodel_model_source_info(source_id)
 
 
 class SteadyStateModel(SedModel):
@@ -241,7 +246,6 @@ class SteadyStateModel(SedModel):
         super().__init__(model_source, model_id, model_name, model_language, model_changes, model_units)
         self.model_id = self.set_id(model_id)
         self.model_name = self.set_name(model_name)
-        self.set_source()
 
 
 class SpatialModel(SedModel):
@@ -256,7 +260,6 @@ class SpatialModel(SedModel):
         super().__init__(model_source, model_id, model_name, model_language, model_changes, model_units)
         self.model_id = self.set_id(model_id)
         self.model_name = self.set_name(model_name)
-        self.set_source()
 
 
 @dataclass
