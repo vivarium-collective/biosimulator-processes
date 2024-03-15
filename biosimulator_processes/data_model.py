@@ -1,3 +1,11 @@
+"""Data Model for the highest-level BioBuilder API
+
+author: Alex Patrie < alexanderpatrie@gmail.com >
+license: Apache 2.0
+created: 03/2024
+"""
+
+
 from typing import Dict, List, Union, Tuple, Optional, Any
 from types import NoneType
 from dataclasses import dataclass, asdict
@@ -13,47 +21,14 @@ from pydantic import (
 )
 
 
-__all__ = [
-    'SpeciesChanges',
-    'GlobalParameterChanges',
-    'ReactionParameter',
-    'ReactionChanges',
-    'TimeCourseModelChanges',
-    'ModelSource',
-    'BiomodelId',
-    'ModelFilepath',
-    'TimeCourseModel',
-    'ProcessConfigSchema',
-    'PortSchema',
-    'EmittedType',
-    'EmitterConfig',
-    'EmitterInstance',
-    'TimeCourseProcessInstance',
-    'FromDict',
-    'BasicoModelChanges',
-    'SedModel',
-    'BaseModel',
-    'ModelParameter',
-    '__ProcessConfig',
-    'Port',
-    'State',
-    'dynamic_process_config',
-    'TimeCourseProcessConfig'
-]
+@dataclass
+class _BaseClass:
+    def to_dict(self):
+        return asdict(self)
 
 
-# TODO: Parse this into sep. library datamodels
-
-# --- MODEL ATTRIBUTES
-class BaseModel(_BaseModel):
-    """Custom implementation of `pydantic.BaseModel` that allows for arbitrary types in the data model.
-
-        TODO: add `protected_namespaces`
-    """
-    model_config = ConfigDict(arbitrary_types_allowed=True, protected_namespaces=())
-
-
-class ModelParameter(BaseModel):
+@dataclass
+class SimulationModelParameter(_BaseClass):
     """
         Attributes:
             name:`str`
@@ -62,46 +37,40 @@ class ModelParameter(BaseModel):
             scope:`str`
     """
     name: str
-    feature: str
     value: Union[float, int, str]
-    scope: str
+    feature: str
+    scope: str = None
 
 
-class SpeciesChanges(BaseModel):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-    name: str
-    unit: Union[str, NoneType, ModelParameter] = Field(default=None)
-    initial_concentration: Optional[Union[float, ModelParameter]] = Field(default=None)
-    initial_particle_number: Optional[Union[float, NoneType, ModelParameter]] = Field(default=None)
-    initial_expression: Union[str, NoneType, ModelParameter] = Field(default=None)
-    expression: Union[str, NoneType, ModelParameter] = Field(default=None)
+# TODO: what could this specific name be? Are these changes etc, unique to Time Course / '2d' simulation?
+@dataclass
+class SpeciesChange(_BaseClass):  # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
+    species_name: str
+    unit: Union[str, NoneType, SimulationModelParameter] = None
+    initial_concentration: Optional[Union[float, SimulationModelParameter]] = None
+    initial_particle_number: Optional[Union[float, NoneType, SimulationModelParameter]] = None
+    initial_expression: Union[str, NoneType, SimulationModelParameter] = None
+    expression: Union[str, NoneType, SimulationModelParameter] = None
 
 
-class GlobalParameterChanges(BaseModel):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
-    name: str
-    initial_value: Union[float, NoneType] = Field(default=None)
-    initial_expression: Union[str, NoneType] = Field(default=None)
-    expression: Union[str, NoneType] = Field(default=None)
-    status: Union[str, NoneType] = Field(default=None)
-    param_type: Union[str, NoneType] = Field(default=None)  # ie: fixed, assignment, reactions, etc
+@dataclass
+class GlobalParameterChange(_BaseClass):  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
+    parameter_name: str
+    initial_value: Union[float, NoneType] = None
+    initial_expression: Union[str, NoneType] = None
+    expression: Union[str, NoneType] = None
+    status: Union[str, NoneType] = None
+    param_type: Union[str, NoneType] = None  # ie: fixed, assignment, reactions, etc
 
 
-class ReactionParameter(BaseModel):
+@dataclass
+class ReactionParameter(_BaseClass):
     parameter_name: str
     value: Union[float, int, str]
 
 
-class ReactionModelParameter(ModelParameter):
-    """
-        Attributes:
-            name:`str`
-            feature:`str`
-            value:`Union[float, int, str]`
-            scope:`str` = 'reaction'
-    """
-    scope: str = 'reaction'
-
-
-class ReactionChanges(BaseModel):
+@dataclass
+class ReactionChange(_BaseClass):
     """
         Attributes:
             reaction_name:`str`: name of the reaction you wish to change.
@@ -110,48 +79,19 @@ class ReactionChanges(BaseModel):
 
     """
     reaction_name: str
-    parameter_changes: List[ReactionParameter] = Field(default=[])
-    reaction_scheme: Union[NoneType, str] = Field(default=None)
+    parameter_changes: List[ReactionParameter] = None
+    reaction_scheme: Union[NoneType, str] = None
 
 
-class TimeCourseModelChanges(BaseModel):
-    species_changes: List[SpeciesChanges] = Field(default=[])
-    global_parameter_changes: List[GlobalParameterChanges] = Field(default=[])
-    reaction_changes: List[ReactionChanges] = Field(default=[])
-
-
-class ModelSource(BaseModel):
-    value: str
-
-
-class BiomodelId(ModelSource):
-    value: str
-
-    @classmethod
-    @field_validator('value')
-    def check_value(cls, v):
-        assert '/' not in v, "value must not contain a path but rather a valid BioModels id like: 'BIOMODELS...'"
-        return v
-
-
-class ModelFilepath(BaseModel):
-    value: str
-
-    @classmethod
-    @field_validator('value')
-    def check_value(cls, v):
-        assert '/' in v, "value must contain a path"
-        return v
-
-
-# --- DATACLASS MODELS
 @dataclass
-class BaseClass:
-    def to_dict(self):
-        return asdict(self)
+class TimeCourseModelChanges(_BaseClass):
+    species_changes: List[SpeciesChange] = None
+    global_parameter_changes: List[GlobalParameterChange] = None
+    reaction_changes: List[ReactionChange] = None
 
 
-class ModelSource(BaseClass):
+@dataclass
+class ModelSource(_BaseClass):
     value: str
 
     @abstractmethod
@@ -159,6 +99,7 @@ class ModelSource(BaseClass):
         pass
 
 
+@dataclass
 class BiomodelID(ModelSource):
     def __init__(self, value):
         super().__init__(value)
@@ -169,7 +110,8 @@ class BiomodelID(ModelSource):
             raise AttributeError('You must pass a valid biomodel id.')
 
 
-class ModelFilePath(ModelSource):
+@dataclass
+class ModelFilepath(ModelSource):
     def __init__(self):
         self.validate_source()
 
@@ -178,36 +120,28 @@ class ModelFilePath(ModelSource):
             raise AttributeError('You must pass a valid model path.')
 
 
-class ModelChange(BaseClass):
+@dataclass
+class ModelChange(_BaseClass):
     name: str
     scope: str
     value: Dict
 
 
-class ModelChanges(BaseClass):
-    species_changes: List[ModelChange]
-    param_changes: List[ModelChange]
-    reaction_changes: List[ModelChange]
+@dataclass
+class ModelChanges(_BaseClass):
+    species_changes: List[ModelChange] = None
+    param_changes: List[ModelChange] = None
+    reaction_changes: List[ModelChange] = None
 
 
-class TimeCourseDataclass(BaseClass):
-    model_id: str = None
-    model_source: Union[BiomodelId, ModelFilepath, str]
-    model_language: str = 'sbml'
-    model_name: str = 'Unnamed TimeCourse Model'
-    model_changes: ModelChanges = None
-    model_units: Dict[str, str] = None
-
-    def __init__(self):
-        if self.model_id is None:
-            if isinstance(self.model_source, str):
-                self.model_id = self.model_source
-            else:
-                self.model_id = self.model_source.value
+class ModelUnits:
+    def __init__(self, **units_config):
+        for k, v in units_config:
+            self.__setattr__(k, v)
 
 
-# --- TIME COURSE MODEL
-class TimeCourseModel(BaseModel):
+@dataclass
+class SedModel(_BaseClass):
     """The data model declaration for process configuration schemas that support SED.
 
         Attributes:
@@ -217,98 +151,127 @@ class TimeCourseModel(BaseModel):
             model_name: `str`
             model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
     """
-    model_id: str = Field(default='')
-    model_source: Union[str, ModelFilepath, BiomodelId]  # <-- SED type validated by constructor
-    model_language: Union[str, Dict[str, str]] = Field(default='sbml')
-    model_name: Union[str, Dict[str, str]] = Field(default='Unnamed Composite Process TimeCourseModel')
-    model_changes: Union[TimeCourseModelChanges, Dict[str, str]] = None
-    model_units: Union[Dict[str, str], str] = Field(default='_default')
+    model_source: Union[BiomodelID, ModelFilepath, str]
+    model_id: str = None
+    model_name: str = None
+    model_language: str = 'sbml'
+    model_changes: ModelChanges = None
+    model_units: ModelUnits = None
 
-    @field_validator('model_source')
-    @classmethod
-    def set_value(cls, v):
-        """Verify that the model source is set to only either a path or a biomodels id"""
-        if isinstance(v, str):
-            if '/' in v:
-                return ModelFilepath(value=v)
-            elif 'BIO' in v:
-                return BiomodelId(value=v)
-        elif isinstance(v, ModelFilepath) or isinstance(v, BiomodelId):
-            return v
+    def set_id(self, model_id=None):
+        if model_id is None:
+            if isinstance(self.model_source, ModelFilepath) \
+                    or isinstance(self.model_source, str) and '/' in self.model_source:
+                if isinstance(self.model_source, ModelFilepath):
+                    source = self.model_source.value
+                else:
+                    source = self.model_source
+                modId = source.split('/')[-1]
+            elif isinstance(self.model_source, str):
+                modId = self.model_source
+            else:
+                modId = self.model_source.value
+            return f'model_from_{modId}'
         else:
-            raise ValidationError('You must pass a valid model_source.')
+            return model_id
+
+    def set_name(self, name=None):
+        if name is None:
+            if self.model_id is not None:
+                return self.model_id
+            else:
+                return 'Un-named model'
+        else:
+            return name
+
+    def dump(self) -> Dict:
+        return self.__dict__
 
 
-class TimeCourseProcessConfig(BaseModel):
-    """TimeCourse configuration with parameters which are parsable by '2D' time-course
-        simulators such as COPASI and Tellurium.
+# TODO: Provide this model if 'CopasiProcess', etc is selected by the user in prompt.
 
-        Attributes:
-            model:`Union[Dict[str, Any], TimeCourseModel]`: configuration of the time course
-                model. See `TimeCourseModel`.
-            method:`str`: method by which the simulator solves the model. Options include
-                stochastic, deterministic, hybrid, directMethod. See basico.run_time_course
-                for full options. Defaults to `'deterministic'`.
-    """
-    model: Union[Dict[str, Any], TimeCourseModel]
-    method: str = Field(default='deterministic')
+@dataclass
+class TimeCourseModel(SedModel):
+    model_language: str = None,
+    model_changes: ModelChanges = None,
+    model_units: ModelUnits = None
 
-
-# --- PORTS
-class PortSchema(BaseModel):
-    input_value_names: List[str]  # user input
-    _schema: Dict[str, List[str]]
-
-    @classmethod
-    @field_validator('_schema')
-    def set_value(cls):
-        return {
-            input_value: [f'{input_value}_store']
-            for input_value in cls.input_value_names}
+    def __init__(self,
+                 model_source: Union[BiomodelID, ModelFilepath, str],
+                 model_id=None,
+                 model_name=None):
+        """Class which inherits SedModel."""
+        super().__init__(model_source, model_id, model_name)
+        # TODO: extract functionality for algorithms related to UTC sims
+        self.model_id = self.set_id(model_id)
+        self.model_name = self.set_name(model_name)
 
 
-# --- EMITTERS
-class EmittedType(BaseModel):
-    value_name: str
-    _type: str  # ie: 'tree[float]'
+class SteadyStateModel(SedModel):
+    def __init__(self,
+                 model_source: Union[BiomodelID, ModelFilepath, str],
+                 model_id=None,
+                 model_name=None,
+                 model_language: str = None,
+                 model_changes: ModelChanges = None,
+                 model_units: ModelUnits = None):
+        """Class which inherits SedModel. # TODO: expand this."""
+        super().__init__(model_source, model_id, model_name, model_language, model_changes, model_units)
+        self.model_id = self.set_id(model_id)
+        self.model_name = self.set_name(model_name)
 
 
-class EmitterConfig(BaseModel):
-    name: str
-    emit: Union[List[EmittedType], Dict[str, str]]  # ie: {'floating_species': 'tree[float]'},
+class SpatialModel(SedModel):
+    def __init__(self,
+                 model_source: Union[BiomodelID, ModelFilepath, str],
+                 model_id=None,
+                 model_name=None,
+                 model_language: str = None,
+                 model_changes: ModelChanges = None,
+                 model_units: ModelUnits = None):
+        """Class which inherits SedModel. # TODO: expand this."""
+        super().__init__(model_source, model_id, model_name, model_language, model_changes, model_units)
+        self.model_id = self.set_id(model_id)
+        self.model_name = self.set_name(model_name)
 
 
-class EmitterInstance:
-    _type: str = Field(default='step')
-    address: str = Field(default='local:ram-emitter')
-    emit_types: List[EmittedType]
-    config: Dict[str, Dict[str, str]]
-    inputs: PortSchema  # these names might be the same as self.config
-
-    @classmethod
-    @field_validator('config')
-    def set_value(cls):
-        config = {
-            'emit': {
-                emit_type.value_name: emit_type._type
-                for emit_type in cls.emit_types
-            }
-        }
+@dataclass
+class TimeCourseProcess(_BaseClass):
+    """Used as config for BioBuilder API"""
+    model: SedModel
+    method: str = 'lsoda'
 
 
-# --- TYPE REGISTRY
-class _ProcessConfig(BaseModel):
-    value: Dict
+@dataclass
+class ExperimentMetadata(_BaseClass):
+    def __init__(self):
+        raise NotImplementedError('Please do not use this class yet. Thanks!')
 
 
-class CustomType(BaseModel):
-    type_declaration: str
-    default_value: any = None
+@dataclass
+class SimulationResult(_BaseClass):
+    value: Dict[str, Any]
 
-    @classmethod
-    @field_validator('default_value')
-    def set_default(cls, v):
+    def serialize(self):
         pass
+
+
+@dataclass
+class Experiment:
+    """Consider this a 'simulation run'."""
+    simulation_model: Union[TimeCourseModel, Dict[str, Any]]  # where the theory/hypothesis lies. you're stating your biological case here.
+    duration: Union[int, float]  # one level above theory model. you're sure of your case and want to not tell but show it.
+    results: Dict[str, Union[NoneType, SimulationResult]] = None  # consider async
+    name: str = None
+    metadata: ExperimentMetadata = None
+
+    def get_results(self, source: Any):
+        return source.get('results', {})
+
+    def set_results(self):
+        source = None
+        results = self.get_results(source)
+        self.results = results
 
 
 def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
@@ -330,84 +293,27 @@ def dynamic_process_config(name: str = None, config: Dict = None, **kwargs):
     return DynamicProcessConfig(**config)
 
 
-class Port(BaseModel):
+class Port(_BaseClass):
     value: Dict
 
 
-class State(BaseModel):
-    # THINK: builder_api LN.120: add_process. TODO: This should be parsable by the builder in add process.
-    _type: str
-    address: str
-    config: BaseModel
-    inputs: Union[Port, Dict]
-    outputs: Union[Port, Dict]
-
-    @classmethod
-    def set_port(cls, v):
-        if isinstance(v, dict):
-            return Port(**v)
-        else:
-            return v
-
-    @field_validator('outputs')
-    @classmethod
-    def set_outputs(cls, v):
-        return cls.set_port(v)
-
-
-# --- PROCESSES
-class ProcessConfigSchema(BaseModel):
-    config: Dict = Field(default={})
-
-
-class __ProcessConfig(BaseModel):
-    process_name: str
-
-
-class TimeCourseProcessInstance(BaseModel):
-    _type: str
-    address: str
-    config: TimeCourseProcessConfig
-    inputs: PortSchema
-    outputs: PortSchema
-
-    @classmethod
-    @field_validator('address')
-    def check_value(cls, v):
-        pass
-
-
-# --- PROCESS CONFIG SCHEMAS
-class TimeCourseModelSchema(BaseModel):
-    model_id: str = 'string'
-    model_source: str = 'tree[string]'
-    model_language: Dict[str, str] = {
-        '_type': 'string',
-        '_default': 'sbml'}
-    model_name: Dict[str, str] = {
-        '_type': 'string',
-        '_default': 'composite_process_model'}
-    model_changes: Dict[str, str] = {
-        'species_changes': 'maybe[tree[string]]',
-        'global_parameter_changes': 'maybe[tree[string]]',
-        'reaction_changes': 'maybe[tree[string]]'}
-    model_units: str = 'maybe[tree[string]]'
-
-
 # --- INSTALLATION
-class DependencyFile(BaseModel):
+@dataclass
+class DependencyFile(_BaseClass):
     name: str
     hash: str
 
 
-class InstallationDependency(BaseModel):
+@dataclass
+class InstallationDependency(_BaseClass):
     name: str
     version: str
     markers: str = Field(default='')  # ie: "markers": "platform_system == \"Windows\""
     files: List[DependencyFile] = Field(default=[])
 
 
-class Simulator(BaseModel):
+@dataclass
+class Simulator(_BaseClass):
     name: str  # name installed by pip
     version: str
     deps: List[InstallationDependency]
@@ -500,7 +406,7 @@ class SedModel(FromDict):
 
 MODEL_TYPE = {
         'model_id': 'string',
-        'model_source': 'tree[string]',
+        'model_source': 'string',  # 'tree[string]',
         'model_language': {
             '_type': 'string',
             '_default': 'sbml'

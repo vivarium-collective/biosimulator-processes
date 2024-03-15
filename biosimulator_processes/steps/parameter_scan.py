@@ -3,7 +3,6 @@ from abc import abstractmethod
 
 import numpy as np
 from process_bigraph import Step
-from biosimulator_processes.data_model import TimeCourseProcessConfig, ModelParameter
 from biosimulator_processes.processes.copasi_process import CopasiProcess
 
 
@@ -70,7 +69,7 @@ class DeterministicTimeCourseParameterScan(Step):
 
     def __init__(self, config=None, core=None):
         self.process = CopasiProcess(config=self.config.get('process_config'))
-        self.params_to_scan: List[ModelParameter] = self.config.get('parameters', [])
+        self.params_to_scan: List = self.config.get('parameters', [])
         self.n_iterations = self.config['n_iterations']
         self.iter_start = self.config.get('iter_start', 0.0)
         self.iter_stop = self.config['iter_stop']

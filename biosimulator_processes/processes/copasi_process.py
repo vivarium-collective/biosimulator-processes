@@ -1,113 +1,84 @@
 """
-    Biosimulator process for Copasi/Basico.
 
-    # 'model_file': 'string'
-    # 'reactions': 'tree[string]',
-    # 'model_changes': 'tree[string]',
-
-    # Newton/Raphson method  distance/rate: steady state  Use newton method and time course simulation
-
-    # try newton stopp if epsilon satistfies
-    # run tc for 0.1unit of time stop if ep satis
-    # try newton stop if e satisfied
-    # run tc for 10x longer time stop if e
-    # if time>10^10 units of time stop otherwise go back to number 3
+    * `deterministic` / `lsoda`: the LSODA implementation
+       |   * `stochastic`: the Gibson & Bruck Gillespie implementation
+       |   * `directMethod`: Gillespie Direct Method
+       |   * others: `hybrid`, `hybridode45`, `hybridlsoda`, `adaptivesa`, `tauleap`, `radau5`, `sde`
 
 """
 
 
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from pandas import DataFrame
-from basico import *
-# from basico import (
-#     load_model,
-#     get_species,
-#     get_parameters,
-#     get_reactions,
-#     set_species,
-#     run_time_course,
-#     get_compartments,
-#     new_model,
-#     set_reaction_parameters,
-#     add_reaction,
-#     T,
-#     set_report_dict
-# )
+from basico import (
+    load_model,
+    get_species,
+    get_parameters,
+    get_reactions,
+    set_species,
+    run_time_course,
+    get_compartments,
+    new_model,
+    set_reaction_parameters,
+    add_reaction,
+    set_reaction,
+    set_parameters,
+    add_parameter
+)
 from process_bigraph import Process, Composite, pf
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes import CORE
-from biosimulator_processes.data_model import (
-    TimeCourseModel,
-    TimeCourseProcessConfig,
-    MODEL_TYPE
-)
+from biosimulator_processes.data_model import MODEL_TYPE
 
 
 class CopasiProcess(Process):
     """
-        Entrypoints:
+        Entrypoint Options:
 
-            A. SBML model file: 
-            B. Reactions (name: {scheme: reaction contents(also defines species)) 'model'.get('model_changes')
-            C. TimeCourseModel search term (load preconfigured model from BioModels)
-
-        Optional Attributes:
-
-            A. 'model_changes', changes to be made to the model, even if starting from empty model.
-            B. 'method', changes the algorithm(s) used to solve the model
-                    COPASI support many different simulations methods:
-                        - deterministic: using the COPASI LSODA implementation
-                        - stochastic: using the Gibson Bruck algorithm
-                        - directMethod: using the Gillespie direct method
-            C. 'units', (tree): quantity, volume, time, area, length
-
-        Justification:
-
-            As per SEDML v4 specifications (section2.2.4), p.32:sed-ml-L1V4.
-
-        MODEL_TYPE = {
-            'model_id': 'string',    # could be used as the BioModels id
-            'model_source': 'string',    # could be used as the "model_file" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
-            'model_language': {    # could be used to load a different model language supported by COPASI/basico
-                '_type': 'string',
-                '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
-            },
-            'model_name': {
-                '_type': 'string',
-                '_default': 'composite_process_model'
-            },
-            'model_changes': {
-                'species_changes': 'tree[string]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-                'global_parameter_changes': 'tree[string]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
-                'reaction_changes': 'tree[string]'
-            }
-        }
+            A. Filepath whose reference is a valid SBML model file(`str`),
+            B. A valid BioModel id which will return a simulator-instance object(`str`),
+            C. A specification of model configuration parameters whose values reflect those required by BasiCo. This
+                specification requires the presence of reactions which inherently define species types and optionally
+                addition parameters. See Basico for more details. There are two types of objects that are accepted
+                for this specification:
+                    - A high-level api object from `biosimulator_processes.data_model`,
+                        ie: `TimeCourseModel` or `SedModel`. (Recommended for first-time users). The parameters with
+                        which these dataclasses are instantiated correspond to the `config_schema` for a given
+                        process implementation. In the config schema, the outermost keys could be considered
+                        parameters/kwargs for a process implementation's construction. The values are all terminally
+                        strings that define the parameter "type" according to bigraph-schema.
+                    - A dictionary which defines the same kwargs/values as the high-level objects. See
+                        `biosimulator_processes.data_model.MODEL_TYPE` for details.
     """
 
-    # config_schema = TimeCourseProcessConfigSchema().model_dump()
     config_schema = {
-        'model': MODEL_TYPE,   # 'time_course_model',  # CustomType(type_declaration='time_course_model', default_value={}).model_dump(),
+        'model': MODEL_TYPE,
         'method': {
             '_type': 'string',
-            '_default': 'deterministic'
+            '_default': 'lsoda'
         }
     }
 
-    def __init__(self, config: Union[Dict, TimeCourseProcessConfig] = None, core=None):
+    def __init__(self,
+                 config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
+                 core: Dict = None):
         super().__init__(config, core)
 
         # insert copasi process model config
-        model_source = self.config['model']['model_source']['value']
+        model_source = self.config['model'].get('model_source')
+        assert model_source is not None, 'You must specify a model source of either a valid biomodel id or model filepath.'
         model_changes = self.config['model'].get('model_changes', {})
         self.model_changes = {} if model_changes is None else model_changes
 
-        # A. enter with model_file
+        # Option A:
         if '/' in model_source:
             self.copasi_model_object = load_model(model_source)
-        # B. enter with specific search term for a model
+
+        # Option B:
         elif 'BIO' in model_source:
             self.copasi_model_object = fetch_biomodel(model_id=model_source)
-        # C. enter with a new model
+
+        # Option C:
         else:
             if not self.model_changes:
                 raise AttributeError("You must pass a source of model changes specifying params, reactions, species or all three if starting from an empty model.")
@@ -264,8 +235,6 @@ class CopasiProcess(Process):
             ).concentration[0])
             for mol_id in self.floating_species_list
         }
-
-        print(f'THE RESULTS AT INTERVAL {interval}:\n{results}')
         return results
 
 
@@ -314,8 +283,3 @@ def test_process():
     workflow.run(10)
     results = workflow.gather_results()
     print(f'RESULTS: {pf(results)}')
-    # assert ('emitter',) in results.keys(), "This instance was not properly configured with an emitter."
-
-
-# if __name__ == "__main__":
-#    test_process()

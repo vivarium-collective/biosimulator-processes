@@ -17,21 +17,26 @@ There are two primary methods of interaction with `biosimulator-processes`:
          
             docker pull ghcr.io/vivarium-collective/biosimulator-processes:latest
    
-   3. Run the image, ensuring that the running of the container is platform-agnostic:
+   3. If there are any "dangling" or already-running jupyter servers running on your machine, the `docker run` command will not properly work. Run the following and close any servers already running, if necessary:
+   
+            jupyter server list && jupyter server stop
+
+   4. Run the image, ensuring that the running of the container is platform-agnostic:
    
             docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:latest
 
-   MAC USERS: Please note that an update of XCode may be required for this to work on your machine.
+
+   **MAC USERS**: Please note that an update of XCode may be required for this to work on your machine.
    
-   As an alternative, there is a helper script that does this and more. To use this script:
+   As an alternative, there is a helper script that does this docker work and more. To use this script:
    
-   1. Add the appropriate permissions to the file:
+      1. Add the appropriate permissions to the file:
             
-            chmod +x ./scripts/run-docker.sh
+               chmod +x ./scripts/run-docker.sh
    
-   2. Run the script:
+      2. Run the script:
    
-            ./scripts/run-docker.sh
+               ./scripts/run-docker.sh
 
 ### The Python Package Index. You may download BioSimulator Processes with: 
 

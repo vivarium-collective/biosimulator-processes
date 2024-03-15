@@ -1,0 +1,84 @@
+{
+    "emitter": {
+        "_type": "step",
+        "address": "local:ram-emitter",
+        "config": {
+            "emit": {}
+        },
+        "inputs": {},
+        "outputs": {}
+    },
+    "tumor_control_model_composite": {
+        "_type": "process",
+        "address": "local:CopasiProcess",
+        "config": {
+            "model": {
+                "model_source": "BIOMD0000000749",
+                "model_id": "model_from_BIOMD0000000749",
+                "model_name": "model_from_BIOMD0000000749",
+                "model_language": "sbml",
+                "model_changes": {
+                    "species_changes": null,
+                    "global_parameter_changes": null,
+                    "reaction_changes": null
+                },
+                "model_units": null
+            },
+            "method": "hybridlsoda"
+        },
+        "inputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ],
+            "model_parameters": [
+                "model_parameters_store"
+            ],
+            "reactions": [
+                "reactions_store"
+            ]
+        },
+        "outputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ]
+        },
+        "interval": 1.0
+    },
+    "global_time": "5.0",
+    "time_store": "5.0",
+    "floating_species_store": {
+        "E": "nan",
+        "R": "nan",
+        "f": "nan",
+        "E'": "nan"
+    },
+    "model_parameters_store": {
+        "B": "0.0",
+        "lm": "0.0",
+        "la": "0.0",
+        "ld": "0.0",
+        "c": "0.0",
+        "k": "0.0",
+        "d1": "0.0",
+        "d0": "0.0",
+        "sigma": "0.0",
+        "r": "0.0"
+    },
+    "reactions_store": {
+        "tumor growth": "0.0",
+        "tumor death": "0.0",
+        "tumor killing": "0.0",
+        "tumor nutrient supply": "0.0",
+        "effector stimulation": "0.0",
+        "effector exhaustion": "0.0",
+        "effector death": "0.0",
+        "effector source": "0.0",
+        "tumor nutrient missuply": "0.0"
+    }
+}

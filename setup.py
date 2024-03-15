@@ -2,7 +2,7 @@ import re
 from setuptools import setup, find_packages
 
 
-__version__ = "0.0.18"
+__version__ = "0.0.19"
 
 with open("README.md", "r") as readme:
     description = readme.read()
@@ -45,6 +45,7 @@ setup(
         "bigraph-schema",
         "process-bigraph",
         "bigraph-builder",
+        "bigraph-viz",
         "numpy",
         "pytest>=6.2.5",
         "tellurium",
@@ -54,7 +55,6 @@ setup(
         "termcolor",
         "jupyterlab",
         "notebook",
-        "bigraph-viz",
         "bigraph-builder",
         "python-libsbml"  # ==5.20.2",
         "docker>=7.0",
