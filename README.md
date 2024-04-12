@@ -23,7 +23,7 @@ There are two primary methods of interaction with `biosimulator-processes`:
 
    4. Run the image, ensuring that the running of the container is platform-agnostic:
    
-            docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/biosimulators/biosimulator-processes:latest
+            docker run --platform linux/amd64 -it -p 8888:8888 ghcr.io/vivarium-collective/biosimulator-processes:latest
 
 
    **MAC USERS**: Please note that an update of XCode may be required for this to work on your machine.
