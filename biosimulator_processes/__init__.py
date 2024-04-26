@@ -1,5 +1,8 @@
-from builder import ProcessTypes
 import importlib
+
+from builder import ProcessTypes
+from process_bigraph import Composite
+
 from biosimulator_processes.data_model import SedDataModel
 
 

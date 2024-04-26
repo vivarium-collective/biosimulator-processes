@@ -6,9 +6,11 @@
        |   * others: `hybrid`, `hybridode45`, `hybridlsoda`, `adaptivesa`, `tauleap`, `radau5`, `sde`
 
 """
-
-
+import os
+from biosimulator_processes.tests.data_model import ProcessUnitTest
+import os.path
 from typing import Dict, Union, Optional
+import json
 from pandas import DataFrame
 from basico import (
     load_model,
@@ -73,10 +75,12 @@ class CopasiProcess(Process):
         # Option A:
         if '/' in model_source:
             self.copasi_model_object = load_model(model_source)
+            print('found a filepath')
 
         # Option B:
         elif 'BIO' in model_source:
             self.copasi_model_object = fetch_biomodel(model_id=model_source)
+            print('found a biomodel id')
 
         # Option C:
         else:
@@ -88,7 +92,7 @@ class CopasiProcess(Process):
                 **model_units)
 
         # ----REACTIONS: set reactions
-        existing_reaction_names = get_reactions(model=self.copasi_model_object).index
+        '''existing_reaction_names = get_reactions(model=self.copasi_model_object).index
         reaction_changes = self.model_changes.get('reaction_changes', [])
         if reaction_changes:
             for reaction_change in reaction_changes:
@@ -105,6 +109,7 @@ class CopasiProcess(Process):
                 # handle new reactions
                 if reaction_name not in existing_reaction_names and scheme_change:
                     add_reaction(reaction_name, scheme_change, model=self.copasi_model_object)
+        '''
 
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
@@ -112,7 +117,7 @@ class CopasiProcess(Process):
             raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
 
         # ----SPECS: set species changes
-        species_changes = self.model_changes.get('species_changes', [])
+        '''species_changes = self.model_changes.get('species_changes', [])
         if species_changes:
             for species_change in species_changes:
                 if isinstance(species_change, dict):
@@ -121,14 +126,14 @@ class CopasiProcess(Process):
                     for spec_param_type, spec_param_value in species_change.items():
                         if spec_param_value:
                             changes_to_apply[spec_param_type] = spec_param_value
-                    set_species(**changes_to_apply, model=self.copasi_model_object)
+                    set_species(**changes_to_apply, model=self.copasi_model_object)'''
 
         # Get the species (floating only)  TODO: add boundary species
         self.floating_species_list = get_species(model=self.copasi_model_object).index.tolist()
         self.floating_species_initial = get_species(model=self.copasi_model_object)['concentration'].tolist()
 
         # ----GLOBAL PARAMS: set global parameter changes
-        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
+        '''global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
         if global_parameter_changes:
             for param_change in global_parameter_changes:
                 param_name = param_change.pop('name')
@@ -144,15 +149,25 @@ class CopasiProcess(Process):
                         if param_name not in existing_global_parameters:
                             assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
-
+        '''
+                            
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
         model_parameters = get_parameters(model=self.copasi_model_object)
-        if isinstance(model_parameters, DataFrame):
+
+        if model_parameters:
             self.model_parameters_list = model_parameters.index.tolist()
             self.model_parameter_values = model_parameters['initial_value'].tolist()
         else:
             self.model_parameters_list = []
             self.model_parameter_values = []
+        
+        '''if isinstance(model_parameters, DataFrame):
+            self.model_parameters_list = model_parameters.index.tolist()
+            self.model_parameter_values = model_parameters['initial_value'].tolist()
+        else:
+            self.model_parameters_list = []
+            self.model_parameter_values = []
+        '''
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
@@ -210,6 +225,7 @@ class CopasiProcess(Process):
         }
 
     def update(self, inputs, interval):
+        print(f'Input for {interval}: {inputs}')
         # set copasi values according to what is passed in states
         for cat_id, value in inputs['floating_species'].items():
             set_species(
@@ -235,34 +251,20 @@ class CopasiProcess(Process):
             ).concentration[0])
             for mol_id in self.floating_species_list
         }
+
+        print(f'Output results for {interval}: {results}')
         return results
+    
 
-
-def test_process_from_document():
-    import json
-    # ensure that the process is registered
-    CORE.process_registry.register('biosimulator_processes.processes.copasi_process.CopasiProcess', CopasiProcess)
-
-    # read the document from local file:
-    five_process_fp = 'notebooks/out/five_process_composite.json'
-    with open(five_process_fp, 'r') as fp:
-        instance = json.load(fp)
-
-    workflow = Composite(config={
-        'state': instance
-    })
-
-
-def test_process():
-    CORE.process_registry.register('biosimulator_processes.processes.copasi_process.CopasiProcess', CopasiProcess)
+"""def test_process():
     instance = {
         'copasi': {
             '_type': 'process',
             'address': 'local:!biosimulator_processes.processes.copasi_process.CopasiProcess',
             'config': {
                 'model': {
-                    'model_source': {
-                        'value': 'biosimulator_processes/model_files/Caravagna2010.xml'}
+                    'model_source': 'biosimulator_processes/model_files/Caravagna2010.xml'  # {
+                    #     'value': 'biosimulator_processes/model_files/Caravagna2010.xml'}
                 }
             },
             'inputs': {
@@ -297,4 +299,4 @@ def test_process():
     })
     workflow.run(10)
     results = workflow.gather_results()
-    print(f'RESULTS: {pf(results)}')
+    print(f'RESULTS: {pf(results)}')"""

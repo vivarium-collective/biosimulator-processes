@@ -9,6 +9,25 @@ import nbformat
 from pydantic import BaseModel
 
 
+
+def run_composition(instance, duration: int = 10) -> dict:
+    workflow = Composite(
+        config={
+            'state': instance
+        }
+    )
+    workflow.run(duration)
+    return workflow.gather_results()
+
+
+def create_class_from_dict(instance_dict: Dict, class_name="DynamicClass"):
+    """
+    Dynamically create a class with attributes set to data based on the outermost keys of the given dictionary.
+    """
+    class_attrs = {key: val for key, val in instance_dict.items()}
+    return type(class_name, (object,), class_attrs)
+
+
 def fetch_biomodel_by_term(term: str, index: int = 0):
     """Search for models matching the term and return an instantiated model from BioModels.
 
