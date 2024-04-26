@@ -238,6 +238,21 @@ class CopasiProcess(Process):
         return results
 
 
+def test_process_from_document():
+    import json
+    # ensure that the process is registered
+    CORE.process_registry.register('biosimulator_processes.processes.copasi_process.CopasiProcess', CopasiProcess)
+
+    # read the document from local file:
+    five_process_fp = 'notebooks/out/five_process_composite.json'
+    with open(five_process_fp, 'r') as fp:
+        instance = json.load(fp)
+
+    workflow = Composite(config={
+        'state': instance
+    })
+
+
 def test_process():
     CORE.process_registry.register('biosimulator_processes.processes.copasi_process.CopasiProcess', CopasiProcess)
     instance = {

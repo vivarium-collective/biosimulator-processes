@@ -26,3 +26,7 @@ buildDockerImage.yml
 process-bigraph
 bigraph-schema
 bigraph-builder
+3.10/
+Miniforge3-Darwin-arm64.sh
+*.cpython-310.pyc
+
