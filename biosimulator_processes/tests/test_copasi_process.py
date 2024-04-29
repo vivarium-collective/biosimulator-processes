@@ -1,7 +1,7 @@
 import os
 import json 
 from process_bigraph import pp, Composite
-from biosimulator_processes.tests.data_model import ProcessUnitTest
+# from biosimulator_processes.tests.data_model import ProcessUnitTest
 
 
 def test():
