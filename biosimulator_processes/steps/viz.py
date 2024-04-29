@@ -1,4 +1,4 @@
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Union, List
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
@@ -70,6 +70,24 @@ class ResultsAnimation:
         """
         fig, ax = self._create_animation_components()
         return FuncAnimation(fig, self._prepare_animation, frames=num_frames)
+
+    @classmethod
+    def plot_single_output(cls, timescale: Union[List, np.array], concentrations: Union[List, np.array]):
+        """Plotting function to plot the output of a SINGLE species' concentrations over a timescale for the output
+            of a deterministic time course simulation.
+
+            Args:
+                timescale:`Union[List, np.array]`: list containing each time step.
+                concentrations:`Union[List, np.array]`: output data mapped to each timescale.
+        """
+        plt.figure(figsize=(8, 5))
+        plt.plot(timescale, concentrations, marker='o', linestyle='-', color='b', label='Concentration vs. Time')
+        plt.title('Concentration of Substance Over Time')
+        plt.xlabel('Time')
+        plt.ylabel('Concentration (mol/L)')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
 
 # TODO: Create plotting step for this

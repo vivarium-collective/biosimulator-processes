@@ -10,7 +10,7 @@
     },
     "simple1": {
         "_type": "process",
-        "address": "local:CopasiProcess",
+        "address": "local:copasi",
         "config": {
             "model": {
                 "model_source": "BIOMD0000000391",
@@ -101,7 +101,7 @@
     },
     "simple2": {
         "_type": "process",
-        "address": "local:CopasiProcess",
+        "address": "local:copasi",
         "config": {
             "model": {
                 "model_source": "BIOMD0000000391",
@@ -143,7 +143,7 @@
     },
     "simple3": {
         "_type": "process",
-        "address": "local:CopasiProcess",
+        "address": "local:copasi",
         "config": {
             "model": {
                 "model_source": "BIOMD0000000391",
@@ -185,7 +185,7 @@
     },
     "simple4": {
         "_type": "process",
-        "address": "local:CopasiProcess",
+        "address": "local:copasi",
         "config": {
             "model": {
                 "model_source": "BIOMD0000000391",
@@ -227,7 +227,7 @@
     },
     "simple5": {
         "_type": "process",
-        "address": "local:CopasiProcess",
+        "address": "local:copasi",
         "config": {
             "model": {
                 "model_source": "BIOMD0000000391",

@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 import json
 from process_bigraph import Composite
+from biosimulator_processes import CORE
 
 
 class ProcessUnitTest:
@@ -12,9 +13,9 @@ class ProcessUnitTest:
         self._run(write_results, out_dir)
 
     def create_composite(self) -> Composite:
-        return Composite(config={
-            'state': self.instance_doc
-        })
+        return Composite(
+            config={'state': self.instance_doc},
+            core=CORE)
 
     def __run_workflow(self, composite: Composite) -> None:
         return composite.run(self.duration)
