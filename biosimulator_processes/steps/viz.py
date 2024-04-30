@@ -71,30 +71,34 @@ class ResultsAnimation:
         fig, ax = self._create_animation_components()
         return FuncAnimation(fig, self._prepare_animation, frames=num_frames)
 
-    @classmethod
-    def plot_single_output(cls, timescale: Union[List, np.array], concentrations: Union[List, np.array], species_name: str):
-        """Plotting function to plot the output of a SINGLE species' concentrations over a timescale for the output
-            of a deterministic time course simulation.
-
-            Args:
-                timescale:`Union[List, np.array]`: list containing each time step.
-                concentrations:`Union[List, np.array]`: output data mapped to each timescale.
-                species_name:`str`: Name of the species that you are plotting.
-        """
-        plt.figure(figsize=(8, 5))
-        plt.plot(timescale, concentrations, marker='o', linestyle='-', color='b', label=species_name)
-        plt.title(f'{species_name} over time')
-        plt.xlabel('Time')
-        plt.ylabel('Species')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
-
 
 # TODO: Create plotting step for this
 
 
 class Plotter2d(Step):
+    @classmethod
+    def plot_output(
+            cls,
+            x_data: Union[List, np.ndarray],
+            y_data: Union[List, np.ndarray],
+            **label_config
+    ) -> None:
+        """Plot arbitrary output.
+
+            Args:
+                x_data: array or list of data for x axis.
+                y_data: array or list of data for y axis.
+                **label_config: kwargs include--> title, x_label, y_label
+        """
+        plt.figure(figsize=(8, 5))
+        plt.plot(x_data, y_data, marker='o', linestyle='-', color='b', label=label_config.get('species'))
+        plt.title(label_config.get('title'))
+        plt.xlabel(label_config.get('x_label'))
+        plt.ylabel(label_config.get('y_label'))
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
     @classmethod
     def plot_single_output(
             cls,
