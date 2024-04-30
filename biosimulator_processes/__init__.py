@@ -1,9 +1,8 @@
 import importlib
 
 from builder import ProcessTypes
+from bigraph_schema import TypeSystem
 from process_bigraph import Composite
-
-from biosimulator_processes.data_model import SedDataModel
 
 
 # Define a list of processes to attempt to import and register
@@ -14,8 +13,10 @@ PROCESSES_TO_REGISTER = [
     ('tellurium', 'tellurium_process.TelluriumProcess'),
 ]
 
+# core process registry implementation (unique to this package)
 CORE = ProcessTypes()
 
+# register processes to CORE
 for process_name, process_path in PROCESSES_TO_REGISTER:
     module_name, class_name = process_path.rsplit('.', 1)
     try:
@@ -35,3 +36,7 @@ for process_name, process_path in PROCESSES_TO_REGISTER:
     except ImportError as e:
         print(f"{class_name} not available. Error: {e}")
 
+
+# core type system implementation (unique to this package)
+TYPE_SYSTEM = TypeSystem()
+TYPE_SYSTEM.type_registry.register('composition', {'_default': Composite})  # is this valid?

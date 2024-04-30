@@ -1,9 +1,31 @@
-from typing import Tuple, Callable, Union, List
+from typing import Tuple, Callable, Union, List, Dict
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from process_bigraph.composite import Step
+from process_bigraph.composite import Step, Composite
+
+
+def parse_composition_results(composition: Composite) -> Dict[float, Dict[str, Union[Dict, int, float]]]:
+    """Return a dictionary in which the outer keys are each member of the timescale, which is parsed
+        from the `process_bigraph.Composite.state['global_time']`. Each outer key's children represent the
+        data returned from the emitter for ports at each time step.
+
+        Args:
+            composition:`process_bigraph.Composite`: Composite instance from which data is being retrieved.
+
+        Returns:
+            `Dict[float, Dict[str, Union[Dict, int, float]]]`
+            A dictionary of keys: result_values.
+    """
+    results = composition.gather_results()
+    result_vals = list(results.values())[0]
+    timescale = [
+        float(n)
+        for n in range(int(composition.state['global_time']) + 1) # python ranges are not as they appear ;)
+    ]
+    assert len(timescale) == len(result_vals)  # internal check: is there a better way to perform the check?
+    return dict(zip(timescale, result_vals))
 
 
 @dataclass
@@ -72,10 +94,100 @@ class ResultsAnimation:
         return FuncAnimation(fig, self._prepare_animation, frames=num_frames)
 
 
-# TODO: Create plotting step for this
+
+class CompositionPlotter(Step):
+
+    data: Dict[float, Dict[str, Union[Dict, int, float]]]
+    emitter: Dict
+    config_schema = {
+        'workflow': 'composite',
+        'plot_counts': {
+            '_type': 'boolean',
+            '_default': False
+        }
+    }
+
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
+
+        workflow = self.config['workflow']
+        self.data = parse_composition_results(workflow)
+        self.emitter = workflow.config['state'].get('emitter')
+        assert self.emitter is not None, 'You must pass a ram-emitter instance into this plotter'
+        self.species_names = []
+        for timestamp, result in self.data.items():
+            names = list(result['floating_species_concentrations'].keys())
+            for n in names:
+                self.species_names.append(n)
+
+        self.species_names = list(set(self.species_names))
+
+    def _parse_data(self, species_names: List):
+        fig, axes = plt.subplots(nrows=len(species_names), ncols=2, figsize=(15, 5 * len(species_names)))
+        fig.suptitle('Species Counts and Concentrations Over Time')
+
+        # Process each species
+        for index, species in enumerate(species_names):
+            times = list(data.keys())
+            counts = [data[time]['floating_species_counts'][species] for time in times]
+            concentrations = [data[time]['floating_species_concentrations'][species] for time in times]
+
+            # Plot counts
+            ax1 = axes[index, 0]
+            ax1.plot(times, counts, label=f'Counts of {species}')
+            ax1.set_title(f'Counts of {species}')
+            ax1.set_xlabel('Time')
+            ax1.set_ylabel('Counts')
+            ax1.legend()
+
+            # Plot concentrations
+            ax2 = axes[index, 1]
+            ax2.plot(times, concentrations, label=f'Concentration of {species}')
+            ax2.set_title(f'Concentration of {species}')
+            ax2.set_xlabel('Time')
+            ax2.set_ylabel('Concentration')
+            ax2.legend()
+
+        # Adjust layout
+        plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust the rect to prevent overlap with the suptitle
+        plt.show()
+
+    def inputs(self):
+        return {}
+
+    def outputs(self):
+        return {}
+
+    def update(self, state):
+        timescale_data = list(self.data.keys())
+        return self._parse_data(self.species_names)
 
 
-class Plotter2d(Step):
+
+
+class Plotter2d:
+    @classmethod
+    def plot_timecourse_data(cls, timescale_data: List, data: Dict, plot_counts=False):
+        plt.figure(figsize=(8, 5))
+        timerange = list(data.keys())
+        species_names = []
+        index = 'floating_species_counts' if plot_counts else 'floating_species_concentrations'
+        for timestamp, result in data.items():
+            root_data = result[index]
+            names = list(root_data.keys())
+            for species_name in names:
+                y_data = []
+
+
+
+        species_names = list(set(species_names))
+
+
+
+
+
+
+
     @classmethod
     def plot_output(
             cls,
