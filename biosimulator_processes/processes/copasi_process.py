@@ -93,7 +93,7 @@ class CopasiProcess(Process):
                 **model_units)
 
         # ----REACTIONS: set reactions
-        """existing_reaction_names = get_reactions(model=self.copasi_model_object).index
+        existing_reaction_names = get_reactions(model=self.copasi_model_object).index
         reaction_changes = self.model_changes.get('reaction_changes', [])
         if reaction_changes:
             for reaction_change in reaction_changes:
@@ -110,7 +110,7 @@ class CopasiProcess(Process):
                 # handle new reactions
                 if reaction_name not in existing_reaction_names and scheme_change:
                     add_reaction(reaction_name, scheme_change, model=self.copasi_model_object)
-        """
+
 
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
@@ -118,7 +118,7 @@ class CopasiProcess(Process):
             raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
 
         # ----SPECS: set species changes
-        """species_changes = self.model_changes.get('species_changes', [])
+        species_changes = self.model_changes.get('species_changes', [])
         if species_changes:
             for species_change in species_changes:
                 if isinstance(species_change, dict):
@@ -128,7 +128,7 @@ class CopasiProcess(Process):
                         if spec_param_value:
                             changes_to_apply[spec_param_type] = spec_param_value
                     set_species(**changes_to_apply, model=self.copasi_model_object)
-        """
+
 
         # Get the species (floating only)  TODO: add boundary species
         species_data = get_species(model=self.copasi_model_object)
@@ -137,7 +137,7 @@ class CopasiProcess(Process):
         self.floating_species_counts = species_data.particle_number.tolist()
 
         # ----GLOBAL PARAMS: set global parameter changes
-        """global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
+        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
         if global_parameter_changes:
             for param_change in global_parameter_changes:
                 param_name = param_change.pop('name')
@@ -153,7 +153,7 @@ class CopasiProcess(Process):
                         if param_name not in existing_global_parameters:
                             assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
-        """
+
 
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
         model_parameters = get_parameters(model=self.copasi_model_object)

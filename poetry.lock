@@ -19,7 +19,7 @@ optional = false
 python-versions = "*"
 files = [
     {file = "antimony-2.14.0-py3-none-macosx_11_0_x86_64.whl", hash = "sha256:169cedd7d87e18ac91daf0c72320926483835c4787f2eda03c335e71dd63f277"},
-    {file = "antimony-2.14.0-py3-none-macosx_12_0_universal2.whl", hash = "sha256:2682e7e56172186ff74250531fc6b82661bcccb7b06c3d1c6ca8c35cf0243c74"},
+    {file = "antimony-2.14.0-py3-none-macosx_12_0_arm64.whl", hash = "sha256:2682e7e56172186ff74250531fc6b82661bcccb7b06c3d1c6ca8c35cf0243c74"},
     {file = "antimony-2.14.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:0483e4b4d9987e2e1c360422b940227e298bddda1104ffd8cb4bb4f8bfd1e994"},
     {file = "antimony-2.14.0-py3-none-win_amd64.whl", hash = "sha256:1aa3909f4e4189212c25960c7cc71a6b29b061fe6c36862e33c696a0483db06f"},
 ]
@@ -2465,6 +2465,7 @@ optional = false
 python-versions = "*"
 files = [
     {file = "phrasedml-1.3.0-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:38ce69496c2b89a1325e1ae022bd3d211d51882aa6313fa35043d7c9f5bcbea0"},
+    {file = "phrasedml-1.3.0-py3-none-macosx_12_0_arm64.whl", hash = "sha256:82db1a39c985ea443ac739225ea019c8dff742c1aaa9a5f3e3f8933a2d74621d"},
     {file = "phrasedml-1.3.0-py3-none-macosx_13_0_arm64.whl", hash = "sha256:8f54b26d6ced9e6066ee1f757aa8912b01c80f9ca44e16ef6995054a65a821f9"},
     {file = "phrasedml-1.3.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:b0e7e58cb84377d9f021c335dd2bd44a6a1e608c8f3b779a1b511d6ea2961ce6"},
     {file = "phrasedml-1.3.0-py3-none-win_amd64.whl", hash = "sha256:ed44fef0e1fa9e079573e7e0735e0801442e1d63373f277f578ed69853958aba"},
@@ -2642,12 +2643,12 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "process-bigraph"
-version = "0.0.15"
+version = "0.0.17"
 description = ""
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "process-bigraph-0.0.15.tar.gz", hash = "sha256:8d002aa47ed9a966271f83626d391437d45f12cdf80e83c1dfed5723084797c1"},
+    {file = "process-bigraph-0.0.17.tar.gz", hash = "sha256:1b105e419e28a133a6d93c6cd13da551b999208246b01928eff4c294276b6ee3"},
 ]
 
 [package.dependencies]
@@ -4586,4 +4587,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "cbc3fcfcd34e266fe3ae30c5439d313a50070d5c0a3e3e340fb0841b2a7d0ab2"
+content-hash = "e21bd6bc3a9b2dc14b4ed6e10ffa406b75ba4719b414a3fba3a64d72bcd1db3e"
