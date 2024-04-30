@@ -209,9 +209,6 @@ class Plotter2d(Step):
         return {}
 
 
-
-
-
     @classmethod
     def plot_output(
             cls,
