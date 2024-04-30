@@ -95,4 +95,31 @@ class ResultsAnimation:
 
 
 class Plotter2d(Step):
-    pass
+    @classmethod
+    def plot_single_output(
+            cls,
+            timescale: Union[List, np.array],
+            data: Union[List, np.array],
+            species_name: str,
+            plot_concentration=True
+    ) -> None:
+        """Plotting function to plot the output of a SINGLE species' concentrations over a timescale for the output
+            of a deterministic time course simulation.
+
+            Args:
+                timescale:`Union[List, np.array]`: list containing each time step.
+                data:`Union[List, np.array]`: output data mapped to each timescale.
+                species_name:`str`: Name of the species that you are plotting.
+                plot_concentration:`bool`: Whether you are plotting concentrations for data. Effects
+                    plot labels. Defaults to `True`.
+        """
+        plt.figure(figsize=(8, 5))
+        plt.plot(timescale, data, marker='o', linestyle='-', color='b', label=species_name)
+        plt.title(f'{species_name} over time')
+        plt.xlabel('Time')
+        plt.ylabel('Concentration' if plot_concentration else 'Counts')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+
