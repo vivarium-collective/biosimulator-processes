@@ -1,11 +1,3 @@
-"""
-
-    * `deterministic` / `lsoda`: the LSODA implementation
-       |   * `stochastic`: the Gibson & Bruck Gillespie implementation
-       |   * `directMethod`: Gillespie Direct Method
-       |   * others: `hybrid`, `hybridode45`, `hybridlsoda`, `adaptivesa`, `tauleap`, `radau5`, `sde`
-
-"""
 import os
 from biosimulator_processes.tests.data_model import ProcessUnitTest
 import os.path
@@ -167,19 +159,6 @@ class CopasiProcess(Process):
         # ----SOLVER: Get the solver (defaults to deterministic)
         self.method = self.config['method']
 
-    """def initial_state(self):
-        floating_species_dict = dict(
-            zip(self.floating_species_list, self.floating_species_initial))
-
-        # keep in mind that a valid simulation may not have global parameters
-        model_parameters_dict = dict(
-            zip(self.model_parameters_list, self.model_parameters_values))
-
-        return {
-            'time': 0.0,
-            'floating_species': floating_species_dict,
-            'model_parameters': model_parameters_dict}"""
-
     def initial_state(self):
         floating_species_concentrations_dict = dict(
             zip(self.floating_species_list, self.floating_species_initial))
@@ -197,43 +176,6 @@ class CopasiProcess(Process):
             'floating_species_concentrations': floating_species_concentrations_dict,
             'floating_species_counts': floating_species_counts_dict,
             'model_parameters': model_parameters_dict}
-
-    """def inputs(self):
-        floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for species_id in self.floating_species_list
-        }
-
-        model_params_type = {
-            param_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for param_id in self.model_parameters_list
-        }
-
-        reactions_type = {
-            reaction_id: 'float'
-            for reaction_id in self.reaction_list
-        }
-
-        return {
-            'time': 'float',
-            'floating_species': floating_species_type,
-            'model_parameters': model_params_type,
-            'reactions': reactions_type}
-
-    def outputs(self):
-        floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for species_id in self.floating_species_list
-        }
-        return {
-            'time': 'float',
-            'floating_species': floating_species_type}"""
 
     def inputs(self):
         floating_species_type = {
@@ -274,6 +216,102 @@ class CopasiProcess(Process):
             'floating_species_concentrations': floating_species_type,
             'floating_species_counts': floating_species_type}
 
+    def update(self, inputs, interval):
+        # set copasi values according to what is passed in states for concentrations
+        for cat_id, value in inputs['floating_species_concentrations'].items():
+            set_species(
+                name=cat_id,
+                initial_concentration=value,
+                model=self.copasi_model_object)
+
+        # set copasi values according to what is passed in states for counts
+        for cat_id, value in inputs['floating_species_counts'].items():
+            set_species(
+                name=cat_id,
+                particle_number=value,
+                model=self.copasi_model_object)
+
+        # run model for "interval" length; we only want the state at the end
+        timecourse = run_time_course(
+            start_time=inputs['time'],
+            duration=interval,
+            update_model=True,
+            model=self.copasi_model_object,
+            method=self.method)
+
+        # extract end values of concentrations from the model and set them in results
+        results = {'time': interval}
+        results['floating_species_concentrations'] = {
+            mol_id: float(get_species(
+                name=mol_id,
+                exact=True,
+                model=self.copasi_model_object
+            ).concentration[0])
+            for mol_id in self.floating_species_list
+        }
+
+        # extract end values of counts from the model and set them in results
+        results['floating_species_counts'] = {
+            mol_id: float(get_species(
+                name=mol_id,
+                exact=True,
+                model=self.copasi_model_object
+            ).particle_number[0])
+            for mol_id in self.floating_species_list
+        }
+
+        return results
+
+    """def initial_state(self):
+        floating_species_dict = dict(
+            zip(self.floating_species_list, self.floating_species_initial))
+
+        # keep in mind that a valid simulation may not have global parameters
+        model_parameters_dict = dict(
+            zip(self.model_parameters_list, self.model_parameters_values))
+
+        return {
+            'time': 0.0,
+            'floating_species': floating_species_dict,
+            'model_parameters': model_parameters_dict}"""
+
+    """def inputs(self):
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for species_id in self.floating_species_list
+        }
+
+        model_params_type = {
+            param_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for param_id in self.model_parameters_list
+        }
+
+        reactions_type = {
+            reaction_id: 'float'
+            for reaction_id in self.reaction_list
+        }
+
+        return {
+            'time': 'float',
+            'floating_species': floating_species_type,
+            'model_parameters': model_params_type,
+            'reactions': reactions_type}
+
+    def outputs(self):
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for species_id in self.floating_species_list
+        }
+        return {
+            'time': 'float',
+            'floating_species': floating_species_type}"""
+
     """def update(self, inputs, interval):
         # set copasi values according to what is passed in states
         print(f'\n---->Inputs {inputs["time"]}:\n{inputs}\n')
@@ -303,93 +341,3 @@ class CopasiProcess(Process):
         }
         print(f'\nOutputs at {inputs["time"]}:\n{results}\n')
         return results"""
-
-    def update(self, inputs, interval):
-        # set copasi values according to what is passed in states
-        for cat_id, value in inputs['floating_species_concentrations'].items():
-            set_species(
-                name=cat_id,
-                initial_concentration=value,
-                model=self.copasi_model_object)
-
-        for cat_id, value in inputs['floating_species_counts'].items():
-            set_species(
-                name=cat_id,
-                particle_number=value,
-                model=self.copasi_model_object)
-
-        # run model for "interval" length; we only want the state at the end
-        timecourse = run_time_course(
-            start_time=inputs['time'],
-            duration=interval,
-            update_model=True,
-            model=self.copasi_model_object,
-            method=self.method)
-
-        # extract end values of concentrations from the model and set them in results
-        results = {'time': interval}
-        results['floating_species_concentrations'] = {
-            mol_id: float(get_species(
-                name=mol_id,
-                exact=True,
-                model=self.copasi_model_object
-            ).concentration[0])
-            for mol_id in self.floating_species_list
-        }
-
-        results['floating_species_counts'] = {
-            mol_id: float(get_species(
-                name=mol_id,
-                exact=True,
-                model=self.copasi_model_object
-            ).particle_number[0])
-            for mol_id in self.floating_species_list
-        }
-        print(f'\nOutputs at {inputs["time"]}:\n{results}\n')
-        return results
-    
-
-"""def test_process():
-    instance = {
-        'copasi': {
-            '_type': 'process',
-            'address': 'local:!biosimulator_processes.processes.copasi_process.CopasiProcess',
-            'config': {
-                'model': {
-                    'model_source': 'biosimulator_processes/model_files/Caravagna2010.xml'  # {
-                    #     'value': 'biosimulator_processes/model_files/Caravagna2010.xml'}
-                }
-            },
-            'inputs': {
-                'floating_species': ['floating_species_store'],
-                'model_parameters': ['model_parameters_store'],
-                'time': ['time_store'],
-                'reactions': ['reactions_store']
-            },
-            'outputs': {
-                'floating_species': ['floating_species_store'],
-                'time': ['time_store'],
-            }
-        },
-        'emitter': {
-            '_type': 'step',
-            'address': 'local:ram-emitter',
-            'config': {
-                'emit': {
-                    'floating_species': 'tree[float]',
-                    'time': 'float',
-                },
-            },
-            'inputs': {
-                'floating_species': ['floating_species_store'],
-                'time': ['time_store'],
-            }
-        }
-    }
-
-    workflow = Composite(config={
-        'state': instance  # initial_sim_state
-    })
-    workflow.run(10)
-    results = workflow.gather_results()
-    print(f'RESULTS: {pf(results)}')"""
