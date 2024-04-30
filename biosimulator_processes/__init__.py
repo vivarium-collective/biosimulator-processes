@@ -3,6 +3,7 @@ import importlib
 from builder import ProcessTypes
 from bigraph_schema import TypeSystem
 from process_bigraph import Composite
+from biosimulator_processes.steps.viz import CompositionPlotter, Plotter2d
 
 
 # Define a list of processes to attempt to import and register
@@ -37,6 +38,12 @@ for process_name, process_path in PROCESSES_TO_REGISTER:
         print(f"{class_name} not available. Error: {e}")
 
 
+# register composition plotter --- make this more dynamic
+CORE.process_registry.register('plotter', CompositionPlotter)
+CORE.process_registry.register('plotter2d', Plotter2d)
+
+
 # core type system implementation (unique to this package)
 TYPE_SYSTEM = TypeSystem()
 TYPE_SYSTEM.type_registry.register('composition', {'_default': Composite})  # is this valid?
+

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from process_bigraph.composite import Step, Composite
+from process_bigraph.composite import Step, Composite, RAMEmitter
 
 
 def parse_composition_results(composition: Composite) -> Dict[float, Dict[str, Union[Dict, int, float]]]:
@@ -98,9 +98,9 @@ class ResultsAnimation:
 class CompositionPlotter(Step):
 
     data: Dict[float, Dict[str, Union[Dict, int, float]]]
-    emitter: Dict
+    emitter: RAMEmitter
     config_schema = {
-        'workflow': 'composite',
+        'emitter': 'step',
         'plot_counts': {
             '_type': 'boolean',
             '_default': False
@@ -110,10 +110,9 @@ class CompositionPlotter(Step):
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        workflow = self.config['workflow']
-        self.data = parse_composition_results(workflow)
-        self.emitter = workflow.config['state'].get('emitter')
+        self.emitter = self.config.get('emitter')
         assert self.emitter is not None, 'You must pass a ram-emitter instance into this plotter'
+        self.data = self.emitter.history
         self.species_names = []
         for timestamp, result in self.data.items():
             names = list(result['floating_species_concentrations'].keys())
@@ -148,41 +147,66 @@ class CompositionPlotter(Step):
             ax2.set_ylabel('Concentration')
             ax2.legend()
 
-        # Adjust layout
-        plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust the rect to prevent overlap with the suptitle
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
         plt.show()
 
     def inputs(self):
-        return {}
+        return {'emitter': 'step'}
 
     def outputs(self):
         return {}
 
     def update(self, state):
-        timescale_data = list(self.data.keys())
         return self._parse_data(self.species_names)
 
 
 
 
-class Plotter2d:
-    @classmethod
-    def plot_timecourse_data(cls, timescale_data: List, data: Dict, plot_counts=False):
-        plt.figure(figsize=(8, 5))
-        timerange = list(data.keys())
-        species_names = []
-        index = 'floating_species_counts' if plot_counts else 'floating_species_concentrations'
-        for timestamp, result in data.items():
-            root_data = result[index]
-            names = list(root_data.keys())
-            for species_name in names:
-                y_data = []
+class Plotter2d(Step):
+    config_schema = {
+        'duration': 'any',  # TODO: change this
+        'process': 'string',
+        'species_context': {
+            '_type': 'string',
+            '_default': 'concentrations'
+        }
+    }
+
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
+        context = self.config['species_context']
+        self.context_key = f'floating_species_{context}'
+        self.species_store = [f'{self.context_key}_store']
 
 
+    def inputs(self):
+        return {
+            self.context_key: 'tree[float]'
+        }
 
-        species_names = list(set(species_names))
+    def outputs(self):
+        return {
+            self.context_key: 'tree[float]'
+        }
 
-
+    def update(self, state):
+        """print(f'GOt the state: {state}')
+        results = state[self.context_key]
+        species_names = list(results.keys())
+        timescale = list(range(self.config['duration'] + 1))
+        for name in species_names:
+            y_data = results[name]
+            self.plot_output(
+                x_data=timescale,
+                y_data=y_data,
+                species=name,
+                x_label='Time',
+                y_label=self.context_key
+            )
+        return {}"""
+        print('----', state)
+        print('----', self.config['process'])
+        return {}
 
 
 

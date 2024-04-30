@@ -44,10 +44,19 @@ class CopasiProcess(Process):
                         strings that define the parameter "type" according to bigraph-schema.
                     - A dictionary which defines the same kwargs/values as the high-level objects. See
                         `biosimulator_processes.data_model.MODEL_TYPE` for details.
+
+        Config:
+            model: see datamodel for more details.
+            species_context: the context by which you measure the species data:: one of: 'concentrations', 'counts'. # TODO: map these to method inference
+            method: basico timecourse setting. Defaults to 'lsoda'.
     """
 
     config_schema = {
         'model': MODEL_TYPE,
+        'species_context': {
+            '_type': 'string',
+            '_default': 'concentrations'
+        },
         'method': {
             '_type': 'string',
             '_default': 'lsoda'
@@ -83,6 +92,10 @@ class CopasiProcess(Process):
             self.copasi_model_object = new_model(
                 name='CopasiProcess TimeCourseModel',
                 **model_units)
+
+        context_type = self.config['species_context']
+        self.species_context_key = f'floating_species_{context_type}'
+        self.use_counts = 'concentrations' in context_type
 
         # ----REACTIONS: set reactions
         existing_reaction_names = get_reactions(model=self.copasi_model_object).index
@@ -124,9 +137,9 @@ class CopasiProcess(Process):
 
         # Get the species (floating only)  TODO: add boundary species
         species_data = get_species(model=self.copasi_model_object)
-        self.floating_species_list = species_data.index.tolist()  # get_species(model=self.copasi_model_object).index.tolist()
-        self.floating_species_initial = species_data.concentration.tolist()  # get_species(model=self.copasi_model_object)['concentration'].tolist()
-        self.floating_species_counts = species_data.particle_number.tolist()
+        self.floating_species_list = species_data.index.tolist()
+        self.floating_species_initial = species_data.concentration.tolist() \
+            if 'concentrations' in self.config['species_context'] else species_data.particle_number.tolist()
 
         # ----GLOBAL PARAMS: set global parameter changes
         global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
@@ -160,24 +173,21 @@ class CopasiProcess(Process):
         self.method = self.config['method']
 
     def initial_state(self):
-        floating_species_concentrations_dict = dict(
-            zip(self.floating_species_list, self.floating_species_initial))
-
-        floating_species_counts_dict = dict(
-            zip(self.floating_species_list, self.floating_species_counts)
-        )
-
         # keep in mind that a valid simulation may not have global parameters
         model_parameters_dict = dict(
             zip(self.model_parameters_list, self.model_parameters_values))
 
+        floating_species_dict = dict(
+            zip(self.floating_species_list, self.floating_species_initial))
+
         return {
             'time': 0.0,
-            'floating_species_concentrations': floating_species_concentrations_dict,
-            'floating_species_counts': floating_species_counts_dict,
-            'model_parameters': model_parameters_dict}
+            'model_parameters': model_parameters_dict,
+            self.species_context_key: floating_species_dict,
+        }
 
     def inputs(self):
+        # dependent on species context set in self.config
         floating_species_type = {
             species_id: {
                 '_type': 'float',
@@ -199,8 +209,7 @@ class CopasiProcess(Process):
 
         return {
             'time': 'float',
-            'floating_species_concentrations': floating_species_type,
-            'floating_species_counts': floating_species_type,
+            self.species_context_key: floating_species_type,
             'model_parameters': model_params_type,
             'reactions': reactions_type}
 
@@ -213,23 +222,17 @@ class CopasiProcess(Process):
         }
         return {
             'time': 'float',
-            'floating_species_concentrations': floating_species_type,
-            'floating_species_counts': floating_species_type}
+            self.species_context_key: floating_species_type}
 
     def update(self, inputs, interval):
         # set copasi values according to what is passed in states for concentrations
-        for cat_id, value in inputs['floating_species_concentrations'].items():
-            set_species(
-                name=cat_id,
-                initial_concentration=value,
-                model=self.copasi_model_object)
-
-        # set copasi values according to what is passed in states for counts
-        for cat_id, value in inputs['floating_species_counts'].items():
-            set_species(
-                name=cat_id,
-                particle_number=value,
-                model=self.copasi_model_object)
+        for cat_id, value in inputs[self.species_context_key].items():
+            set_type = 'particle_number' if 'counts' in self.species_context_key else 'concentration'
+            species_config = {
+                'name': cat_id,
+                'model': self.copasi_model_object,
+                set_type: value}
+            set_species(**species_config)
 
         # run model for "interval" length; we only want the state at the end
         timecourse = run_time_course(
@@ -241,7 +244,17 @@ class CopasiProcess(Process):
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
-        results['floating_species_concentrations'] = {
+        measurement_type = 'particle_number' if self.use_counts else 'concentration'
+        results[self.species_context_key] = {
+            mol_id: float(get_species(
+                name=mol_id,
+                exact=True,
+                model=self.copasi_model_object
+            )[measurement_type][0])
+            for mol_id in self.floating_species_list
+        }
+
+        """results['floating_species_concentrations'] = {
             mol_id: float(get_species(
                 name=mol_id,
                 exact=True,
@@ -258,7 +271,7 @@ class CopasiProcess(Process):
                 model=self.copasi_model_object
             ).particle_number[0])
             for mol_id in self.floating_species_list
-        }
+        }"""
 
         return results
 
