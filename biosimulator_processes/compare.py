@@ -12,11 +12,11 @@ class ODEComparator(Process):
         'sbml_model_file': 'string',
         'duration': 'number',
         'num_steps': 'number',
-        'framework_type': {
+        'simulators': 'list[string]',
+        'framework_type': {  # TODO: handle this with assertion
             '_default': 'deterministic',
             '_type': 'string'
         },
-        'simulators': 'list[string]',
         'target_parameter': 'maybe[tree[union[string, float]]]',  # derived from experimental data for fitness calculation
         'target_dataset': 'maybe[tree[string, tree[union[string, float]]]]'  # TODO: are experimental datasets which match the ports available?
     }
@@ -24,11 +24,17 @@ class ODEComparator(Process):
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
         # TODO: quantify unique simulator config here, ie: get species names
-        self.floating_species_list = []
-        self.model_parameters_list = []
-        self.reaction_list = []
         self.species_context_key = 'floating_species_concentrations'
         self.simulator_instances = self._set_simulator_instances()
+        self.floating_species_ids = {}
+        self.model_parameter_ids = {}
+        self.reactions = {}
+
+        # if assuming that the simulators will have the same attributes to call. TODO: ensure this happens
+        for simulator_name, simulator_instance in self.simulator_instances.items():
+            self.floating_species_ids[simulator_name] = simulator_instance.floating_species_list  # TODO: ensure that Tellurium has a floating_species_list
+            self.model_parameter_ids[simulator_name] = simulator_instance.model_parameters_list
+            self.reactions[simulator_name] = simulator_instance.reaction_list
 
     def _set_simulator_instances(self):
         simulator_instances = {}
@@ -48,7 +54,7 @@ class ODEComparator(Process):
             for simulator_name, simulator_process in self.simulator_instances.items()}
 
     def inputs(self):
-        # dependent on species context set in self.config
+        # TODO: will each simulator have all of the same names/vals for this?
         floating_species_type = {
             species_id: {
                 '_type': 'float',
@@ -69,8 +75,9 @@ class ODEComparator(Process):
             simulator_name: {
                 'time': 'float',
                 self.species_context_key: floating_species_type,
-                'model_parameters': model_params_type,
-                'reactions': reactions_type}
+                'model_parameters': 'tree[any]',  # model_params_type,
+                'reactions': 'tree[any]'  # reactions_type
+            }
             for simulator_name in self.simulator_instances.keys()}
 
         if self.config.get('target_parameter'):
