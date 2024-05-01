@@ -1,7 +1,7 @@
 from typing import *
 from process_bigraph import Composite
 from biosimulator_processes import CORE
-from biosimulator_processes.compare import ComparisonDocument
+from biosimulator_processes.data_model.compare_data_model import ComparisonDocument
 
 
 def create_comparison_document(

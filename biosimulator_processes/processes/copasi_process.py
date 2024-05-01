@@ -1,8 +1,4 @@
-import os
-from biosimulator_processes.tests.data_model import ProcessUnitTest
-import os.path
 from typing import Dict, Union, Optional
-import json
 from pandas import DataFrame
 from basico import (
     load_model,
@@ -19,13 +15,12 @@ from basico import (
     set_parameters,
     add_parameter
 )
-from process_bigraph import Process, Composite, pf
+from process_bigraph import Process
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes import CORE
-from biosimulator_processes.data_model import MODEL_TYPE
+from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 
 
-# TODO: nest concentrations and counts under single 'floating_species' key
 class CopasiProcess(Process):
     """
         Entrypoint Options:
@@ -65,7 +60,7 @@ class CopasiProcess(Process):
 
     def __init__(self,
                  config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
-                 core: Dict = None):
+                 core: Dict = CORE):
         super().__init__(config, core)
 
         # insert copasi process model config
@@ -116,7 +111,6 @@ class CopasiProcess(Process):
                 if reaction_name not in existing_reaction_names and scheme_change:
                     add_reaction(reaction_name, scheme_change, model=self.copasi_model_object)
 
-
         # Get a list of reactions
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
         if not self.reaction_list:
@@ -133,7 +127,6 @@ class CopasiProcess(Process):
                         if spec_param_value:
                             changes_to_apply[spec_param_type] = spec_param_value
                     set_species(**changes_to_apply, model=self.copasi_model_object)
-
 
         # Get the species (floating only)  TODO: add boundary species
         species_data = get_species(model=self.copasi_model_object)
@@ -158,7 +151,6 @@ class CopasiProcess(Process):
                         if param_name not in existing_global_parameters:
                             assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
-
 
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
         model_parameters = get_parameters(model=self.copasi_model_object)
@@ -254,103 +246,4 @@ class CopasiProcess(Process):
             for mol_id in self.floating_species_list
         }
 
-        """results['floating_species_concentrations'] = {
-            mol_id: float(get_species(
-                name=mol_id,
-                exact=True,
-                model=self.copasi_model_object
-            ).concentration[0])
-            for mol_id in self.floating_species_list
-        }
-
-        # extract end values of counts from the model and set them in results
-        results['floating_species_counts'] = {
-            mol_id: float(get_species(
-                name=mol_id,
-                exact=True,
-                model=self.copasi_model_object
-            ).particle_number[0])
-            for mol_id in self.floating_species_list
-        }"""
-
         return results
-
-    """def initial_state(self):
-        floating_species_dict = dict(
-            zip(self.floating_species_list, self.floating_species_initial))
-
-        # keep in mind that a valid simulation may not have global parameters
-        model_parameters_dict = dict(
-            zip(self.model_parameters_list, self.model_parameters_values))
-
-        return {
-            'time': 0.0,
-            'floating_species': floating_species_dict,
-            'model_parameters': model_parameters_dict}"""
-
-    """def inputs(self):
-        floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for species_id in self.floating_species_list
-        }
-
-        model_params_type = {
-            param_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for param_id in self.model_parameters_list
-        }
-
-        reactions_type = {
-            reaction_id: 'float'
-            for reaction_id in self.reaction_list
-        }
-
-        return {
-            'time': 'float',
-            'floating_species': floating_species_type,
-            'model_parameters': model_params_type,
-            'reactions': reactions_type}
-
-    def outputs(self):
-        floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for species_id in self.floating_species_list
-        }
-        return {
-            'time': 'float',
-            'floating_species': floating_species_type}"""
-
-    """def update(self, inputs, interval):
-        # set copasi values according to what is passed in states
-        print(f'\n---->Inputs {inputs["time"]}:\n{inputs}\n')
-        for cat_id, value in inputs['floating_species'].items():
-            set_species(
-                name=cat_id,
-                initial_concentration=value,
-                model=self.copasi_model_object)
-
-        # run model for "interval" length; we only want the state at the end
-        timecourse = run_time_course(
-            start_time=inputs['time'],
-            duration=interval,
-            update_model=True,
-            model=self.copasi_model_object,
-            method=self.method)
-
-        # extract end values of concentrations from the model and set them in results
-        results = {'time': interval}
-        results['floating_species'] = {
-            mol_id: float(get_species(
-                name=mol_id,
-                exact=True,
-                model=self.copasi_model_object
-            ).concentration[0])
-            for mol_id in self.floating_species_list
-        }
-        print(f'\nOutputs at {inputs["time"]}:\n{results}\n')
-        return results"""

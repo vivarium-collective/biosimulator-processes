@@ -1,6 +1,6 @@
 import os
 import json
-from biosimulator_processes.tests.data_model import ProcessUnitTest
+from biosimulator_processes.tests import ProcessUnitTest
 
 
 def test_process():

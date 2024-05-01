@@ -2,7 +2,7 @@ import os
 import json
 from process_bigraph import Composite, pf
 from biosimulator_processes import CORE
-from biosimulator_processes.tests.data_model import ProcessUnitTest
+from biosimulator_processes.tests import ProcessUnitTest
 
 
 def test_process():

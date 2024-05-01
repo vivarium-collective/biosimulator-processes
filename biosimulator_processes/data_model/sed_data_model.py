@@ -1,31 +1,10 @@
-"""Data Model for the highest-level BioBuilder API
-
-author: Alex Patrie < alexanderpatrie@gmail.com >
-license: Apache 2.0
-created: 03/2024
-"""
-
-
-from typing import Dict, List, Union, Tuple, Optional, Any
-import requests
+from dataclasses import dataclass
+from typing import *
 from types import NoneType
-from dataclasses import dataclass, asdict
-from abc import ABC, abstractmethod
-from pydantic import (
-    BaseModel as _BaseModel,
-    field_validator,
-    field_serializer,
-    Field,
-    ConfigDict,
-    create_model,
-    ValidationError
-)
-
-
-@dataclass
-class _BaseClass:
-    def to_dict(self):
-        return asdict(self)
+import requests
+from abc import abstractmethod, ABC
+from pydantic import Field, create_model
+from biosimulator_processes.data_model import _BaseClass
 
 
 @dataclass

@@ -7,7 +7,7 @@ import numpy as np
 import tellurium as te
 from process_bigraph import Process, Composite, pf, Step
 from biosimulator_processes import CORE
-from biosimulator_processes.data_model import MODEL_TYPE
+from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 
 
 class TelluriumStep(Step):
