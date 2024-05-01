@@ -36,6 +36,8 @@ class ODEComparator(Process):
             self.model_parameter_ids[simulator_name] = simulator_instance.model_parameters_list
             self.reactions[simulator_name] = simulator_instance.reaction_list
 
+        self.species_names = [names for names in self.floating_species_ids.values()]
+
     def _set_simulator_instances(self):
         simulator_instances = {}
         for simulator in self.config['simulators']:
@@ -55,11 +57,15 @@ class ODEComparator(Process):
 
     def inputs(self):
         # TODO: will each simulator have all of the same names/vals for this?
-        floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for species_id in self.floating_species_list}
+        """floating_species_type = {
+            simulator_name: {
+                species_id: {
+                    '_type': 'float',
+                    '_apply': 'set'}
+                for species_id in simulator_species_names
+            }
+            for simulator_name, simulator_species_names in self.floating_species_ids.items()
+        }
 
         model_params_type = {
             param_id: {
@@ -69,12 +75,12 @@ class ODEComparator(Process):
 
         reactions_type = {
             reaction_id: 'float'
-            for reaction_id in self.reaction_list}
+            for reaction_id in self.reaction_list}"""
 
         input_schema = {
             simulator_name: {
                 'time': 'float',
-                self.species_context_key: floating_species_type,
+                self.species_context_key: 'tree[any]',  # floating_species_type,
                 'model_parameters': 'tree[any]',  # model_params_type,
                 'reactions': 'tree[any]'  # reactions_type
             }
@@ -89,16 +95,17 @@ class ODEComparator(Process):
         return input_schema
 
     def outputs(self):
-        floating_species_type = {
+        """floating_species_type = {
             species_id: {
                 '_type': 'float',
                 '_apply': 'set'}
             for species_id in self.floating_species_list
-        }
+        }"""
+
         output_schema = {
             simulator_name: {
                 'time': 'float',
-                self.species_context_key: floating_species_type
+                self.species_context_key: 'tree[any]'  # floating_species_type
             } for simulator_name in self.simulator_instances.keys()}
 
         if self.config.get('target_parameter'):
@@ -124,7 +131,6 @@ class ODEComparator(Process):
                 results[simulator]['validation_score'] = diff  # TODO: make this more fine-grained
 
         return results
-
 
 
 class ComparisonDocument:
