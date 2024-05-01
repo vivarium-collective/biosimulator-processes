@@ -1,16 +1,18 @@
 import os
 import json
-from process_bigraph import Composite, pf
-from biosimulator_processes import CORE
-from biosimulator_processes.tests import ProcessUnitTest
+from tests import ProcessUnitTest
+from biosimulator_processes.utils import prepare_single_copasi_process_composite_doc
 
 
 def test_process():
-    sbml_model_files_root = 'biosimulator_processes/model_files/sbml'
-    model_name = 'vilar-discrete-SSA.xml'  # 'BIOMD0000000061_url.xml'
-    model_fp = os.path.join(sbml_model_files_root, model_name)
-
     biomodel_id = 'BIOMD0000000630'
+    model_fp = f'../biosimulator_processes/model_files/sbml/{biomodel_id}_url.xml'
+    species_context = 'counts'
+    species_port_name = f'floating_species_{species_context}'
+    species_store = [f'floating_species_{species_context}_store']
+    duration = 10
+
+    document = prepare_single_copasi_process_composite_doc()
 
     instance = {
         'copasi': {
@@ -18,7 +20,7 @@ def test_process():
             'address': 'local:copasi',
             'config': {
                 'model': {
-                    'model_source': biomodel_id  # model_fp
+                    'model_source': model_fp
                 },
                 'method': 'lsoda'
             },

@@ -9,58 +9,50 @@ import nbformat
 from pydantic import BaseModel
 
 
-def prepare_single_copasi_process_composite_doc(biomodel_id, species_context, duration):
+def prepare_single_copasi_process_schema(
+        process_name: str,
+        biomodel_id: str = None,
+        sbml_model_fp: str = None,
+        method='lsoda',
+        species_context='concentrations',
+        add_emitter=True
+        ) -> Dict:
     species_port_name = f'floating_species_{species_context}'
     species_store = [f'floating_species_{species_context}_store']
-    return {
-        'copasi': {
+    model_source = biomodel_id or sbml_model_fp
+    assert model_source, 'You must pass either a biomodel id or sbml model path source.'
+    document = {
+        process_name: {
             '_type': 'process',
             'address': 'local:copasi',
             'config': {
                 'model': {
-                    'model_source': biomodel_id
-                },
-                'method': 'lsoda',
-                'species_context': species_context
-            },
+                    'model_source': model_source},
+                'method': method,
+                'species_context': species_context},
             'inputs': {
                 species_port_name: species_store,
                 'model_parameters': ['model_parameters_store'],
                 'time': ['time_store'],
-                'reactions': ['reactions_store']
-            },
+                'reactions': ['reactions_store']},
             'outputs': {
                 species_port_name: species_store,
-                'time': ['time_store'],
-            }
-        },
-        'emitter': {
-            '_type': 'step',
-            'address': 'local:ram-emitter',
-            'config': {
-                'emit': {
-                    species_port_name: 'tree[float]',
-                    'time': 'float',
-                },
-            },
-            'inputs': {
-                species_port_name: species_store,
-                'time': ['time_store'],
-            }
-        },
-        'plotter2d': {
-            '_type': 'step',
-            'address': 'local:plotter2d',
-            'config': {
-                'duration': duration,
-                'species_context': 'counts',
-                'process': ['copasi']
-            },
-            'inputs': {
-                species_port_name: species_store
-            }
-        }
-    }
+                'time': ['time_store']}}}
+
+    if add_emitter:
+        document['emitter'] = {
+            'emitter': {
+                '_type': 'step',
+                'address': 'local:ram-emitter',
+                'config': {
+                    'emit': {
+                        species_port_name: 'tree[float]',
+                        'time': 'float'}},
+                'inputs': {
+                    species_port_name: species_store,
+                    'time': ['time_store']}}}
+
+    return document
 
 
 def run_composition(instance, duration: int = 10) -> dict:
