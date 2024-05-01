@@ -1,0 +1,156 @@
+from typing import *
+from process_bigraph import Process
+
+
+def generate_composite_index(results: Dict[str, float]):
+    num_population = len(list(results.keys()))
+    print(num_population)
+    return sum(list(results.values())) / num_population
+
+
+class ODEComparator(Process):
+    config_schema = {
+        'sbml_model_file': 'string',
+        'duration': 'number',
+        'num_steps': 'number',
+        'framework_type': {
+            '_default': 'deterministic',
+            '_type': 'string'
+        },
+        'simulators': 'list[string]'
+    }
+
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
+        # TODO: quantify unique simulator config here, ie: get species names
+        self.floating_species_list = []
+        self.model_parameters_list = []
+        self.reaction_list = []
+        self.species_context_key = 'floating_species_concentrations'
+        self.simulator_instances = {}
+
+        for simulator in self.config['simulators']:
+            module_name = simulator + '_process'
+            class_name = simulator.replace(simulator[0], simulator[0].upper()) + 'Process'
+            import_statement = f'biosimulator_processes.processes.{module_name}'
+            simulator_module = __import__(import_statement, fromlist=[class_name])
+            simulator_instance = getattr(simulator_module, class_name)
+            self.simulator_instances[simulator] = simulator_instance
+
+        # TODO: possibly create unique instance params as required by each simulator and instantiate here
+
+    def initial_state(self):
+        # TODO: get these values from constructor
+        return {
+            simulator: {}
+            for simulator in self.config['simulators']
+        }
+
+    def inputs(self):
+        # dependent on species context set in self.config
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for species_id in self.floating_species_list
+        }
+
+        model_params_type = {
+            param_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for param_id in self.model_parameters_list
+        }
+
+        reactions_type = {
+            reaction_id: 'float'
+            for reaction_id in self.reaction_list
+        }
+
+        return {
+            'time': 'float',
+            self.species_context_key: floating_species_type,
+            'model_parameters': model_params_type,
+            'reactions': reactions_type}
+
+    def outputs(self):
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for species_id in self.floating_species_list
+        }
+        return {
+            'time': 'float',
+            self.species_context_key: floating_species_type}
+
+    def update(self, state, interval):
+        # TODO: do this in parallel
+
+
+
+class ComparisonDocument:
+    """To be called 'behind-the-scenes' by the Comparison REST API"""
+
+    def __init__(self,
+                 simulators: List[str],
+                 duration: int,
+                 num_steps: int,
+                 model_filepath: str,
+                 framework_type='deterministic'):
+        self.simulators = simulators
+        self.composite = {
+            'processes': {
+                'duration': duration,
+                'num_steps': num_steps,
+            }
+        }
+        self.framework_type = framework_type
+        context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
+        self.species_port_name = f'floating_species_{context}'
+        self.species_store = [f'floating_species_{context}_store']
+        self._populate_composition(model_filepath)
+        self._add_emitter()
+
+    def _add_emitter(self):
+        self.composite['emitter'] = {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'emit': {
+                    self.species_port_name: 'tree[float]',
+                    'time': 'float'}
+            },
+            'inputs': {
+                self.species_port_name: self.species_store,
+                'time': ['time_store']}
+        }
+
+    def _populate_composition(self, model_filepath: str):
+        context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
+        for process in self.simulators:
+            self._add_ode_process_schema(process, context, model={'model_source': model_filepath})
+
+    def _add_ode_process_schema(
+            self,
+            process_name: str,
+            species_context: str,
+            **config
+    ) -> None:
+        species_port_name = f'floating_species_{species_context}'
+        species_store = [f'floating_species_{species_context}_store']
+        self.composite['processes'][process_name] = {
+            '_type': 'process',
+            'address': f'local:{process_name}',
+            'config': config,
+            'inputs': {
+                species_port_name: species_store,
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                'reactions': ['reactions_store']
+            },
+            'outputs': {
+                species_port_name: species_store,
+                'time': ['time_store']
+            }
+        }
