@@ -111,7 +111,7 @@ class TelluriumProcess(Process):
         if '/' in model_source:
             self.simulator = te.loadSBMLModel(model_source)
         else:
-            if 'model' in model_source:
+            if 'model' in model_source:  # TODO: find a better way to do this
                 self.simulator = te.loada(model_source)
             else:
                 raise Exception('the config requires either an "antimony_string" or an "sbml_model_path"')
@@ -161,7 +161,7 @@ class TelluriumProcess(Process):
         float_set = {'_type': 'float', '_apply': 'set'}
         return {
             'time': 'float',
-            'run_time': 'float',
+            # 'run_time': 'float',
             self.species_context_key: {
                 species_id: float_set for species_id in self.floating_species_list},
             # 'boundary_species': {
@@ -187,6 +187,9 @@ class TelluriumProcess(Process):
             if port_id in self.input_ports:  # only update from input ports
                 for cat_id, value in values.items():
                     self.simulator.setValue(cat_id, value)
+
+        for cat_id, value in inputs[self.species_context_key].items():
+            self.simulator.setValue(cat_id, value)
 
         # run the simulation
         new_time = self.simulator.oneStep(inputs['time'], interval)

@@ -145,14 +145,10 @@ class ComparisonDocument:
                  duration: int,
                  num_steps: int,
                  model_filepath: str,
-                 framework_type='deterministic'):
+                 framework_type='deterministic',
+                 target_parameter: Dict[str, Union[str, float]] = None):
         self.simulators = simulators
-        self.composite = {
-            'processes': {
-                'duration': duration,
-                'num_steps': num_steps,
-            }
-        }
+        self.composite = {}
         self.framework_type = framework_type
         context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
         self.species_port_name = f'floating_species_{context}'
@@ -160,7 +156,7 @@ class ComparisonDocument:
         self._populate_composition(model_filepath)
         self._add_emitter()
 
-    def _add_emitter(self):
+    def _add_emitter(self):  # TODO: How do we reference different nesting levels?
         self.composite['emitter'] = {
             '_type': 'step',
             'address': 'local:ram-emitter',
@@ -193,7 +189,7 @@ class ComparisonDocument:
     ) -> None:
         species_port_name = f'floating_species_{species_context}'
         species_store = [f'floating_species_{species_context}_store']
-        self.composite['processes'][f'{process_name}_{i}'] = {
+        self.composite[f'{process_name}_{i}'] = {
             '_type': 'process',
             'address': f'local:{process_name}',
             'config': config,

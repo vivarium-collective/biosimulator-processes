@@ -25,6 +25,16 @@ docker = ">=7.0"
 python-libnuml = "^1.1.6" # ">=1.0.0"
 notebook = "^7.1.1"
 toml = "*"
+fastapi = "*"
+pyyaml = "*"
+pydantic = "*"
+h5py = "*"
+pydantic-settings = "*"
+httpx = "*"
+tensorstore = "*"
+aiofiles = "*"
+aiobotocore = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 # psutil = "^5.9.8"
 
 [tool.poetry.group.dev.dependencies]
