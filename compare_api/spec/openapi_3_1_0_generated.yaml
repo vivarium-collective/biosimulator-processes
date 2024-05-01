@@ -1,0 +1,111 @@
+openapi: 3.1.0
+info:
+  title: compare-api
+  version: 1.0.0
+paths:
+  /:
+    get:
+      summary: Root
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /run:
+    post:
+      summary: Run A Simulator Comparison
+      operationId: run-comparison
+      parameters:
+      - name: sbml_model_file_path
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Sbml Model File Path
+      - name: duration
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Duration
+      - name: num_steps
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Num Steps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              title: Simulators
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulatorComparisonResult'
+        '404':
+          description: Unable to run comparison
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    SimulatorComparisonResult:
+      properties:
+        simulators:
+          items:
+            type: string
+          type: array
+          title: Simulators
+        value:
+          additionalProperties:
+            type: object
+          type: object
+          title: Value
+      type: object
+      required:
+      - simulators
+      - value
+      title: SimulatorComparisonResult
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
