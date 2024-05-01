@@ -22,7 +22,13 @@ def main():
     current_directory = os.path.dirname(os.path.realpath(__file__))
 
     # Write the YAML OpenAPI spec to a file in subdirectory spec
-    with open(f"{current_directory}/../spec/openapi_3_1_0_generated.yaml", "w") as f:
+    openapi_version = app.openapi_version.replace('.', '_')
+    spec_fp = f"{current_directory}/../spec/openapi_{openapi_version}_generated.yaml"
+    if os.path.exists(spec_fp):
+        print('Spec exists, overwriting')
+        os.remove(spec_fp)
+
+    with open(spec_fp, "w") as f:
         f.write(openapi_spec_yaml)
 
 

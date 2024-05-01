@@ -23,7 +23,15 @@ paths:
         required: true
         schema:
           type: string
-          title: Sbml Model File Path
+          title: SBML Model File Path
+      - name: simulators
+        in: query
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+          title: Simulators to Compare
       - name: duration
         in: query
         required: true
@@ -35,16 +43,7 @@ paths:
         required: true
         schema:
           type: integer
-          title: Num Steps
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-              title: Simulators
+          title: Number of Steps
       responses:
         '200':
           description: Successful Response

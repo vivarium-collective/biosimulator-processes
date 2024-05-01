@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import *
 from urllib.parse import unquote
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from compare_api.datamodel import SimulatorComparisonResult, CompositeRunError
 from compare_api.internal.composite_doc import create_comparison_document, generate_workflow, run_workflow
@@ -55,10 +55,10 @@ async def root():
     }
 )
 async def run_comparison(
-        sbml_model_file_path: str,
-        simulators: List[str],
-        duration: int,
-        num_steps: int
+        sbml_model_file_path: str = Query(..., title="SBML Model File Path"),
+        simulators: List[str] = Query(..., title="Simulators to Compare"),
+        duration: int = Query(..., title="Duration"),
+        num_steps: int = Query(..., title="Number of Steps")
 ) -> SimulatorComparisonResult:
     try:
         document = create_comparison_document(sbml_model_file_path, simulators, duration, num_steps)
