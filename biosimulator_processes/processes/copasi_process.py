@@ -59,7 +59,7 @@ class CopasiProcess(Process):
         },
         'method': {
             '_type': 'string',
-            '_default': 'lsoda'
+            '_default': 'deterministic'  # 'lsoda'
         }
     }
 

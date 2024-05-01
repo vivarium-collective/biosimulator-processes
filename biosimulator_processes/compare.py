@@ -46,7 +46,11 @@ class ODEComparator(Process):
             import_statement = f'biosimulator_processes.processes.{module_name}'
             simulator_module = __import__(import_statement, fromlist=[class_name])
             simulator_instance = getattr(simulator_module, class_name)
-            simulator_instances[simulator] = simulator_instance
+            simulator_instances[simulator] = simulator_instance(config={
+                'model': {
+                    'model_source': self.config['sbml_model_file']
+                }
+            })
         return simulator_instances
 
     def initial_state(self):
@@ -84,7 +88,7 @@ class ODEComparator(Process):
                 'model_parameters': 'tree[any]',  # model_params_type,
                 'reactions': 'tree[any]'  # reactions_type
             }
-            for simulator_name in self.simulator_instances.keys()}
+            for simulator_name, simulator_process in self.simulator_instances.items()}
 
         if self.config.get('target_parameter'):
             for sim in self.simulator_instances.keys():
@@ -172,18 +176,24 @@ class ComparisonDocument:
 
     def _populate_composition(self, model_filepath: str):
         context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
-        for process in self.simulators:
-            self._add_ode_process_schema(process, context, model={'model_source': model_filepath})
+        for index, process in enumerate(self.simulators):
+            self._add_ode_process_schema(
+                process_name=process,
+                species_context=context,
+                i=index,
+                model={'model_source': model_filepath}
+            )
 
     def _add_ode_process_schema(
             self,
             process_name: str,
             species_context: str,
+            i: int,
             **config
     ) -> None:
         species_port_name = f'floating_species_{species_context}'
         species_store = [f'floating_species_{species_context}_store']
-        self.composite['processes'][process_name] = {
+        self.composite['processes'][f'{process_name}_{i}'] = {
             '_type': 'process',
             'address': f'local:{process_name}',
             'config': config,
