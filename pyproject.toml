@@ -4,7 +4,7 @@ version = "0.0.21"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
-packages = [{include = "biosimulator_processes"}]
+packages = [{include = "biosimulator_processes"}, {include = "compare_api"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10"
@@ -19,7 +19,7 @@ numpy = "*" # "^1.26.4"
 copasi-basico = "*"
 cobra = "*"
 tellurium = "*"
-smoldyn = ">=2.72"
+# smoldyn = ">=2.72"
 python-libsbml = "^5.20.2"
 docker = ">=7.0"
 python-libnuml = "^1.1.6" # ">=1.0.0"
