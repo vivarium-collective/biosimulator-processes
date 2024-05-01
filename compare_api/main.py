@@ -6,7 +6,7 @@ from urllib.parse import unquote
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from compare_api.datamodel import SimulatorComparisonResult, CompositeRunError
-from compare_api.internal.composite_doc import create_comparison_document, generate_workflow, run_workflow
+from compare_api.src.composite_doc import create_comparison_document, generate_workflow, run_workflow
 
 # logger for this module
 logger = logging.getLogger(__name__)

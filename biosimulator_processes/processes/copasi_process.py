@@ -82,12 +82,15 @@ class CopasiProcess(Process):
         # Option C:
         else:
             if not self.model_changes:
-                raise AttributeError("You must pass a source of model changes specifying params, reactions, species or all three if starting from an empty model.")
+                raise AttributeError(
+                    """You must pass a source of model changes specifying params, reactions, 
+                        species or all three if starting from an empty model.""")
             model_units = self.config['model'].get('model_units', {})
             self.copasi_model_object = new_model(
                 name='CopasiProcess TimeCourseModel',
                 **model_units)
 
+        # handle context of species output
         context_type = self.config['species_context']
         self.species_context_key = f'floating_species_{context_type}'
         self.use_counts = 'concentrations' in context_type
@@ -131,8 +134,8 @@ class CopasiProcess(Process):
         # Get the species (floating only)  TODO: add boundary species
         species_data = get_species(model=self.copasi_model_object)
         self.floating_species_list = species_data.index.tolist()
-        self.floating_species_initial = species_data.concentration.tolist() \
-            if 'concentrations' in self.config['species_context'] else species_data.particle_number.tolist()
+        self.floating_species_initial = species_data.particle_number.tolist() \
+            if self.use_counts else species_data.concentration.tolist()
 
         # ----GLOBAL PARAMS: set global parameter changes
         global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
@@ -154,9 +157,10 @@ class CopasiProcess(Process):
 
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
         model_parameters = get_parameters(model=self.copasi_model_object)
-
-        self.model_parameters_list = model_parameters.index.tolist() if isinstance(model_parameters, DataFrame) else []
-        self.model_parameters_values = model_parameters.initial_value.tolist() if isinstance(model_parameters, DataFrame) else []
+        self.model_parameters_list = model_parameters.index.tolist() \
+            if isinstance(model_parameters, DataFrame) else []
+        self.model_parameters_values = model_parameters.initial_value.tolist() \
+            if isinstance(model_parameters, DataFrame) else []
 
         # Get a list of compartments
         self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
@@ -236,14 +240,31 @@ class CopasiProcess(Process):
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
-        measurement_type = 'particle_number' if self.use_counts else 'concentration'
-        results[self.species_context_key] = {
-            mol_id: float(get_species(
+        for mol_id in self.floating_species_list:
+            raw_mol_data = get_species(
                 name=mol_id,
                 exact=True,
-                model=self.copasi_model_object
-            )[measurement_type][0])
-            for mol_id in self.floating_species_list
-        }
+                model=self.copasi_model_object)
+
+            mol_data = raw_mol_data.particle_number[0] if self.use_counts else raw_mol_data.concentration[0]
+            results[self.species_context_key] = {
+                mol_id: float(mol_data)
+            }
+        """if self.use_counts:
+            results[self.species_context_key] = {
+                mol_id: float(get_species(
+                    name=mol_id,
+                    exact=True,
+                    model=self.copasi_model_object
+                ).particle_number[0])
+                for mol_id in self.floating_species_list}
+        else:
+            results[self.species_context_key] = {
+                mol_id: float(get_species(
+                    name=mol_id,
+                    exact=True,
+                    model=self.copasi_model_object
+                ).concentration[0])
+                for mol_id in self.floating_species_list}"""
 
         return results

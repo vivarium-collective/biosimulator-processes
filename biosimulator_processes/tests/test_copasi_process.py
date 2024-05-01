@@ -54,7 +54,7 @@ def test_process():
 
 def test_process_from_document():
     # read the document from local file:
-    five_process_fp = 'notebooks/out/five_process_composite.json'
+    five_process_fp = 'composer-notebooks/out/five_process_composite.json'
     with open(five_process_fp, 'r') as fp:
         instance = json.load(fp)
 

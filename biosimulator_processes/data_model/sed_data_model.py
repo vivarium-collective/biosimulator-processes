@@ -7,6 +7,8 @@ from pydantic import Field, create_model
 from biosimulator_processes.data_model import _BaseClass
 
 
+__all__ = ['SedDataModel']
+
 @dataclass
 class SimulationModelParameter(_BaseClass):
     """
@@ -135,7 +137,7 @@ class SedModel(_BaseClass):
     model_source: Union[BiomodelID, ModelFilepath, str]
     model_id: str = None
     model_name: str = None
-    model_language: str = 'sbml'
+    model_language: str = Field(default='sbml')
     model_changes: ModelChanges = None
     model_units: ModelUnits = None
 
@@ -198,11 +200,11 @@ class TimeCourseModel(SedModel):
         Attributes:
             model_id: `str`
             model_source: `Union[biosimulator_processes.data_model.ModelFilepath, biosimulator_processes.data_model.BiomodelId]`
-            model_language: `str`
+            model_language: `str` defaults to sbml
             model_name: `str`
             model_changes: `biosimulator_processes.data_model.TimeCourseModelChanges`
     """
-    model_language: str = None,
+    model_language: str = 'sbml',
     model_changes: TimeCourseModelChanges = None,
     model_units: ModelUnits = None
 
@@ -256,6 +258,7 @@ class TimeCourseProcess(_BaseClass):
     """Used as config for BioBuilder API"""
     model: SedModel
     method: str = 'lsoda'
+    model_language: str = 'sbml'
 
 
 @dataclass

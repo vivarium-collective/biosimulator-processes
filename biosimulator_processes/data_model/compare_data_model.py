@@ -1,6 +1,9 @@
 from typing import *
 
 
+__all__ = ['ComparisonDocument']
+
+
 class ComparisonDocument:
     """To be called 'behind-the-scenes' by the Comparison REST API"""
     def __init__(self,

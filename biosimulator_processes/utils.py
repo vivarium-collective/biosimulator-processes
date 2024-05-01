@@ -330,7 +330,7 @@ def fix_execution_count(notebook_path):
 
 
 def fix_notebooks_execution_count():
-    for root, _, files in os.walk('../notebooks'):
+    for root, _, files in os.walk('../composer-notebooks'):
         for _file in files:
             notebook_path = os.path.join(root, _file)
             fix_execution_count(notebook_path)

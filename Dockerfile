@@ -14,7 +14,7 @@ WORKDIR /app
 
 # copy and make dirs
 COPY ./biosimulator_processes /app/biosimulator_processes
-COPY notebooks /app/notebooks
+COPY composer-notebooks /app/notebooks
 
 # copy files
 COPY ./pyproject.toml ./poetry.lock ./data ./scripts/trust-notebooks.sh /app/
@@ -51,10 +51,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && poetry config virtualenvs.in-project true \
     && poetry update \
     && poetry install \
-    && chmod +x ./trust-notebooks.sh \
+    && chmod +x ./trust-composer-notebooks.sh \
     && chmod +x /usr/local/bin/enter-lab.sh \
-    && ./trust-notebooks.sh \
-    && rm ./trust-notebooks.sh \
+    && ./trust-composer-notebooks.sh \
+    && rm ./trust-composer-notebooks.sh \
     && apt-get clean \
     && apt-get autoclean
 

@@ -24,7 +24,7 @@ def parse_composition_results(composition: Composite) -> Dict[float, Dict[str, U
         float(n)
         for n in range(int(composition.state['global_time']) + 1) # python ranges are not as they appear ;)
     ]
-    assert len(timescale) == len(result_vals)  # internal check: is there a better way to perform the check?
+    assert len(timescale) == len(result_vals)  # src check: is there a better way to perform the check?
     return dict(zip(timescale, result_vals))
 
 
