@@ -85,9 +85,9 @@ class TelluriumStep(Step):
 
 class TelluriumProcess(Process):
     config_schema = {
-        'sbml_model_path': 'string',
-        'antimony_string': 'string',
-        'record_history': 'bool',  # TODO -- do we have this type?
+        # 'sbml_model_path': 'string',
+        # 'antimony_string': 'string',
+        'record_history': 'maybe[boolean]',  # TODO -- do we have this type?
         'model': MODEL_TYPE,
         'method': {
             '_default': 'cvode',
