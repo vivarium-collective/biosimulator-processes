@@ -18,12 +18,12 @@ paths:
       summary: Run A Simulator Comparison
       operationId: run-comparison
       parameters:
-      - name: sbml_model_file_path
+      - name: sbml_model_url
         in: query
-        required: true
+        required: false
         schema:
           type: string
-          title: SBML Model File Path
+          title: SBML Model Url
       - name: simulators
         in: query
         required: true
@@ -44,6 +44,12 @@ paths:
         schema:
           type: integer
           title: Number of Steps
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_run-comparison'
       responses:
         '200':
           description: Successful Response
@@ -61,6 +67,16 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
+    Body_run-comparison:
+      properties:
+        sbml_model_file:
+          type: string
+          format: binary
+          title: Upload a File
+      type: object
+      required:
+      - sbml_model_file
+      title: Body_run-comparison
     HTTPValidationError:
       properties:
         detail:

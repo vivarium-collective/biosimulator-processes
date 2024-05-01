@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import *
 from urllib.parse import unquote
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from compare_api.datamodel import SimulatorComparisonResult, CompositeRunError
 from compare_api.internal.composite_doc import create_comparison_document, generate_workflow, run_workflow
@@ -55,16 +55,20 @@ async def root():
     }
 )
 async def run_comparison(
-        sbml_model_file_path: str = Query(..., title="SBML Model File Path"),
+        sbml_model_file: UploadFile = File(..., title="Upload a File"),
+        sbml_model_url: str = Query(None, title="SBML Model Url"),
         simulators: List[str] = Query(..., title="Simulators to Compare"),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps")
 ) -> SimulatorComparisonResult:
+    # TODO: enable remote model file for model path with download
     try:
-        document = create_comparison_document(sbml_model_file_path, simulators, duration, num_steps)
+        model_file_content = await sbml_model_file.read()
+        model_file_location = sbml_model_file.filename
+        document = create_comparison_document(model_file_location, simulators, duration, num_steps)
         workflow = generate_workflow(document)
         results = await run_workflow(workflow, duration)
         return SimulatorComparisonResult(simulators=simulators, value=results)
-    except Exception as e:
+    except AssertionError as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")
