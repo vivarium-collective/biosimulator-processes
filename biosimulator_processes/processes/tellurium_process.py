@@ -7,6 +7,7 @@ import numpy as np
 import tellurium as te
 from process_bigraph import Process, Composite, pf, Step
 from biosimulator_processes import CORE
+from biosimulator_processes.data_model import MODEL_TYPE
 
 
 class TelluriumStep(Step):
@@ -87,28 +88,40 @@ class TelluriumProcess(Process):
         'sbml_model_path': 'string',
         'antimony_string': 'string',
         'record_history': 'bool',  # TODO -- do we have this type?
+        'model': MODEL_TYPE,
+        'method': {
+            '_default': 'cvode',
+            '_type': 'string'
+        },
+        'species_context': {
+            '_default': 'concentrations',
+            '_type': 'string'
+        }
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
         # initialize a tellurium(roadrunner) simulation object. Load the model in using either sbml(default) or antimony
-        if self.config.get('antimony_string') and not self.config.get('sbml_model_path'):
-            self.simulator = te.loada(self.config['antimony_string'])
-        elif self.config.get('sbml_model_path') and not self.config.get('antimony_string'):
-            self.simulator: te.roadrunner.extended_roadrunner.ExtendedRoadRunner = te.loadSBMLModel(self.config['sbml_model_path'])
+        # if self.config.get('antimony_string') and not self.config.get('sbml_model_path'):
+            # self.simulator = te.loada(self.config['antimony_string'])
+        # elif self.config.get('sbml_model_path') and not self.config.get('antimony_string'):
+            # self.simulator: te.roadrunner.extended_roadrunner.ExtendedRoadRunner = te.loadSBMLModel(self.config['sbml_model_path'])
+        model_source = self.config['model']['model_source']
+        if '/' in model_source:
+            self.simulator = te.loadSBMLModel(model_source)
         else:
-            raise Exception('the config requires either an "antimony_string" or an "sbml_model_path"')
+            if 'model' in model_source:
+                self.simulator = te.loada(model_source)
+            else:
+                raise Exception('the config requires either an "antimony_string" or an "sbml_model_path"')
 
         # TODO -- make this configurable.
         self.input_ports = [
             'floating_species',
             'boundary_species',
             'model_parameters'
-            'time',
-            # 'compartments',
-            # 'parameters',
-            # 'stoichiometries',
+            'time'
         ]
 
         self.output_ports = [
@@ -129,14 +142,18 @@ class TelluriumProcess(Process):
         # Get a list of reactions
         self.reaction_list = self.simulator.getReactionIds()
 
+        context_type = self.config['species_context']
+        self.species_context_key = f'floating_species_{context_type}'
+        self.use_counts = 'concentrations' in context_type
+
     def initial_state(self, config=None):
         floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
         boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
         model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
         return {
             'time': 0.0,
-            'floating_species': floating_species_dict,
-            'boundary_species': boundary_species_dict,
+            self.species_context_key: floating_species_dict,
+            # 'boundary_species': boundary_species_dict,
             'model_parameters': model_parameters_dict
         }
 
@@ -145,10 +162,10 @@ class TelluriumProcess(Process):
         return {
             'time': 'float',
             'run_time': 'float',
-            'floating_species': {
+            self.species_context_key: {
                 species_id: float_set for species_id in self.floating_species_list},
-            'boundary_species': {
-                species_id: float_set for species_id in self.boundary_species_list},
+            # 'boundary_species': {
+                # species_id: float_set for species_id in self.boundary_species_list},
             'model_parameters': {
                 param_id: float_set for param_id in self.model_parameters_list},
             'reactions': {
@@ -158,7 +175,7 @@ class TelluriumProcess(Process):
     def outputs(self):
         float_set = {'_type': 'float', '_apply': 'set'}
         return {
-            'floating_species': {
+            self.species_context_key: {
                 species_id: float_set for species_id in self.floating_species_list},
             'time': 'float'
         }
@@ -175,12 +192,19 @@ class TelluriumProcess(Process):
         new_time = self.simulator.oneStep(inputs['time'], interval)
 
         # extract the results and convert to update
-        update = {'time': new_time}
-        for port_id, values in inputs.items():
+        update = {
+            'time': interval,  # new_time,
+            self.species_context_key: {
+                mol_id: float(self.simulator.getValue(mol_id))
+                for mol_id in self.floating_species_list
+            }
+        }
+
+        """for port_id, values in inputs.items():
             if port_id in self.output_ports:
                 update[port_id] = {}
                 for cat_id in values.keys():
-                    update[port_id][cat_id] = self.simulator.getValue(cat_id)
+                    update[port_id][cat_id] = self.simulator.getValue(cat_id)"""
         return update
 
 
