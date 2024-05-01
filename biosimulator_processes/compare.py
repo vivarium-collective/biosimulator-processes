@@ -114,7 +114,7 @@ class ODEComparator(Process):
                 simulator_values = results[simulator][self.species_context_key]
                 simulator_result_value = simulator_values.get(target_param['name'])
                 diff = target_param['value'] - simulator_result_value
-                results[simulator]['validation_score'] = diff
+                results[simulator]['validation_score'] = diff  # TODO: make this more fine-grained
 
         return results
 
