@@ -18,8 +18,8 @@ class ODEComparator(Process):
         },
         'simulators': 'list[string]',
         'target_parameter': 'maybe[tree[union[string, float]]]',  # derived from experimental data for fitness calculation
-        'target_dataset': 'maybe[tree[string, tree[union[string, float]]]]'  # possible encapsulating many target_parameters
-        # TODO: are experimental datasets which match the ports available?
+        'target_dataset': 'maybe[tree[string, tree[union[string, float]]]]'  # TODO: are experimental datasets which match the ports available?
+    }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
