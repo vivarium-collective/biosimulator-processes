@@ -11,5 +11,10 @@ class SimulatorComparisonResult(BaseModel):
     value: Dict[Tuple[str], Dict[str, Any]]
 
 
+class ProcessAttributes:
+    name: str
+    initial_state: Dict[str, Any]
+
+
 class CompositeRunError(BaseModel):
     exception: Exception

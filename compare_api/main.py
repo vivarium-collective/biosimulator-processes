@@ -5,7 +5,7 @@ from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from compare_api.datamodel import SimulatorComparisonResult, CompositeRunError
+from compare_api.datamodel import SimulatorComparisonResult, CompositeRunError, ProcessAttributes
 from compare_api.src.composite_doc import create_comparison_document, generate_workflow, run_workflow
 
 # logger for this module
@@ -45,8 +45,31 @@ async def root():
     return {"message": "Hello from compare-api!!!"}
 
 
+@app.get(
+    "/get-process-attributes",
+
+)
+async def get_process_attributes(
+        process_name: str = Query(..., title="Name of the process type; i.e: copasi, tellurium, etc.")
+        ) -> ProcessAttributes:
+    module_name = f'{process_name}_process'
+    import_statement = f'biosimulator_processes.processes.{module_name}'
+    module_paths = module_name.split('_')
+    class_name = module_paths[0].replace(module_name[0], module_name[0].upper())
+    class_name += module_paths[0].replace(module_name[0], module_name[0].upper())
+    module = __import__(
+        import_statement, fromlist=[class_name])
+
+    # module = importlib.import_module(import_statement)
+
+    # Get the class from the module
+    bigraph_class = getattr(module, class_name)\
+
+    # TODO: Finish this
+
+
 @app.post(
-    "/run",
+    "/run-comparison",
     response_model=SimulatorComparisonResult,
     name="Run a Simulator Comparison",
     operation_id="run-comparison",
