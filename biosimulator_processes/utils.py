@@ -54,11 +54,6 @@ def prepare_single_ode_process_document(
     return document
 
 
-class ODEProcessDocument(_BaseModel):
-    """Data structure for holding any ODE process document/composition"""
-    process_id: st
-
-
 def prepare_single_copasi_process_schema(
         process_name: str,
         biomodel_id: str = None,

@@ -49,6 +49,13 @@ a jupyter notebook. The installation for this notebook is provided below.
 ### Using `biosimulator_processes.smoldyn_process.SmoldynProcess()`: 
 
 #### Mac Users PLEASE NOTE: 
+
+##### **Amici**
+You most likely have to install/update `swig` with `brew`, among other possible requirements. Please refer to the
+[Amici Python Installation Documentation](https://amici.readthedocs.io/en/latest/python_installation.html) for 
+more information.
+
+##### **Smoldyn**
 Due to the multi-lingual nature of Smoldyn, which is primarily 
 developed in C++, the installation process for utilizing 
 the `SmoldynProcess` process implementation requires separate handling. This is particularly 

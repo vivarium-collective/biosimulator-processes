@@ -1,4 +1,5 @@
 from typing import *
+from dataclasses import dataclass
 
 
 __all__ = ['ComparisonDocument']
@@ -12,9 +13,10 @@ class ComparisonDocument:
                  num_steps: int,
                  model_filepath: str,
                  framework_type='deterministic',
-                 target_parameter: Dict[str, Union[str, float]] = None):
+                 target_parameter: Dict[str, Union[str, float]] = None,
+                 **kwargs):
         self.simulators = simulators
-        self.composite = {}
+        self.composite = kwargs.get('composite') or {}
         self.framework_type = framework_type
         context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
         self.species_port_name = f'floating_species_{context}'
@@ -74,3 +76,20 @@ class ComparisonDocument:
                 'time': ['time_store']
             }
         }
+
+
+class DocumentFactory:
+    @classmethod
+    def from_dict(cls, configuration: Dict) -> ComparisonDocument:
+        """
+            Args:
+                configuration:`Dict`: required keys:
+                     simulators: List[str],
+                     duration: int,
+                     num_steps: int,
+                     model_filepath: str,
+                     framework_type='deterministic',
+                     target_parameter: Dict[str, Union[str, float]] = None
+
+        """
+        return ComparisonDocument(**configuration)
