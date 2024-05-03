@@ -1,12 +1,62 @@
 from typing import Dict, Union
 from types import FunctionType
 import os
-
 import numpy as np
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf
 import nbformat
-from pydantic import BaseModel
+from pydantic import Field
+from biosimulator_processes.data_model import _BaseModel
+
+
+def prepare_single_ode_process_document(
+        process_id: str,
+        simulator_name: str,
+        sbml_model_fp: str,
+        add_emitter=True
+        ) -> Dict:
+    """
+        * `simulator_name` must correspond to an existing process implementation.
+        # TODO: Make this more flexible by providing a default to biosimulators1.0 for tools not yet implemented.
+    """
+    species_context = 'concentrations'
+    species_port_name = f'floating_species_{species_context}'
+    species_store = [f'{species_port_name}_store']
+    document = {
+        process_id: {
+            '_type': 'process',
+            'address': 'local:copasi',
+            'config': {
+                'model': {
+                    'model_source': sbml_model_fp}},
+            'inputs': {
+                species_port_name: species_store,
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                'reactions': ['reactions_store']},
+            'outputs': {
+                species_port_name: species_store,
+                'time': ['time_store']}}}
+
+    if add_emitter:
+        document['emitter'] = {
+            'emitter': {
+                '_type': 'step',
+                'address': 'local:ram-emitter',
+                'config': {
+                    'emit': {
+                        species_port_name: 'tree[float]',
+                        'time': 'float'}},
+                'inputs': {
+                    species_port_name: species_store,
+                    'time': ['time_store']}}}
+
+    return document
+
+
+class ODEProcessDocument(_BaseModel):
+    """Data structure for holding any ODE process document/composition"""
+    process_id: st
 
 
 def prepare_single_copasi_process_schema(
