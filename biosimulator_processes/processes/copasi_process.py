@@ -54,7 +54,7 @@ class CopasiProcess(Process):
         },
         'method': {
             '_type': 'string',
-            '_default': 'deterministic'  # 'lsoda'
+            '_default': 'deterministic'  # <-- CVODE for consistency, or should we use LSODA?
         }
     }
 

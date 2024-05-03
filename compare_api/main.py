@@ -60,14 +60,13 @@ async def get_process_attributes(
     module = __import__(
         import_statement, fromlist=[class_name])
 
-    # module = importlib.import_module(import_statement)
-
     # Get the class from the module
-    bigraph_class = getattr(module, class_name)\
+    bigraph_class = getattr(module, class_name)
 
     # TODO: Finish this
 
 
+# TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
 @app.post(
     "/run-comparison",
     response_model=SimulatorComparisonResult,

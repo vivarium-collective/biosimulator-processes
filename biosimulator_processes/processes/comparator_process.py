@@ -2,6 +2,9 @@ from process_bigraph import Process
 
 
 class ODEComparator(Process):
+    """Process that serves to perform a comparison of ODE-enabled simulator output, particularly
+        simulators that are equipped to use CVODE. Such simulators include: COPASI, Tellurium, and AMICI.
+    """
     config_schema = {
         'sbml_model_file': 'string',
         'duration': 'number',
