@@ -361,6 +361,26 @@ class SedDataModel:
 
 
 # --- Non-Pydantic FromDict classes
+
+MODEL_TYPE = {
+        'model_id': 'string',
+        'model_source': 'string',  # TODO: add antimony support here.
+        'model_language': {
+            '_type': 'string',
+            '_default': 'sbml'
+        },
+        'model_name': {
+            '_type': 'string',
+            '_default': 'composite_process_model'
+        },
+        'model_changes': {
+            'species_changes': 'maybe[tree[string]]',
+            'global_parameter_changes': 'maybe[tree[string]]',
+            'reaction_changes': 'maybe[tree[string]]'
+        },
+        'model_units': 'maybe[tree[string]]'}
+
+
 class FromDict(dict):
     def __init__(self, value: Dict):
         super().__init__(value)
@@ -421,45 +441,7 @@ class SedModel(FromDict):
             #     }
             # }
     """
-    # The first 3 params are NOT optional below for a TimeCourseModel in SEDML. model_source has been adapted to mean point of residence
-    MODEL_TYPE = {
-        'model_id': 'string',
-        'model_source': 'dict[string]',  # 'string',    # could be used as the "model_file" or "biomodel_id" below (SEDML l1V4 uses URIs); what if it was 'model_source': 'sbml:model_filepath'  ?
-        'model_language': {    # could be used to load a different model language supported by COPASI/basico
-            '_type': 'string',
-            '_default': 'sbml'    # perhaps concatenate this with 'model_source'.value? I.E: 'model_source': 'MODEL_LANGUAGE:MODEL_FILEPATH' <-- this would facilitate verifying correct model fp types.
-        },
-        'model_name': {
-            '_type': 'string',
-            '_default': 'composite_process_model'
-        },
-        'model_changes': {
-            'species_changes': 'maybe[tree[string]]',   # <-- this is done like set_species('B', kwarg=) where the inner most keys are the kwargs
-            'global_parameter_changes': 'maybe[tree[string]]',  # <-- this is done with set_parameters(PARAM, kwarg=). where the inner most keys are the kwargs
-            'reaction_changes': 'maybe[tree[string]]'
-        },
-        'model_units': 'maybe[tree[string]]'
-    }
-
-    def __init__(self, _type: Dict = MODEL_TYPE):
+    _MODEL_TYPE = MODEL_TYPE
+    def __init__(self, _type: Dict = _MODEL_TYPE):
         super().__init__(_type)
 
-
-MODEL_TYPE = {
-        'model_id': 'string',
-        'model_source': 'string',  # 'tree[string]',
-        'model_language': {
-            '_type': 'string',
-            '_default': 'sbml'
-        },
-        'model_name': {
-            '_type': 'string',
-            '_default': 'composite_process_model'
-        },
-        'model_changes': {
-            'species_changes': 'maybe[tree[string]]',
-            'global_parameter_changes': 'maybe[tree[string]]',
-            'reaction_changes': 'maybe[tree[string]]'
-        },
-        'model_units': 'maybe[tree[string]]'
-    }

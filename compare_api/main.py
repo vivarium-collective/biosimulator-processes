@@ -5,11 +5,13 @@ from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from compare_api.datamodel import SimulatorComparisonResult, CompositeRunError, ProcessAttributes
+from compare_api.datamodel import SimulatorComparisonResult, CompositeRunError, ProcessAttributes, ComparisonResults
 from compare_api.src.composite_doc import create_comparison_document, generate_workflow, run_workflow
+
 
 # logger for this module
 logger = logging.getLogger(__name__)
+
 
 app = FastAPI(title="compare-api", version="1.0.0")
 app.dependency_overrides = {}
@@ -47,35 +49,43 @@ async def root():
 
 @app.get(
     "/get-process-attributes",
-
-)
+    response_model=ProcessAttributes,
+    name="Get Process Attributes",
+    operation_id="get-process-attributes",
+    responses={
+        404: {"description": "Unable to get attributes for specified simulator process."}})
 async def get_process_attributes(
         process_name: str = Query(..., title="Name of the process type; i.e: copasi, tellurium, etc.")
         ) -> ProcessAttributes:
-    module_name = f'{process_name}_process'
-    import_statement = f'biosimulator_processes.processes.{module_name}'
-    module_paths = module_name.split('_')
-    class_name = module_paths[0].replace(module_name[0], module_name[0].upper())
-    class_name += module_paths[0].replace(module_name[0], module_name[0].upper())
-    module = __import__(
-        import_statement, fromlist=[class_name])
+    try:
+        module_name = f'{process_name}_process'
+        import_statement = f'biosimulator_processes.processes.{module_name}'
+        module_paths = module_name.split('_')
+        class_name = module_paths[0].replace(module_name[0], module_name[0].upper())
+        class_name += module_paths[0].replace(module_name[0], module_name[0].upper())
+        module = __import__(
+            import_statement, fromlist=[class_name])
 
-    # Get the class from the module
-    bigraph_class = getattr(module, class_name)
+        # Get the class from the module
+        bigraph_class = getattr(module, class_name)
+        attributes = await ProcessAttributes(
+            name=class_name,
+            initial_state=bigraph_class.initial_state(),
+            inputs=bigraph_class.inputs(),
+            outputs=bigraph_class.outputs())
+        return attributes
+    except Exception as e:
+        logger.warning(f'failed to run simulator comparison composite: {str(e)}')
+        raise HTTPException(status_code=404, detail="Parameters not valid.")
 
-    # TODO: Finish this
 
-
-# TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
 @app.post(
     "/run-comparison",
     response_model=SimulatorComparisonResult,
     name="Run a Simulator Comparison",
     operation_id="run-comparison",
     responses={
-        404: {"description": "Unable to run comparison"}
-    }
-)
+        404: {"description": "Unable to run comparison"}})
 async def run_comparison(
         sbml_model_file: UploadFile = File(..., title="Upload a File"),
         sbml_model_url: str = Query(None, title="SBML Model Url"),
@@ -83,6 +93,7 @@ async def run_comparison(
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps")
 ) -> SimulatorComparisonResult:
+    # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     # TODO: enable remote model file for model path with download
     try:
         model_file_content = await sbml_model_file.read()

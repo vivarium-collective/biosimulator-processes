@@ -12,6 +12,7 @@ PROCESSES_TO_REGISTER = [
     ('copasi', 'copasi_process.CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
+    ('amici', 'amici_process.AmiciProcess')
 ]
 
 # core process registry implementation (unique to this package)

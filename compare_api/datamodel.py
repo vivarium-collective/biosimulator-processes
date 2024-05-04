@@ -11,9 +11,28 @@ class SimulatorComparisonResult(BaseModel):
     value: Dict[Tuple[str], Dict[str, Any]]
 
 
-class ProcessAttributes:
+class IntervalResult(BaseModel):
+    global_time_stamp: float
+    results: Dict[str, Any]
+
+
+class SimulatorResult(BaseModel):
+    process_id: str
+    simulator: str
+    result: List[IntervalResult]
+
+
+class ComparisonResults(BaseModel):
+    duration: int
+    num_steps: int
+    values: List[SimulatorResult]
+
+
+class ProcessAttributes(BaseModel):
     name: str
     initial_state: Dict[str, Any]
+    inputs: Dict[str, Any]
+    outputs: Dict[str, Any]
 
 
 class CompositeRunError(BaseModel):

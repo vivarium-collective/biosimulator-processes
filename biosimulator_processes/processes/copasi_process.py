@@ -240,17 +240,7 @@ class CopasiProcess(Process):
 
         # extract end values of concentrations from the model and set them in results
         results = {'time': interval}
-        for mol_id in self.floating_species_list:
-            raw_mol_data = get_species(
-                name=mol_id,
-                exact=True,
-                model=self.copasi_model_object)
-
-            mol_data = raw_mol_data.particle_number[0] if self.use_counts else raw_mol_data.concentration[0]
-            results[self.species_context_key] = {
-                mol_id: float(mol_data)
-            }
-        """if self.use_counts:
+        if self.use_counts:
             results[self.species_context_key] = {
                 mol_id: float(get_species(
                     name=mol_id,
@@ -265,6 +255,6 @@ class CopasiProcess(Process):
                     exact=True,
                     model=self.copasi_model_object
                 ).concentration[0])
-                for mol_id in self.floating_species_list}"""
+                for mol_id in self.floating_species_list}
 
         return results

@@ -1,11 +1,18 @@
 from typing import *
+from abc import ABC
 from dataclasses import dataclass
+from biosimulator_processes.utils import prepare_single_ode_process_document
 
 
 __all__ = ['ComparisonDocument']
 
 
-class ComparisonDocument:
+class ComparisonDocument(ABC):
+    def __init__(self):
+        pass
+
+
+class ODEComparisonDocument(ComparisonDocument):
     """To be called 'behind-the-scenes' by the Comparison REST API"""
     def __init__(self,
                  simulators: List[str],
@@ -15,14 +22,24 @@ class ComparisonDocument:
                  framework_type='deterministic',
                  target_parameter: Dict[str, Union[str, float]] = None,
                  **kwargs):
+        super().__init__()
         self.simulators = simulators
         self.composite = kwargs.get('composite') or {}
+        self.model_filepath = model_filepath
         self.framework_type = framework_type
         context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
         self.species_port_name = f'floating_species_{context}'
         self.species_store = [f'floating_species_{context}_store']
         self._populate_composition(model_filepath)
         self._add_emitter()
+
+    def add_single_process_to_composite(self, process_id: str, simulator: str):
+        process_instance = prepare_single_ode_process_document(
+            process_id=process_id,
+            simulator_name=simulator,
+            sbml_model_fp=self.model_filepath,
+            add_emitter=False)
+        self.composite[process_id] = process_instance[process_id]
 
     def _generate_composite_index(self) -> float:
         # TODO: implement this.
