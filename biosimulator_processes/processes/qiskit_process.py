@@ -46,18 +46,36 @@ class QiskitProcess(Process):
 
 class QAOAProcess(QiskitProcess):
     config_schema = {
-        'bigraph_instance': 'tree[any]'
-    }
+        'bigraph_instance': 'tree[any]'}
 
     def __init__(self, config=None, core=CORE):
         # TODO: Finish this based on https://qiskit-community.github.io/qiskit-algorithms/tutorials/05_qaoa.html
         super().__init__(config, core)
         self.num_nodes = len(list(self.config['bigraph_instance'].keys()))
 
-        # TODO: Enable dynamic setting of these weights
-        w = np.array(
-            [[0.0, 1.0, 1.0, 0.0], [1.0, 0.0, 1.0, 1.0], [1.0, 1.0, 0.0, 1.0], [0.0, 1.0, 1.0, 0.0]])
+        # TODO: Enable dynamic setting of these weights with np.stack
+        weights = []
+        for i, n in enumerate(list(range(self.num_nodes))):
+            adj = [0.0, 1.0, 1.0, 0.0]  # TODO: Finish this
+            weights.append(adj)
+
+        self.w = np.stack(weights)
+        w = np.array([
+            [0.0, 1.0, 1.0, 0.0],
+            [1.0, 0.0, 1.0, 1.0],
+            [1.0, 1.0, 0.0, 1.0],
+            [0.0, 1.0, 1.0, 0.0]])
+
         self.G = nx.from_numpy_array(w)
+        print('Drawing graph: ')
+        self._draw_graph()
+
+    def _draw_graph(self):
+        layout = nx.random_layout(self.G, seed=10)
+        colors = ["r", "g", "b", "y"]
+        nx.draw(self.G, layout, node_color=colors)
+        labels = nx.get_edge_attributes(self.G, "weight")
+        return nx.draw_networkx_edge_labels(self.G, pos=layout, edge_labels=labels)
 
 
 class QuantumAutoencoderProcess(QiskitProcess):
