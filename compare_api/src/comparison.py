@@ -46,7 +46,7 @@ class ComparisonResults(BaseModel):
 """
 
 from typing import *
-from compare_api.datamodel import IntervalResult, SimulatorResult, ComparisonResults
+from biosimulator_processes.data_model.compare_data_model import IntervalResult, SimulatorResult, ComparisonResults
 
 
 def parse_comparison_results(results: Dict):

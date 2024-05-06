@@ -85,7 +85,7 @@ class QAOAProcess(QiskitProcess):
         return {}
 
     def inputs(self):
-        return {}
+        return {'weights': 'list[float]', 'objective_result': 'int'}
 
     def outputs(self):
         return {'weights': 'list[float]', 'objective_result': 'int'}

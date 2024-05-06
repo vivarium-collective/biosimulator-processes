@@ -1,4 +1,11 @@
+import numpy as np
 from process_bigraph import Process
+
+from biosimulator_processes.data_model.compare_data_model import ComparisonResults, SimulatorResult, IntervalResult
+
+
+def mean_squared_error(true_values, predicted_values):
+    return np.mean((predicted_values - true_values) ** 2)
 
 
 class ODEComparator(Process):
@@ -19,6 +26,12 @@ class ODEComparator(Process):
     }
 
     def __init__(self, config=None, core=None):
+        """
+            Parameters:
+                config:`Dict`: required keys include: sbml_model_file(`str`), duration(`int`),
+                    num_steps(`int`), simulators(`List[str]`). Optional keys include framework_type(`str`),
+                    target_parameter(`Dict`), target_dataset(`Dict`).
+        """
         super().__init__(config, core)
         # TODO: quantify unique simulator config here, ie: get species names
         self.species_context_key = 'floating_species_concentrations'
@@ -45,8 +58,7 @@ class ODEComparator(Process):
             simulator_instance = getattr(simulator_module, class_name)
             simulator_instances[simulator] = simulator_instance(config={
                 'model': {
-                    'model_source': self.config['sbml_model_file']
-                }
+                    'model_source': self.config['sbml_model_file']}
             })
         return simulator_instances
 
@@ -92,6 +104,7 @@ class ODEComparator(Process):
 
     def update(self, state, interval):
         # TODO: instantiate parallel subprocesses for the simulation run
+        # Ensure that these results can be fit into the ComparisonResults class
         results = {
             simulator_name: simulator_process.update(state, interval)
             for simulator_name, simulator_process in self.simulator_instances.items()}
@@ -101,7 +114,7 @@ class ODEComparator(Process):
             for simulator in self.simulator_instances.keys():
                 simulator_values = results[simulator][self.species_context_key]
                 simulator_result_value = simulator_values.get(target_param['name'])
-                diff = target_param['value'] - simulator_result_value
-                results[simulator]['validation_score'] = diff  # TODO: make this more fine-grained
+                diff = mean_squared_error(target_param['value'], simulator_result_value)
+                results[simulator]['validation_score'] = diff  # TODO: make this more fine-grained with MSE
 
         return results
