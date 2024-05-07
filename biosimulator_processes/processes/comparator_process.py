@@ -1,10 +1,12 @@
+from typing import *
+
 import numpy as np
 from process_bigraph import Process
 
 from biosimulator_processes.data_model.compare_data_model import ComparisonResults, SimulatorResult, IntervalResult
 
 
-def mean_squared_error(true_values, predicted_values):
+def mean_squared_error(true_values: np.ndarray, predicted_values: np.ndarray):
     return np.mean((predicted_values - true_values) ** 2)
 
 
@@ -46,9 +48,8 @@ class ODEComparator(Process):
             self.model_parameter_ids[simulator_name] = simulator_instance.model_parameters_list
             self.reactions[simulator_name] = simulator_instance.reaction_list
 
-        self.species_names = [names for names in self.floating_species_ids.values()]
 
-    def _set_simulator_instances(self):
+    def _set_simulator_instances(self) -> Dict:
         simulator_instances = {}
         for simulator in self.config['simulators']:
             module_name = simulator + '_process'

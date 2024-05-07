@@ -48,12 +48,12 @@ class ComparisonDocument(ABC):
 class ODEComparisonDocument(ComparisonDocument):
     """To be called 'behind-the-scenes' by the Comparison REST API"""
     def __init__(self,
-                 simulators: Union[List[str], Dict[str, str]],
                  duration: int,
                  num_steps: int,
                  model_filepath: str,
                  framework_type='deterministic',
-                 target_parameter: Dict[str, Union[str, float]] = None,
+                 simulators: Optional[Union[List[str], Dict[str, str]]] = None,
+                 target_parameter: Optional[Dict[str, Union[str, float]]] = None,
                  **kwargs):
         """This object implements a self generated factory with which it creates its representation. The naming of
             simulator processes within the composition are by default generated through concatenating the simulator
@@ -72,22 +72,21 @@ class ODEComparisonDocument(ComparisonDocument):
         """
         super().__init__()
 
-        if isinstance(simulators, dict):
+        if simulators is None:
+            self.simulators = ['tellurium', 'copasi', 'amici']
+        elif isinstance(simulators, dict):
             self.simulators = list(simulators.keys()) if isinstance(simulators, dict) else simulators
             self.custom_process_ids = list(simulators.values())
         else:
             self.simulators = simulators
 
         self.composite = kwargs.get('composite', {})
-        self.model_filepath = model_filepath
         self.framework_type = framework_type
 
-        context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
+        context = 'concentrations'
         self.species_port_name = f'floating_species_{context}'
         self.species_store = [f'floating_species_{context}_store']
-
         self._populate_composition(model_filepath)
-        self._add_emitter()
 
     def add_single_process_to_composite(self, process_id: str, simulator: str):
         process_instance = prepare_single_ode_process_document(
@@ -101,7 +100,7 @@ class ODEComparisonDocument(ComparisonDocument):
         # TODO: implement this.
         pass
 
-    def _add_emitter(self):  # TODO: How do we reference different nesting levels?
+    def _add_emitter(self) -> None:  # TODO: How do we reference different nesting levels?
         self.composite['emitter'] = {
             '_type': 'step',
             'address': 'local:ram-emitter',
@@ -112,18 +111,17 @@ class ODEComparisonDocument(ComparisonDocument):
             },
             'inputs': {
                 self.species_port_name: self.species_store,
-                'time': ['time_store']}
-        }
+                'time': ['time_store']}}
 
     def _populate_composition(self, model_filepath: str):
-        context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
+        context = 'concentrations'
         for index, process in enumerate(self.simulators):
             self._add_ode_process_schema(
                 process_name=process,
                 species_context=context,
                 i=index,
-                model={'model_source': model_filepath}
-            )
+                model={'model_source': model_filepath})
+        return self._add_emitter()
 
     def _add_ode_process_schema(
             self,

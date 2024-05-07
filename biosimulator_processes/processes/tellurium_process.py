@@ -85,10 +85,8 @@ class TelluriumStep(Step):
 
 class TelluriumProcess(Process):
     config_schema = {
-        # 'sbml_model_path': 'string',
-        # 'antimony_string': 'string',
         'record_history': 'maybe[boolean]',  # TODO -- do we have this type?
-        'model': MODEL_TYPE,
+        'model': 'sed_model',
         'method': {
             '_default': 'cvode',
             '_type': 'string'
@@ -102,11 +100,6 @@ class TelluriumProcess(Process):
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
-        # initialize a tellurium(roadrunner) simulation object. Load the model in using either sbml(default) or antimony
-        # if self.config.get('antimony_string') and not self.config.get('sbml_model_path'):
-            # self.simulator = te.loada(self.config['antimony_string'])
-        # elif self.config.get('sbml_model_path') and not self.config.get('antimony_string'):
-            # self.simulator: te.roadrunner.extended_roadrunner.ExtendedRoadRunner = te.loadSBMLModel(self.config['sbml_model_path'])
         model_source = self.config['model']['model_source']
         if '/' in model_source:
             self.simulator = te.loadSBMLModel(model_source)
@@ -116,18 +109,21 @@ class TelluriumProcess(Process):
             else:
                 raise Exception('the config requires either an "antimony_string" or an "sbml_model_path"')
 
+        # handle context type (concentrations for deterministic by default)
+        context_type = self.config['species_context']
+        self.species_context_key = f'floating_species_{context_type}'
+        self.use_counts = 'concentrations' in context_type
+
         # TODO -- make this configurable.
         self.input_ports = [
-            'floating_species',
+            self.species_context_key,
             'boundary_species',
             'model_parameters'
-            'time'
-        ]
+            'time']
 
         self.output_ports = [
-            'floating_species',
-            'time',
-        ]
+            self.species_context_key,
+            'time']
 
         # Get the species (floating and boundary)
         self.floating_species_list = self.simulator.getFloatingSpeciesIds()
@@ -141,10 +137,6 @@ class TelluriumProcess(Process):
 
         # Get a list of reactions
         self.reaction_list = self.simulator.getReactionIds()
-
-        context_type = self.config['species_context']
-        self.species_context_key = f'floating_species_{context_type}'
-        self.use_counts = 'concentrations' in context_type
 
     def initial_state(self, config=None):
         floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
