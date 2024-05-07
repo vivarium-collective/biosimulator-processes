@@ -1,4 +1,5 @@
 from typing import Dict, Union, Optional
+import json
 from pandas import DataFrame
 from basico import (
     load_model,
@@ -256,5 +257,8 @@ class CopasiProcess(Process):
                     model=self.copasi_model_object
                 ).concentration[0])
                 for mol_id in self.floating_species_list}
+
+        with open(f'/Users/alex/Desktop/uchc_work/repos/biosimulator-processes/composer-notebooks/out/{interval}.json', 'w') as fp:
+            json.dump(results, fp, indent=4)
 
         return results
