@@ -32,3 +32,4 @@ Miniforge3-Darwin-arm64.sh
 playground.ipynb
 composer-notebooks/playground.ipynb
 *model_dir/
+commit.sh
