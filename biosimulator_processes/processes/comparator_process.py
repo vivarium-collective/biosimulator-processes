@@ -89,9 +89,8 @@ class ODEComparator(Process):
 
     def update(self, state, interval):
         # TODO: instantiate parallel subprocesses for the simulation run
-        # TODO: somehow integrate num_steps into interval here
         results = {
-            simulator_name: simulator_process.update(state, interval)
+            simulator_name: simulator_process.update(state, interval)  # TODO: somehow integrate num_steps into interval here
             for simulator_name, simulator_process in self.simulator_instances.items()}
 
         # TODO: creating mapping of species names to value for MSE and iterate over below:
