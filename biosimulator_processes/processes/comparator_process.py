@@ -35,7 +35,6 @@ class ODEComparator(Process):
                     target_parameter(`Dict`), target_dataset(`Dict`).
         """
         super().__init__(config, core)
-        # TODO: quantify unique simulator config here, ie: get species names
         self.species_context_key = 'floating_species_concentrations'
         self.simulator_instances = self._set_simulator_instances()
         self.floating_species_ids = {}
@@ -105,16 +104,19 @@ class ODEComparator(Process):
 
     def update(self, state, interval):
         # TODO: instantiate parallel subprocesses for the simulation run
-        # Ensure that these results can be fit into the ComparisonResults class
+        # TODO: somehow integrate num_steps into interval here
         results = {
             simulator_name: simulator_process.update(state, interval)
             for simulator_name, simulator_process in self.simulator_instances.items()}
+
+        # TODO: creating mapping of species names to value for MSE and iterate over below:
 
         if self.config.get('target_parameter'):
             target_param: dict = self.config['target_parameter']
             for simulator in self.simulator_instances.keys():
                 simulator_values = results[simulator][self.species_context_key]
                 simulator_result_value = simulator_values.get(target_param['name'])
+                # TODO: implement MSE
                 diff = mean_squared_error(target_param['value'], simulator_result_value)
                 results[simulator]['validation_score'] = diff  # TODO: make this more fine-grained with MSE
 
