@@ -9,7 +9,7 @@ dist/
 refresh-env.sh
 smoldyn-2.72-mac/
 build/
-c.sh
+commit.sh
 install.sh
 push-image.sh
 release.sh

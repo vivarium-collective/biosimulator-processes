@@ -47,21 +47,6 @@ class ODEComparator(Process):
             self.model_parameter_ids[simulator_name] = simulator_instance.model_parameters_list
             self.reactions[simulator_name] = simulator_instance.reaction_list
 
-
-    def _set_simulator_instances(self) -> Dict:
-        simulator_instances = {}
-        for simulator in self.config['simulators']:
-            module_name = simulator + '_process'
-            class_name = simulator.replace(simulator[0], simulator[0].upper()) + 'Process'
-            import_statement = f'biosimulator_processes.processes.{module_name}'
-            simulator_module = __import__(import_statement, fromlist=[class_name])
-            simulator_instance = getattr(simulator_module, class_name)
-            simulator_instances[simulator] = simulator_instance(config={
-                'model': {
-                    'model_source': self.config['sbml_model_file']}
-            })
-        return simulator_instances
-
     def initial_state(self):
         # TODO: get these values from constructor
         return {
@@ -121,3 +106,17 @@ class ODEComparator(Process):
                 results[simulator]['validation_score'] = diff  # TODO: make this more fine-grained with MSE
 
         return results
+
+    def _set_simulator_instances(self) -> Dict:
+        simulator_instances = {}
+        for simulator in self.config['simulators']:
+            module_name = simulator + '_process'
+            class_name = simulator.replace(simulator[0], simulator[0].upper()) + 'Process'
+            import_statement = f'biosimulator_processes.processes.{module_name}'
+            simulator_module = __import__(import_statement, fromlist=[class_name])
+            simulator_instance = getattr(simulator_module, class_name)
+            simulator_instances[simulator] = simulator_instance(config={
+                'model': {
+                    'model_source': self.config['sbml_model_file']}
+            })
+        return simulator_instances
