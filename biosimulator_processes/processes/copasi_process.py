@@ -20,6 +20,7 @@ from process_bigraph import Process
 from biosimulator_processes.utils import fetch_biomodel
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from datetime import datetime
 
 
 class CopasiProcess(Process):
@@ -98,7 +99,8 @@ class CopasiProcess(Process):
 
         # Get a list of reactions
         self._set_reaction_changes()
-        self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
+        reactions = get_reactions(model=self.copasi_model_object)
+        self.reaction_list = reactions.index.tolist() if reactions is not None else []
         # if not self.reaction_list:
             # raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
 
@@ -212,7 +214,7 @@ class CopasiProcess(Process):
                 ).concentration[0])
                 for mol_id in self.floating_species_list}
 
-        with open(f'/Users/alex/Desktop/uchc_work/repos/biosimulator-processes/composer-notebooks/out/{interval}.json', 'w') as fp:
+        with open(f'/Users/alex/Desktop/uchc_work/repos/biosimulator-processes/composer-notebooks/out/{str(datetime.today())}.json', 'w') as fp:
             print('writing out fp!')
             json.dump(results, fp, indent=4)
 
@@ -220,7 +222,8 @@ class CopasiProcess(Process):
 
     def _set_reaction_changes(self):
         # ----REACTIONS: set reactions
-        existing_reaction_names = get_reactions(model=self.copasi_model_object).index
+        existing_reactions = get_reactions(model=self.copasi_model_object)
+        existing_reaction_names = existing_reactions.index.tolist() if existing_reactions is not None else []
         reaction_changes = self.model_changes.get('reaction_changes', [])
         if reaction_changes:
             for reaction_change in reaction_changes:

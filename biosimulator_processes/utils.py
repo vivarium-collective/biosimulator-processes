@@ -62,16 +62,15 @@ def prepare_single_ode_process_document(
 
     if add_emitter:
         document['emitter'] = {
-            'emitter': {
-                '_type': 'step',
-                'address': 'local:ram-emitter',
-                'config': {
-                    'emit': {
-                        species_port_name: 'tree[float]',
-                        'time': 'float'}},
-                'inputs': {
-                    species_port_name: species_store,
-                    'time': ['time_store']}}}
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'emit': {
+                    species_port_name: 'tree[float]',
+                    'time': 'float'}},
+            'inputs': {
+                species_port_name: species_store,
+                'time': ['time_store']}}
 
     return document
 
