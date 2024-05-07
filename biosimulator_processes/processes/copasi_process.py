@@ -96,67 +96,21 @@ class CopasiProcess(Process):
         self.species_context_key = f'floating_species_{context_type}'
         self.use_counts = 'concentrations' in context_type
 
-        # ----REACTIONS: set reactions
-        existing_reaction_names = get_reactions(model=self.copasi_model_object).index
-        reaction_changes = self.model_changes.get('reaction_changes', [])
-        if reaction_changes:
-            for reaction_change in reaction_changes:
-                reaction_name: str = reaction_change['reaction_name']
-                param_changes: list[dict[str, float]] = reaction_change['parameter_changes']
-                scheme_change: str = reaction_change.get('reaction_scheme')
-
-                # handle changes to existing reactions
-                if param_changes:
-                    for param_name, param_change_val in param_changes:
-                        set_reaction_parameters(param_name, value=param_change_val, model=self.copasi_model_object)
-                if scheme_change:
-                    set_reaction(name=reaction_name, scheme=scheme_change, model=self.copasi_model_object)
-                # handle new reactions
-                if reaction_name not in existing_reaction_names and scheme_change:
-                    add_reaction(reaction_name, scheme_change, model=self.copasi_model_object)
-
         # Get a list of reactions
+        self._set_reaction_changes()
         self.reaction_list = get_reactions(model=self.copasi_model_object).index.tolist()
-        if not self.reaction_list:
-            raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
-
-        # ----SPECS: set species changes
-        species_changes = self.model_changes.get('species_changes', [])
-        if species_changes:
-            for species_change in species_changes:
-                if isinstance(species_change, dict):
-                    species_name = species_change.pop('name')
-                    changes_to_apply = {}
-                    for spec_param_type, spec_param_value in species_change.items():
-                        if spec_param_value:
-                            changes_to_apply[spec_param_type] = spec_param_value
-                    set_species(**changes_to_apply, model=self.copasi_model_object)
+        # if not self.reaction_list:
+            # raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
 
         # Get the species (floating only)  TODO: add boundary species
+        self._set_species_changes()
         species_data = get_species(model=self.copasi_model_object)
         self.floating_species_list = species_data.index.tolist()
         self.floating_species_initial = species_data.particle_number.tolist() \
             if self.use_counts else species_data.concentration.tolist()
 
-        # ----GLOBAL PARAMS: set global parameter changes
-        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
-        if global_parameter_changes:
-            for param_change in global_parameter_changes:
-                param_name = param_change.pop('name')
-                for param_type, param_value in param_change.items():
-                    if not param_value:
-                        param_change.pop(param_type)
-                    # handle changes to existing params
-                    set_parameters(name=param_name, **param_change, model=self.copasi_model_object)
-                    # set new params
-                    global_params = get_parameters(model=self.copasi_model_object)
-                    if global_params:
-                        existing_global_parameters = global_params.index
-                        if param_name not in existing_global_parameters:
-                            assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
-                            add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
-
         # Get the list of parameters and their values (it is possible to run a model without any parameters)
+        self._set_global_param_changes()
         model_parameters = get_parameters(model=self.copasi_model_object)
         self.model_parameters_list = model_parameters.index.tolist() \
             if isinstance(model_parameters, DataFrame) else []
@@ -259,6 +213,58 @@ class CopasiProcess(Process):
                 for mol_id in self.floating_species_list}
 
         with open(f'/Users/alex/Desktop/uchc_work/repos/biosimulator-processes/composer-notebooks/out/{interval}.json', 'w') as fp:
+            print('writing out fp!')
             json.dump(results, fp, indent=4)
 
         return results
+
+    def _set_reaction_changes(self):
+        # ----REACTIONS: set reactions
+        existing_reaction_names = get_reactions(model=self.copasi_model_object).index
+        reaction_changes = self.model_changes.get('reaction_changes', [])
+        if reaction_changes:
+            for reaction_change in reaction_changes:
+                reaction_name: str = reaction_change['reaction_name']
+                param_changes: list[dict[str, float]] = reaction_change['parameter_changes']
+                scheme_change: str = reaction_change.get('reaction_scheme')
+                # handle changes to existing reactions
+                if param_changes:
+                    for param_name, param_change_val in param_changes:
+                        set_reaction_parameters(param_name, value=param_change_val, model=self.copasi_model_object)
+                if scheme_change:
+                    set_reaction(name=reaction_name, scheme=scheme_change, model=self.copasi_model_object)
+                # handle new reactions
+                if reaction_name not in existing_reaction_names and scheme_change:
+                    add_reaction(reaction_name, scheme_change, model=self.copasi_model_object)
+
+    def _set_species_changes(self):
+        # ----SPECS: set species changes
+        species_changes = self.model_changes.get('species_changes', [])
+        if species_changes:
+            for species_change in åspecies_changes:
+                if isinstance(species_change, dict):
+                    species_name = species_change.pop('name')
+                    changes_to_apply = {}
+                    for spec_param_type, spec_param_value in species_change.items():
+                        if spec_param_value:
+                            changes_to_apply[spec_param_type] = spec_param_value
+                    set_species(**changes_to_apply, model=self.copasi_model_object)
+
+    def _set_global_param_changes(self):
+        # ----GLOBAL PARAMS: set global parameter changes
+        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
+        if global_parameter_changes:
+            for param_change in global_parameter_changes:
+                param_name = param_change.pop('name')
+                for param_type, param_value in param_change.items():
+                    if not param_value:
+                        param_change.pop(param_type)
+                    # handle changes to existing params
+                    set_parameters(name=param_name, **param_change, model=self.copasi_model_object)
+                    # set new params
+                    global_params = get_parameters(model=self.copasi_model_object)
+                    if global_params:
+                        existing_global_parameters = global_params.index
+                        if param_name not in existing_global_parameters:
+                            assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
+                            add_parameter(name=param_name, **param_change, model=self.copasi_model_object)

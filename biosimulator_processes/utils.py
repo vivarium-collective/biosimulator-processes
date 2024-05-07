@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Union, List, Tuple
 from types import FunctionType
 import os
 import numpy as np
@@ -7,6 +7,28 @@ from process_bigraph import Composite, pf
 import nbformat
 from pydantic import Field
 from biosimulator_processes.data_model import _BaseModel
+
+
+def register_module(items_to_register: List[Tuple[str, str]], core) -> None:
+    for process_name, path in items_to_register:
+        module_name, class_name = path.rsplit('.', 1)
+        try:
+            library = 'steps' if 'process' not in path else 'processes'
+            import_statement = f'biosimulator_processes.{library}.{module_name}'
+
+            module = __import__(
+                 import_statement, fromlist=[class_name])
+
+            # module = importlib.import_module(import_statement)
+
+            # Get the class from the module
+            bigraph_class = getattr(module, class_name)
+
+            # Register the process
+            core.process_registry.register(process_name, bigraph_class)
+            print(f"{class_name} registered successfully.")
+        except ImportError as e:
+            print(f"{class_name} not available. Error: {e}")
 
 
 def prepare_single_ode_process_document(
