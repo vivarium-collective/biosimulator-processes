@@ -1,12 +1,142 @@
-from typing import Dict, Union
+from typing import Dict, Union, List, Tuple
 from types import FunctionType
 import os
-
 import numpy as np
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf
 import nbformat
-from pydantic import BaseModel
+from pydantic import Field
+from biosimulator_processes.data_model import _BaseModel
+
+
+def register_module(items_to_register: List[Tuple[str, str]], core) -> None:
+    for process_name, path in items_to_register:
+        module_name, class_name = path.rsplit('.', 1)
+        try:
+            library = 'steps' if 'process' not in path else 'processes'
+            import_statement = f'biosimulator_processes.{library}.{module_name}'
+
+            module = __import__(
+                 import_statement, fromlist=[class_name])
+
+            # module = importlib.import_module(import_statement)
+
+            # Get the class from the module
+            bigraph_class = getattr(module, class_name)
+
+            # Register the process
+            core.process_registry.register(process_name, bigraph_class)
+            print(f"{class_name} registered successfully.")
+        except ImportError as e:
+            print(f"{class_name} not available. Error: {e}")
+
+
+def prepare_single_ode_process_document(
+        process_id: str,
+        simulator_name: str,
+        sbml_model_fp: str,
+        add_emitter=True
+        ) -> Dict:
+    """
+        * `simulator_name` must correspond to an existing process implementation.
+        # TODO: Make this more flexible by providing a default to biosimulators1.0 for tools not yet implemented.
+    """
+    species_context = 'concentrations'
+    species_port_name = f'floating_species_{species_context}'
+    species_store = [f'{species_port_name}_store']
+    document = {
+        process_id: {
+            '_type': 'process',
+            'address': 'local:copasi',
+            'config': {
+                'model': {
+                    'model_source': sbml_model_fp}},
+            'inputs': {
+                species_port_name: species_store,
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                'reactions': ['reactions_store']},
+            'outputs': {
+                species_port_name: species_store,
+                'time': ['time_store']}}}
+
+    if add_emitter:
+        document['emitter'] = {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'emit': {
+                    species_port_name: 'tree[float]',
+                    'time': 'float'}},
+            'inputs': {
+                species_port_name: species_store,
+                'time': ['time_store']}}
+
+    return document
+
+
+def prepare_single_copasi_process_schema(
+        process_name: str,
+        biomodel_id: str = None,
+        sbml_model_fp: str = None,
+        method='lsoda',
+        species_context='concentrations',
+        add_emitter=True
+        ) -> Dict:
+    species_port_name = f'floating_species_{species_context}'
+    species_store = [f'floating_species_{species_context}_store']
+    model_source = biomodel_id or sbml_model_fp
+    assert model_source, 'You must pass either a biomodel id or sbml model path source.'
+    document = {
+        process_name: {
+            '_type': 'process',
+            'address': 'local:copasi',
+            'config': {
+                'model': {
+                    'model_source': model_source},
+                'method': method,
+                'species_context': species_context},
+            'inputs': {
+                species_port_name: species_store,
+                'model_parameters': ['model_parameters_store'],
+                'time': ['time_store'],
+                'reactions': ['reactions_store']},
+            'outputs': {
+                species_port_name: species_store,
+                'time': ['time_store']}}}
+
+    if add_emitter:
+        document['emitter'] = {
+            'emitter': {
+                '_type': 'step',
+                'address': 'local:ram-emitter',
+                'config': {
+                    'emit': {
+                        species_port_name: 'tree[float]',
+                        'time': 'float'}},
+                'inputs': {
+                    species_port_name: species_store,
+                    'time': ['time_store']}}}
+
+    return document
+
+
+def run_composition(instance, duration: int = 10) -> dict:
+    workflow = Composite(
+        config={
+            'state': instance
+        }
+    )
+    workflow.run(duration)
+    return workflow.gather_results()
+
+
+def create_class_from_dict(instance_dict: Dict, class_name="DynamicClass"):
+    """
+    Dynamically create a class with attributes set to data based on the outermost keys of the given dictionary.
+    """
+    class_attrs = {key: val for key, val in instance_dict.items()}
+    return type(class_name, (object,), class_attrs)
 
 
 def fetch_biomodel_by_term(term: str, index: int = 0):
@@ -258,7 +388,7 @@ def fix_execution_count(notebook_path):
 
 
 def fix_notebooks_execution_count():
-    for root, _, files in os.walk('../notebooks'):
+    for root, _, files in os.walk('../composer-notebooks'):
         for _file in files:
             notebook_path = os.path.join(root, _file)
             fix_execution_count(notebook_path)

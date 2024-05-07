@@ -1,6 +1,13 @@
-from builder import ProcessTypes
 import importlib
-from biosimulator_processes.data_model import SedDataModel
+from typing import *
+
+from builder import ProcessTypes
+from bigraph_schema import TypeSystem
+from process_bigraph import Composite
+
+from biosimulator_processes.steps.viz import CompositionPlotter, Plotter2d
+from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulator_processes.utils import register_module
 
 
 # Define a list of processes to attempt to import and register
@@ -9,37 +16,17 @@ PROCESSES_TO_REGISTER = [
     ('copasi', 'copasi_process.CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
-    # ('parameter_scan', 'parameter_scan.DeterministicTimeCourseParameterScan')
-]
+    ('amici', 'amici_process.AmiciProcess')]
 
+STEPS_TO_REGISTER = [
+    ('get_sbml', 'get_sbml.GetSbml'),
+    ('plotter', 'viz.CompositionPlotter'),
+    ('plotter2d', 'viz.Plotter2d')]
+
+# core process registry implementation (unique to this package)
 CORE = ProcessTypes()
 
-for process_name, process_path in PROCESSES_TO_REGISTER:
-    module_name, class_name = process_path.rsplit('.', 1)
-    try:
-        if 'parameter_scan' in process_name:
-            import_statement = f'biosimulator_processes.steps.{module_name}'
-        else:
-            import_statement = f'biosimulator_processes.processes.{module_name}'
-
-        module = __import__(
-             import_statement, fromlist=[class_name])
-
-        # module = importlib.import_module(import_statement)
-
-        # Get the class from the module
-        bigraph_class = getattr(module, class_name)
-
-        # Register the process
-        CORE.process_registry.register(class_name, bigraph_class)
-        print(f"{class_name} registered successfully.")
-    except ImportError as e:
-        print(f"{class_name} not available. Error: {e}")
-
-
-"""
- Builder(dataclasses) <- Implementation(dict) <- ProcessBigraph(dict) <- BigraphSchema(dict) 
- 
- the general builder should make/take dynamically created classes 
- the biosimulator builder should make/take predefined classes
-"""
+# core type system implementation (unique to this package)
+CORE.type_registry.register('sed_model', schema={'_type': MODEL_TYPE})
+register_module(PROCESSES_TO_REGISTER, CORE)
+register_module(STEPS_TO_REGISTER, CORE)

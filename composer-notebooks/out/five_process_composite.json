@@ -1,0 +1,270 @@
+{
+    "emitter": {
+        "_type": "step",
+        "address": "local:ram-emitter",
+        "config": {
+            "emit": {}
+        },
+        "inputs": {},
+        "outputs": {}
+    },
+    "simple1": {
+        "_type": "process",
+        "address": "local:copasi",
+        "config": {
+            "model": {
+                "model_source": "BIOMD0000000391",
+                "model_id": "",
+                "model_language": "sbml",
+                "model_name": "composite_process_model",
+                "model_changes": {
+                    "species_changes": null,
+                    "global_parameter_changes": null,
+                    "reaction_changes": null
+                },
+                "model_units": null
+            },
+            "method": "deterministic"
+        },
+        "inputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ],
+            "model_parameters": [
+                "model_parameters_store"
+            ],
+            "reactions": [
+                "reactions_store"
+            ]
+        },
+        "outputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ]
+        },
+        "interval": 1.0
+    },
+    "time_store": "0.0",
+    "floating_species_store": {
+        "RuBP": "0.0",
+        "PGA": "0.0",
+        "DPGA": "0.0",
+        "GAP": "0.0",
+        "DHAP": "0.0",
+        "FBP": "0.0",
+        "F6P": "0.0",
+        "E4P": "0.0",
+        "SBP": "0.0",
+        "S7P": "0.0",
+        "X5P": "0.0",
+        "R5P": "0.0",
+        "Ru5P": "0.0",
+        "G6P": "0.0",
+        "G1P": "0.0",
+        "ATP": "0.0",
+        "ADP": "0.0",
+        "NADPH": "0.0",
+        "NADP": "0.0",
+        "H": "0.0",
+        "Pi": "0.0",
+        "Pext": "0.0"
+    },
+    "model_parameters_store": {},
+    "reactions_store": {
+        "RuBisCo": "0.0",
+        "PGA kinase": "0.0",
+        "GAP dehydrogenase": "0.0",
+        "TP isomerase": "0.0",
+        "FBP aldolase": "0.0",
+        "FBP ase": "0.0",
+        "F6P transketolase": "0.0",
+        "SBP aldolase": "0.0",
+        "SBP ase": "0.0",
+        "S7P transketolase": "0.0",
+        "R5P isomerase": "0.0",
+        "Ru5P epimerase": "0.0",
+        "Ru5P kinase": "0.0",
+        "PG isomerase": "0.0",
+        "PG mutase": "0.0",
+        "starch synthase": "0.0",
+        "starch phosphorylase": "0.0",
+        "ATP synthetase": "0.0",
+        "TPT - PGA": "0.0",
+        "TPT - GAP": "0.0",
+        "TPT - DHAP": "0.0"
+    },
+    "simple2": {
+        "_type": "process",
+        "address": "local:copasi",
+        "config": {
+            "model": {
+                "model_source": "BIOMD0000000391",
+                "model_id": "",
+                "model_language": "sbml",
+                "model_name": "composite_process_model",
+                "model_changes": {
+                    "species_changes": null,
+                    "global_parameter_changes": null,
+                    "reaction_changes": null
+                },
+                "model_units": null
+            },
+            "method": "deterministic"
+        },
+        "inputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ],
+            "model_parameters": [
+                "model_parameters_store"
+            ],
+            "reactions": [
+                "reactions_store"
+            ]
+        },
+        "outputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ]
+        },
+        "interval": 1.0
+    },
+    "simple3": {
+        "_type": "process",
+        "address": "local:copasi",
+        "config": {
+            "model": {
+                "model_source": "BIOMD0000000391",
+                "model_id": "",
+                "model_language": "sbml",
+                "model_name": "composite_process_model",
+                "model_changes": {
+                    "species_changes": null,
+                    "global_parameter_changes": null,
+                    "reaction_changes": null
+                },
+                "model_units": null
+            },
+            "method": "deterministic"
+        },
+        "inputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ],
+            "model_parameters": [
+                "model_parameters_store"
+            ],
+            "reactions": [
+                "reactions_store"
+            ]
+        },
+        "outputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ]
+        },
+        "interval": 1.0
+    },
+    "simple4": {
+        "_type": "process",
+        "address": "local:copasi",
+        "config": {
+            "model": {
+                "model_source": "BIOMD0000000391",
+                "model_id": "",
+                "model_language": "sbml",
+                "model_name": "composite_process_model",
+                "model_changes": {
+                    "species_changes": null,
+                    "global_parameter_changes": null,
+                    "reaction_changes": null
+                },
+                "model_units": null
+            },
+            "method": "deterministic"
+        },
+        "inputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ],
+            "model_parameters": [
+                "model_parameters_store"
+            ],
+            "reactions": [
+                "reactions_store"
+            ]
+        },
+        "outputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ]
+        },
+        "interval": 1.0
+    },
+    "simple5": {
+        "_type": "process",
+        "address": "local:copasi",
+        "config": {
+            "model": {
+                "model_source": "BIOMD0000000391",
+                "model_id": "",
+                "model_language": "sbml",
+                "model_name": "composite_process_model",
+                "model_changes": {
+                    "species_changes": null,
+                    "global_parameter_changes": null,
+                    "reaction_changes": null
+                },
+                "model_units": null
+            },
+            "method": "deterministic"
+        },
+        "inputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ],
+            "model_parameters": [
+                "model_parameters_store"
+            ],
+            "reactions": [
+                "reactions_store"
+            ]
+        },
+        "outputs": {
+            "time": [
+                "time_store"
+            ],
+            "floating_species": [
+                "floating_species_store"
+            ]
+        },
+        "interval": 1.0
+    }
+}

@@ -94,7 +94,10 @@ class SmoldynProcess(Process):
     # TODO: Add the ability to pass model parameters and not just a model file.
     config_schema = {
         'model_filepath': 'string',
-        'animate': 'bool',
+        'animate': {
+            '_type': 'boolean',
+            '_default': False
+        }
     }
 
     def __init__(self, config: Dict[str, Any] = None, core=None):

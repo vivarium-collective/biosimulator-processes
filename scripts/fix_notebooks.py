@@ -17,7 +17,7 @@ def fix_execution_count(notebook_path):
 
 
 if __name__ == '__main__':
-    root = "notebooks"
+    root = "composer-notebooks"
     for f in os.listdir(root):
         fp = os.path.join(root, f)
         print(fp)

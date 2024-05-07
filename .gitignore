@@ -29,4 +29,6 @@ bigraph-builder
 3.10/
 Miniforge3-Darwin-arm64.sh
 *.cpython-310.pyc
-
+playground.ipynb
+composer-notebooks/playground.ipynb
+*model_dir/

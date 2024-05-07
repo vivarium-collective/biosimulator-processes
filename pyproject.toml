@@ -4,7 +4,7 @@ version = "0.0.21"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
-packages = [{include = "biosimulator_processes"}]
+packages = [{include = "biosimulator_processes"}, {include = "compare_api"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10"
@@ -12,19 +12,30 @@ zarr = "*"
 termcolor = "*"
 jupyterlab = "*"
 bigraph-schema = "*"
-process-bigraph = "*"
+process-bigraph = "^0.0.17"
+bigraph-viz = "*"
+bigraph-builder = "*"
 numpy = "*" # "^1.26.4"
 copasi-basico = "*"
 cobra = "*"
 tellurium = "*"
+amici = "^0.24.0"
 smoldyn = ">=2.72"
-bigraph-viz = "*"
-bigraph-builder = "*"
 python-libsbml = "^5.20.2"
 docker = ">=7.0"
 python-libnuml = "^1.1.6" # ">=1.0.0"
 notebook = "^7.1.1"
 toml = "*"
+fastapi = "^0.109.0"  # "*"
+pyyaml = "*"
+pydantic = "*"
+h5py = "*"
+pydantic-settings = "*"
+httpx = "*"
+tensorstore = "*"
+aiofiles = "*"
+aiobotocore = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 # psutil = "^5.9.8"
 
 [tool.poetry.group.dev.dependencies]
