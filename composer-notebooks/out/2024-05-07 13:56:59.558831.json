@@ -1,0 +1,11 @@
+{
+    "time": 1.0,
+    "floating_species_concentrations": {
+        "plasminogen": 8.832804288443198e+16,
+        "plasmin": 531507615509958.2,
+        "single intact chain urokinase-type plasminogen activator": 1.8533608092734436e+16,
+        "two-chain urokinase-type plasminogen activator": 1650948309862.1147,
+        "x": 0.0,
+        "x-plasmin": 0.0
+    }
+}

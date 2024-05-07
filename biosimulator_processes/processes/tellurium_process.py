@@ -86,7 +86,7 @@ class TelluriumStep(Step):
 class TelluriumProcess(Process):
     config_schema = {
         'record_history': 'maybe[boolean]',  # TODO -- do we have this type?
-        'model': 'sed_model',
+        'model': MODEL_TYPE,
         'method': {
             '_default': 'cvode',
             '_type': 'string'

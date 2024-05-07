@@ -1,13 +1,19 @@
 from typing import *
 
 import numpy as np
-from process_bigraph import Process
+from process_bigraph import Process, Step
 
 from biosimulator_processes.data_model.compare_data_model import ComparisonResults, SimulatorResult, IntervalResult
 
 
 def mean_squared_error(true_values: np.ndarray, predicted_values: np.ndarray):
     return np.mean((predicted_values - true_values) ** 2)
+
+
+class CompareResults(Step):
+    config_schema = {
+        'emitter_results'
+    }
 
 
 class ODEComparator(Process):

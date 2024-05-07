@@ -47,7 +47,7 @@ def prepare_single_ode_process_document(
     document = {
         process_id: {
             '_type': 'process',
-            'address': 'local:copasi',
+            'address': f'local:{simulator_name}',
             'config': {
                 'model': {
                     'model_source': sbml_model_fp}},

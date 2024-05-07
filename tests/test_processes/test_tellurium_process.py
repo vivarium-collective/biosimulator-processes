@@ -12,10 +12,10 @@ def test_process():
 
     instance = {
         'tellurium': {
-            '_type': 'process',
-            'address': 'local:tellurium',
+            '_type': 'step',
+            'address': 'local:get_sbml',
             'config': {
-                'sbml_model_path': model_fp,
+                'biomodel_id': model_fp,
             },
             'inputs': {
                 'time': ['start_time_store'],
