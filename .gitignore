@@ -30,4 +30,4 @@ bigraph-builder
 Miniforge3-Darwin-arm64.sh
 *.cpython-310.pyc
 playground.ipynb
-p.ipynb
+composer-notebooks/playground.ipynb

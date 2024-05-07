@@ -48,21 +48,44 @@ class ComparisonDocument(ABC):
 class ODEComparisonDocument(ComparisonDocument):
     """To be called 'behind-the-scenes' by the Comparison REST API"""
     def __init__(self,
-                 simulators: List[str],
+                 simulators: Union[List[str], Dict[str, str]],
                  duration: int,
                  num_steps: int,
                  model_filepath: str,
                  framework_type='deterministic',
                  target_parameter: Dict[str, Union[str, float]] = None,
                  **kwargs):
+        """This object implements a self generated factory with which it creates its representation. The naming of
+            simulator processes within the composition are by default generated through concatenating the simulator
+            tool _name_(i.e: `'tellurium'`) with with a simple index `i` which is a population of an iteration over
+            the total number of processes in the bigraph.
+
+                Args:
+                    simulators:`Union[List[str], Dict[str, str]]`: either a list of actual simulator tool names,
+                        ie: `'copasi'`; or a dict mapping of {simulator_tool_name: custom_process_id}
+                    duration:`int`: the total duration of simulation run
+                    num_steps:`int`
+                    model_filepath:`str`: filepath which points to a SBML model file.
+                    framework_type:`str`: type of mathematical framework to employ with the simulators within your
+                        composition. Choices are `'stochastic'`, `'deterministic'`. Note that there may be more
+                        stochastic options than deterministic.
+        """
         super().__init__()
-        self.simulators = simulators
-        self.composite = kwargs.get('composite') or {}
+
+        if isinstance(simulators, dict):
+            self.simulators = list(simulators.keys()) if isinstance(simulators, dict) else simulators
+            self.custom_process_ids = list(simulators.values())
+        else:
+            self.simulators = simulators
+
+        self.composite = kwargs.get('composite', {})
         self.model_filepath = model_filepath
         self.framework_type = framework_type
+
         context = 'concentrations' if 'deterministic' in self.framework_type else 'counts'
         self.species_port_name = f'floating_species_{context}'
         self.species_store = [f'floating_species_{context}_store']
+
         self._populate_composition(model_filepath)
         self._add_emitter()
 
