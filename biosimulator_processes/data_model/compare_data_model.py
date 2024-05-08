@@ -12,22 +12,60 @@ class SimulatorComparisonResult(BaseModel):
     value: Dict[Tuple[str], Dict[str, Any]]
 
 
+class ResultData(BaseModel):
+    name: str
+    value: Union[float, int, str]
+    mse: float
+
+
 class IntervalResult(BaseModel):
     global_time_stamp: float
-    results: Dict[str, Any]
+    # results: Dict[str, Any]
+    results: List[ResultData]
+
+
+class RMSE(BaseModel):
+    param_name: str
+    value: float
 
 
 class SimulatorResult(BaseModel):
     process_id: str
     simulator: str
-    result: List[IntervalResult]
+    data: List[IntervalResult]
+    rmse: List[RMSE]
 
 
 class ComparisonResults(BaseModel):
     duration: int
     num_steps: int
-    values: List[SimulatorResult]
+    biomodel_id: str
+    outputs: List[SimulatorResult]
 
+
+"""
+
+For example: 
+
+result = ComparisonResults(
+            10, 
+            20, 
+            'BIOMD0000023', 
+            [
+                SimulatorResult(
+                    my_process, 
+                    copasi, 
+                    [
+                        IntervalResult(
+                            0, 
+                            [
+                                ResultData('T', 2.9, 0.7)
+                            ]
+                    ]
+                )
+            ]
+
+"""
 
 class ProcessAttributes(BaseModel):
     name: str

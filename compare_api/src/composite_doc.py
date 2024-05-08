@@ -1,7 +1,7 @@
 from typing import *
 from process_bigraph import Composite
 from biosimulator_processes import CORE
-from biosimulator_processes.data_model.compare_data_model import ComparisonDocument
+from biosimulator_processes.data_model.compare_data_model import ODEComparisonDocument
 
 
 def create_comparison_document(
@@ -10,8 +10,8 @@ def create_comparison_document(
         duration: int,
         n_steps: int,
         target_param: dict = None
-        ) -> ComparisonDocument:
-    return ComparisonDocument(
+        ) -> ODEComparisonDocument:
+    return ODEComparisonDocument(
         simulators=simulators,
         duration=duration,
         num_steps=n_steps,
@@ -19,7 +19,7 @@ def create_comparison_document(
         target_parameter=target_param)
 
 
-def generate_workflow(document: ComparisonDocument) -> Composite:
+def generate_workflow(document: ODEComparisonDocument) -> Composite:
     return Composite(
         config={'state': document.composite},
         core=CORE)

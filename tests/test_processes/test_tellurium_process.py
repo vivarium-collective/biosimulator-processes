@@ -10,7 +10,7 @@ def test_process():
     model_name = 'vilar-discrete-SSA.xml'  # 'BIOMD0000000061_url.xml'
     model_fp = os.path.join(sbml_model_files_root, model_name)
 
-    instance = {
+    composite_document = {
         'tellurium': {
             '_type': 'step',
             'address': 'local:get_sbml',
@@ -48,7 +48,7 @@ def test_process():
 
     # 2. make the composite
     workflow = Composite(
-        config={'state': instance},
+        config={'state': composite_document},
         core=CORE)
 
     # 3. run
