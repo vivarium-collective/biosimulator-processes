@@ -1,4 +1,5 @@
 from typing import *
+import random
 
 import numpy as np
 from process_bigraph import Process, Step
@@ -24,8 +25,13 @@ def mean_squared_error(data: Union[List[float, np.ndarray]]) -> np.ndarray[float
     return (data - data_average) ** 2
 
 
-def mean_squared_error(true_values: np.ndarray, predicted_values: np.ndarray):
-    return np.mean((predicted_values - true_values) ** 2)
+def random_population_selection(population: List, update_population=True) -> List:
+    """Pick a random member of a given population `population` and pop it from the population if
+        update_population is set to True.
+    """
+    index = len(population) - 1
+    rand_i = random.randint(0, index)
+    return population.pop(rand_i) if update_population else population[rand_i]
 
 
 class CompareResults(Step):
