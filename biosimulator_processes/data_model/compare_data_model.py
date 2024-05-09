@@ -50,17 +50,6 @@ result = ComparisonResults(
 """
 
 
-class RMSE(BaseModel):
-    process_id: str
-    param_id: str  # mostly species names or something like that
-    value: Union[float, int]
-
-
-class ODEProcessFitnessScore(BaseModel):
-    process_id: str
-    rmse_values: List[RMSE]
-
-
 class ResultData(BaseModel):
     name: str
     value: float
@@ -82,10 +71,29 @@ class IntervalResult(BaseModel):
     data: List[ResultData]
 
 
+class MSEValues(BaseModel):
+    param_name: str
+    value: float
+
+
+class RMSE(BaseModel):
+    process_id: str
+    param_id: str  # mostly species names or something like that
+    value: Union[float, int]
+    _mse_values: List[MSEValues]  # set internally
+
+
+# Based on the list of interval results
+class ODEProcessFitnessScore(BaseModel):
+    process_id: str
+    rmse_values: List[RMSE]
+
+
 class SimulatorProcessResult(BaseModel):
     simulator: str
     process_id: str
     data: List[IntervalResult]
+    fitness_score: ODEProcessFitnessScore
 
 
 class SimulatorComparisonResult(BaseModel):
