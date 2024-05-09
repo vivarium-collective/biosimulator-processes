@@ -24,7 +24,7 @@ def mean_squared_error(data: Union[List[float, np.ndarray]]) -> np.ndarray[float
     data_average = np.mean(data)
     return (data - data_average) ** 2
 
-
+  
 def random_population_selection(population: List, update_population=True) -> List:
     """Pick a random member of a given population `population` and pop it from the population if
         update_population is set to True.
