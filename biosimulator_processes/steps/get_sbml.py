@@ -2,6 +2,7 @@ from tempfile import mkdtemp
 import os
 import requests
 
+import libsbml
 from process_bigraph import Step, pp
 
 from biosimulator_processes import CORE
@@ -27,7 +28,7 @@ class GetSbml(Step):
 
     def update(self, state):
         try:
-            model_dirpath = mkdtemp()
+            model_dirpath = os.getcwd()  # mkdtemp()
             biomodels_request_url = f'https://www.ebi.ac.uk/biomodels/search/download?models={self.biomodel_id}'
             response = requests.get(biomodels_request_url)
             response.raise_for_status()
@@ -36,8 +37,19 @@ class GetSbml(Step):
             with open(model_fp, 'wb') as f:
                 f.write(response.content)
 
-            print(self.biomodel_id)
+            print(model_fp)
+
+            reader = libsbml.SBMLReader()
+            document = reader.readSBML(model_fp)
+            if document.getNumErrors() > 0:
+                raise Exception('Error reading SBML file')
+
+            model = document.getModel()
+            if model is None:
+                raise Exception('No model found in SBML file')
+            else:
+                print(f'{dir(model)}')
 
             return {'sbml_model_fp': model_fp}
-        except:
-            raise Exception(f'There was an issue')
+        except Exception as e:
+            print(e)

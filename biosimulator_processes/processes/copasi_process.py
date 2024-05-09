@@ -1,5 +1,7 @@
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, List
 import json
+
+from COPASI import CDataModel
 from pandas import DataFrame
 from basico import (
     load_model,
@@ -245,7 +247,7 @@ class CopasiProcess(Process):
         # ----SPECS: set species changes
         species_changes = self.model_changes.get('species_changes', [])
         if species_changes:
-            for species_change in åspecies_changes:
+            for species_change in species_changes:
                 if isinstance(species_change, dict):
                     species_name = species_change.pop('name')
                     changes_to_apply = {}
@@ -274,24 +276,168 @@ class CopasiProcess(Process):
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
 
 
-class _Process(Process):
-    config_schema = {}
+class _CopasiProcess(Process):
+    config_schema = {
+        'model': MODEL_TYPE,
+        'species_context': {
+            '_type': 'string',
+            '_default': 'concentrations'
+        },
+        'method': {
+            '_type': 'string',
+            '_default': 'deterministic'  # <-- CVODE for consistency, or should we use LSODA?
+        }
+    }
 
-    def __init__(self, config=None, core=CORE):
+    model_changes: Dict
+    species_context_key: str
+    use_counts: bool
+    reaction_list: List[str]
+    floating_species_list: List[str]
+    copasi_model_object: CDataModel
+    floating_species_initial: List[float]
+    model_parameters_list: List[str]
+    model_parameters_values: List[float]
+    compartments_list: List[str]
+    method: str
+
+    def __init__(self,
+                 config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
+                 core: Dict = CORE):
         super().__init__(config, core)
 
+    def initial_state(self):
+        # insert copasi process model config
+        model_source = self.config['model'].get('model_source')
+        assert model_source is not None, "You must pass a model source."
+        self.copasi_model_object = load_model(model_source)
+
+        model_changes = self.config['model'].get('model_changes', {})
+        self.model_changes = {} if model_changes is None else model_changes
+
+        # handle context of species output
+        context_type = self.config['species_context']
+        self.species_context_key = f'floating_species_{context_type}'
+        self.use_counts = 'concentrations' in context_type
+
+        # Get a list of reactions
+        # self._set_reaction_changes()
+        reactions = get_reactions(model=self.copasi_model_object)
+        self.reaction_list = reactions.index.tolist() if reactions is not None else []
+        # if not self.reaction_list:
+        # raise AttributeError('No reactions could be parsed from this model. Your model must contain reactions to run.')
+
+        # Get the species (floating only)  TODO: add boundary species
+        # self._set_species_changes()
+        species_data = get_species(model=self.copasi_model_object)
+        self.floating_species_list = species_data.index.tolist()
+        self.floating_species_initial = species_data.particle_number.tolist() \
+            if self.use_counts else species_data.concentration.tolist()
+
+        # Get the list of parameters and their values (it is possible to run a model without any parameters)
+        # self._set_global_param_changes()
+        model_parameters = get_parameters(model=self.copasi_model_object)
+        self.model_parameters_list = model_parameters.index.tolist() \
+            if isinstance(model_parameters, DataFrame) else []
+        self.model_parameters_values = model_parameters.initial_value.tolist() \
+            if isinstance(model_parameters, DataFrame) else []
+
+        # Get a list of compartments
+        self.compartments_list = get_compartments(model=self.copasi_model_object).index.tolist()
+
+        # ----SOLVER: Get the solver (defaults to deterministic)
+        self.method = self.config['method']
+        # keep in mind that a valid simulation may not have global parameters
+        model_parameters_dict = dict(
+            zip(self.model_parameters_list, self.model_parameters_values))
+
+        floating_species_dict = dict(
+            zip(self.floating_species_list, self.floating_species_initial))
+
+        return {
+            'time': 0.0,
+            'model_parameters': model_parameters_dict,
+            self.species_context_key: floating_species_dict,
+        }
+
     def inputs(self):
-        return {'source': 'string'}
+        # dependent on species context set in self.config
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for species_id in self.floating_species_list
+        }
+
+        model_params_type = {
+            param_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for param_id in self.model_parameters_list
+        }
+
+        reactions_type = {
+            reaction_id: 'float'
+            for reaction_id in self.reaction_list
+        }
+
+        return {
+            'model_source': 'string',
+            'time': 'float',
+            self.species_context_key: floating_species_type,
+            'model_parameters': model_params_type,
+            'reactions': reactions_type}
 
     def outputs(self):
-        return {'names': 'list[string]'}
+        floating_species_type = {
+            species_id: {
+                '_type': 'float',
+                '_apply': 'set'}
+            for species_id in self.floating_species_list
+        }
+        return {
+            'time': 'float',
+            self.species_context_key: floating_species_type}
 
-    def update(self, state, interval):
-        import os
-        print(f"the source: {state['source']}")
-        print(f"{os.path.exists(state['source'])}")
-        model = load_model(location=state['source'])
-        return {'names': get_species(model=model)}
+    def update(self, inputs, interval):
+        # set copasi values according to what is passed in states for concentrations
+        for cat_id, value in inputs[self.species_context_key].items():
+            set_type = 'particle_number' if 'counts' in self.species_context_key else 'concentration'
+            species_config = {
+                'name': cat_id,
+                'model': self.copasi_model_object,
+                set_type: value}
+            set_species(**species_config)
 
+        # run model for "interval" length; we only want the state at the end
+        timecourse = run_time_course(
+            start_time=inputs['time'],
+            duration=interval,
+            update_model=True,
+            model=self.copasi_model_object,
+            method=self.method)
 
-CORE.process_registry.register('_process', _Process)
+        # extract end values of concentrations from the model and set them in results
+        results = {'time': interval}
+        if self.use_counts:
+            results[self.species_context_key] = {
+                mol_id: float(get_species(
+                    name=mol_id,
+                    exact=True,
+                    model=self.copasi_model_object
+                ).particle_number[0])
+                for mol_id in self.floating_species_list}
+        else:
+            results[self.species_context_key] = {
+                mol_id: float(get_species(
+                    name=mol_id,
+                    exact=True,
+                    model=self.copasi_model_object
+                ).concentration[0])
+                for mol_id in self.floating_species_list}
+
+        with open(f'/Users/alex/Desktop/uchc_work/repos/biosimulator-processes/composer-notebooks/out/{str(datetime.today())}.json', 'w') as fp:
+            print('writing out fp!')
+            json.dump(results, fp, indent=4)
+
+        return results

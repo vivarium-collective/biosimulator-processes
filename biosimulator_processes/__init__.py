@@ -14,6 +14,7 @@ from biosimulator_processes.utils import register_module
 PROCESSES_TO_REGISTER = [
     ('cobra', 'cobra_process.CobraProcess'),
     ('copasi', 'copasi_process.CopasiProcess'),
+    ('_copasi', 'copasi_process._CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
     ('amici', 'amici_process.AmiciProcess'),
