@@ -54,7 +54,7 @@ class ResultData(BaseModel):
     name: str
     value: float
     target: float
-    mse: float = Field(..., default=0.0)
+    mse: float = Field(...)
 
     def __init__(self, name: str, value: float, target: float):
         self.name = name

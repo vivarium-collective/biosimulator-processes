@@ -14,7 +14,7 @@ class GetSbml(Step):
 
     def __init__(self, config=None, core=CORE):
         super().__init__(config, core)
-        print(type(self.config))
+        self.biomodel_id = self.config['biomodel_id']
 
     def initial_state(self):
         return {'biomodel_id': self.config['biomodel_id']}
@@ -26,17 +26,17 @@ class GetSbml(Step):
         return {'sbml_model_fp': 'string'}
 
     def update(self, state):
-        model_dirpath = mkdtemp()
-        biomodel_id = state['biomodel_id']
-        biomodels_request_url = f'https://www.ebi.ac.uk/biomodels/search/download?models={biomodel_id}'
         try:
+            model_dirpath = mkdtemp()
+            biomodels_request_url = f'https://www.ebi.ac.uk/biomodels/search/download?models={self.biomodel_id}'
             response = requests.get(biomodels_request_url)
             response.raise_for_status()
-            model_fp = os.path.join(model_dirpath, f'{biomodel_id}_url.xml')
+            model_fp = os.path.join(model_dirpath, f'{self.biomodel_id}_url.xml')
+            assert self.biomodel_id is not None
             with open(model_fp, 'wb') as f:
                 f.write(response.content)
 
-            print(f'File successfully written to: {model_fp}')
+            print(self.biomodel_id)
 
             return {'sbml_model_fp': model_fp}
         except:

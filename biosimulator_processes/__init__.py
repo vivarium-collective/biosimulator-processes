@@ -16,12 +16,14 @@ PROCESSES_TO_REGISTER = [
     ('copasi', 'copasi_process.CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
-    ('amici', 'amici_process.AmiciProcess')]
+    ('amici', 'amici_process.AmiciProcess'),
+    ('compare_ode_process', 'comparator_process.ODEComparatorProcess')]
 
 STEPS_TO_REGISTER = [
     ('get_sbml', 'get_sbml.GetSbml'),
     ('plotter', 'viz.CompositionPlotter'),
-    ('plotter2d', 'viz.Plotter2d')]
+    ('plotter2d', 'viz.Plotter2d'),
+    ('compare_ode_step', 'comparator_step.ODEComparatorStep')]
 
 # core process registry implementation (unique to this package)
 CORE = ProcessTypes()

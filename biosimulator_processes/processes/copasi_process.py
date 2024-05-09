@@ -57,7 +57,8 @@ class CopasiProcess(Process):
         'method': {
             '_type': 'string',
             '_default': 'deterministic'  # <-- CVODE for consistency, or should we use LSODA?
-        }
+        },
+        'sbml_fp': 'maybe[string]'
     }
 
     def __init__(self,
@@ -66,7 +67,7 @@ class CopasiProcess(Process):
         super().__init__(config, core)
 
         # insert copasi process model config
-        model_source = self.config['model'].get('model_source')
+        model_source = self.config['model'].get('model_source') or self.config.get('sbml_fp')
         assert model_source is not None, 'You must specify a model source of either a valid biomodel id or model filepath.'
         model_changes = self.config['model'].get('model_changes', {})
         self.model_changes = {} if model_changes is None else model_changes
@@ -271,3 +272,26 @@ class CopasiProcess(Process):
                         if param_name not in existing_global_parameters:
                             assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
+
+
+class _Process(Process):
+    config_schema = {}
+
+    def __init__(self, config=None, core=CORE):
+        super().__init__(config, core)
+
+    def inputs(self):
+        return {'source': 'string'}
+
+    def outputs(self):
+        return {'names': 'list[string]'}
+
+    def update(self, state, interval):
+        import os
+        print(f"the source: {state['source']}")
+        print(f"{os.path.exists(state['source'])}")
+        model = load_model(location=state['source'])
+        return {'names': get_species(model=model)}
+
+
+CORE.process_registry.register('_process', _Process)

@@ -1,13 +1,16 @@
+"""Comparator Process:
+
+    Here the entrypoint is either a biomodel id or sbml model path.
+"""
+
 from typing import *
 import random
 
 import numpy as np
 from process_bigraph import Process, Step
 
-from biosimulator_processes.data_model.compare_data_model import ComparisonResults, SimulatorResult, IntervalResult
 
-
-def mean_squared_error(data: Union[List[float, np.ndarray]]) -> np.ndarray[float]:
+def mean_squared_error(data: Union[List[float], np.ndarray]) -> np.ndarray[float]:
     """Takes in an array of data which represents the results of a composition for a species/param
         at a given interval, averages the values, and then scores each item in the data array with an MSE value
         calculated against the average, returning the MSE scores as an array.
@@ -40,7 +43,7 @@ class CompareResults(Step):
     }
 
 
-class ODEComparator(Process):
+class ODEComparatorProcess(Process):
     """Process that serves to perform a comparison of ODE-enabled simulator output, particularly
         simulators that are equipped to use CVODE. Such simulators include: COPASI, Tellurium, and AMICI.
     """
