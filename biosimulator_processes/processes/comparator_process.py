@@ -6,8 +6,22 @@ from process_bigraph import Process, Step
 from biosimulator_processes.data_model.compare_data_model import ComparisonResults, SimulatorResult, IntervalResult
 
 
-def mean_squared_error(true_values: np.ndarray, predicted_values: np.ndarray):
-    return np.mean((predicted_values - true_values) ** 2)
+def mean_squared_error(data: Union[List[float, np.ndarray]]) -> np.ndarray[float]:
+    """Takes in an array of data which represents the results of a composition for a species/param
+        at a given interval, averages the values, and then scores each item in the data array with an MSE value
+        calculated against the average, returning the MSE scores as an array.
+
+        Args:
+              data:`Union[List[float, np.ndarray[float]]]`: An array of data which represents the results
+                of a composition for a species/param.
+
+        Returns:
+            `np.ndarray[float]`: An array of MSE scores for each item in `data`.
+    """
+    if isinstance(data, list):
+        data = np.array(data)
+    data_average = np.mean(data)
+    return (data - data_average) ** 2
 
 
 class CompareResults(Step):
