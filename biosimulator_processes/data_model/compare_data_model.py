@@ -12,9 +12,10 @@ date: 04/2024
 from typing import *
 from abc import ABC
 from dataclasses import dataclass
-from biosimulator_processes.utils import prepare_single_ode_process_document
 
-from typing import List, Dict, Tuple, Any
+from pydantic import Field, field_validator
+
+from biosimulator_processes.utils import prepare_single_ode_process_document
 from biosimulator_processes.data_model import _BaseModel as BaseModel
 
 
@@ -63,7 +64,17 @@ class ODEProcessFitnessScore(BaseModel):
 class ResultData(BaseModel):
     name: str
     value: float
-    mse: float
+    target: float
+    mse: float = Field(..., default=0.0)
+
+    def __init__(self, name: str, value: float, target: float):
+        self.name = name
+        self.value = value
+        self.target = target
+        self.mse = self._set_mse()
+
+    def _set_mse(self):
+        return (self.target - self.value) ** 2
 
 
 class IntervalResult(BaseModel):
