@@ -1,3 +1,14 @@
+"""
+Compare Data Model:
+    Objects whose purpose is to compare the output of 'like-minded' simulators/processes
+which reside in a shared compositional space. The global 'state' of this composition
+is agnostic to any summation of values.
+
+author: Alex Patrie
+license: Apache License, Version 2.0
+date: 04/2024
+"""
+
 from typing import *
 from abc import ABC
 from dataclasses import dataclass
@@ -7,43 +18,13 @@ from typing import List, Dict, Tuple, Any
 from biosimulator_processes.data_model import _BaseModel as BaseModel
 
 
-class SimulatorComparisonResult(BaseModel):
-    simulators: List[str]
-    value: Dict[Tuple[str], Dict[str, Any]]
-
-
-class ResultData(BaseModel):
-    name: str
-    value: Union[float, int, str]
-    mse: float
-
-
-class IntervalResult(BaseModel):
-    global_time_stamp: float
-    # results: Dict[str, Any]
-    results: List[ResultData]
-
-
-class RMSE(BaseModel):
-    param_name: str
-    value: float
-
-
-class SimulatorResult(BaseModel):
-    process_id: str
-    simulator: str
-    data: List[IntervalResult]
-    rmse: List[RMSE]
-
-
-class ComparisonResults(BaseModel):
-    duration: int
-    num_steps: int
-    biomodel_id: str
-    outputs: List[SimulatorResult]
-
-
 """
+Such engineering should be performed by an expeditionary of semantic unity, using 
+vocabulary as their protection. The Explorer is truly that: unafraid to step outside of
+the unifying 'glossary' in the name of expanding it. Semantics are of both great
+use and immense terror to the Explorer. The Explorer firmly understands and believes 
+these worldly facts. 
+
 
 For example: 
 
@@ -66,6 +47,42 @@ result = ComparisonResults(
             ]
 
 """
+
+
+class RMSE(BaseModel):
+    process_id: str
+    param_id: str  # mostly species names or something like that
+    value: Union[float, int]
+
+
+class ODEProcessFitnessScore(BaseModel):
+    process_id: str
+    rmse_values: List[RMSE]
+
+
+class ResultData(BaseModel):
+    name: str
+    value: float
+    mse: float
+
+
+class IntervalResult(BaseModel):
+    interval_id: float  # should be Composite.state['global_time']
+    data: List[ResultData]
+
+
+class SimulatorProcessResult(BaseModel):
+    simulator: str
+    process_id: str
+    data: List[IntervalResult]
+
+
+class SimulatorComparisonResult(BaseModel):
+    duration: int
+    num_steps: int
+    simulators: List[str]
+    outputs: List[SimulatorProcessResult]
+
 
 class ProcessAttributes(BaseModel):
     name: str
