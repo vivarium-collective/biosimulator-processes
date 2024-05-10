@@ -27,6 +27,7 @@ class GetSbml(Step):
         return {'sbml_model_fp': 'string'}
 
     def update(self, state):
+        # TODO: Use copasi for this
         try:
             model_dirpath = os.getcwd()  # mkdtemp()
             biomodels_request_url = f'https://www.ebi.ac.uk/biomodels/search/download?models={self.biomodel_id}'
