@@ -1,3 +1,6 @@
+import json
+import os
+
 from process_bigraph import pp
 
 from verify_api.src.comparison import generate_ode_comparison
@@ -10,6 +13,10 @@ def test_step():
     simulators = ['copasi', 'tellurium']
     results = generate_ode_comparison(biomodel_id, duration)
     pp(f'Results for comparison test:\n{results}')
+
+    with open(os.path.join(os.getcwd(), 'comparator_result.txt'), 'w') as f:
+        f.write(str(results))
+
     return results
 
 
