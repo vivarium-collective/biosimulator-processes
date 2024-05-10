@@ -45,10 +45,33 @@ class ComparisonResults(BaseModel):
 
 """
 
-from typing import *
-from biosimulator_processes.data_model.compare_data_model import IntervalResult, SimulatorResult, ComparisonResults
+
+from process_bigraph import Composite
+
+from biosimulator_processes import CORE
 
 
-def parse_comparison_results(results: Dict):
-    result_values = results[('emitter',)]
+def generate_ode_verification(biomodel_id, dur) -> dict:
+    compare = {
+        'compare_ode': {
+            '_type': 'step',
+            'address': 'local:compare_ode_step',
+            'config': {'biomodel_id': biomodel_id, 'duration': dur},
+            'inputs': {},
+            'outputs': {'comparison_data': ['comparison_store']}
+        },
+        'verification_data': {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'emit': {'comparison_data': 'tree[any]'}
+            },
+            'inputs': {'comparison_data': ['comparison_store']}
+        }
+    }
+
+    wf = Composite(config={'state': compare}, core=CORE)
+    wf.run(1)
+    comparison_results = wf.gather_results()
+    return comparison_results
 
