@@ -6,16 +6,19 @@ import libsbml
 from process_bigraph import Step, pp
 
 from biosimulator_processes import CORE
+from biosimulator_processes.io import fetch_sbml_file
 
 
-class GetSbml(Step):
+class GetSbmlStep(Step):
     config_schema = {
-        'biomodel_id': 'string'
+        'biomodel_id': 'string',
+        'save_dir': 'maybe[string]'
     }
 
     def __init__(self, config=None, core=CORE):
         super().__init__(config, core)
         self.biomodel_id = self.config['biomodel_id']
+        self.save_dir = self.config.get('save_dir')
 
     def initial_state(self):
         return {'biomodel_id': self.config['biomodel_id']}
@@ -29,28 +32,7 @@ class GetSbml(Step):
     def update(self, state):
         # TODO: Use copasi for this
         try:
-            model_dirpath = os.getcwd()  # mkdtemp()
-            biomodels_request_url = f'https://www.ebi.ac.uk/biomodels/search/download?models={self.biomodel_id}'
-            response = requests.get(biomodels_request_url)
-            response.raise_for_status()
-            model_fp = os.path.join(model_dirpath, f'{self.biomodel_id}_url.xml')
-            assert self.biomodel_id is not None
-            with open(model_fp, 'wb') as f:
-                f.write(response.content)
-
-            print(model_fp)
-
-            reader = libsbml.SBMLReader()
-            document = reader.readSBML(model_fp)
-            if document.getNumErrors() > 0:
-                raise Exception('Error reading SBML file')
-
-            model = document.getModel()
-            if model is None:
-                raise Exception('No model found in SBML file')
-            else:
-                print(f'{dir(model)}')
-
+            model_fp = fetch_sbml_file(biomodel_id=self.biomodel_id, save_dir=self.save_dir)
             return {'sbml_model_fp': model_fp}
         except Exception as e:
             print(e)

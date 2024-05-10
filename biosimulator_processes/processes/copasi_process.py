@@ -217,10 +217,6 @@ class CopasiProcess(Process):
                 ).concentration[0])
                 for mol_id in self.floating_species_list}
 
-        with open(f'/Users/alex/Desktop/uchc_work/repos/biosimulator-processes/composer-notebooks/out/{str(datetime.today())}.json', 'w') as fp:
-            print('writing out fp!')
-            json.dump(results, fp, indent=4)
-
         return results
 
     def _set_reaction_changes(self):
@@ -435,9 +431,5 @@ class _CopasiProcess(Process):
                     model=self.copasi_model_object
                 ).concentration[0])
                 for mol_id in self.floating_species_list}
-
-        with open(f'/Users/alex/Desktop/uchc_work/repos/biosimulator-processes/composer-notebooks/out/{str(datetime.today())}.json', 'w') as fp:
-            print('writing out fp!')
-            json.dump(results, fp, indent=4)
 
         return results
