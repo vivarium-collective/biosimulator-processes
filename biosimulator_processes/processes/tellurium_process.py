@@ -94,9 +94,11 @@ class TelluriumProcess(Process):
         'species_context': {
             '_default': 'concentrations',
             '_type': 'string'
-        }
+        },
+        'num_steps': 'maybe[integer]'
     }
 
+    simulator: te.roadrunner.extended_roadrunner.ExtendedRoadRunner
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
@@ -184,7 +186,7 @@ class TelluriumProcess(Process):
             self.simulator.setValue(cat_id, value)
 
         # run the simulation
-        new_time = self.simulator.oneStep(inputs['time'], interval)
+        result = self.simulator.oneStep(inputs['time'], interval)
 
         # extract the results and convert to update
         update = {

@@ -9,6 +9,8 @@ import random
 import numpy as np
 from process_bigraph import Process, Step
 
+from biosimulator_processes.io import fetch_sbml_file
+
 
 def mean_squared_error(data: Union[List[float], np.ndarray]) -> np.ndarray[float]:
     """Takes in an array of data which represents the results of a composition for a species/param
@@ -48,7 +50,7 @@ class ODEComparatorProcess(Process):
         simulators that are equipped to use CVODE. Such simulators include: COPASI, Tellurium, and AMICI.
     """
     config_schema = {
-        'sbml_model_file': 'string',
+        'biomodel_id': 'string',
         'duration': 'number',
         'num_steps': 'number',
         'simulators': 'list[string]',
@@ -69,7 +71,8 @@ class ODEComparatorProcess(Process):
         """
         super().__init__(config, core)
         self.species_context_key = 'floating_species_concentrations'
-        self.simulator_instances = self._set_simulator_instances()
+        model_fp = fetch_sbml_file(self.config['biomodel_id'])
+        self.simulator_instances = self._set_simulator_instances(model_fp)
         self.floating_species_ids = {}
         self.model_parameter_ids = {}
         self.reactions = {}
@@ -139,8 +142,9 @@ class ODEComparatorProcess(Process):
 
         return results
 
-    def _set_simulator_instances(self) -> Dict:
+    def _set_simulator_instances(self, model_fp) -> Dict:
         simulator_instances = {}
+        simulators = ['tellurium', 'copasi']
         for simulator in self.config['simulators']:
             module_name = simulator + '_process'
             class_name = simulator.replace(simulator[0], simulator[0].upper()) + 'Process'
@@ -149,6 +153,6 @@ class ODEComparatorProcess(Process):
             simulator_instance = getattr(simulator_module, class_name)
             simulator_instances[simulator] = simulator_instance(config={
                 'model': {
-                    'model_source': self.config['sbml_model_file']}
+                    'model_source': model_fp}
             })
         return simulator_instances
