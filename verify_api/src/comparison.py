@@ -51,7 +51,7 @@ from process_bigraph import Composite
 from biosimulator_processes import CORE
 
 
-def generate_ode_verification(biomodel_id, dur) -> dict:
+def generate_ode_comparison(biomodel_id, dur) -> dict:
     compare = {
         'compare_ode': {
             '_type': 'step',
