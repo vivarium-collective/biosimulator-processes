@@ -158,20 +158,15 @@ class AmiciProcess(Process):
             self.species_context_key: floating_species_type}
 
     def update(self, inputs, interval):
-        # TODO: Complete this.
         set_values = []
         for species_id, value in inputs[self.species_context_key].items():
-            print(f'Values for {species_id} in AmiciProcess from inputs: {value}')
             set_values.append(value)
-
         self.amici_model_object.setInitialStates(set_values)
-        print(f'Input State for {interval}: {self.amici_model_object.getInitialStates()}')
 
         result_data = runAmiciSimulation(self.amici_model_object, self.method)
 
-        print(self.amici_model_object.getStateIds())
-
         results = {'time': interval}
-        results['floating_species_concentrations'] = dict(
+        results[self.species_context_key] = dict(
             zip(self.floating_species_list, self.floating_species_initial))
+
         return results
