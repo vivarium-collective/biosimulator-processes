@@ -73,6 +73,5 @@ def generate_ode_comparison(biomodel_id, dur) -> dict:
     wf = Composite(config={'state': compare}, core=CORE)
     wf.run(1)
     comparison_results = wf.gather_results()
-
     return comparison_results
 
