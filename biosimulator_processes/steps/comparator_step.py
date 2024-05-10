@@ -90,4 +90,4 @@ class ODEComparatorStep(Step):
 
         comp = Composite(config={'state': manuscript}, core=CORE)
         comp.run(self.duration)
-        return comp.gather_results()
+        return comp.gather_results()[('emitter',)]
