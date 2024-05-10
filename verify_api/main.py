@@ -5,8 +5,8 @@ from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, ComparisonResults
-from compare_api.src.composite_doc import create_comparison_document, generate_workflow, run_workflow
+from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, SimulatorComparisonResult
+from verify_api.src.composite_doc import create_comparison_document, generate_workflow, run_workflow
 
 
 # logger for this module
@@ -81,7 +81,7 @@ async def get_process_attributes(
 
 @app.post(
     "/run-comparison",
-    response_model=ComparisonResults,
+    response_model=SimulatorComparisonResult,
     name="Run a Simulator Comparison",
     operation_id="run-comparison",
     responses={
@@ -92,7 +92,7 @@ async def run_comparison(
         simulators: List[str] = Query(..., title="Simulators to Compare"),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps")
-) -> ComparisonResults:
+) -> SimulatorComparisonResult:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     # TODO: enable remote model file for model path with download
     try:
@@ -101,7 +101,11 @@ async def run_comparison(
         document = create_comparison_document(model_file_location, simulators, duration, num_steps)
         workflow = generate_workflow(document)
         results = await run_workflow(workflow, duration)
-        return ComparisonResults(simulators=simulators, value=results)
+        return SimulatorComparisonResult(
+            num_steps=num_steps,
+            duration=duration,
+            simulators=simulators,
+            outputs=results)
     except AssertionError as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")

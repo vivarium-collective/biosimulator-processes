@@ -1,12 +1,15 @@
 import os
 import logging
+from tempfile import mkdtemp
+
 import libsbml
 from amici import amici, SbmlImporter, import_model_module, Model, runAmiciSimulation
 from amici.sbml_import import get_species_initial
-from tempfile import mkdtemp
 from process_bigraph import Process
+
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+
 
 class AmiciProcess(Process):
     """
@@ -89,10 +92,6 @@ class AmiciProcess(Process):
 
         # get species names
         self.species_objects = self.sbml_model_object.getListOfSpecies()
-        # self.floating_species_list = [s.getId() for s in self.species_objects]
-        # self.floating_species_initial = [
-            # s.getInitialAmount() if self.use_counts else s.getInitialConcentration()
-            # for s in self.species_objects]
         self.floating_species_list = list(self.amici_model_object.getStateNames())
         self.floating_species_initial = list(self.amici_model_object.getInitialStates())
 

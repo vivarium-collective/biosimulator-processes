@@ -100,7 +100,7 @@ class SimulatorComparisonResult(BaseModel):
     duration: int
     num_steps: int
     simulators: List[str]
-    outputs: List[SimulatorProcessResult]
+    outputs: Union[List[SimulatorProcessResult], Dict]
 
 
 class ProcessAttributes(BaseModel):
