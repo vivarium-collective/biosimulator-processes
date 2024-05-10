@@ -1,7 +1,7 @@
 import os
 import logging
 import libsbml
-from amici import amici, SbmlImporter, import_model_module, Model
+from amici import amici, SbmlImporter, import_model_module, Model, runAmiciSimulation
 from amici.sbml_import import get_species_initial
 from tempfile import mkdtemp
 from process_bigraph import Process
@@ -89,10 +89,12 @@ class AmiciProcess(Process):
 
         # get species names
         self.species_objects = self.sbml_model_object.getListOfSpecies()
-        self.floating_species_list = [s.getId() for s in self.species_objects]
-        self.floating_species_initial = [
-            s.getInitialAmount() if self.use_counts else s.getInitialConcentration()
-            for s in self.species_objects]
+        # self.floating_species_list = [s.getId() for s in self.species_objects]
+        # self.floating_species_initial = [
+            # s.getInitialAmount() if self.use_counts else s.getInitialConcentration()
+            # for s in self.species_objects]
+        self.floating_species_list = list(self.amici_model_object.getStateNames())
+        self.floating_species_initial = list(self.amici_model_object.getInitialStates())
 
         # get model parameters
         self.model_parameter_objects = self.sbml_model_object.getListOfParameters()
@@ -156,38 +158,20 @@ class AmiciProcess(Process):
             self.species_context_key: floating_species_type}
 
     def update(self, inputs, interval):
-        # TODO: Complete this.`
-        for cat_id, value in inputs[self.species_context_key].items():
-             print(f'Values for {cat_id} in AmiciProcess: {value}')
-        """COPIED FROM CopasiProcess:
+        # TODO: Complete this.
+        set_values = []
+        for species_id, value in inputs[self.species_context_key].items():
+            print(f'Values for {species_id} in AmiciProcess from inputs: {value}')
+            set_values.append(value)
 
-        for cat_id, value in inputs[self.species_context_key].items():
-            set_type = 'particle_number' if 'counts' in self.species_context_key else 'concentration'
-            species_config = {
-                'name': cat_id,
-                'model': self.copasi_model_object,
-                set_type: value}
-            set_species(**species_config)
+        self.amici_model_object.setInitialStates(set_values)
+        print(f'Input State for {interval}: {self.amici_model_object.getInitialStates()}')
 
-        # run model for "interval" length; we only want the state at the end
-        timecourse = run_time_course(
-            start_time=inputs['time'],
-            duration=interval,
-            update_model=True,
-            model=self.copasi_model_object,
-            method=self.method)
+        result_data = runAmiciSimulation(self.amici_model_object, self.method)
 
-        # extract end values of concentrations from the model and set them in results
+        print(self.amici_model_object.getStateIds())
+
         results = {'time': interval}
-        for mol_id in self.floating_species_list:
-            raw_mol_data = get_species(
-                name=mol_id,
-                exact=True,
-                model=self.copasi_model_object)
-
-            mol_data = raw_mol_data.particle_number[0] if self.use_counts else raw_mol_data.concentration[0]
-            results[self.species_context_key] = {
-                mol_id: float(mol_data)
-            }
-        """
-        return {}
+        results['floating_species_concentrations'] = dict(
+            zip(self.floating_species_list, self.floating_species_initial))
+        return results
