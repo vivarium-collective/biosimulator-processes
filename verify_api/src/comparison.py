@@ -50,6 +50,7 @@ from typing import Dict
 from process_bigraph import Composite
 
 from biosimulator_processes import CORE
+from biosimulator_processes.data_model.compare_data_model import OutputData, SimulatorProcessOutput, ODEComparisonResult
 
 
 def generate_ode_comparison(biomodel_id, dur) -> Dict:
@@ -77,4 +78,24 @@ def generate_ode_comparison(biomodel_id, dur) -> Dict:
     # print(f'comparison results:\n{comparison_results[("verification_data",)]}')
     output = comparison_results[("verification_data"),][0]['comparison_data']
     return {'outputs': output[('emitter',)]}
+
+
+def generate_ode_comparison_result_object(results, duration, n_steps, simulators) -> ODEComparisonResult:
+    process_outputs = []
+    for interval_output in results['outputs']:
+        outputs = []
+        for name, val in interval_output.items():
+            if isinstance(val, dict):
+                for output_name, output_val in val.items():
+                    output_data = OutputData(name=output_name, value=output_val)
+                    outputs.append(output_data)
+            elif isinstance(val, float):
+                output_data = OutputData(name=name, value=val)
+                outputs.append(output_data)
+        process_id = list(interval_output.keys())[0]
+        process_simulator = process_id.split('_')[0]
+        process_output = SimulatorProcessOutput(process_id=process_id, simulator=process_simulator, data=outputs)
+        process_outputs.append(process_output)
+
+    return ODEComparisonResult(duration=duration, num_steps=n_steps, simulators=simulators, outputs=process_outputs)
 

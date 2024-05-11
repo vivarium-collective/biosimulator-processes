@@ -50,6 +50,26 @@ result = ComparisonResults(
 """
 
 
+class OutputData(BaseModel):
+    name: str
+    value: float
+    # mse: Optional[float]
+
+
+class SimulatorProcessOutput(BaseModel):
+    process_id: str
+    simulator: str
+    data: List[OutputData]
+
+
+class ODEComparisonResult(BaseModel):
+    duration: int
+    num_steps: int
+    simulators: List[str]
+    outputs: List[SimulatorProcessOutput]
+
+
+
 class ResultData(BaseModel):
     name: str
     value: float

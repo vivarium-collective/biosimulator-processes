@@ -3,7 +3,22 @@ import os
 
 from process_bigraph import pp
 
-from verify_api.src.comparison import generate_ode_comparison
+from verify_api.src.comparison import generate_ode_comparison, generate_ode_comparison_result_object
+
+
+"""
+ "outputs": [
+        {
+            "copasi_simple_floating_species_concentrations": {
+                "plasminogen": 0.0,
+                "plasmin": 0.0,
+                "single intact chain urokinase-type plasminogen activator": 0.0,
+                "two-chain urokinase-type plasminogen activator": 0.0,
+                "x": 0.0,
+                "x-plasmin": 0.0
+            },
+
+"""
 
 
 def test_step():
@@ -17,8 +32,9 @@ def test_step():
 
     pp(f'The final results:\n{results}')
 
+    comparison_result_obj = generate_ode_comparison_result_object(results, duration, n_steps, simulators)
     with open(results_fp.replace('.txt', '.json'), 'w') as f:
-        json.dump(results, f, indent=4)
+        json.dump(comparison_result_obj.model_dump(), f, indent=4)
 
     return results
 

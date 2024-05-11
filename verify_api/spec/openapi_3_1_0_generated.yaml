@@ -13,17 +13,43 @@ paths:
           content:
             application/json:
               schema: {}
-  /run:
+  /get-process-attributes:
+    get:
+      summary: Get Process Attributes
+      operationId: get-process-attributes
+      parameters:
+      - name: process_name
+        in: query
+        required: true
+        schema:
+          type: string
+          title: 'Name of the process type; i.e: copasi, tellurium, etc.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessAttributes'
+        '404':
+          description: Unable to get attributes for specified simulator process.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /run-ode-comparison:
     post:
       summary: Run A Simulator Comparison
       operationId: run-comparison
       parameters:
-      - name: sbml_model_url
+      - name: biomodel_id
         in: query
-        required: false
+        required: true
         schema:
           type: string
-          title: SBML Model Url
+          title: Biomodel ID of to be run by the simulator composite
       - name: simulators
         in: query
         required: true
@@ -44,19 +70,13 @@ paths:
         schema:
           type: integer
           title: Number of Steps
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Body_run-comparison'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimulatorComparisonResult'
+                $ref: '#/components/schemas/ODEComparisonResult'
         '404':
           description: Unable to run comparison
         '422':
@@ -67,16 +87,6 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
-    Body_run-comparison:
-      properties:
-        sbml_model_file:
-          type: string
-          format: binary
-          title: Upload a File
-      type: object
-      required:
-      - sbml_model_file
-      title: Body_run-comparison
     HTTPValidationError:
       properties:
         detail:
@@ -86,23 +96,84 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
-    SimulatorComparisonResult:
+    ODEComparisonResult:
       properties:
+        duration:
+          type: integer
+          title: Duration
+        num_steps:
+          type: integer
+          title: Num Steps
         simulators:
           items:
             type: string
           type: array
           title: Simulators
+        outputs:
+          items:
+            $ref: '#/components/schemas/SimulatorProcessOutput'
+          type: array
+          title: Outputs
+      type: object
+      required:
+      - duration
+      - num_steps
+      - simulators
+      - outputs
+      title: ODEComparisonResult
+    OutputData:
+      properties:
+        name:
+          type: string
+          title: Name
         value:
-          additionalProperties:
-            type: object
-          type: object
+          type: number
           title: Value
       type: object
       required:
-      - simulators
+      - name
       - value
-      title: SimulatorComparisonResult
+      title: OutputData
+    ProcessAttributes:
+      properties:
+        name:
+          type: string
+          title: Name
+        initial_state:
+          type: object
+          title: Initial State
+        inputs:
+          type: object
+          title: Inputs
+        outputs:
+          type: object
+          title: Outputs
+      type: object
+      required:
+      - name
+      - initial_state
+      - inputs
+      - outputs
+      title: ProcessAttributes
+    SimulatorProcessOutput:
+      properties:
+        process_id:
+          type: string
+          title: Process Id
+        simulator:
+          type: string
+          title: Simulator
+        data:
+          items:
+            $ref: '#/components/schemas/OutputData'
+          type: array
+          title: Data
+      type: object
+      required:
+      - process_id
+      - simulator
+      - data
+      title: SimulatorProcessOutput
     ValidationError:
       properties:
         loc:

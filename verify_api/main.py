@@ -5,8 +5,9 @@ from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, SimulatorComparisonResult
+from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, SimulatorComparisonResult, ODEComparisonResult
 from verify_api.src.composite_doc import create_comparison_document, generate_workflow, run_workflow
+from verify_api.src.comparison import generate_ode_comparison_result_object, generate_ode_comparison
 
 
 # logger for this module
@@ -80,32 +81,22 @@ async def get_process_attributes(
 
 
 @app.post(
-    "/run-comparison",
-    response_model=SimulatorComparisonResult,
+    "/run-ode-comparison",
+    response_model=ODEComparisonResult,
     name="Run a Simulator Comparison",
     operation_id="run-comparison",
     responses={
         404: {"description": "Unable to run comparison"}})
-async def run_comparison(
-        sbml_model_file: UploadFile = File(..., title="Upload a File"),
-        sbml_model_url: str = Query(None, title="SBML Model Url"),
+async def run_ode_comparison(
+        biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
         simulators: List[str] = Query(..., title="Simulators to Compare"),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps")
-) -> SimulatorComparisonResult:
+) -> ODEComparisonResult:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
-    # TODO: enable remote model file for model path with download
     try:
-        model_file_content = await sbml_model_file.read()
-        model_file_location = sbml_model_file.filename
-        document = create_comparison_document(model_file_location, simulators, duration, num_steps)
-        workflow = generate_workflow(document)
-        results = await run_workflow(workflow, duration)
-        return SimulatorComparisonResult(
-            num_steps=num_steps,
-            duration=duration,
-            simulators=simulators,
-            outputs=results)
+        results = generate_ode_comparison(biomodel_id=biomodel_id, dur=duration)
+        return generate_ode_comparison_result_object(results=results, simulators=simulators, duration=duration, n_steps=num_steps)
     except AssertionError as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")
