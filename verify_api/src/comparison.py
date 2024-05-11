@@ -45,13 +45,14 @@ class ComparisonResults(BaseModel):
 
 """
 
+from typing import Dict
 
 from process_bigraph import Composite
 
 from biosimulator_processes import CORE
 
 
-def generate_ode_comparison(biomodel_id, dur) -> dict:
+def generate_ode_comparison(biomodel_id, dur) -> Dict:
     compare = {
         'compare_ode': {
             '_type': 'step',
@@ -73,5 +74,7 @@ def generate_ode_comparison(biomodel_id, dur) -> dict:
     wf = Composite(config={'state': compare}, core=CORE)
     wf.run(1)
     comparison_results = wf.gather_results()
-    return comparison_results
+    # print(f'comparison results:\n{comparison_results[("verification_data",)]}')
+    output = comparison_results[("verification_data"),][0]['comparison_data']
+    return {'outputs': output[('emitter',)]}
 

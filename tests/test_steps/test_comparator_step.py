@@ -11,16 +11,13 @@ def test_step():
     duration = 30
     n_steps = 42
     simulators = ['copasi', 'tellurium']
+
     results = generate_ode_comparison(biomodel_id, duration)
-    pp(f'Results for comparison test:\n{results}')
+    results_fp = os.path.join(os.getcwd(), 'data', 'test_ode_comparator_step_result.txt')
 
-    results['verification_data'] = results[('verification_data',)]
-    results.pop(('verification_data',))
+    pp(f'The final results:\n{results}')
 
-    with open(os.path.join(os.getcwd(), 'comparator_result.txt'), 'w') as fp:
-        fp.write(str(results))
-
-    with open(os.path.join(os.getcwd(), 'comparator_result.json'), 'w') as f:
+    with open(results_fp.replace('.txt', '.json'), 'w') as f:
         json.dump(results, f, indent=4)
 
     return results

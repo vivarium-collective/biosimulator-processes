@@ -24,11 +24,13 @@ class ODEComparatorStep(Step):
         return {}
 
     def outputs(self):
-        return {'comparison': 'tree[any]'}
+        return {'comparison_data': 'tree[any]'}
 
     def update(self, state):
         results = self._run_workflow()
-        return {'comparison_data': results}
+        output = {'comparison_data': results}
+        print(output)
+        return output
 
     def _run_workflow(self):
         directory = mkdtemp()
@@ -90,4 +92,5 @@ class ODEComparatorStep(Step):
 
         comp = Composite(config={'state': manuscript}, core=CORE)
         comp.run(self.duration)
-        return comp.gather_results()[('emitter',)]
+        results = comp.gather_results()
+        return results
