@@ -21,16 +21,17 @@ from verify_api.src.comparison import generate_ode_comparison, generate_ode_comp
 """
 
 
-def test_step():
+def test_step(verbose=False):
     biomodel_id = 'BIOMD0000000630'
     duration = 30
     n_steps = 42
-    simulators = ['copasi', 'tellurium']
+    simulators = ['copasi', 'tellurium', 'amici']
 
     results = generate_ode_comparison(biomodel_id, duration)
     results_fp = os.path.join(os.getcwd(), 'test_outputs', 'test_ode_comparator_step_result.txt')
 
-    pp(f'The final results:\n{results}')
+    if verbose:
+        pp(f'The final results:\n{results}')
 
     comparison_result_obj = generate_ode_comparison_result_object(results, duration, n_steps, simulators)
     with open(results_fp.replace('.txt', '.json'), 'w') as f:
@@ -40,4 +41,4 @@ def test_step():
 
 
 if __name__ == '__main__':
-    test_step()
+    test_step(True)

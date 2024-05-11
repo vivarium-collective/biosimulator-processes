@@ -106,19 +106,24 @@ def generate_ode_comparison_result_object(results, duration, n_steps, simulators
     """
     process_outputs = []
     for interval_output in results['outputs']:
-        outputs = []
-        for name, val in interval_output.items():
-            if isinstance(val, dict):
-                for output_name, output_val in val.items():
+        for process_output_name, process_output_val in interval_output.items():
+            simulator_process_id = process_output_name.split("_f")[0]
+            simulator_id = simulator_process_id.split("_")[0]
+
+            process_output_data = []
+            if isinstance(process_output_val, dict):
+                for output_name, output_val in process_output_val.items():
                     output_data = OutputData(name=output_name, value=output_val)
-                    outputs.append(output_data)
-            elif isinstance(val, float):
-                output_data = OutputData(name=name, value=val)
-                outputs.append(output_data)
-        process_id = list(interval_output.keys())[0]
-        process_simulator = process_id.split('_')[0]
-        process_output = SimulatorProcessOutput(process_id=process_id, simulator=process_simulator, data=outputs)
-        process_outputs.append(process_output)
+                    process_output_data.append(output_data)
+            elif isinstance(process_output_val, float):
+                output_data = OutputData(name=process_output_name, value=process_output_val)
+                process_output_data.append(output_data)
+
+            process_output = SimulatorProcessOutput(
+                process_id=simulator_process_id,
+                simulator=simulator_id,
+                data=process_output_data)
+            process_outputs.append(process_output)
 
     return ODEComparisonResult(duration=duration, num_steps=n_steps, simulators=simulators, outputs=process_outputs)
 

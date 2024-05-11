@@ -3,11 +3,12 @@
     "num_steps": 42,
     "simulators": [
         "copasi",
-        "tellurium"
+        "tellurium",
+        "amici"
     ],
     "outputs": [
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -33,7 +34,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.0
@@ -57,7 +64,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.0
@@ -73,7 +86,13 @@
                 {
                     "name": "species_4",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 0.0
@@ -81,7 +100,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -107,7 +126,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.01
@@ -131,7 +156,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.009841338446759926
@@ -147,7 +178,13 @@
                 {
                     "name": "species_4",
                     "value": 1.9636710780672987e-15
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 3.0
@@ -155,7 +192,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -181,7 +218,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.02
@@ -205,7 +248,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.019370741206347065
@@ -221,7 +270,13 @@
                 {
                     "name": "species_4",
                     "value": 4.144775521499997e-13
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 6.0
@@ -229,7 +284,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -255,7 +310,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.03
@@ -279,7 +340,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.028596342905413796
@@ -295,7 +362,13 @@
                 {
                     "name": "species_4",
                     "value": 9.064979257024028e-12
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 9.0
@@ -303,7 +376,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -329,7 +402,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.04
@@ -353,7 +432,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.03752631341708181
@@ -369,7 +454,13 @@
                 {
                     "name": "species_4",
                     "value": 7.737118488498422e-11
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 12.0
@@ -377,7 +468,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -403,7 +494,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.05
@@ -427,7 +524,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.04616881823934249
@@ -443,7 +546,13 @@
                 {
                     "name": "species_4",
                     "value": 3.9452490810562224e-10
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 15.0
@@ -451,7 +560,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -477,7 +586,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.060000000000000005
@@ -501,7 +616,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.05453198468487382
@@ -517,7 +638,13 @@
                 {
                     "name": "species_4",
                     "value": 1.4529464715886217e-09
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 18.0
@@ -525,7 +652,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -551,7 +678,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.07
@@ -575,7 +708,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.06262387319177992
@@ -591,7 +730,13 @@
                 {
                     "name": "species_4",
                     "value": 4.2762054232334345e-09
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 21.0
@@ -599,7 +744,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -625,7 +770,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.08
@@ -649,7 +800,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.07045245317639325
@@ -665,7 +822,13 @@
                 {
                     "name": "species_4",
                     "value": 1.0684114291167734e-08
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 24.0
@@ -673,7 +836,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -699,7 +862,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.09
@@ -723,7 +892,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.07802558272179654
@@ -739,7 +914,13 @@
                 {
                     "name": "species_4",
                     "value": 2.3561925029847964e-08
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 27.0
@@ -747,7 +928,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -773,7 +954,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.09999999999999999
@@ -797,7 +984,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.0853509919069679
@@ -813,7 +1006,13 @@
                 {
                     "name": "species_4",
                     "value": 4.710120023413839e-08
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 30.0
@@ -821,7 +1020,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -847,7 +1046,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.10999999999999999
@@ -871,7 +1076,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.09243626875891199
@@ -887,7 +1098,13 @@
                 {
                     "name": "species_4",
                     "value": 8.698538721535593e-08
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 33.0
@@ -895,7 +1112,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -921,7 +1138,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.11999999999999998
@@ -945,7 +1168,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.0992888485375883
@@ -961,7 +1190,13 @@
                 {
                     "name": "species_4",
                     "value": 1.504991492189103e-07
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 36.0
@@ -969,7 +1204,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -995,7 +1230,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.12999999999999998
@@ -1019,7 +1260,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.10591600435070338
@@ -1035,7 +1282,13 @@
                 {
                     "name": "species_4",
                     "value": 2.4655794189787547e-07
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 39.0
@@ -1043,7 +1296,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1069,7 +1322,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.13999999999999999
@@ -1093,7 +1352,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.11232484037603455
@@ -1109,7 +1374,13 @@
                 {
                     "name": "species_4",
                     "value": 3.856501017450368e-07
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 42.0
@@ -1117,7 +1388,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1143,7 +1414,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.15
@@ -1167,7 +1444,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.1185222875935492
@@ -1183,7 +1466,13 @@
                 {
                     "name": "species_4",
                     "value": 5.797018678169073e-07
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 45.0
@@ -1191,7 +1480,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1217,7 +1506,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.16
@@ -1241,7 +1536,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.124515097978394
@@ -1257,7 +1558,13 @@
                 {
                     "name": "species_4",
                     "value": 8.418792839080272e-07
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 48.0
@@ -1265,7 +1572,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1291,7 +1598,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.17
@@ -1315,7 +1628,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.13030984438201815
@@ -1331,7 +1650,13 @@
                 {
                     "name": "species_4",
                     "value": 1.1863318711262537e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 51.0
@@ -1339,7 +1664,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1365,7 +1690,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.18000000000000002
@@ -1389,7 +1720,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.13591291880733408
@@ -1405,7 +1742,13 @@
                 {
                     "name": "species_4",
                     "value": 1.6279048130782806e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 54.0
@@ -1413,7 +1756,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1439,7 +1782,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.19000000000000003
@@ -1463,7 +1812,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.14133053076126656
@@ -1479,7 +1834,13 @@
                 {
                     "name": "species_4",
                     "value": 2.181834372283923e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 57.0
@@ -1487,7 +1848,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1513,7 +1874,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.20000000000000004
@@ -1537,7 +1904,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.14656870922035203
@@ -1553,7 +1926,13 @@
                 {
                     "name": "species_4",
                     "value": 2.863433737883515e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 60.0
@@ -1561,7 +1940,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1587,7 +1966,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.21000000000000005
@@ -1611,7 +1996,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.15163330373022232
@@ -1627,7 +2018,13 @@
                 {
                     "name": "species_4",
                     "value": 3.6877904985946876e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 63.0
@@ -1635,7 +2032,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1661,7 +2058,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.22000000000000006
@@ -1685,7 +2088,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.1565299857453634
@@ -1701,7 +2110,13 @@
                 {
                     "name": "species_4",
                     "value": 4.669480018733145e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 66.0
@@ -1709,7 +2124,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1735,7 +2150,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.23000000000000007
@@ -1759,7 +2180,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.16126425206820036
@@ -1775,7 +2202,13 @@
                 {
                     "name": "species_4",
                     "value": 5.822314786305203e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 69.0
@@ -1783,7 +2216,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1809,7 +2242,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.24000000000000007
@@ -1833,7 +2272,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.16584142720018882
@@ -1849,7 +2294,13 @@
                 {
                     "name": "species_4",
                     "value": 7.159120266407245e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 72.0
@@ -1857,7 +2308,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1883,7 +2334,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.25000000000000006
@@ -1907,7 +2364,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.17026669075238648
@@ -1923,7 +2386,13 @@
                 {
                     "name": "species_4",
                     "value": 8.691607483997918e-06
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 75.0
@@ -1931,7 +2400,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -1957,7 +2426,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.26000000000000006
@@ -1981,7 +2456,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.17454501798183603
@@ -1997,7 +2478,13 @@
                 {
                     "name": "species_4",
                     "value": 1.0430072993800591e-05
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 78.0
@@ -2005,7 +2492,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -2031,7 +2518,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.2700000000000001
@@ -2055,7 +2548,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.17868123328029295
@@ -2071,7 +2570,13 @@
                 {
                     "name": "species_4",
                     "value": 1.2383430184618205e-05
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 81.0
@@ -2079,7 +2584,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -2105,7 +2610,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.2800000000000001
@@ -2129,7 +2640,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.1826799996779901
@@ -2145,7 +2662,13 @@
                 {
                     "name": "species_4",
                     "value": 1.4559108037785673e-05
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 84.0
@@ -2153,7 +2676,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -2179,7 +2702,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.2900000000000001
@@ -2203,7 +2732,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.18654583515282042
@@ -2219,7 +2754,13 @@
                 {
                     "name": "species_4",
                     "value": 1.6963035848722523e-05
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 87.0
@@ -2227,7 +2768,7 @@
             ]
         },
         {
-            "process_id": "copasi_simple_floating_species_concentrations",
+            "process_id": "copasi_simple",
             "simulator": "copasi",
             "data": [
                 {
@@ -2253,7 +2794,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "amici_simple",
+            "simulator": "amici",
+            "data": [
                 {
                     "name": "plasminogen",
                     "value": 0.3000000000000001
@@ -2277,7 +2824,13 @@
                 {
                     "name": "x-plasmin",
                     "value": 0.0
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "tellurium_simple",
+            "simulator": "tellurium",
+            "data": [
                 {
                     "name": "species_1",
                     "value": 0.19028311113729995
@@ -2293,7 +2846,13 @@
                 {
                     "name": "species_4",
                     "value": 1.9599628084815148e-05
-                },
+                }
+            ]
+        },
+        {
+            "process_id": "time",
+            "simulator": "time",
+            "data": [
                 {
                     "name": "time",
                     "value": 90.0
