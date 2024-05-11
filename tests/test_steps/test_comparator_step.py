@@ -28,7 +28,7 @@ def test_step():
     simulators = ['copasi', 'tellurium']
 
     results = generate_ode_comparison(biomodel_id, duration)
-    results_fp = os.path.join(os.getcwd(), 'data', 'test_ode_comparator_step_result.txt')
+    results_fp = os.path.join(os.getcwd(), 'test_outputs', 'test_ode_comparator_step_result.txt')
 
     pp(f'The final results:\n{results}')
 
