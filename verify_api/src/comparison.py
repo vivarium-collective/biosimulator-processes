@@ -53,7 +53,17 @@ from biosimulator_processes import CORE
 from biosimulator_processes.data_model.compare_data_model import OutputData, SimulatorProcessOutput, ODEComparisonResult
 
 
-def generate_ode_comparison(biomodel_id, dur) -> Dict:
+def generate_ode_comparison(biomodel_id: str, dur: int) -> Dict:
+    """Run the `compare_ode_step` composite and return data which encapsulates another composite
+        workflow specified by dir.
+
+        Args:
+            biomodel_id:`str`: A Valid Biomodel ID.
+            dur:`int`: duration of the internal composite simulation.
+
+        Returns:
+            `Dict` of simulation comparison results like `{'outputs': {...etc}}`
+    """
     compare = {
         'compare_ode': {
             '_type': 'step',
@@ -75,12 +85,25 @@ def generate_ode_comparison(biomodel_id, dur) -> Dict:
     wf = Composite(config={'state': compare}, core=CORE)
     wf.run(1)
     comparison_results = wf.gather_results()
-    # print(f'comparison results:\n{comparison_results[("verification_data",)]}')
     output = comparison_results[("verification_data"),][0]['comparison_data']
+
     return {'outputs': output[('emitter',)]}
 
 
 def generate_ode_comparison_result_object(results, duration, n_steps, simulators) -> ODEComparisonResult:
+    """Factory for `ODEComparisonResult`.
+
+        Args:
+            results:`Dict`: results of `generate_ode_comparison()`.
+            duration:`int`: duration of the internal composite simulation.
+            n_steps:`int`: number of steps of internal composite simulation.
+            simulators:`List[str]`: simulator names used in comparison.
+
+        Returns:
+            `ODEComparisonResult`: object representing comparison result.
+                Please note: this object is polymorphic with pydantic `BaseClass`, and thus can
+                be easily serialized with the `.model_dump()` method.
+    """
     process_outputs = []
     for interval_output in results['outputs']:
         outputs = []
