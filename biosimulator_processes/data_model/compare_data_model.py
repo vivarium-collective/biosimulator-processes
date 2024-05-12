@@ -67,6 +67,7 @@ class ODEComparisonResult(BaseModel):
     num_steps: int
     simulators: List[str]
     outputs: List[SimulatorProcessOutput]
+    timestamp: str
 
 
 class ResultData(BaseModel):

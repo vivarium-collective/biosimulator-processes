@@ -45,7 +45,7 @@ class ComparisonResults(BaseModel):
 
 """
 
-from typing import Dict
+from typing import Dict, List
 
 from process_bigraph import Composite
 
@@ -90,7 +90,12 @@ def generate_ode_comparison(biomodel_id: str, dur: int) -> Dict:
     return {'outputs': output[('emitter',)]}
 
 
-def generate_ode_comparison_result_object(results, duration, n_steps, simulators) -> ODEComparisonResult:
+def generate_ode_comparison_result_object(
+        results: Dict,
+        duration: int,
+        n_steps: int,
+        simulators: List[str],
+        timestamp: str) -> ODEComparisonResult:
     """Factory for `ODEComparisonResult`.
 
         Args:
@@ -98,6 +103,7 @@ def generate_ode_comparison_result_object(results, duration, n_steps, simulators
             duration:`int`: duration of the internal composite simulation.
             n_steps:`int`: number of steps of internal composite simulation.
             simulators:`List[str]`: simulator names used in comparison.
+            timestamp:`str`: timestamp of simulation run...use date and time
 
         Returns:
             `ODEComparisonResult`: object representing comparison result.
@@ -125,10 +131,15 @@ def generate_ode_comparison_result_object(results, duration, n_steps, simulators
                 data=process_output_data)
             process_outputs.append(process_output)
 
-    return ODEComparisonResult(duration=duration, num_steps=n_steps, simulators=simulators, outputs=process_outputs)
+    return ODEComparisonResult(
+        duration=duration,
+        num_steps=n_steps,
+        simulators=simulators,
+        outputs=process_outputs,
+        timestamp=timestamp)
 
 
-def ode_comparison(biomodel_id: str, duration: int, n_steps: int) -> ODEComparisonResult:
+def ode_comparison(biomodel_id: str, duration: int, n_steps: int, timestamp: str) -> ODEComparisonResult:
     simulators = ['copasi', 'tellurium', 'amici']
     results_dict = generate_ode_comparison(biomodel_id, duration)
-    return generate_ode_comparison_result_object(results_dict, duration, n_steps, simulators)
+    return generate_ode_comparison_result_object(results_dict, duration, n_steps, simulators, timestamp)
