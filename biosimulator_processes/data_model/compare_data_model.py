@@ -53,6 +53,7 @@ result = ComparisonResults(
 class OutputData(BaseModel):
     name: str
     value: float
+    time: float
     # mse: Optional[float]
 
 
