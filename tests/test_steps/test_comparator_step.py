@@ -27,18 +27,29 @@ def test_step(verbose=False):
     n_steps = 42
     simulators = ['copasi', 'tellurium', 'amici']
 
-    results = generate_ode_comparison(biomodel_id, duration)
+    results_dict = generate_ode_comparison(biomodel_id, duration)
     results_fp = os.path.join(os.getcwd(), 'test_outputs', 'test_ode_comparator_step_result.txt')
 
     if verbose:
-        pp(f'The final results:\n{results}')
+        pp(f'The final results:\n{results_dict}')
 
-    comparison_result_obj = generate_ode_comparison_result_object(results, duration, n_steps, simulators)
+    comparison_result_obj = generate_ode_comparison_result_object(results_dict, duration, n_steps, simulators)
     with open(results_fp.replace('.txt', '.json'), 'w') as f:
         json.dump(comparison_result_obj.model_dump(), f, indent=4)
 
-    return results
+    return comparison_result_obj
+
+
+from biosimulator_processes.data_model.compare_data_model import ODEComparisonResult
+
+
+def _ode_comparison(biomodel_id: str, duration: int, n_steps: int) -> ODEComparisonResult:
+    simulators = ['copasi', 'tellurium', 'amici']
+    results_dict = generate_ode_comparison(biomodel_id, duration)
+    return generate_ode_comparison_result_object(results_dict, duration, n_steps, simulators)
+
 
 
 if __name__ == '__main__':
-    test_step(True)
+    obj = test_step(True)
+    print(obj)

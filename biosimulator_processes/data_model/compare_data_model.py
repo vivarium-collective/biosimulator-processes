@@ -69,7 +69,6 @@ class ODEComparisonResult(BaseModel):
     outputs: List[SimulatorProcessOutput]
 
 
-
 class ResultData(BaseModel):
     name: str
     value: float

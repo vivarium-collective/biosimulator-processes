@@ -127,3 +127,8 @@ def generate_ode_comparison_result_object(results, duration, n_steps, simulators
 
     return ODEComparisonResult(duration=duration, num_steps=n_steps, simulators=simulators, outputs=process_outputs)
 
+
+def ode_comparison(biomodel_id: str, duration: int, n_steps: int) -> ODEComparisonResult:
+    simulators = ['copasi', 'tellurium', 'amici']
+    results_dict = generate_ode_comparison(biomodel_id, duration)
+    return generate_ode_comparison_result_object(results_dict, duration, n_steps, simulators)

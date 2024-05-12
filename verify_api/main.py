@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, SimulatorComparisonResult, ODEComparisonResult
 from verify_api.src.composite_doc import create_comparison_document, generate_workflow, run_workflow
-from verify_api.src.comparison import generate_ode_comparison_result_object, generate_ode_comparison
+from verify_api.src.comparison import generate_ode_comparison_result_object, generate_ode_comparison, ode_comparison
 
 
 # logger for this module
@@ -89,14 +89,13 @@ async def get_process_attributes(
         404: {"description": "Unable to run comparison"}})
 async def run_ode_comparison(
         biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
-        simulators: List[str] = Query(..., title="Simulators to Compare"),
+        simulators: List[str] = Query(['tellurium', 'copasi', 'amici'], title="Simulators to Compare"),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps")
 ) -> ODEComparisonResult:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:
-        results = generate_ode_comparison(biomodel_id=biomodel_id, dur=duration)
-        return generate_ode_comparison_result_object(results=results, simulators=simulators, duration=duration, n_steps=num_steps)
+        return ode_comparison(biomodel_id=biomodel_id, duration=duration, n_steps=num_steps)
     except AssertionError as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")
