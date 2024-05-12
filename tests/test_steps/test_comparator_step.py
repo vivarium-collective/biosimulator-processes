@@ -40,16 +40,6 @@ def test_step(verbose=False):
     return comparison_result_obj
 
 
-from biosimulator_processes.data_model.compare_data_model import ODEComparisonResult
-
-
-def _ode_comparison(biomodel_id: str, duration: int, n_steps: int) -> ODEComparisonResult:
-    simulators = ['copasi', 'tellurium', 'amici']
-    results_dict = generate_ode_comparison(biomodel_id, duration)
-    return generate_ode_comparison_result_object(results_dict, duration, n_steps, simulators)
-
-
-
 if __name__ == '__main__':
     obj = test_step(True)
     print(obj)

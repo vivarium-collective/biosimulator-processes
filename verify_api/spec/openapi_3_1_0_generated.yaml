@@ -118,12 +118,16 @@ components:
             $ref: '#/components/schemas/SimulatorProcessOutput'
           type: array
           title: Outputs
+        timestamp:
+          type: string
+          title: Timestamp
       type: object
       required:
       - duration
       - num_steps
       - simulators
       - outputs
+      - timestamp
       title: ODEComparisonResult
     OutputData:
       properties:
