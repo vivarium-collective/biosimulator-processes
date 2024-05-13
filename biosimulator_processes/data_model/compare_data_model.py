@@ -17,7 +17,6 @@ import numpy as np
 from pydantic import Field, field_validator
 
 from biosimulator_processes.utils import prepare_single_ode_process_document
-from biosimulator_processes.steps.comparator_step import calculate_mse
 from biosimulator_processes.data_model import _BaseModel as BaseModel
 
 
@@ -52,8 +51,18 @@ result = ComparisonResults(
 """
 
 
-TODO: Transpose data frame and make col vectors for each param, where the index is param name,
-    and cols are simulator id.
+# TODO: Transpose data frame and make col vectors for each param, where the index is param name,
+    # and cols are simulator id.
+
+
+class ParamIntervalOutputData(BaseModel):
+    param_name: str
+    value: float
+
+
+class IntervalOutput(BaseModel):
+    interval_id: float
+    data: Union[Dict[str, float], List[ParamIntervalOutputData]]
 
 
 class ParameterScore(BaseModel):

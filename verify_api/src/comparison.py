@@ -50,7 +50,7 @@ from typing import Dict, List
 from process_bigraph import Composite
 
 from biosimulator_processes import CORE
-from biosimulator_processes.data_model.compare_data_model import OutputData, SimulatorProcessOutput, ODEComparisonResult, ProcessComparisonResult
+from biosimulator_processes.data_model.compare_data_model import IntervalOutputData, SimulatorProcessOutput, ODEComparisonResult, ProcessComparisonResult
 
 
 def generate_ode_comparison(biomodel_id: str, dur: int) -> Dict:

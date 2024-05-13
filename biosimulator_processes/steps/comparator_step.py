@@ -83,11 +83,6 @@ class SimulatorComparatorStep(Step):
         output = {'comparison_data': results}
         return output
 
-    @abstractmethod
-    def _run_workflow(self):
-        # TODO: Implement this.
-        pass
-
 
 class ODEComparatorStep(SimulatorComparatorStep):
     """config_schema = {'biomodel_id': 'string', 'duration': 'integer'}"""
@@ -97,33 +92,19 @@ class ODEComparatorStep(SimulatorComparatorStep):
         self.biomodel_id = self.config['biomodel_id']
         self.duration = self.config['duration']
 
-    # TODO: Do we need this?
-    # def inputs(self):
-    #     return {}
-
-    # def outputs(self):
-    #     return {'comparison_data': 'tree[any]'}
-
-    # def update(self, state):
-    #     results = self._run_workflow()
-    #     output = {'comparison_data': results}
-    #     return output
-
-    def _run_workflow(self):
         directory = mkdtemp()
         model_fp = fetch_sbml_file(self.biomodel_id, save_dir=directory)
-
-        manuscript = {
+        self.document = {
             'copasi_simple': {
                 '_type': 'process',
-                  'address': 'local:copasi',
-                  'config': {'model': {'model_source': model_fp}},
-                  'inputs': {'floating_species_concentrations': ['copasi_simple_floating_species_concentrations_store'],
-                   'model_parameters': ['model_parameters_store'],
-                   'time': ['time_store'],
-                   'reactions': ['reactions_store']},
-                  'outputs': {'floating_species_concentrations': ['copasi_simple_floating_species_concentrations_store'],
-                   'time': ['time_store']}
+                'address': 'local:copasi',
+                'config': {'model': {'model_source': model_fp}},
+                'inputs': {'floating_species_concentrations': ['copasi_simple_floating_species_concentrations_store'],
+                           'model_parameters': ['model_parameters_store'],
+                           'time': ['time_store'],
+                           'reactions': ['reactions_store']},
+                'outputs': {'floating_species_concentrations': ['copasi_simple_floating_species_concentrations_store'],
+                            'time': ['time_store']}
             },
             'amici_simple': {
                 '_type': 'process',
@@ -139,37 +120,53 @@ class ODEComparatorStep(SimulatorComparatorStep):
                     'time': ['time_store']}
             },
             'emitter': {
-                 '_type': 'step',
-                  'address': 'local:ram-emitter',
-                  'config': {
-                      'emit': {
-                          'copasi_simple_floating_species_concentrations': 'tree[float]',
-                          'amici_simple_floating_species_concentrations': 'tree[float]',
-                          'tellurium_simple_floating_species_concentrations': 'tree[float]',
-                          'time': 'float'
-                      }
-                  },
-                  'inputs': {
-                      'copasi_simple_floating_species_concentrations': ['copasi_simple_floating_species_concentrations_store'],
-                      'amici_simple_floating_species_concentrations': ['amici_simple_floating_species_concentrations_store'],
-                      'tellurium_simple_floating_species_concentrations': ['tellurium_simple_floating_species_concentrations_store'],
-                      'time': ['time_store']
-                  }
+                '_type': 'step',
+                'address': 'local:ram-emitter',
+                'config': {
+                    'emit': {
+                        'copasi_simple_floating_species_concentrations': 'tree[float]',
+                        'amici_simple_floating_species_concentrations': 'tree[float]',
+                        'tellurium_simple_floating_species_concentrations': 'tree[float]',
+                        'time': 'float'
+                    }
+                },
+                'inputs': {
+                    'copasi_simple_floating_species_concentrations': ['copasi_simple_floating_species_concentrations_store'],
+                    'amici_simple_floating_species_concentrations': ['amici_simple_floating_species_concentrations_store'],
+                    'tellurium_simple_floating_species_concentrations': ['tellurium_simple_floating_species_concentrations_store'],
+                    'time': ['time_store']
+                }
             },
             'tellurium_simple': {
                 '_type': 'process',
-                  'address': 'local:tellurium',
-                  'config': {'model': {'model_source': model_fp}},
-                  'inputs': {'floating_species_concentrations': ['tellurium_simple_floating_species_concentrations_store'],
-                   'model_parameters': ['model_parameters_store'],
-                   'time': ['time_store'],
-                   'reactions': ['reactions_store']},
-                  'outputs': {'floating_species_concentrations': ['tellurium_simple_floating_species_concentrations_store'],
-                   'time': ['time_store']}}}
+                'address': 'local:tellurium',
+                'config': {'model': {'model_source': model_fp}},
+                'inputs': {'floating_species_concentrations': ['tellurium_simple_floating_species_concentrations_store'],
+                           'model_parameters': ['model_parameters_store'],
+                           'time': ['time_store'],
+                           'reactions': ['reactions_store']},
+                'outputs': {'floating_species_concentrations': ['tellurium_simple_floating_species_concentrations_store'],
+                            'time': ['time_store']}}}
 
-        comp = Composite(config={'state': manuscript}, core=CORE)
+    # TODO: Do we need this?
+    # def inputs(self):
+    #     return {}
+
+    # def outputs(self):
+    #     return {'comparison_data': 'tree[any]'}
+
+    def update(self, state):
+        comp = self._generate_composition(self.document)
+        results = self._run_composition(comp)
+        output = {'comparison_data': results}
+        return output
+
+    @staticmethod
+    def _generate_composition(document: Dict) -> Composite:
+        return Composite(config={'state': document}, core=CORE)
+
+    def _run_composition(self, comp: Composite) -> Dict:
         comp.run(self.duration)
-        results = comp.gather_results()
-        return results
+        return comp.gather_results()
 
 

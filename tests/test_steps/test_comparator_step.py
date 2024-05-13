@@ -3,6 +3,7 @@ import os
 
 from process_bigraph import pp
 
+from biosimulator_processes.data_model import BaseModel
 from verify_api.src.comparison import generate_ode_comparison, generate_ode_comparison_result_object
 
 
@@ -21,7 +22,46 @@ from verify_api.src.comparison import generate_ode_comparison, generate_ode_comp
 """
 
 
-def test_step(verbose=False):
+from typing import *
+
+
+class ODEIntervalResult(BaseModel):
+    interval_id: float
+    copasi_floating_species_concentrations: Dict[str, float]
+    tellurium_floating_species_concentrations: Dict[str, float]
+    amici_floating_species_concentrations: Dict[str, float]
+    time: float
+
+
+def test_step():
+    biomodel_id = 'BIOMD0000000630'
+    duration = 30
+    n_steps = 42
+    simulators = ['copasi', 'tellurium', 'amici']
+
+    results_dict = generate_ode_comparison(biomodel_id, duration)
+    results_fp = os.path.join(os.getcwd(), 'test_outputs', 'test_ode_comparator_step_result.txt')
+
+    interval_results = []
+    simulator_names = ['copasi', 'tellurium', 'amici']
+    for global_time_index, interval_result_data in enumerate(results_dict['outputs']):
+        print(global_time_index)
+        print(interval_result_data, interval_result_data.keys())
+
+        interval_config = {}
+        for k, v in interval_result_data.items():
+            if 'species' in k:
+                interval_config['copasi_floating_species_concentrations'] = v
+
+        interval_result = ODEIntervalResult(
+            interval_id=float(global_time_index),
+            copasi_floating_species_concentrations=interval_result_data['copasi_floating_species_concentrations'],
+            amici_floating_species_concentrations=interval_result_data['amici_floating_species_concentrations'],
+            tellurium_floating_species_concentrations=interval_result_data['tellurium_floating_species_concentrations'],
+        )
+
+
+def test_step_object(verbose=False):
     biomodel_id = 'BIOMD0000000630'
     duration = 30
     n_steps = 42
@@ -41,5 +81,4 @@ def test_step(verbose=False):
 
 
 if __name__ == '__main__':
-    obj = test_step(True)
-    print(obj)
+    test_step()
