@@ -39,10 +39,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /run-ode-comparison:
+  /run-simulator-composite-comparison:
     post:
-      summary: Run A Simulator Comparison
-      operationId: run-comparison
+      summary: Generate A Comparison Of Simulator Process Outputs
+      operationId: run-process-comparison
       parameters:
       - name: biomodel_id
         in: query
@@ -52,16 +52,50 @@ paths:
           title: Biomodel ID of to be run by the simulator composite
       - name: simulators
         in: query
-        required: false
+        required: true
         schema:
           type: array
           items:
             type: string
-          title: Simulators to Compare
-          default:
-          - tellurium
-          - copasi
-          - amici
+          title: Simulators to compare within a composition
+      - name: duration
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Duration
+      - name: num_steps
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Number of Steps
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessComparisonResult'
+        '404':
+          description: Unable to run comparison
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /run-ode-composite-comparison:
+    post:
+      summary: Run A Simulator Comparison
+      operationId: run-ode-comparison
+      parameters:
+      - name: biomodel_id
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Biomodel ID of to be run by the simulator composite
       - name: duration
         in: query
         required: true
@@ -113,6 +147,10 @@ components:
             type: string
           type: array
           title: Simulators
+          default:
+          - tellurium
+          - copasi
+          - amici
         outputs:
           items:
             $ref: '#/components/schemas/SimulatorProcessOutput'
@@ -125,7 +163,6 @@ components:
       required:
       - duration
       - num_steps
-      - simulators
       - outputs
       - timestamp
       title: ODEComparisonResult
@@ -137,10 +174,14 @@ components:
         value:
           type: number
           title: Value
+        time_id:
+          type: number
+          title: Time Id
       type: object
       required:
       - name
       - value
+      - time_id
       title: OutputData
     ProcessAttributes:
       properties:
@@ -163,6 +204,55 @@ components:
       - inputs
       - outputs
       title: ProcessAttributes
+    ProcessComparisonResult:
+      properties:
+        duration:
+          type: integer
+          title: Duration
+        num_steps:
+          type: integer
+          title: Num Steps
+        simulators:
+          items:
+            type: string
+          type: array
+          title: Simulators
+        outputs:
+          items:
+            $ref: '#/components/schemas/SimulatorProcessOutput'
+          type: array
+          title: Outputs
+        timestamp:
+          type: string
+          title: Timestamp
+      type: object
+      required:
+      - duration
+      - num_steps
+      - simulators
+      - outputs
+      - timestamp
+      title: ProcessComparisonResult
+      description: Generic class inherited for all process comparisons.
+    RMSE:
+      properties:
+        process_id:
+          type: string
+          title: Process Id
+        param_id:
+          type: string
+          title: Param Id
+        value:
+          anyOf:
+          - type: number
+          - type: integer
+          title: Value
+      type: object
+      required:
+      - process_id
+      - param_id
+      - value
+      title: RMSE
     SimulatorProcessOutput:
       properties:
         process_id:
@@ -176,11 +266,14 @@ components:
             $ref: '#/components/schemas/OutputData'
           type: array
           title: Data
+        root_mean_squared_error:
+          $ref: '#/components/schemas/RMSE'
       type: object
       required:
       - process_id
       - simulator
       - data
+      - root_mean_squared_error
       title: SimulatorProcessOutput
     ValidationError:
       properties:

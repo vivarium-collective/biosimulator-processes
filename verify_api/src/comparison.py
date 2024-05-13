@@ -50,7 +50,7 @@ from typing import Dict, List
 from process_bigraph import Composite
 
 from biosimulator_processes import CORE
-from biosimulator_processes.data_model.compare_data_model import OutputData, SimulatorProcessOutput, ODEComparisonResult
+from biosimulator_processes.data_model.compare_data_model import OutputData, SimulatorProcessOutput, ODEComparisonResult, ProcessComparisonResult
 
 
 def generate_ode_comparison(biomodel_id: str, dur: int) -> Dict:
@@ -119,16 +119,12 @@ def generate_ode_comparison_result_object(
             process_output_data = []
             if isinstance(process_output_val, dict):
                 for output_name, output_val in process_output_val.items():
-                    for output in results['outputs']:
-                        if 'time' in output.keys():
-                            output_data = OutputData(
-                                name=output_name,
-                                value=output_val,
-                                time=output['time'])
-                            process_output_data.append(output_data)
-            # elif isinstance(process_output_val, float) and 'time' in process_output_name:
-            #     output_data = OutputData(name=process_output_name, value=process_output_val)
-            #     process_output_data.append(output_data)
+                    output_
+                    output_data = OutputData(
+                        name=output_name,
+                        value=output_val,
+                        time_id=output['time'])
+                    process_output_data.append(output_data)
 
             process_output = SimulatorProcessOutput(
                 process_id=simulator_process_id,
@@ -142,6 +138,11 @@ def generate_ode_comparison_result_object(
         simulators=simulators,
         outputs=process_outputs,
         timestamp=timestamp)
+
+
+def process_comparison(biomodel_id: str, simulators: List[str], duration: int, n_steps: int, timestamp: str) -> ProcessComparisonResult:
+    # TODO: Implement this.
+    pass
 
 
 def ode_comparison(biomodel_id: str, duration: int, n_steps: int, timestamp: str) -> ODEComparisonResult:

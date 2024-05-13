@@ -4,8 +4,8 @@ from typing import *
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, SimulatorComparisonResult, ODEComparisonResult
-from verify_api.src.comparison import ode_comparison
+from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, ProcessComparisonResult, ODEComparisonResult
+from verify_api.src.comparison import ode_comparison, process_comparison
 
 
 # logger for this module
@@ -79,15 +79,39 @@ async def get_process_attributes(
 
 
 @app.post(
-    "/run-ode-comparison",
+    "/run-simulator-composite-comparison",
+    response_model=ProcessComparisonResult,
+    name="Generate a Comparison of Simulator Process outputs",
+    operation_id="run-process-comparison",
+    responses={
+        404: {"description": "Unable to run comparison"}})
+def run_process_comparison(
+        biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
+        simulators: List[str] = Query(..., title="Simulators to compare within a composition"),
+        duration: int = Query(..., title="Duration"),
+        num_steps: int = Query(..., title="Number of Steps")
+) -> Union[ProcessComparisonResult, HTTPException]:
+    # TODO: Finish this.
+    # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
+    try:
+        timestamp = str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-')
+        result = process_comparison(biomodel_id=biomodel_id, duration=duration, n_steps=num_steps, timestamp=timestamp)
+        raise HTTPException(status_code=404, detail="This feature is not yet implemented.")
+    except HTTPException as e:
+        # logger.warning(f'failed to run simulator comparison composite: {str(e)}')
+        # raise HTTPException(status_code=404, detail="Parameters not valid.")
+        return e
+
+
+@app.post(
+    "/run-ode-composite-comparison",
     response_model=ODEComparisonResult,
     name="Run a Simulator Comparison",
-    operation_id="run-comparison",
+    operation_id="run-ode-comparison",
     responses={
         404: {"description": "Unable to run comparison"}})
 def run_ode_comparison(
         biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
-        simulators: List[str] = Query(['tellurium', 'copasi', 'amici'], title="Simulators to Compare"),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps")
 ) -> ODEComparisonResult:

@@ -13,9 +13,11 @@ from typing import *
 from abc import ABC
 from dataclasses import dataclass
 
+import numpy as np
 from pydantic import Field, field_validator
 
 from biosimulator_processes.utils import prepare_single_ode_process_document
+from biosimulator_processes.steps.comparator_step import calculate_mse
 from biosimulator_processes.data_model import _BaseModel as BaseModel
 
 
@@ -50,20 +52,79 @@ result = ComparisonResults(
 """
 
 
-class OutputData(BaseModel):
-    name: str
+class ParameterScore(BaseModel):
+    """Base class for parameter scores in-general."""
+    param_name: str
     value: float
-    time: float
-    # mse: Optional[float]
+
+
+class ParameterMSE(ParameterScore):
+    """Attribute of Process Parameter RMSE"""
+    param_name: str
+    value: float = Field(...)  # TODO: Ensure field validation/setting for MSE-specific calculation.
+    mean: float
+    process_id: str
+
+    @classmethod
+    @field_validator('value')
+    def set_value(cls, v):
+        # TODO: Finish this.
+        return v
+
+
+class ProcessParameterRMSE(BaseModel):
+    """Attribute of Process Fitness Score"""
+    process_id: str
+    param_id: str  # mostly species names or something like that
+
+    def __init__(self, process_id, param_id, mse_values: List[float]):
+        self.process_id = process_id
+        self.param_id = param_id
+        self.value = self._set_value(mse_values)
+
+    def _set_value(self, values: List[float]):
+        """Calculate the RMSE for a given parameter and trajectory values"""
+        all_mse_values = []
+
+        for time_point_data in values:
+            mse_values = calculate_mse(time_point_data)
+            all_mse_values.extend(mse_values)
+
+        # Calculate the mean of all MSE values
+        mean_mse = np.mean(all_mse_values)
+
+        # Calculate RMSE
+        rmse = np.sqrt(mean_mse)
+
+        return rmse
+
+
+
+class ProcessFitnessScore(BaseModel):
+    """Attribute of Simulator Process Output Based on the list of interval results"""
+    process_id: str
+    error: float  # the error by which to bias the rmse calculation
+    rmse_values: List[ProcessParameterRMSE]  # indexed by parameter name over whole simulation
+
+
+class IntervalOutputData(BaseModel):
+    """Attribute of Simulator Process Output"""
+    param_name: str  # data name
+    value: float
+    time_id: float  # index for composite run inference
+    mse: ParameterMSE
 
 
 class SimulatorProcessOutput(BaseModel):
+    """Attribute of Process Comparison Result"""
     process_id: str
     simulator: str
-    data: List[OutputData]
+    data: List[IntervalOutputData]
+    fitness_score: ProcessFitnessScore
 
 
-class ODEComparisonResult(BaseModel):
+class ProcessComparisonResult(BaseModel):
+    """Generic class inherited for all process comparisons."""
     duration: int
     num_steps: int
     simulators: List[str]
@@ -71,64 +132,19 @@ class ODEComparisonResult(BaseModel):
     timestamp: str
 
 
-class ResultData(BaseModel):
-    name: str
-    value: float
-    target: float
-    mse: float = Field(...)
-
-    def __init__(self, name: str, value: float, target: float):
-        self.name = name
-        self.value = value
-        self.target = target
-        self.mse = self._set_mse()
-
-    def _set_mse(self):
-        return (self.target - self.value) ** 2
-
-
-class IntervalResult(BaseModel):
-    interval_id: float  # should be Composite.state['global_time']
-    data: List[ResultData]
-
-
-class MSEValues(BaseModel):
-    param_name: str
-    value: float
-
-
-class RMSE(BaseModel):
-    process_id: str
-    param_id: str  # mostly species names or something like that
-    value: Union[float, int]
-    _mse_values: List[MSEValues]  # set internally
-
-
-# Based on the list of interval results
-class ODEProcessFitnessScore(BaseModel):
-    process_id: str
-    rmse_values: List[RMSE]
-
-
-class SimulatorProcessResult(BaseModel):
-    simulator: str
-    process_id: str
-    data: List[IntervalResult]
-    fitness_score: ODEProcessFitnessScore
-
-
-class SimulatorComparisonResult(BaseModel):
+class ODEComparisonResult(ProcessComparisonResult):
     duration: int
     num_steps: int
-    simulators: List[str]
-    outputs: Union[List[SimulatorProcessResult], Dict]
+    simulators: List[str] = ['tellurium', 'copasi', 'amici']
+    outputs: List[SimulatorProcessOutput]
+    timestamp: str
 
 
 class ProcessAttributes(BaseModel):
     name: str
     initial_state: Dict[str, Any]
-    inputs: Dict[str, Any]
-    outputs: Dict[str, Any]
+    input_schema: Dict[str, Any]
+    output_schema: Dict[str, Any]
 
 
 class CompositeRunError(BaseModel):
