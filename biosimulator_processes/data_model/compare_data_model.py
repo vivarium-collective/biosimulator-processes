@@ -52,6 +52,10 @@ result = ComparisonResults(
 """
 
 
+TODO: Transpose data frame and make col vectors for each param, where the index is param name,
+    and cols are simulator id.
+
+
 class ParameterScore(BaseModel):
     """Base class for parameter scores in-general."""
     param_name: str
@@ -76,28 +80,7 @@ class ProcessParameterRMSE(BaseModel):
     """Attribute of Process Fitness Score"""
     process_id: str
     param_id: str  # mostly species names or something like that
-
-    def __init__(self, process_id, param_id, mse_values: List[float]):
-        self.process_id = process_id
-        self.param_id = param_id
-        self.value = self._set_value(mse_values)
-
-    def _set_value(self, values: List[float]):
-        """Calculate the RMSE for a given parameter and trajectory values"""
-        all_mse_values = []
-
-        for time_point_data in values:
-            mse_values = calculate_mse(time_point_data)
-            all_mse_values.extend(mse_values)
-
-        # Calculate the mean of all MSE values
-        mean_mse = np.mean(all_mse_values)
-
-        # Calculate RMSE
-        rmse = np.sqrt(mean_mse)
-
-        return rmse
-
+    value: float  # use calculate rmse here
 
 
 class ProcessFitnessScore(BaseModel):

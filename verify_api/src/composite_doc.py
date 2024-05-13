@@ -28,3 +28,6 @@ def generate_workflow(document: ODEComparisonDocument) -> Composite:
 async def run_workflow(workflow: Composite, duration: int) -> Dict:
     workflow.run(duration)
     return workflow.gather_results()
+
+
+"""Timescale, num_steps, sbml model path, sbml model file upload, omex, sbml string. Metadata."""
