@@ -303,7 +303,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_11-22-31-180870
+          default: 2024-05-14_11-25-57-466719
       type: object
       required:
       - duration

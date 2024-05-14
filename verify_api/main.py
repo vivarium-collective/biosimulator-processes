@@ -82,7 +82,7 @@ async def get_process_attributes(
         import_statement = f'biosimulator_processes.processes.{module_name}'
         module_paths = module_name.split('_')
         class_name = module_paths[0].replace(module_name[0], module_name[0].upper())
-        class_name += module_paths[0].replace(module_name[0], module_name[0].upper())
+        class_name += module_paths[1].replace(module_paths[1][0], module_paths[1][0].upper())
         module = __import__(
             import_statement, fromlist=[class_name])
 
