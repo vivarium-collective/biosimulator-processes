@@ -22,7 +22,7 @@ from verify_api.src.comparison import ode_comparison, process_comparison
 logger = logging.getLogger(__name__)
 
 
-app = FastAPI(title="compare-api", version="1.0.0")
+app = FastAPI(title="verification-api", version="1.0.0")
 app.dependency_overrides = {}
 # enable cross-origin resource sharing (CORS)
 origins = [

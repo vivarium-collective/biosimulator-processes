@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: compare-api
+  title: verification-api
   version: 1.0.0
 paths:
   /:
@@ -302,7 +302,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_22-01-26-644443
+          default: 2024-05-13_22-11-53-922224
       type: object
       required:
       - duration
