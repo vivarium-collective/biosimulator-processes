@@ -19,7 +19,7 @@ paths:
       operationId: get-available-processes
       responses:
         '200':
-          description: Successful Response
+          description: The available processes.
           content:
             application/json:
               schema:
@@ -62,7 +62,9 @@ paths:
         required: true
         schema:
           type: string
-          title: Biomodel ID of to be run by the simulator composite
+          description: Biomodel ID of to be run by the simulator composite
+          title: Biomodel Id
+        description: Biomodel ID of to be run by the simulator composite
       - name: simulators
         in: query
         required: true
@@ -70,19 +72,25 @@ paths:
           type: array
           items:
             type: string
-          title: Simulators to compare within a composition
+          description: Simulators to compare within a composition
+          title: Simulators
+        description: Simulators to compare within a composition
       - name: duration
         in: query
         required: true
         schema:
           type: integer
+          description: Duration
           title: Duration
+        description: Duration
       - name: num_steps
         in: query
         required: true
         schema:
           type: integer
-          title: Number of Steps
+          description: Number of Steps
+          title: Num Steps
+        description: Number of Steps
       responses:
         '200':
           description: Successful Response
@@ -108,19 +116,25 @@ paths:
         required: true
         schema:
           type: string
-          title: Biomodel ID of to be run by the simulator composite
+          description: Biomodel ID of to be run by the simulator composite
+          title: Biomodel Id
+        description: Biomodel ID of to be run by the simulator composite
       - name: duration
         in: query
         required: true
         schema:
           type: integer
+          description: Simulation duration
           title: Duration
+        description: Simulation duration
       - name: num_steps
         in: query
         required: true
         schema:
           type: integer
-          title: Number of Steps
+          description: Number of steps to be recorded in the simulation
+          title: Num Steps
+        description: Number of steps to be recorded in the simulation
       responses:
         '200':
           description: Successful Response
@@ -140,14 +154,14 @@ components:
   schemas:
     AvailableProcesses:
       properties:
-        names:
+        process_names:
           items:
-            $ref: '#/components/schemas/ProcessRegistrationData'
+            type: string
           type: array
-          title: Names
+          title: Process Names
       type: object
       required:
-      - names
+      - process_names
       title: AvailableProcesses
     HTTPValidationError:
       properties:
@@ -302,7 +316,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_22-11-53-922224
+          default: 2024-05-14_13-58-35-794219
       type: object
       required:
       - duration
@@ -350,15 +364,6 @@ components:
       - value
       title: ProcessParameterRMSE
       description: Attribute of Process Fitness Score
-    ProcessRegistrationData:
-      properties:
-        reg_id:
-          type: string
-          title: Reg Id
-      type: object
-      required:
-      - reg_id
-      title: ProcessRegistrationData
     SimulatorProcessOutput:
       properties:
         process_id:

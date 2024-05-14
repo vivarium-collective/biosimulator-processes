@@ -62,11 +62,10 @@ async def root():
     name="Get Available Processes",
     operation_id="get-available-processes",
     responses={
-        404: {"description": "Unable to get the available processes."}})
+        404: {"description": "Unable to get the available processes."},
+        200: {"description": "The available processes."}})
 def get_available_processes() -> AvailableProcesses:
-    processes = list(CORE.process_registry.registry.keys())
-    registration_data = [ProcessRegistrationData(reg_id=p) for p in processes]
-    return AvailableProcesses(names=registration_data)
+    return AvailableProcesses(process_names=CORE.process_registry.list())
 
 
 @app.get(
@@ -109,10 +108,11 @@ async def get_process_attributes(
     responses={
         404: {"description": "Unable to run comparison"}})
 def run_process_comparison(
-        biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
-        simulators: List[str] = Query(..., title="Simulators to compare within a composition"),
-        duration: int = Query(..., title="Duration"),
-        num_steps: int = Query(..., title="Number of Steps")
+        biomodel_id: str = Query(..., description="Biomodel ID of to be run by the simulator composite"),
+        # sbml_model_file: Optional[UploadFile] = File(..., description="Valid SBML model file to be run by the simulator composite")
+        simulators: List[str] = Query(..., description="Simulators to compare within a composition"),
+        duration: int = Query(..., description="Duration"),
+        num_steps: int = Query(..., description="Number of Steps")
 ) -> Union[ProcessComparisonResult, HTTPException]:
     # TODO: Finish this.
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
@@ -134,10 +134,10 @@ def run_process_comparison(
     responses={
         404: {"description": "Unable to run comparison"}})
 def run_ode_comparison(
-        biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
-        duration: int = Query(..., title="Duration"),
-        num_steps: int = Query(..., title="Number of Steps"),
-        # sbml_file: Optional[UploadFile] = File(...),
+        biomodel_id: str = Query(..., description="Biomodel ID of to be run by the simulator composite"),
+        # sbml_model_file: Optional[UploadFile] = File(..., description="Valid SBML model file to be run by the simulator composite")
+        duration: int = Query(..., description="Simulation duration"),
+        num_steps: int = Query(..., description="Number of steps to be recorded in the simulation"),
 ) -> ODEComparisonResult:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:
