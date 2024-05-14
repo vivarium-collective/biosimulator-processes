@@ -15,7 +15,8 @@ paths:
               schema: {}
   /get-available-processes:
     get:
-      summary: Get Available Processes
+      summary: Get A List Of Available Process Names That Can Be Called And Defined
+        Within A Composite Simulation
       operationId: get-available-processes
       responses:
         '200':
@@ -302,7 +303,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_11-21-08-468155
+          default: 2024-05-14_11-22-31-180870
       type: object
       required:
       - duration

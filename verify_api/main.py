@@ -59,7 +59,7 @@ async def root():
 @app.get(
     "/get-available-processes",
     response_model=AvailableProcesses,
-    name="Get Available Processes",
+    name="Get a list of available process names that can be called and defined within a composite simulation",
     operation_id="get-available-processes",
     responses={
         404: {"description": "Unable to get the available processes."}})
