@@ -134,7 +134,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ODEComparisonResult'
+                $ref: '#/components/schemas/ODEComparison'
         '404':
           description: Unable to run comparison
         '422':
@@ -196,7 +196,7 @@ components:
       - mse
       title: IntervalOutputData
       description: Attribute of Simulator Process Output
-    ODEComparisonResult:
+    ODEComparison:
       properties:
         duration:
           type: integer
@@ -223,7 +223,7 @@ components:
       - num_steps
       - biomodel_id
       - timestamp
-      title: ODEComparisonResult
+      title: ODEComparison
     ODEIntervalResult:
       properties:
         interval_id:
@@ -319,7 +319,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_12-20-12-791321
+          default: 2024-05-14_12-55-55-114382
       type: object
       required:
       - duration

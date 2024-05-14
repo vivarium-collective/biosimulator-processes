@@ -11,9 +11,6 @@ class AvailableProcesses(BaseModel):
     process_names: List[str]
 
 
-class ODEComparison(BaseModel):
-    duration: int
-    num_steps: int
-    biomodel_id: str
-    timestamp: str
-    outputs: List
+class ODEComparison(BaseModel, ODEComparisonResult):
+    def __init__(self, **kwargs):
+        super(ODEComparison, self).__init__(**kwargs)
