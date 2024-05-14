@@ -7,4 +7,4 @@ class ODEComparison(BaseModel):
     num_steps: int
     biomodel_id: str
     timestamp: str
-    outputs: List[Dict]
+    outputs: List

@@ -114,7 +114,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ODEComparison'
+                $ref: '#/components/schemas/ODEComparisonResult'
         '404':
           description: Unable to run comparison
         '422':
@@ -155,7 +155,7 @@ components:
       - mse
       title: IntervalOutputData
       description: Attribute of Simulator Process Output
-    ODEComparison:
+    ODEComparisonResult:
       properties:
         duration:
           type: integer
@@ -170,9 +170,11 @@ components:
           type: string
           title: Timestamp
         outputs:
-          items:
-            type: object
-          type: array
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/ODEIntervalResult'
+            type: array
+          - type: 'null'
           title: Outputs
       type: object
       required:
@@ -180,8 +182,38 @@ components:
       - num_steps
       - biomodel_id
       - timestamp
-      - outputs
-      title: ODEComparison
+      title: ODEComparisonResult
+    ODEIntervalResult:
+      properties:
+        interval_id:
+          type: number
+          title: Interval Id
+        copasi_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Copasi Floating Species Concentrations
+        tellurium_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Tellurium Floating Species Concentrations
+        amici_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Amici Floating Species Concentrations
+        time:
+          type: number
+          title: Time
+      type: object
+      required:
+      - interval_id
+      - copasi_floating_species_concentrations
+      - tellurium_floating_species_concentrations
+      - amici_floating_species_concentrations
+      - time
+      title: ODEIntervalResult
     ParameterMSE:
       properties:
         param_name:
@@ -246,7 +278,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_21-42-12-301328
+          default: 2024-05-13_21-47-07-387022
       type: object
       required:
       - duration

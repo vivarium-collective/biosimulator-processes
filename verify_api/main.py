@@ -110,7 +110,7 @@ def run_process_comparison(
 
 @app.post(
     "/run-ode-composite-comparison",
-    response_model=ODEComparison,
+    response_model=ODEComparisonResult,
     name="Run a Simulator Comparison",
     operation_id="run-ode-comparison",
     responses={
@@ -120,17 +120,10 @@ def run_ode_comparison(
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps"),
         # sbml_file: Optional[UploadFile] = File(...),
-) -> ODEComparison:
+) -> ODEComparisonResult:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:
-        comparison_result = ODEComparisonResult(duration=duration, num_steps=num_steps, biomodel_id=biomodel_id)
-        serialized_outputs = [output.to_dict() for output in comparison_result.outputs]
-
-        return ODEComparison(
-            duration=comparison_result.duration,
-            num_steps=comparison_result.num_steps,
-            biomodel_id=comparison_result.biomodel_id,
-            outputs=serialized_outputs)
+        return ODEComparisonResult(duration=duration, num_steps=num_steps, biomodel_id=biomodel_id)
     except AssertionError as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")
