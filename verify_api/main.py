@@ -153,14 +153,23 @@ def run_process_comparison(
     responses={
         404: {"description": "Unable to run comparison"}})
 async def run_ode_comparison(
-        biomodel_id: str = Query(default=None, title="Biomodel ID of to be run by the simulator composite"),
-        sbml_file: Optional[UploadFile] = File(default=None, title="Valid SBML model file to run comparison with."),
+        biomodel_id: Optional[str] = Query(default=None, description="Biomodel ID of to be run by the simulator composite"),
+        sbml_file: Optional[UploadFile] = File(default=None, description="Valid SBML model file with which to run the ode comparison."),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps"),
 ) -> ODEComparison:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:
+        # handle input entrypoints
+        if biomodel_id and sbml_file:
+            raise HTTPException(status_code=400, detail="Please provide either a biomodel_id or a model_file, not both.")
+        elif biomodel_id is None and sbml_file is None:
+            raise HTTPException(status_code=400, detail="Please provide either a biomodel_id or a model_file.")
+
+        # generate a biosimulator processes response
         comparison = await generate_ode_process_comparison(biomodel_id, duration, num_steps)
+
+        # handle conversion of outputs
         comparison_outputs = [
             ODEProcessIntervalResult(
                 interval_id=output.interval_id,

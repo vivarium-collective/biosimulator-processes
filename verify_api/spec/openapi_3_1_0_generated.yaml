@@ -114,8 +114,12 @@ paths:
         in: query
         required: false
         schema:
-          type: string
-          title: Biomodel ID of to be run by the simulator composite
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Biomodel ID of to be run by the simulator composite
+          title: Biomodel Id
+        description: Biomodel ID of to be run by the simulator composite
       - name: duration
         in: query
         required: true
@@ -180,7 +184,8 @@ components:
           - type: string
             format: binary
           - type: 'null'
-          title: Valid SBML model file to run comparison with.
+          title: Sbml File
+          description: Valid SBML model file with which to run the ode comparison.
       type: object
       title: Body_run-ode-comparison
     HTTPValidationError:
@@ -337,7 +342,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_13-23-21-214572
+          default: 2024-05-14_13-30-23-027345
       type: object
       required:
       - duration
