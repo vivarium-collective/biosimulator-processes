@@ -29,7 +29,7 @@ paths:
           description: Unable to get the available processes.
   /get-process-attributes:
     get:
-      summary: Get Process Attributes
+      summary: Get Process Attribute Data For A Given Model File
       operationId: get-process-attributes
       parameters:
       - name: process_name
@@ -38,6 +38,12 @@ paths:
         schema:
           type: string
           title: 'Name of the process type; i.e: copasi, tellurium, etc.'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_get-process-attributes'
       responses:
         '200':
           description: Successful Response
@@ -150,6 +156,16 @@ components:
       required:
       - process_names
       title: AvailableProcesses
+    Body_get-process-attributes:
+      properties:
+        sbml_model_file:
+          type: string
+          format: binary
+          title: Valid SBML model file by which to infer process attribute details
+      type: object
+      required:
+      - sbml_model_file
+      title: Body_get-process-attributes
     HTTPValidationError:
       properties:
         detail:
@@ -303,7 +319,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_11-25-57-466719
+          default: 2024-05-14_11-29-21-178497
       type: object
       required:
       - duration

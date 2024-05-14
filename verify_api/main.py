@@ -70,12 +70,13 @@ def get_available_processes() -> AvailableProcesses:
 @app.get(
     "/get-process-attributes",
     response_model=ProcessAttributes,
-    name="Get Process Attributes",
+    name="Get Process Attribute data for a given model file",
     operation_id="get-process-attributes",
     responses={
         404: {"description": "Unable to get attributes for specified simulator process."}})
 async def get_process_attributes(
-        process_name: str = Query(..., title="Name of the process type; i.e: copasi, tellurium, etc.")
+        process_name: str = Query(..., title="Name of the process type; i.e: copasi, tellurium, etc."),
+        sbml_model_file: UploadFile = File(..., title="Valid SBML model file by which to infer process attribute details")
         ) -> ProcessAttributes:
     try:
         module_name = f'{process_name}_process'
@@ -87,7 +88,7 @@ async def get_process_attributes(
             import_statement, fromlist=[class_name])
 
         # Get the class from the module
-        bigraph_class = getattr(module, class_name)
+        bigraph_class = getattr(module, class_name)(config={'model': {'model_source': sbml_model_file}})
         attributes = await ProcessAttributes(
             name=class_name,
             initial_state=bigraph_class.initial_state(),
