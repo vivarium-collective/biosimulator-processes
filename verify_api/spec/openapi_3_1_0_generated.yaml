@@ -13,6 +13,19 @@ paths:
           content:
             application/json:
               schema: {}
+  /get-available-processes:
+    get:
+      summary: Get Available Processes
+      operationId: get-available-processes
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableProcesses'
+        '404':
+          description: Unable to get the available processes.
   /get-process-attributes:
     get:
       summary: Get Process Attributes
@@ -125,6 +138,17 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
+    AvailableProcesses:
+      properties:
+        names:
+          items:
+            $ref: '#/components/schemas/ProcessRegistrationData'
+          type: array
+          title: Names
+      type: object
+      required:
+      - names
+      title: AvailableProcesses
     HTTPValidationError:
       properties:
         detail:
@@ -278,7 +302,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_21-47-07-387022
+          default: 2024-05-13_21-56-49-916954
       type: object
       required:
       - duration
@@ -326,6 +350,15 @@ components:
       - value
       title: ProcessParameterRMSE
       description: Attribute of Process Fitness Score
+    ProcessRegistrationData:
+      properties:
+        process_registration_id:
+          type: string
+          title: Process Registration Id
+      type: object
+      required:
+      - process_registration_id
+      title: ProcessRegistrationData
     SimulatorProcessOutput:
       properties:
         process_id:

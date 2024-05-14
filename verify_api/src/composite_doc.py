@@ -4,6 +4,10 @@ from biosimulator_processes import CORE
 from biosimulator_processes.data_model.compare_data_model import ODEComparisonDocument
 
 
+def get_process_address_names():
+    return CORE.process_registry.registry
+
+
 def create_comparison_document(
         sbml_model_path: str,
         simulators: list[str],

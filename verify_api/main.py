@@ -4,12 +4,14 @@ from typing import *
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+
+from biosimulator_processes import CORE
 from biosimulator_processes.data_model.compare_data_model import (
     ProcessAttributes,
     ProcessComparisonResult,
     ODEComparisonResult
 )
-from verify_api.data_model import ODEComparison
+from verify_api.data_model import ODEComparison, AvailableProcesses
 from verify_api.src.comparison import ode_comparison, process_comparison
 
 
@@ -49,6 +51,18 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {"message": "Hello from compare-api!!!"}
+
+
+@app.get(
+    "/get-available-processes",
+    response_model=AvailableProcesses,
+    name="Get Available Processes",
+    operation_id="get-available-processes",
+    responses={
+        404: {"description": "Unable to get the available processes."}})
+def get_available_processes() -> AvailableProcesses:
+    processes = list(CORE.process_registry.registry.keys())
+    return AvailableProcesses(names=processes)
 
 
 @app.get(
