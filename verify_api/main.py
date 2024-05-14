@@ -64,9 +64,7 @@ async def root():
     responses={
         404: {"description": "Unable to get the available processes."}})
 def get_available_processes() -> AvailableProcesses:
-    processes = list(CORE.process_registry.registry.keys())
-    registration_data = [ProcessRegistrationData(reg_id=p) for p in processes]
-    return AvailableProcesses(names=registration_data)
+    return AvailableProcesses(process_names=CORE.process_registry.list())
 
 
 @app.get(

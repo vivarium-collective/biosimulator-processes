@@ -140,14 +140,14 @@ components:
   schemas:
     AvailableProcesses:
       properties:
-        names:
+        process_names:
           items:
-            $ref: '#/components/schemas/ProcessRegistrationData'
+            type: string
           type: array
-          title: Names
+          title: Process Names
       type: object
       required:
-      - names
+      - process_names
       title: AvailableProcesses
     HTTPValidationError:
       properties:
@@ -302,7 +302,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_22-11-53-922224
+          default: 2024-05-14_11-21-08-468155
       type: object
       required:
       - duration
@@ -350,15 +350,6 @@ components:
       - value
       title: ProcessParameterRMSE
       description: Attribute of Process Fitness Score
-    ProcessRegistrationData:
-      properties:
-        reg_id:
-          type: string
-          title: Reg Id
-      type: object
-      required:
-      - reg_id
-      title: ProcessRegistrationData
     SimulatorProcessOutput:
       properties:
         process_id:

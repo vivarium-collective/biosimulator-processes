@@ -7,7 +7,7 @@ class ProcessRegistrationData(BaseModel):
 
 
 class AvailableProcesses(BaseModel):
-    names: List[ProcessRegistrationData]
+    process_names: List[str]
 
 
 class ODEComparison(BaseModel):
