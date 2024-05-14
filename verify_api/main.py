@@ -4,7 +4,12 @@ from typing import *
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from biosimulator_processes.data_model.compare_data_model import ProcessAttributes, ProcessComparisonResult, ODEComparisonResult
+from biosimulator_processes.data_model.compare_data_model import (
+    ProcessAttributes,
+    ProcessComparisonResult,
+    ODEComparisonResult
+)
+from verify_api.data_model import ODEComparison
 from verify_api.src.comparison import ode_comparison, process_comparison
 
 
@@ -105,7 +110,7 @@ def run_process_comparison(
 
 @app.post(
     "/run-ode-composite-comparison",
-    response_model=ODEComparisonResult,
+    response_model=ODEComparison,
     name="Run a Simulator Comparison",
     operation_id="run-ode-comparison",
     responses={
@@ -113,12 +118,17 @@ def run_process_comparison(
 def run_ode_comparison(
         biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
         duration: int = Query(..., title="Duration"),
-        num_steps: int = Query(..., title="Number of Steps")
-) -> ODEComparisonResult:
+        num_steps: int = Query(..., title="Number of Steps"),
+        sbml_file: UploadFile = File(...),
+) -> ODEComparison:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:
-        timestamp = str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-')
-        return ode_comparison(biomodel_id=biomodel_id, duration=duration, n_steps=num_steps, timestamp=timestamp)
+        comparison_result = ODEComparisonResult(duration=duration, num_steps=num_steps, biomodel_id=biomodel_id)
+        return ODEComparison(
+            duration=comparison_result.duration,
+            num_steps=comparison_result.num_steps,
+            biomodel_id=comparison_result.biomodel_id,
+            outputs=[output.to_dict() for output in comparison_result.outputs])
     except AssertionError as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")

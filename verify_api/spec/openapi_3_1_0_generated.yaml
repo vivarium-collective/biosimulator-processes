@@ -108,13 +108,19 @@ paths:
         schema:
           type: integer
           title: Number of Steps
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_run-ode-comparison'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ODEComparisonResult'
+                $ref: '#/components/schemas/ODEComparison'
         '404':
           description: Unable to run comparison
         '422':
@@ -125,6 +131,16 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
+    Body_run-ode-comparison:
+      properties:
+        sbml_file:
+          type: string
+          format: binary
+          title: Sbml File
+      type: object
+      required:
+      - sbml_file
+      title: Body_run-ode-comparison
     HTTPValidationError:
       properties:
         detail:
@@ -134,7 +150,28 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
-    ODEComparisonResult:
+    IntervalOutputData:
+      properties:
+        param_name:
+          type: string
+          title: Param Name
+        value:
+          type: number
+          title: Value
+        time_id:
+          type: number
+          title: Time Id
+        mse:
+          $ref: '#/components/schemas/ParameterMSE'
+      type: object
+      required:
+      - param_name
+      - value
+      - time_id
+      - mse
+      title: IntervalOutputData
+      description: Attribute of Simulator Process Output
+    ODEComparison:
       properties:
         duration:
           type: integer
@@ -142,47 +179,47 @@ components:
         num_steps:
           type: integer
           title: Num Steps
-        simulators:
-          items:
-            type: string
-          type: array
-          title: Simulators
-          default:
-          - tellurium
-          - copasi
-          - amici
-        outputs:
-          items:
-            $ref: '#/components/schemas/SimulatorProcessOutput'
-          type: array
-          title: Outputs
+        biomodel_id:
+          type: string
+          title: Biomodel Id
         timestamp:
           type: string
           title: Timestamp
+        outputs:
+          items:
+            type: object
+          type: array
+          title: Outputs
       type: object
       required:
       - duration
       - num_steps
-      - outputs
+      - biomodel_id
       - timestamp
-      title: ODEComparisonResult
-    OutputData:
+      - outputs
+      title: ODEComparison
+    ParameterMSE:
       properties:
-        name:
+        param_name:
           type: string
-          title: Name
+          title: Param Name
         value:
           type: number
           title: Value
-        time_id:
+        mean:
           type: number
-          title: Time Id
+          title: Mean
+        process_id:
+          type: string
+          title: Process Id
       type: object
       required:
-      - name
+      - param_name
       - value
-      - time_id
-      title: OutputData
+      - mean
+      - process_id
+      title: ParameterMSE
+      description: Attribute of Process Parameter RMSE
     ProcessAttributes:
       properties:
         name:
@@ -191,18 +228,18 @@ components:
         initial_state:
           type: object
           title: Initial State
-        inputs:
+        input_schema:
           type: object
-          title: Inputs
-        outputs:
+          title: Input Schema
+        output_schema:
           type: object
-          title: Outputs
+          title: Output Schema
       type: object
       required:
       - name
       - initial_state
-      - inputs
-      - outputs
+      - input_schema
+      - output_schema
       title: ProcessAttributes
     ProcessComparisonResult:
       properties:
@@ -225,16 +262,37 @@ components:
         timestamp:
           type: string
           title: Timestamp
+          default: 2024-05-13_21-35-18-496395
       type: object
       required:
       - duration
       - num_steps
       - simulators
       - outputs
-      - timestamp
       title: ProcessComparisonResult
       description: Generic class inherited for all process comparisons.
-    RMSE:
+    ProcessFitnessScore:
+      properties:
+        process_id:
+          type: string
+          title: Process Id
+        error:
+          type: number
+          title: Error
+        rmse_values:
+          items:
+            $ref: '#/components/schemas/ProcessParameterRMSE'
+          type: array
+          title: Rmse Values
+      type: object
+      required:
+      - process_id
+      - error
+      - rmse_values
+      title: ProcessFitnessScore
+      description: Attribute of Simulator Process Output Based on the list of interval
+        results
+    ProcessParameterRMSE:
       properties:
         process_id:
           type: string
@@ -243,16 +301,15 @@ components:
           type: string
           title: Param Id
         value:
-          anyOf:
-          - type: number
-          - type: integer
+          type: number
           title: Value
       type: object
       required:
       - process_id
       - param_id
       - value
-      title: RMSE
+      title: ProcessParameterRMSE
+      description: Attribute of Process Fitness Score
     SimulatorProcessOutput:
       properties:
         process_id:
@@ -263,18 +320,19 @@ components:
           title: Simulator
         data:
           items:
-            $ref: '#/components/schemas/OutputData'
+            $ref: '#/components/schemas/IntervalOutputData'
           type: array
           title: Data
-        root_mean_squared_error:
-          $ref: '#/components/schemas/RMSE'
+        fitness_score:
+          $ref: '#/components/schemas/ProcessFitnessScore'
       type: object
       required:
       - process_id
       - simulator
       - data
-      - root_mean_squared_error
+      - fitness_score
       title: SimulatorProcessOutput
+      description: Attribute of Process Comparison Result
     ValidationError:
       properties:
         loc:
