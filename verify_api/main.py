@@ -7,14 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.compare_data_model import (
-    ProcessAttributes,
     ProcessComparisonResult,
     ODEComparisonResult
 )
 from verify_api.data_model import (
     ODEComparison,
     AvailableProcesses,
-    ProcessRegistrationData)
+    ProcessAttributes)
 from verify_api.src.comparison import ode_comparison, process_comparison
 
 
@@ -68,7 +67,7 @@ def get_available_processes() -> AvailableProcesses:
     return AvailableProcesses(process_names=CORE.process_registry.list())
 
 
-@app.get(
+@app.post(
     "/get-process-attributes",
     response_model=ProcessAttributes,
     name="Get Process Attributes",
@@ -76,6 +75,8 @@ def get_available_processes() -> AvailableProcesses:
     responses={
         404: {"description": "Unable to get attributes for specified simulator process."}})
 async def get_process_attributes(
+        biomodel_id: str = Query(..., description="Biomodel identifier"),
+        sbml_model_file: UploadFile = File(default=None, description="Valid SBML model file"),
         process_name: str = Query(..., title="Name of the process type; i.e: copasi, tellurium, etc.")
         ) -> ProcessAttributes:
     try:
@@ -83,17 +84,25 @@ async def get_process_attributes(
         import_statement = f'biosimulator_processes.processes.{module_name}'
         module_paths = module_name.split('_')
         class_name = module_paths[0].replace(module_name[0], module_name[0].upper())
-        class_name += module_paths[0].replace(module_name[0], module_name[0].upper())
+        class_name += module_paths[1].replace(module_paths[1][0], module_paths[1][0].upper())
         module = __import__(
             import_statement, fromlist=[class_name])
 
         # Get the class from the module
+        model_source = biomodel_id or sbml_model_file
         bigraph_class = getattr(module, class_name)
-        attributes = await ProcessAttributes(
+        process = bigraph_class(config={'model': {'model_source': biomodel_id}})
+
+        file_location = f"./{sbml_model_file.filename}"
+        with open(file_location, "wb") as file_buffer:
+            content = await sbml_model_file.read()
+            file_buffer.write(content)
+        print({"message": f"File saved at {file_location} and processing"})
+        attributes = ProcessAttributes(
             name=class_name,
-            initial_state=bigraph_class.initial_state(),
-            inputs=bigraph_class.inputs(),
-            outputs=bigraph_class.outputs())
+            initial_state=process.initial_state(),
+            input_schema=process.inputs(),
+            output_schema=process.outputs())
         return attributes
     except Exception as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')

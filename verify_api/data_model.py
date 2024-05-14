@@ -10,6 +10,13 @@ class AvailableProcesses(BaseModel):
     process_names: List[str]
 
 
+class ProcessAttributes(BaseModel):
+    name: str
+    initial_state: Dict
+    input_schema: Dict
+    output_schema: Dict
+
+
 class ODEComparison(BaseModel):
     duration: int
     num_steps: int

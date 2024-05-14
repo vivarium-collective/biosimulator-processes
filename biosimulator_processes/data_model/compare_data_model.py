@@ -229,13 +229,6 @@ class ODEComparisonResult(_BaseClass):
         return {'outputs': output[('emitter',)]}
 
 
-class ProcessAttributes(BaseModel):
-    name: str
-    initial_state: Dict[str, Any]
-    input_schema: Dict[str, Any]
-    output_schema: Dict[str, Any]
-
-
 class CompositeRunError(BaseModel):
     exception: Exception
 

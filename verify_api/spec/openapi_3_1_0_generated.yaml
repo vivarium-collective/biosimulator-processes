@@ -27,16 +27,31 @@ paths:
         '404':
           description: Unable to get the available processes.
   /get-process-attributes:
-    get:
+    post:
       summary: Get Process Attributes
       operationId: get-process-attributes
       parameters:
+      - name: biomodel_id
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Biomodel identifier
+          title: Biomodel Id
+        description: Biomodel identifier
       - name: process_name
         in: query
         required: true
         schema:
           type: string
           title: 'Name of the process type; i.e: copasi, tellurium, etc.'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/Body_get-process-attributes'
+              title: Body
       responses:
         '200':
           description: Successful Response
@@ -163,6 +178,15 @@ components:
       required:
       - process_names
       title: AvailableProcesses
+    Body_get-process-attributes:
+      properties:
+        sbml_model_file:
+          type: string
+          format: binary
+          title: Sbml Model File
+          description: Valid SBML model file
+      type: object
+      title: Body_get-process-attributes
     HTTPValidationError:
       properties:
         detail:
@@ -316,7 +340,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_13-58-35-794219
+          default: 2024-05-14_14-20-32-490978
       type: object
       required:
       - duration
