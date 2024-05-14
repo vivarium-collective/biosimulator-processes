@@ -53,7 +53,7 @@ from biosimulator_processes import CORE
 from biosimulator_processes.data_model.compare_data_model import IntervalOutputData, SimulatorProcessOutput, ODEComparisonResult, ProcessComparisonResult
 
 
-async def generate_ode_process_comparison(biomodel_id: str, duration: int, num_steps: int) -> ODEComparisonResult:
+def generate_ode_process_comparison(biomodel_id: str, duration: int, num_steps: int) -> ODEComparisonResult:
     return ODEComparisonResult(duration=duration, biomodel_id=biomodel_id, num_steps=num_steps)
 
 

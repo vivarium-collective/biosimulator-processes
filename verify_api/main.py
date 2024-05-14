@@ -167,7 +167,7 @@ async def run_ode_comparison(
             raise HTTPException(status_code=400, detail="Please provide either a biomodel_id or a model_file.")
 
         # generate a biosimulator processes response
-        comparison = await generate_ode_process_comparison(biomodel_id, duration, num_steps)
+        comparison = generate_ode_process_comparison(biomodel_id, duration, num_steps)
 
         # handle conversion of outputs
         comparison_outputs = [
