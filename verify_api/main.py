@@ -119,7 +119,7 @@ def run_ode_comparison(
         biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps"),
-        sbml_file: UploadFile = File(...),
+        sbml_file: Optional[UploadFile] = File(...),
 ) -> ODEComparison:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:

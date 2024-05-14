@@ -134,8 +134,10 @@ components:
     Body_run-ode-comparison:
       properties:
         sbml_file:
-          type: string
-          format: binary
+          anyOf:
+          - type: string
+            format: binary
+          - type: 'null'
           title: Sbml File
       type: object
       required:
@@ -262,7 +264,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_21-35-18-496395
+          default: 2024-05-13_21-37-06-098471
       type: object
       required:
       - duration
