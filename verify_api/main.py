@@ -69,7 +69,7 @@ def get_available_processes() -> AvailableProcesses:
     return AvailableProcesses(process_names=CORE.process_registry.list())
 
 
-@app.get(
+@app.post(
     "/get-process-attributes",
     response_model=ProcessAttributes,
     name="Get Process Attribute data for a given model file",
@@ -85,11 +85,10 @@ async def get_process_attributes(
     try:
         # Create a named temporary file (deleted automatically when closed)
         with NamedTemporaryFile(delete=False, suffix=".xml") as temp_file:
-            temp_file_path = temp_file.name
-            # Write the uploaded file's content to the temporary file
             contents = await sbml_model_file.read()
             temp_file.write(contents)
             temp_file.flush()
+            temp_file_path = temp_file.name
 
         # Importing the required class based on the process_name
         module_name = f'{process_name}_process'
@@ -100,6 +99,7 @@ async def get_process_attributes(
 
         # Get the class from the module
         bigraph_class = getattr(module, class_name)(config={'model': {'model_source': temp_file_path}})
+
         attributes = ProcessAttributes(
             name=class_name,
             initial_state=await bigraph_class.initial_state(),

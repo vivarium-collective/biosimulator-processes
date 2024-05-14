@@ -28,7 +28,7 @@ paths:
         '404':
           description: Unable to get the available processes.
   /get-process-attributes:
-    get:
+    post:
       summary: Get Process Attribute Data For A Given Model File
       operationId: get-process-attributes
       parameters:
@@ -319,7 +319,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_12-11-31-914007
+          default: 2024-05-14_12-20-12-791321
       type: object
       required:
       - duration
