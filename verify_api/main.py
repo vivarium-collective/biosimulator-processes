@@ -1,4 +1,6 @@
 import logging
+import os
+from tempfile import NamedTemporaryFile
 from datetime import datetime
 from typing import *
 
@@ -73,29 +75,45 @@ def get_available_processes() -> AvailableProcesses:
     name="Get Process Attribute data for a given model file",
     operation_id="get-process-attributes",
     responses={
-        404: {"description": "Unable to get attributes for specified simulator process."}})
+        404: {"description": "Unable to get attributes for specified simulator process."},
+        200: {"description": "Successfully retrieved process attributes."}})
 async def get_process_attributes(
         process_name: str = Query(..., title="Name of the process type; i.e: copasi, tellurium, etc."),
         sbml_model_file: UploadFile = File(..., title="Valid SBML model file by which to infer process attribute details")
         ) -> ProcessAttributes:
+    # Create a temporary file to store the uploaded file
     try:
+        # Create a named temporary file (deleted automatically when closed)
+        with NamedTemporaryFile(delete=False, suffix=".xml") as temp_file:
+            temp_file_path = temp_file.name
+            # Write the uploaded file's content to the temporary file
+            contents = await sbml_model_file.read()
+            temp_file.write(contents)
+            temp_file.flush()
+
+        # Importing the required class based on the process_name
         module_name = f'{process_name}_process'
         import_statement = f'biosimulator_processes.processes.{module_name}'
         module_paths = module_name.split('_')
-        class_name = module_paths[0].replace(module_name[0], module_name[0].upper())
-        class_name += module_paths[1].replace(module_paths[1][0], module_paths[1][0].upper())
-        module = __import__(
-            import_statement, fromlist=[class_name])
+        class_name = ''.join(word.capitalize() for word in module_paths)
+        module = __import__(import_statement, fromlist=[class_name])
 
         # Get the class from the module
-        bigraph_class = getattr(module, class_name)(config={'model': {'model_source': sbml_model_file}})
-        attributes = await ProcessAttributes(
+        bigraph_class = getattr(module, class_name)(config={'model': {'model_source': temp_file_path}})
+        attributes = ProcessAttributes(
             name=class_name,
-            initial_state=bigraph_class.initial_state(),
-            inputs=bigraph_class.inputs(),
-            outputs=bigraph_class.outputs())
+            initial_state=await bigraph_class.initial_state(),
+            inputs=await bigraph_class.inputs(),
+            outputs=await bigraph_class.outputs())
+
+        # Clean up the temporary file
+        os.unlink(temp_file_path)
         return attributes
+
     except Exception as e:
+        # Clean up the temporary file in case of failure before returning the response
+        if 'temp_file_path' in locals():
+            os.unlink(temp_file_path)
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")
 

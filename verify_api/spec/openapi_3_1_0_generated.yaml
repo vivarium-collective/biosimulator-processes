@@ -46,7 +46,7 @@ paths:
               $ref: '#/components/schemas/Body_get-process-attributes'
       responses:
         '200':
-          description: Successful Response
+          description: Successfully retrieved process attributes.
           content:
             application/json:
               schema:
@@ -319,7 +319,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_11-29-21-178497
+          default: 2024-05-14_11-33-31-238620
       type: object
       required:
       - duration
