@@ -35,8 +35,9 @@ def test_ode_comparison_result():
     n_steps = 300
     biomodel_id = 'BIOMD0000000630'
     ode_comparison_result = ODEComparisonResult(duration=dur, num_steps=n_steps, biomodel_id=biomodel_id)
-
-
+    pp(pf(ode_comparison_result.to_dict()))
+    with open('/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/test_outputs' + '/test_ode_comparison_object.json', 'w') as f:
+        json.dump(ode_comparison_result.to_dict(), f, indent=4)
 
 
 def test_step():
@@ -61,8 +62,6 @@ def test_step():
         f.close()
 
 
-
-
 def test_step_object(verbose=False):
     biomodel_id = 'BIOMD0000000630'
     duration = 30
@@ -83,4 +82,4 @@ def test_step_object(verbose=False):
 
 
 if __name__ == '__main__':
-    test_step()
+    test_ode_comparison_result()

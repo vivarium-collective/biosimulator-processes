@@ -19,7 +19,7 @@ from process_bigraph import Composite, pf
 from pydantic import Field, field_validator
 
 from biosimulator_processes.utils import prepare_single_ode_process_document
-from biosimulator_processes.data_model import _BaseModel as BaseModel
+from biosimulator_processes.data_model import _BaseModel as BaseModel, _BaseClass
 from biosimulator_processes import CORE
 
 
@@ -111,14 +111,6 @@ class IntervalOutputData(BaseModel):
     mse: ParameterMSE
 
 
-class ODEIntervalResult(BaseModel):
-    interval_id: float
-    copasi_floating_species_concentrations: Dict[str, float]
-    tellurium_floating_species_concentrations: Dict[str, float]
-    amici_floating_species_concentrations: Dict[str, float]
-    time: float
-
-
 class SimulatorProcessOutput(BaseModel):
     """Attribute of Process Comparison Result"""
     process_id: str
@@ -140,24 +132,34 @@ class ProcessComparisonResult(BaseModel):
         .replace('.', '-')
 
 
-class ODEComparisonResult(BaseModel):
+@dataclass
+class ODEIntervalResult(_BaseClass):
+    interval_id: float
+    copasi_floating_species_concentrations: Dict[str, float]
+    tellurium_floating_species_concentrations: Dict[str, float]
+    amici_floating_species_concentrations: Dict[str, float]
+    time: float
+
+
+@dataclass
+class ODEComparisonResult(_BaseClass):
     duration: int
     num_steps: int
     biomodel_id: str
-    outputs: List[ODEIntervalResult] = Field(default=[])
-    __timestamp: str = Field(
-        default=str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-'))
+    timestamp: str
+    outputs: Optional[List[ODEIntervalResult]] = None
 
-    def __init__(self,
-                 duration: int,
-                 num_steps: int,
-                 biomodel_id: str,
-                 timestamp: str = __timestamp):
+    def __init__(self, duration, num_steps, biomodel_id):
+        super().__init__()
         self.duration = duration
         self.num_steps = num_steps
         self.biomodel_id = biomodel_id
-        self.timestamp = timestamp
         self.outputs = self._set_outputs()
+        self.timestamp = self._set_timestamp()
+
+    @classmethod
+    def _set_timestamp(cls):
+        return str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-')
 
     def _set_outputs(self):
         return self.generate_ode_interval_outputs(
