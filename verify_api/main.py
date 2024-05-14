@@ -8,13 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.compare_data_model import (
     ProcessComparisonResult,
-    ODEComparisonResult
-)
+    ODEComparisonResult)
 from verify_api.data_model import (
     ODEComparison,
     AvailableProcesses,
-    ProcessAttributes)
+    ProcessAttributes,
+    UploadFileResponse)
 from verify_api.src.comparison import ode_comparison, process_comparison
+from verify_api.src.composite_doc import upload_sbml_file
 
 
 # logger for this module
@@ -93,11 +94,6 @@ async def get_process_attributes(
         bigraph_class = getattr(module, class_name)
         process = bigraph_class(config={'model': {'model_source': biomodel_id}})
 
-        file_location = f"./{sbml_model_file.filename}"
-        with open(file_location, "wb") as file_buffer:
-            content = await sbml_model_file.read()
-            file_buffer.write(content)
-        print({"message": f"File saved at {file_location} and processing"})
         attributes = ProcessAttributes(
             name=class_name,
             initial_state=process.initial_state(),
@@ -107,6 +103,22 @@ async def get_process_attributes(
     except Exception as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")
+
+
+@app.post(
+    "/upload-sbml-file",
+    response_model=UploadFileResponse,
+    name="Upload SBML File",
+    operation_id="upload-sbml-file",
+    responses={
+        404: {"description": "Unable to upload the SBML file."}})
+async def upload_sbml_file(sbml_model_file: UploadFile = File(..., description="Valid SBML model file")) -> UploadFileResponse:
+    try:
+        file_location = await upload_sbml_file(sbml_model_file)
+        response_message = f"File saved at {file_location} and processing"
+        return UploadFileResponse(message=response_message)
+    except HTTPException as e:
+        logger.warning(f'File to run model upload: {str(e)}')
 
 
 @app.post(

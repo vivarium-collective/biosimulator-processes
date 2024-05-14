@@ -23,3 +23,8 @@ class ODEComparison(BaseModel):
     biomodel_id: str
     timestamp: str
     outputs: List
+
+
+class UploadFileResponse(BaseModel):
+    message: str
+    file_location: str
