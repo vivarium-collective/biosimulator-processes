@@ -108,12 +108,6 @@ paths:
         schema:
           type: integer
           title: Number of Steps
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Body_run-ode-comparison'
       responses:
         '200':
           description: Successful Response
@@ -131,18 +125,6 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
-    Body_run-ode-comparison:
-      properties:
-        sbml_file:
-          anyOf:
-          - type: string
-            format: binary
-          - type: 'null'
-          title: Sbml File
-      type: object
-      required:
-      - sbml_file
-      title: Body_run-ode-comparison
     HTTPValidationError:
       properties:
         detail:
@@ -264,7 +246,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_21-37-06-098471
+          default: 2024-05-13_21-38-06-839207
       type: object
       required:
       - duration
