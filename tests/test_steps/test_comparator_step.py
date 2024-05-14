@@ -34,13 +34,7 @@ def test_ode_comparison_result():
     dur = 30
     n_steps = 300
     biomodel_id = 'BIOMD0000000630'
-    interval_outputs = generate_ode_interval_outputs(dur, n_steps, biomodel_id)
-    comparison_result = ODEComparisonResult(
-        duration=dur,
-        num_steps=n_steps,
-        outputs=interval_outputs)
-    pp(comparison_result)
-
+    ode_comparison_result = ODEComparisonResult(duration=dur, num_steps=n_steps, biomodel_id=biomodel_id)
 
 
 

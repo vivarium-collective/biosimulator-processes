@@ -140,22 +140,24 @@ class ProcessComparisonResult(BaseModel):
         .replace('.', '-')
 
 
-class ODEComparisonResult:
+class ODEComparisonResult(BaseModel):
     duration: int
     num_steps: int
     biomodel_id: str
-    outputs: List[ODEIntervalResult]
-    timestamp: str
+    outputs: List[ODEIntervalResult] = Field(default=[])
+    __timestamp: str = Field(
+        default=str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-'))
 
     def __init__(self,
                  duration: int,
                  num_steps: int,
-                 biomodel_id: str):
+                 biomodel_id: str,
+                 timestamp: str = __timestamp):
         self.duration = duration
         self.num_steps = num_steps
         self.biomodel_id = biomodel_id
+        self.timestamp = timestamp
         self.outputs = self._set_outputs()
-        self.timestamp = str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-')
 
     def _set_outputs(self):
         return self.generate_ode_interval_outputs(
