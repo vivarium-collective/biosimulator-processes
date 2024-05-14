@@ -12,12 +12,16 @@ date: 04/2024
 from typing import *
 from abc import ABC
 from dataclasses import dataclass
+from datetime import datetime
 
 import numpy as np
+from process_bigraph import Composite, pf
 from pydantic import Field, field_validator
 
 from biosimulator_processes.utils import prepare_single_ode_process_document
 from biosimulator_processes.data_model import _BaseModel as BaseModel
+from biosimulator_processes import CORE
+
 
 
 """
@@ -107,6 +111,14 @@ class IntervalOutputData(BaseModel):
     mse: ParameterMSE
 
 
+class ODEIntervalResult(BaseModel):
+    interval_id: float
+    copasi_floating_species_concentrations: Dict[str, float]
+    tellurium_floating_species_concentrations: Dict[str, float]
+    amici_floating_species_concentrations: Dict[str, float]
+    time: float
+
+
 class SimulatorProcessOutput(BaseModel):
     """Attribute of Process Comparison Result"""
     process_id: str
@@ -121,15 +133,96 @@ class ProcessComparisonResult(BaseModel):
     num_steps: int
     simulators: List[str]
     outputs: List[SimulatorProcessOutput]
-    timestamp: str
+    timestamp: str = str(
+        datetime.now()) \
+        .replace(' ', '_') \
+        .replace(':', '-') \
+        .replace('.', '-')
 
 
-class ODEComparisonResult(ProcessComparisonResult):
+class ODEComparisonResult:
     duration: int
     num_steps: int
-    simulators: List[str] = ['tellurium', 'copasi', 'amici']
-    outputs: List[SimulatorProcessOutput]
+    biomodel_id: str
+    outputs: List[ODEIntervalResult]
     timestamp: str
+
+    def __init__(self,
+                 duration: int,
+                 num_steps: int,
+                 biomodel_id: str):
+        self.duration = duration
+        self.num_steps = num_steps
+        self.biomodel_id = biomodel_id
+        self.outputs = self._set_outputs()
+        self.timestamp = str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-')
+
+    def _set_outputs(self):
+        return self.generate_ode_interval_outputs(
+            self.duration,
+            self.num_steps,
+            self.biomodel_id)
+
+    def generate_ode_interval_outputs(self, duration: int, n_steps: int, biomodel_id: str) -> List[ODEIntervalResult]:
+        def _generate_ode_interval_results(duration: int, n_steps: int, biomodel_id: str) -> List[ODEIntervalResult]:
+            results_dict = self.generate_ode_comparison(biomodel_id, duration)
+            simulator_names = ['copasi', 'tellurium', 'amici']
+            interval_results = []
+
+            for global_time_index, interval_result_data in enumerate(results_dict['outputs']):
+                interval_config = {
+                    'interval_id': float(global_time_index),
+                    'time': interval_result_data['time']
+                }
+
+                for k, v in interval_result_data.items():
+                    for simulator_name in simulator_names:
+                        if simulator_name in k:
+                            interval_config[f'{simulator_name}_floating_species_concentrations'] = v
+
+                interval_result = ODEIntervalResult(**interval_config)
+                interval_results.append(interval_result)
+
+            return interval_results
+
+        return _generate_ode_interval_results(duration, n_steps, biomodel_id)
+
+    @classmethod
+    def generate_ode_comparison(cls, biomodel_id: str, dur: int) -> Dict:
+        """Run the `compare_ode_step` composite and return data which encapsulates another composite
+            workflow specified by dir.
+
+            Args:
+                biomodel_id:`str`: A Valid Biomodel ID.
+                dur:`int`: duration of the internal composite simulation.
+
+            Returns:
+                `Dict` of simulation comparison results like `{'outputs': {...etc}}`
+        """
+        compare = {
+            'compare_ode': {
+                '_type': 'step',
+                'address': 'local:compare_ode_step',
+                'config': {'biomodel_id': biomodel_id, 'duration': dur},
+                'inputs': {},
+                'outputs': {'comparison_data': ['comparison_store']}
+            },
+            'verification_data': {
+                '_type': 'step',
+                'address': 'local:ram-emitter',
+                'config': {
+                    'emit': {'comparison_data': 'tree[any]'}
+                },
+                'inputs': {'comparison_data': ['comparison_store']}
+            }
+        }
+
+        wf = Composite(config={'state': compare}, core=CORE)
+        wf.run(1)
+        comparison_results = wf.gather_results()
+        output = comparison_results[("verification_data"),][0]['comparison_data']
+
+        return {'outputs': output[('emitter',)]}
 
 
 class ProcessAttributes(BaseModel):
