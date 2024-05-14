@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 from datetime import datetime
 from typing import *
 
+from debugpy.launcher import output
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,8 +17,9 @@ from biosimulator_processes.data_model.compare_data_model import (
 from verify_api.api_data_model import (
     ODEComparison,
     AvailableProcesses,
-    ProcessRegistrationData)
-from verify_api.src.comparison import ode_comparison, process_comparison
+    ProcessRegistrationData,
+    ODEProcessIntervalResult)
+from verify_api.src.comparison import ode_comparison, process_comparison, generate_ode_process_comparison
 
 
 # logger for this module
@@ -150,15 +152,31 @@ def run_process_comparison(
     operation_id="run-ode-comparison",
     responses={
         404: {"description": "Unable to run comparison"}})
-def run_ode_comparison(
-        biomodel_id: str = Query(..., title="Biomodel ID of to be run by the simulator composite"),
+async def run_ode_comparison(
+        biomodel_id: str = Query(default=None, title="Biomodel ID of to be run by the simulator composite"),
+        sbml_file: Optional[UploadFile] = File(default=None, title="Valid SBML model file to run comparison with."),
         duration: int = Query(..., title="Duration"),
         num_steps: int = Query(..., title="Number of Steps"),
-        # sbml_file: Optional[UploadFile] = File(...),
 ) -> ODEComparison:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:
-        return ODEComparison(duration=duration, num_steps=num_steps, biomodel_id=biomodel_id)
+        comparison = await generate_ode_process_comparison(biomodel_id, duration, num_steps)
+        comparison_outputs = [
+            ODEProcessIntervalResult(
+                interval_id=output.interval_id,
+                copasi_floating_species_concentrations=output.copasi_floating_species_concentrations,
+                tellurium_floating_species_concentrations=output.tellurium_floating_species_concentrations,
+                amici_floating_species_concentrations=output.amici_floating_species_concentrations)
+            for output in comparison.outputs
+        ]
+
+        return ODEComparison(
+            duration=comparison.duration,
+            num_steps=comparison.num_steps,
+            biomodel_id=comparison.biomodel_id,
+            timestamp=comparison.timestamp,
+            outputs=comparison_outputs)
+
     except AssertionError as e:
         logger.warning(f'failed to run simulator comparison composite: {str(e)}')
         raise HTTPException(status_code=404, detail="Parameters not valid.")

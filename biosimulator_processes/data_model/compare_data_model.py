@@ -23,42 +23,6 @@ from biosimulator_processes.data_model import _BaseModel as BaseModel, _BaseClas
 from biosimulator_processes import CORE
 
 
-
-"""
-Such engineering should be performed by an expeditionary of semantic unity, using 
-vocabulary as their protection. The Explorer is truly that: unafraid to step outside of
-the unifying 'glossary' in the name of expanding it. Semantics are of both great
-use and immense terror to the Explorer. The Explorer firmly understands and believes 
-these worldly facts. 
-
-
-For example: 
-
-result = ComparisonResults(
-            10, 
-            20, 
-            'BIOMD0000023', 
-            [
-                SimulatorResult(
-                    my_process, 
-                    copasi, 
-                    [
-                        IntervalResult(
-                            0, 
-                            [
-                                ResultData('T', 2.9, 0.7)
-                            ]
-                    ]
-                )
-            ]
-
-"""
-
-
-# TODO: Transpose data frame and make col vectors for each param, where the index is param name,
-    # and cols are simulator id.
-
-
 class ParamIntervalOutputData(BaseModel):
     param_name: str
     value: float
@@ -143,6 +107,12 @@ class ODEIntervalResult(_BaseClass):
 
 @dataclass
 class ODEComparisonResult(_BaseClass):
+    duration: int
+    num_steps: int
+    biomodel_id: str
+    timestamp: str
+    outputs: Optional[List[ODEIntervalResult]] = None
+
     def __init__(self, duration: int, num_steps: int, biomodel_id: str):
         super().__init__()
         self.duration = duration
@@ -156,71 +126,18 @@ class ODEComparisonResult(_BaseClass):
         return str(datetime.now()).replace(' ', '_').replace(':', '-').replace('.', '-')
 
     def _set_outputs(self):
-        return self.generate_ode_interval_outputs(
+        return self._generate_ode_interval_outputs(
             self.duration,
             self.num_steps,
             self.biomodel_id)
 
-    def generate_ode_interval_outputs(self, duration: int, n_steps: int, biomodel_id: str) -> List[ODEIntervalResult]:
-        def _generate_ode_interval_results(duration: int, n_steps: int, biomodel_id: str) -> List[ODEIntervalResult]:
-            results_dict = self.generate_ode_comparison(biomodel_id, duration)
-            simulator_names = ['copasi', 'tellurium', 'amici']
-            interval_results = []
+    @staticmethod
+    def _generate_ode_interval_outputs(duration: int, n_steps: int, biomodel_id: str) -> List[ODEIntervalResult]:
+        return generate_ode_interval_results(duration, n_steps, biomodel_id)
 
-            for global_time_index, interval_result_data in enumerate(results_dict['outputs']):
-                interval_config = {
-                    'interval_id': float(global_time_index),
-                    'time': interval_result_data['time']
-                }
-
-                for k, v in interval_result_data.items():
-                    for simulator_name in simulator_names:
-                        if simulator_name in k:
-                            interval_config[f'{simulator_name}_floating_species_concentrations'] = v
-
-                interval_result = ODEIntervalResult(**interval_config)
-                interval_results.append(interval_result)
-
-            return interval_results
-
-        return _generate_ode_interval_results(duration, n_steps, biomodel_id)
-
-    @classmethod
-    def generate_ode_comparison(cls, biomodel_id: str, dur: int) -> Dict:
-        """Run the `compare_ode_step` composite and return data which encapsulates another composite
-            workflow specified by dir.
-
-            Args:
-                biomodel_id:`str`: A Valid Biomodel ID.
-                dur:`int`: duration of the internal composite simulation.
-
-            Returns:
-                `Dict` of simulation comparison results like `{'outputs': {...etc}}`
-        """
-        compare = {
-            'compare_ode': {
-                '_type': 'step',
-                'address': 'local:compare_ode_step',
-                'config': {'biomodel_id': biomodel_id, 'duration': dur},
-                'inputs': {},
-                'outputs': {'comparison_data': ['comparison_store']}
-            },
-            'verification_data': {
-                '_type': 'step',
-                'address': 'local:ram-emitter',
-                'config': {
-                    'emit': {'comparison_data': 'tree[any]'}
-                },
-                'inputs': {'comparison_data': ['comparison_store']}
-            }
-        }
-
-        wf = Composite(config={'state': compare}, core=CORE)
-        wf.run(1)
-        comparison_results = wf.gather_results()
-        output = comparison_results[("verification_data"),][0]['comparison_data']
-
-        return {'outputs': output[('emitter',)]}
+    @staticmethod
+    def _generate_ode_comparison(biomodel_id: str, dur: int) -> Dict:
+        return generate_ode_comparison(biomodel_id, dur)
 
 
 class ProcessAttributes(BaseModel):
@@ -358,3 +275,61 @@ class DocumentFactory:
 
         """
         return ComparisonDocument(**configuration)
+
+
+def generate_ode_interval_results(duration: int, n_steps: int, biomodel_id: str) -> List[ODEIntervalResult]:
+    results_dict = generate_ode_comparison(biomodel_id, duration)
+    simulator_names = ['copasi', 'tellurium', 'amici']
+    interval_results = []
+
+    for global_time_index, interval_result_data in enumerate(results_dict['outputs']):
+        interval_config = {
+            'interval_id': float(global_time_index),
+            'time': interval_result_data['time']
+        }
+
+        for k, v in interval_result_data.items():
+            for simulator_name in simulator_names:
+                if simulator_name in k:
+                    interval_config[f'{simulator_name}_floating_species_concentrations'] = v
+
+        interval_result = ODEIntervalResult(**interval_config)
+        interval_results.append(interval_result)
+
+    return interval_results
+
+# TODO: Transpose data frame and make col vectors for each param, where the index is param name,
+    # and cols are simulator id.
+
+
+def generate_ode_comparison(biomodel_id: str, dur: int) -> Dict:
+    """Run the `compare_ode_step` composite and return data which encapsulates another composite
+        workflow specified by dir.
+        Args:
+            biomodel_id:`str`: A Valid Biomodel ID.
+            dur:`int`: duration of the internal composite simulation.
+        Returns:
+            `Dict` of simulation comparison results like `{'outputs': {...etc}}`
+    """
+    compare = {
+        'compare_ode': {
+            '_type': 'step',
+            'address': 'local:compare_ode_step',
+            'config': {'biomodel_id': biomodel_id, 'duration': dur},
+            'inputs': {},
+            'outputs': {'comparison_data': ['comparison_store']}
+        },
+        'verification_data': {
+            '_type': 'step',
+            'address': 'local:ram-emitter',
+            'config': {
+                'emit': {'comparison_data': 'tree[any]'}
+            },
+            'inputs': {'comparison_data': ['comparison_store']}
+        }
+    }
+    wf = Composite(config={'state': compare}, core=CORE)
+    wf.run(1)
+    comparison_results = wf.gather_results()
+    output = comparison_results[("verification_data"),][0]['comparison_data']
+    return {'outputs': output[('emitter',)]}

@@ -112,7 +112,7 @@ paths:
       parameters:
       - name: biomodel_id
         in: query
-        required: true
+        required: false
         schema:
           type: string
           title: Biomodel ID of to be run by the simulator composite
@@ -128,6 +128,13 @@ paths:
         schema:
           type: integer
           title: Number of Steps
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/Body_run-ode-comparison'
+              title: Body
       responses:
         '200':
           description: Successful Response
@@ -166,6 +173,16 @@ components:
       required:
       - sbml_model_file
       title: Body_get-process-attributes
+    Body_run-ode-comparison:
+      properties:
+        sbml_file:
+          anyOf:
+          - type: string
+            format: binary
+          - type: 'null'
+          title: Valid SBML model file to run comparison with.
+      type: object
+      title: Body_run-ode-comparison
     HTTPValidationError:
       properties:
         detail:
@@ -197,10 +214,65 @@ components:
       title: IntervalOutputData
       description: Attribute of Simulator Process Output
     ODEComparison:
-      properties: {}
+      properties:
+        duration:
+          type: integer
+          title: Duration
+        num_steps:
+          type: integer
+          title: Num Steps
+        biomodel_id:
+          type: string
+          title: Biomodel Id
+        timestamp:
+          type: string
+          title: Timestamp
+        outputs:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/ODEProcessIntervalResult'
+            type: array
+          - type: 'null'
+          title: Outputs
       type: object
+      required:
+      - duration
+      - num_steps
+      - biomodel_id
+      - timestamp
+      - outputs
       title: ODEComparison
-      description: ODEComparison()
+    ODEProcessIntervalResult:
+      properties:
+        interval_id:
+          type: number
+          title: Interval Id
+        copasi_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Copasi Floating Species Concentrations
+        tellurium_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Tellurium Floating Species Concentrations
+        amici_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Amici Floating Species Concentrations
+        time:
+          type: number
+          title: Time
+      type: object
+      required:
+      - interval_id
+      - copasi_floating_species_concentrations
+      - tellurium_floating_species_concentrations
+      - amici_floating_species_concentrations
+      - time
+      title: ODEProcessIntervalResult
     ParameterMSE:
       properties:
         param_name:
@@ -265,7 +337,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_13-00-11-542661
+          default: 2024-05-14_13-23-21-214572
       type: object
       required:
       - duration
