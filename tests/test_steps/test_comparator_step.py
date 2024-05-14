@@ -1,7 +1,7 @@
 import json
 import os
 
-from process_bigraph import pp
+from process_bigraph import pp, pf
 
 from biosimulator_processes.data_model import BaseModel
 from verify_api.src.comparison import generate_ode_comparison, generate_ode_comparison_result_object
@@ -25,12 +25,40 @@ from verify_api.src.comparison import generate_ode_comparison, generate_ode_comp
 from typing import *
 
 
-class ODEIntervalResult(BaseModel):
+class IntervalResult(BaseModel):
     interval_id: float
-    copasi_floating_species_concentrations: Dict[str, float]
-    tellurium_floating_species_concentrations: Dict[str, float]
-    amici_floating_species_concentrations: Dict[str, float]
-    time: float
+
+
+def generate_ode_interval_results(duration: int, n_steps: int, biomodel_id: str) -> List[IntervalResult]:
+    class ODEIntervalResult(IntervalResult):
+        interval_id: float
+        copasi_floating_species_concentrations: Dict[str, float]
+        tellurium_floating_species_concentrations: Dict[str, float]
+        amici_floating_species_concentrations: Dict[str, float]
+        time: float
+
+    def _generate_ode_interval_results(duration: int, n_steps: int, biomodel_id: str) -> List[ODEIntervalResult]:
+        results_dict = generate_ode_comparison(biomodel_id, duration)
+        simulator_names = ['copasi', 'tellurium', 'amici']
+        interval_results = []
+
+        for global_time_index, interval_result_data in enumerate(results_dict['outputs']):
+            interval_config = {
+                'interval_id': float(global_time_index),
+                'time': interval_result_data['time']
+            }
+
+            for k, v in interval_result_data.items():
+                for simulator_name in simulator_names:
+                    if simulator_name in k:
+                        interval_config[f'{simulator_name}_floating_species_concentrations'] = v
+
+            interval_result = ODEIntervalResult(**interval_config)
+            interval_results.append(interval_result)
+
+        return interval_results
+
+    return _generate_ode_interval_results(duration, n_steps, biomodel_id)
 
 
 def test_step():
@@ -42,31 +70,19 @@ def test_step():
     results_dict = generate_ode_comparison(biomodel_id, duration)
     results_fp = os.path.join(os.getcwd(), 'test_outputs', 'test_ode_comparator_step_result.txt')
 
-    interval_results: List[ODEIntervalResult] = []
-    simulator_names = ['copasi', 'tellurium', 'amici']
-    for global_time_index, interval_result_data in enumerate(results_dict['outputs']):
-        print(global_time_index)
-        print(interval_result_data, interval_result_data.keys())
+    interval_results = generate_ode_interval_results(duration, n_steps, biomodel_id)
 
-        interval_config = {}
-        for k, v in interval_result_data.items():
-            for simulator_name in simulator_names:
-                if simulator_name in k:
-                    interval_config[f'{simulator_name}_floating_species_concentrations'] = v
+    outs = ''
+    for i, v in enumerate(interval_results):
+        print(i)
+        pp(v)
+        outs += f'{i}\n{pf(v)}\n\n'
 
-        interval_id = float(global_time_index)
+    with open('/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/test_outputs' + '/test_ode_comparator_step_result.txt', 'w') as f:
+        f.write(outs)
+        f.close()
 
-        interval_result = ODEIntervalResult(**interval_config, interval_id=interval_id)
-        interval_results.append(interval_result)
 
-    pp(interval_results)
-
-    """interval_result = ODEIntervalResult(
-        interval_id=float(global_time_index),
-        copasi_floating_species_concentrations=interval_result_data['copasi_floating_species_concentrations'],
-        amici_floating_species_concentrations=interval_result_data['amici_floating_species_concentrations'],
-        tellurium_floating_species_concentrations=interval_result_data['tellurium_floating_species_concentrations'],
-    )"""
 
 
 def test_step_object(verbose=False):
