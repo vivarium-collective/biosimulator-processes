@@ -3,7 +3,7 @@ from biosimulator_processes.data_model import BaseModel
 
 
 class ProcessRegistrationData(BaseModel):
-    process_registration_id: str
+    reg_id: str
 
 
 class AvailableProcesses(BaseModel):

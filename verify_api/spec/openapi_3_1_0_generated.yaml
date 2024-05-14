@@ -302,7 +302,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-13_21-56-49-916954
+          default: 2024-05-13_22-00-12-262201
       type: object
       required:
       - duration
@@ -352,12 +352,12 @@ components:
       description: Attribute of Process Fitness Score
     ProcessRegistrationData:
       properties:
-        process_registration_id:
+        reg_id:
           type: string
-          title: Process Registration Id
+          title: Reg Id
       type: object
       required:
-      - process_registration_id
+      - reg_id
       title: ProcessRegistrationData
     SimulatorProcessOutput:
       properties:
