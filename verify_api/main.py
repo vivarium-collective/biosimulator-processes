@@ -148,15 +148,15 @@ def run_process_comparison(
 @app.post(
     "/run-ode-composite-comparison",
     response_model=ODEComparison,
-    name="Run a Simulator Comparison",
+    name="Run an ODE-simulator comparison composition`",
     operation_id="run-ode-comparison",
     responses={
         404: {"description": "Unable to run comparison"}})
 async def run_ode_comparison(
         biomodel_id: Optional[str] = Query(default=None, description="Biomodel ID of to be run by the simulator composite"),
         sbml_file: Optional[UploadFile] = File(default=None, description="Valid SBML model file with which to run the ode comparison."),
-        duration: int = Query(..., title="Duration"),
-        num_steps: int = Query(..., title="Number of Steps"),
+        duration: int = Query(..., description="Duration of composite simulation"),
+        num_steps: int = Query(..., description="Number of Steps"),
 ) -> ODEComparison:
     # TODO: Add fallback of biosimulations 1.0 for simulators not yet implemented.
     try:

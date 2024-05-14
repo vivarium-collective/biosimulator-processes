@@ -107,7 +107,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /run-ode-composite-comparison:
     post:
-      summary: Run A Simulator Comparison
+      summary: Run An Ode-Simulator Comparison Composition`
       operationId: run-ode-comparison
       parameters:
       - name: biomodel_id
@@ -125,13 +125,17 @@ paths:
         required: true
         schema:
           type: integer
+          description: Duration of composite simulation
           title: Duration
+        description: Duration of composite simulation
       - name: num_steps
         in: query
         required: true
         schema:
           type: integer
-          title: Number of Steps
+          description: Number of Steps
+          title: Num Steps
+        description: Number of Steps
       requestBody:
         content:
           multipart/form-data:
@@ -342,7 +346,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_13-30-23-027345
+          default: 2024-05-14_13-33-37-123726
       type: object
       required:
       - duration
