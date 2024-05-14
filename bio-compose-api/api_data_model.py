@@ -1,5 +1,6 @@
 from typing import *
 from biosimulator_processes.data_model import BaseModel
+from biosimulator_processes.data_model.compare_data_model import ODEComparisonResult
 
 
 class ProcessRegistrationData(BaseModel):

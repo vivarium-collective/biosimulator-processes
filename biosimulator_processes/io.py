@@ -5,7 +5,10 @@ import zipfile as zf
 import os
 
 
-def fetch_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -> str:
+async def fetch_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -> str:
+    """return the filepath of a SBML file that has been uploaded to `save_dir` which
+        was retrieved from `biomodel_id` and the biomodels rest api.
+    """
     url = f'https://www.ebi.ac.uk/biomodels/search/download?models={biomodel_id}'
     headers = {'accept': '*/*'}
     response = requests.get(url, headers=headers)
