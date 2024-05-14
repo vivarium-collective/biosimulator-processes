@@ -1,0 +1,483 @@
+openapi: 3.1.0
+info:
+  title: verification-api
+  version: 1.0.0
+paths:
+  /:
+    get:
+      summary: Root
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /get-available-processes:
+    get:
+      summary: Get Available Processes
+      operationId: get-available-processes
+      responses:
+        '200':
+          description: The available processes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableProcesses'
+        '404':
+          description: Unable to get the available processes.
+  /get-process-attributes:
+    post:
+      summary: Get Process Attributes
+      operationId: get-process-attributes
+      parameters:
+      - name: biomodel_id
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Biomodel identifier
+          title: Biomodel Id
+        description: Biomodel identifier
+      - name: process_name
+        in: query
+        required: true
+        schema:
+          type: string
+          title: 'Name of the process type; i.e: copasi, tellurium, etc.'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/Body_get-process-attributes'
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessAttributes'
+        '404':
+          description: Unable to get attributes for specified simulator process.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /upload-sbml-file:
+    post:
+      summary: Upload Sbml File
+      operationId: upload-sbml-file
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload-sbml-file'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadFileResponse'
+        '404':
+          description: Unable to upload the SBML file.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /run-simulator-composite-comparison:
+    post:
+      summary: Generate A Comparison Of Simulator Process Outputs
+      operationId: run-process-comparison
+      parameters:
+      - name: biomodel_id
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Biomodel ID of to be run by the simulator composite
+          title: Biomodel Id
+        description: Biomodel ID of to be run by the simulator composite
+      - name: simulators
+        in: query
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+          description: Simulators to compare within a composition
+          title: Simulators
+        description: Simulators to compare within a composition
+      - name: duration
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Duration
+          title: Duration
+        description: Duration
+      - name: num_steps
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Number of Steps
+          title: Num Steps
+        description: Number of Steps
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessComparisonResult'
+        '404':
+          description: Unable to run comparison
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /run-ode-composite-comparison:
+    post:
+      summary: Run A Simulator Comparison
+      operationId: run-ode-comparison
+      parameters:
+      - name: biomodel_id
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Biomodel ID of to be run by the simulator composite
+          title: Biomodel Id
+        description: Biomodel ID of to be run by the simulator composite
+      - name: duration
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Simulation duration
+          title: Duration
+        description: Simulation duration
+      - name: num_steps
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Number of steps to be recorded in the simulation
+          title: Num Steps
+        description: Number of steps to be recorded in the simulation
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODEComparisonResult'
+        '404':
+          description: Unable to run comparison
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    AvailableProcesses:
+      properties:
+        process_names:
+          items:
+            type: string
+          type: array
+          title: Process Names
+      type: object
+      required:
+      - process_names
+      title: AvailableProcesses
+    Body_get-process-attributes:
+      properties:
+        sbml_model_file:
+          type: string
+          format: binary
+          title: Sbml Model File
+          description: Valid SBML model file
+      type: object
+      title: Body_get-process-attributes
+    Body_upload-sbml-file:
+      properties:
+        sbml_model_file:
+          type: string
+          format: binary
+          title: Sbml Model File
+          description: Valid SBML model file
+      type: object
+      required:
+      - sbml_model_file
+      title: Body_upload-sbml-file
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    IntervalOutputData:
+      properties:
+        param_name:
+          type: string
+          title: Param Name
+        value:
+          type: number
+          title: Value
+        time_id:
+          type: number
+          title: Time Id
+        mse:
+          $ref: '#/components/schemas/ParameterMSE'
+      type: object
+      required:
+      - param_name
+      - value
+      - time_id
+      - mse
+      title: IntervalOutputData
+      description: Attribute of Simulator Process Output
+    ODEComparisonResult:
+      properties:
+        duration:
+          type: integer
+          title: Duration
+        num_steps:
+          type: integer
+          title: Num Steps
+        biomodel_id:
+          type: string
+          title: Biomodel Id
+        timestamp:
+          type: string
+          title: Timestamp
+        outputs:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/ODEIntervalResult'
+            type: array
+          - type: 'null'
+          title: Outputs
+      type: object
+      required:
+      - duration
+      - num_steps
+      - biomodel_id
+      - timestamp
+      title: ODEComparisonResult
+    ODEIntervalResult:
+      properties:
+        interval_id:
+          type: number
+          title: Interval Id
+        copasi_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Copasi Floating Species Concentrations
+        tellurium_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Tellurium Floating Species Concentrations
+        amici_floating_species_concentrations:
+          additionalProperties:
+            type: number
+          type: object
+          title: Amici Floating Species Concentrations
+        time:
+          type: number
+          title: Time
+      type: object
+      required:
+      - interval_id
+      - copasi_floating_species_concentrations
+      - tellurium_floating_species_concentrations
+      - amici_floating_species_concentrations
+      - time
+      title: ODEIntervalResult
+    ParameterMSE:
+      properties:
+        param_name:
+          type: string
+          title: Param Name
+        value:
+          type: number
+          title: Value
+        mean:
+          type: number
+          title: Mean
+        process_id:
+          type: string
+          title: Process Id
+      type: object
+      required:
+      - param_name
+      - value
+      - mean
+      - process_id
+      title: ParameterMSE
+      description: Attribute of Process Parameter RMSE
+    ProcessAttributes:
+      properties:
+        name:
+          type: string
+          title: Name
+        initial_state:
+          type: object
+          title: Initial State
+        input_schema:
+          type: object
+          title: Input Schema
+        output_schema:
+          type: object
+          title: Output Schema
+      type: object
+      required:
+      - name
+      - initial_state
+      - input_schema
+      - output_schema
+      title: ProcessAttributes
+    ProcessComparisonResult:
+      properties:
+        duration:
+          type: integer
+          title: Duration
+        num_steps:
+          type: integer
+          title: Num Steps
+        simulators:
+          items:
+            type: string
+          type: array
+          title: Simulators
+        outputs:
+          items:
+            $ref: '#/components/schemas/SimulatorProcessOutput'
+          type: array
+          title: Outputs
+        timestamp:
+          type: string
+          title: Timestamp
+          default: 2024-05-14_14-34-32-484942
+      type: object
+      required:
+      - duration
+      - num_steps
+      - simulators
+      - outputs
+      title: ProcessComparisonResult
+      description: Generic class inherited for all process comparisons.
+    ProcessFitnessScore:
+      properties:
+        process_id:
+          type: string
+          title: Process Id
+        error:
+          type: number
+          title: Error
+        rmse_values:
+          items:
+            $ref: '#/components/schemas/ProcessParameterRMSE'
+          type: array
+          title: Rmse Values
+      type: object
+      required:
+      - process_id
+      - error
+      - rmse_values
+      title: ProcessFitnessScore
+      description: Attribute of Simulator Process Output Based on the list of interval
+        results
+    ProcessParameterRMSE:
+      properties:
+        process_id:
+          type: string
+          title: Process Id
+        param_id:
+          type: string
+          title: Param Id
+        value:
+          type: number
+          title: Value
+      type: object
+      required:
+      - process_id
+      - param_id
+      - value
+      title: ProcessParameterRMSE
+      description: Attribute of Process Fitness Score
+    SimulatorProcessOutput:
+      properties:
+        process_id:
+          type: string
+          title: Process Id
+        simulator:
+          type: string
+          title: Simulator
+        data:
+          items:
+            $ref: '#/components/schemas/IntervalOutputData'
+          type: array
+          title: Data
+        fitness_score:
+          $ref: '#/components/schemas/ProcessFitnessScore'
+      type: object
+      required:
+      - process_id
+      - simulator
+      - data
+      - fitness_score
+      title: SimulatorProcessOutput
+      description: Attribute of Process Comparison Result
+    UploadFileResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+        file_location:
+          type: string
+          title: File Location
+      type: object
+      required:
+      - message
+      - file_location
+      title: UploadFileResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
