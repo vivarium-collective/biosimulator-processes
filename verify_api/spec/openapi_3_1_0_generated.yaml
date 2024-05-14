@@ -200,6 +200,7 @@ components:
       properties: {}
       type: object
       title: ODEComparison
+      description: ODEComparison()
     ParameterMSE:
       properties:
         param_name:
@@ -264,7 +265,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_12-58-30-315423
+          default: 2024-05-14_13-00-11-542661
       type: object
       required:
       - duration
