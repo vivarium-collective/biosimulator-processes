@@ -143,13 +143,7 @@ class ODEIntervalResult(_BaseClass):
 
 @dataclass
 class ODEComparisonResult(_BaseClass):
-    duration: int
-    num_steps: int
-    biomodel_id: str
-    timestamp: str
-    outputs: Optional[List[ODEIntervalResult]] = None
-
-    def __init__(self, duration, num_steps, biomodel_id):
+    def __init__(self, duration: int, num_steps: int, biomodel_id: str):
         super().__init__()
         self.duration = duration
         self.num_steps = num_steps

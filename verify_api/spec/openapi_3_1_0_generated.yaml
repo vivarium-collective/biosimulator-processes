@@ -197,64 +197,9 @@ components:
       title: IntervalOutputData
       description: Attribute of Simulator Process Output
     ODEComparison:
-      properties:
-        duration:
-          type: integer
-          title: Duration
-        num_steps:
-          type: integer
-          title: Num Steps
-        biomodel_id:
-          type: string
-          title: Biomodel Id
-        timestamp:
-          type: string
-          title: Timestamp
-        outputs:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/ODEIntervalResult'
-            type: array
-          - type: 'null'
-          title: Outputs
+      properties: {}
       type: object
-      required:
-      - duration
-      - num_steps
-      - biomodel_id
-      - timestamp
       title: ODEComparison
-    ODEIntervalResult:
-      properties:
-        interval_id:
-          type: number
-          title: Interval Id
-        copasi_floating_species_concentrations:
-          additionalProperties:
-            type: number
-          type: object
-          title: Copasi Floating Species Concentrations
-        tellurium_floating_species_concentrations:
-          additionalProperties:
-            type: number
-          type: object
-          title: Tellurium Floating Species Concentrations
-        amici_floating_species_concentrations:
-          additionalProperties:
-            type: number
-          type: object
-          title: Amici Floating Species Concentrations
-        time:
-          type: number
-          title: Time
-      type: object
-      required:
-      - interval_id
-      - copasi_floating_species_concentrations
-      - tellurium_floating_species_concentrations
-      - amici_floating_species_concentrations
-      - time
-      title: ODEIntervalResult
     ParameterMSE:
       properties:
         param_name:
@@ -319,7 +264,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          default: 2024-05-14_12-55-55-114382
+          default: 2024-05-14_12-58-30-315423
       type: object
       required:
       - duration
