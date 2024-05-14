@@ -66,7 +66,7 @@ async def root():
 def get_available_processes() -> AvailableProcesses:
     processes = list(CORE.process_registry.registry.keys())
     registration_data = [ProcessRegistrationData(reg_id=p) for p in processes]
-    return AvailableProcesses(names=processes)
+    return AvailableProcesses(names=registration_data)
 
 
 @app.get(
