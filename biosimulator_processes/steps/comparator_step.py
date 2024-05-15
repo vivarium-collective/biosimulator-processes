@@ -203,16 +203,20 @@ def populate_comparison_matrix(ode_comparison_results: ODEComparisonResult):
 # TODO: normalize data prior
 
 
+def calculate_comparison(a, b):
+    return np.sum((a - b) ** 2)
+
+
 def calculate_comparison_scores(comparison_matrix):
-    return [np.sum(comparison_matrix[i]) for i in range(3)]
+    return [np.sum(comparison_matrix[i]) / 3 for i in range(3)]
 
 
-def construct_process_interval_matrix(outputs_copasi, outputs_amici, outputs_tellurium, time_id, rtol, atol):
-    comparison_matrix = np.zeros((3, 3), dtype=bool)
+def construct_process_interval_matrix(outputs_copasi, outputs_amici, outputs_tellurium, time_id, rtol=None, atol=None) -> np.ndarray:
+    comparison_matrix = np.zeros((3, 3), dtype=float)
 
-    comparison_matrix[0, 1] = compare_simulators(outputs_copasi, outputs_tellurium, rtol, atol)
-    comparison_matrix[0, 2] = compare_simulators(outputs_copasi, outputs_amici, rtol, atol)
-    comparison_matrix[1, 2] = compare_simulators(outputs_tellurium, outputs_amici, rtol, atol)
+    comparison_matrix[0, 1] = calculate_comparison(outputs_copasi, outputs_tellurium)
+    comparison_matrix[0, 2] = calculate_comparison(outputs_copasi, outputs_amici)
+    comparison_matrix[1, 2] = calculate_comparison(outputs_tellurium, outputs_amici)
     comparison_matrix[1, 0] = comparison_matrix[0, 1]
     comparison_matrix[2, 0] = comparison_matrix[0, 2]
     comparison_matrix[2, 1] = comparison_matrix[1, 2]
