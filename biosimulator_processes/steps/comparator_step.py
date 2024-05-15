@@ -13,7 +13,7 @@ import numpy as np
 
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model import BaseModel
-from biosimulator_processes.data_model.compare_data_model import ParameterMSE
+from biosimulator_processes.data_model.compare_data_model import ParameterMSE, ODEComparisonResult
 from biosimulator_processes.io import fetch_sbml_file
 
 
@@ -57,6 +57,27 @@ def calculate_mse_for_simulator_param(values: Dict[str, float], param_name: str)
     process_names = list(values.keys())
     mse_dict = dict(zip(process_names, mse_vals.tolist()))
     return [ParameterMSE(param_name=param_name, value=mse_value, mean=mean, process_id=sim_name) for sim_name, mse_value in mse_dict.items()]
+
+
+def comparison(a, b, rTol, aTol) -> int:
+    return int(np.allclose(a, b, rTol, aTol))
+
+
+def calc_comparison(a, b):
+    return (a - b) ** 2
+
+
+def generate_pairwise_comparison(data):
+    """
+        Args:
+            data:`np.ndarray`: shape of (n, 2) where 2 represents the outputs to two simulators.
+
+    """
+    comparison_data = {}
+    transposed = data.transpose()
+    for i, param_compare in enumerate(transposed):
+        comparison_data['param_' + str(i)] = calc_comparison(*param_compare)
+    return comparison_data
 
 
 class SimulatorComparatorStep(Step):
@@ -168,5 +189,57 @@ class ODEComparatorStep(SimulatorComparatorStep):
     def _run_composition(self, comp: Composite) -> Dict:
         comp.run(self.duration)
         return comp.gather_results()
+
+
+def compare_simulators(output1, output2, rtol=1e-2, atol=1e-3):
+    return np.allclose(output1, output2, rtol=rtol, atol=atol)
+
+
+def populate_comparison_matrix(ode_comparison_results: ODEComparisonResult):
+    for interval_output in ode_comparison_results.outputs:
+        pass
+
+
+# TODO: normalize data prior
+
+
+def calculate_comparison_scores(comparison_matrix):
+    return [np.sum(comparison_matrix[i]) for i in range(3)]
+
+
+def construct_process_interval_matrix(outputs_copasi, outputs_amici, outputs_tellurium, time_id, rtol, atol):
+    comparison_matrix = np.zeros((3, 3), dtype=bool)
+
+    comparison_matrix[0, 1] = compare_simulators(outputs_copasi, outputs_tellurium, rtol, atol)
+    comparison_matrix[0, 2] = compare_simulators(outputs_copasi, outputs_amici, rtol, atol)
+    comparison_matrix[1, 2] = compare_simulators(outputs_tellurium, outputs_amici, rtol, atol)
+    comparison_matrix[1, 0] = comparison_matrix[0, 1]
+    comparison_matrix[2, 0] = comparison_matrix[0, 2]
+    comparison_matrix[2, 1] = comparison_matrix[1, 2]
+
+    np.fill_diagonal(comparison_matrix, True)
+    return comparison_matrix
+
+
+def generate_process_comparison_scores(
+        outputs_copasi,
+        outputs_amici,
+        outputs_tellurium,
+        time_id,
+        rtol=1e-2,
+        atol=1e-3):
+    # TODO: use ODEComparisonResult to populate args
+    comparison_matrix = construct_process_interval_matrix(
+        outputs_copasi,
+        outputs_amici,
+        outputs_tellurium,
+        time_id,
+        rtol,
+        atol)
+
+    scores = calculate_comparison_scores(comparison_matrix)
+    print("Scores for each simulator:", scores)
+
+    return scores
 
 
