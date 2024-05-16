@@ -8,22 +8,6 @@ import matplotlib.pyplot as plt
 from biosimulator_processes.data_model.compare_data_model import ODEProcessIntervalComparison
 
 
-def calculate_mse(a, b):
-    return np.mean((a - b) ** 2)
-
-
-def calculate_rmse(a, b):
-    return np.sqrt(calculate_mse(a, b))
-
-
-def calculate_inner_product(a, b) -> np.ndarray:
-    return np.dot(a, b)
-
-
-def calculate_outer_product(a, b) -> np.ndarray:
-    return np.outer(a, b)
-
-
 def generate_ode_process_interval_comparison_data(outputs: list[np.array], time_id: int) -> ODEProcessIntervalComparison:
     simulators = ['copasi', 'tellurium', 'amici']
 
@@ -92,3 +76,19 @@ def plot_ode_process_comparison(
 
     plt.tight_layout()
     plt.show()
+
+
+def calculate_mse(a, b):
+    return np.mean((a - b) ** 2)
+
+
+def calculate_rmse(a, b):
+    return np.sqrt(calculate_mse(a, b))
+
+
+def calculate_inner_product(a, b) -> np.ndarray:
+    return np.dot(a, b)
+
+
+def calculate_outer_product(a, b) -> np.ndarray:
+    return np.outer(a, b)
