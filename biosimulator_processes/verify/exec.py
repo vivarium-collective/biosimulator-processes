@@ -1,14 +1,35 @@
-from typing import Dict
+from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from biosimulator_processes.data_model.compare_data_model import ODEProcessIntervalComparison
+from biosimulator_processes.data_model.compare_data_model import ODEProcessIntervalComparison, ODEComparisonResult
 
 
-def generate_ode_process_interval_comparison_data(outputs: list[np.array], time_id: int) -> ODEProcessIntervalComparison:
+def generate_interval_comparisons(ode_process_comparison_output: ODEComparisonResult):
+    all_comparison_data = []
+
+    for interval_output in ode_process_comparison_output.outputs:
+        time_id = interval_output.interval_id
+        interval_output_attributes = vars(interval_output)
+
+        concentrations_data = []
+        for output_key, output_value in interval_output_attributes.items():
+            if 'concentrations' in output_key:
+                process_interval_output = np.array(list(interval_output_attributes[output_key].values()))
+                concentrations_data.append(process_interval_output)
+            if isinstance(output_value, dict):
+                process_outputs = list(output_value.values())
+
+        interval_comparison = generate_ode_process_interval_comparison_data(outputs=concentrations_data, time_id=time_id)
+        all_comparison_data.append(interval_comparison)
+
+    return all_comparison_data
+
+
+def generate_ode_process_interval_comparison_data(outputs: list[np.array], time_id: Union[float, int]) -> ODEProcessIntervalComparison:
     simulators = ['copasi', 'tellurium', 'amici']
 
     mse_matrix = np.zeros((3, 3), dtype=float)
@@ -45,7 +66,8 @@ def plot_ode_process_comparison(
         mse_df: pd.DataFrame,
         rmse_df: pd.DataFrame,
         inner_product_df: pd.DataFrame,
-        outer_product_matrices: Dict
+        outer_product_matrices: Dict,
+        show_outer=False
         ) -> None:
     # plot heatmaps for MSE, RMSE, and inner product matrices
     plt.figure(figsize=(15, 5))
@@ -65,17 +87,18 @@ def plot_ode_process_comparison(
     plt.tight_layout()
     plt.show()
 
-    # visualize outer product matrices
-    fig, axes = plt.subplots(3, 3, figsize=(15, 15))
-    for idx, ((sim1, sim2), matrix) in enumerate(outer_product_matrices.items()):
-        ax = axes[idx // 3, idx % 3]
-        sns.heatmap(matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax, cbar=True)
-        ax.set_title(f"Outer Product: {sim1} vs {sim2}")
-        ax.set_xlabel(sim2)
-        ax.set_ylabel(sim1)
+    if show_outer:
+        # visualize outer product matrices
+        fig, axes = plt.subplots(3, 3, figsize=(15, 15))
+        for idx, ((sim1, sim2), matrix) in enumerate(outer_product_matrices.items()):
+            ax = axes[idx // 3, idx % 3]
+            sns.heatmap(matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax, cbar=True)
+            ax.set_title(f"Outer Product: {sim1} vs {sim2}")
+            ax.set_xlabel(sim2)
+            ax.set_ylabel(sim1)
 
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.show()
 
 
 def calculate_mse(a, b):
