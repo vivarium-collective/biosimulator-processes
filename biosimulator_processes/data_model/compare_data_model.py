@@ -4,10 +4,18 @@ Compare Data Model:
 which reside in a shared compositional space. The global 'state' of this composition
 is agnostic to any summation of values.
 
+
+Such engineering should be performed by an expeditionary of semantic unity, using
+vocabulary as their protection. The Explorer is truly that: unafraid to step outside of
+the unifying 'glossary' in the name of expanding it. Semantics are of both great
+use and immense terror to the Explorer. The Explorer firmly understands and believes
+these worldly facts.
+
 author: Alex Patrie
 license: Apache License, Version 2.0
 date: 04/2024
 """
+
 
 from typing import *
 from abc import ABC
@@ -15,44 +23,13 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 from process_bigraph import Composite, pf
 from pydantic import Field, field_validator
 
 from biosimulator_processes.utils import prepare_single_ode_process_document
 from biosimulator_processes.data_model import _BaseModel as BaseModel, _BaseClass
 from biosimulator_processes import CORE
-
-
-
-"""
-Such engineering should be performed by an expeditionary of semantic unity, using 
-vocabulary as their protection. The Explorer is truly that: unafraid to step outside of
-the unifying 'glossary' in the name of expanding it. Semantics are of both great
-use and immense terror to the Explorer. The Explorer firmly understands and believes 
-these worldly facts. 
-
-
-For example: 
-
-result = ComparisonResults(
-            10, 
-            20, 
-            'BIOMD0000023', 
-            [
-                SimulatorResult(
-                    my_process, 
-                    copasi, 
-                    [
-                        IntervalResult(
-                            0, 
-                            [
-                                ResultData('T', 2.9, 0.7)
-                            ]
-                    ]
-                )
-            ]
-
-"""
 
 
 # TODO: Transpose data frame and make col vectors for each param, where the index is param name,
@@ -130,6 +107,16 @@ class ProcessComparisonResult(BaseModel):
         .replace(' ', '_') \
         .replace(':', '-') \
         .replace('.', '-')
+
+
+# DATA MODEL USED
+@dataclass
+class ODEProcessIntervalComparison(_BaseClass):
+    mse_data: pd.DataFrame
+    rmse_data: pd.DataFrame
+    inner_prod_data: pd.DataFrame
+    outer_prod_data: Dict
+    time_id: int 
 
 
 @dataclass

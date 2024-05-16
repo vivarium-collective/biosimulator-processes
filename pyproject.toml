@@ -36,6 +36,7 @@ tensorstore = "*"
 aiofiles = "*"
 aiobotocore = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+seaborn = "^0.13.2"
 # psutil = "^5.9.8"
 
 [tool.poetry.group.dev.dependencies]
