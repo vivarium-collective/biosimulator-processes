@@ -60,7 +60,8 @@ setup(
         "python-libsbml"  # ==5.20.2",
         "docker>=7.0",
         "toml",
-        "python-libnuml==1.1.6"  # ">=1.0.0"
+        "python-libnuml==1.1.6",  # ">=1.0.0"
+        "seaborn"
     ],
     extras_require={
         "smoldyn": ["smoldyn", "simulariumio"],
