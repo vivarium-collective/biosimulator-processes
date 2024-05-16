@@ -28,3 +28,10 @@ class ODEComparison(BaseModel):
 class UploadFileResponse(BaseModel):
     message: str
     file_location: str
+
+
+class ODEComparisonMatrix(BaseModel):
+    duration: int
+    num_steps: int
+    biomodel_id: str
+    data: Dict
