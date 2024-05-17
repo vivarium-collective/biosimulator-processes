@@ -1,12 +1,18 @@
+"""Comparator Process:
+
+    Here the entrypoint is either a biomodel id or sbml model path.
+"""
+
 from typing import *
+import random
 
 import numpy as np
 from process_bigraph import Process, Step
 
-from biosimulator_processes.data_model.compare_data_model import ComparisonResults, SimulatorResult, IntervalResult
+from biosimulator_processes.io import fetch_sbml_file
 
 
-def mean_squared_error(data: Union[List[float, np.ndarray]]) -> np.ndarray[float]:
+def mean_squared_error(data: Union[List[float], np.ndarray]) -> np.ndarray[float]:
     """Takes in an array of data which represents the results of a composition for a species/param
         at a given interval, averages the values, and then scores each item in the data array with an MSE value
         calculated against the average, returning the MSE scores as an array.
@@ -23,6 +29,15 @@ def mean_squared_error(data: Union[List[float, np.ndarray]]) -> np.ndarray[float
     data_average = np.mean(data)
     return (data - data_average) ** 2
 
+  
+def random_population_selection(population: List, update_population=True) -> List:
+    """Pick a random member of a given population `population` and pop it from the population if
+        update_population is set to True.
+    """
+    index = len(population) - 1
+    rand_i = random.randint(0, index)
+    return population.pop(rand_i) if update_population else population[rand_i]
+
 
 class CompareResults(Step):
     config_schema = {
@@ -30,12 +45,12 @@ class CompareResults(Step):
     }
 
 
-class ODEComparator(Process):
+class ODEComparatorProcess(Process):
     """Process that serves to perform a comparison of ODE-enabled simulator output, particularly
         simulators that are equipped to use CVODE. Such simulators include: COPASI, Tellurium, and AMICI.
     """
     config_schema = {
-        'sbml_model_file': 'string',
+        'biomodel_id': 'string',
         'duration': 'number',
         'num_steps': 'number',
         'simulators': 'list[string]',
@@ -56,7 +71,8 @@ class ODEComparator(Process):
         """
         super().__init__(config, core)
         self.species_context_key = 'floating_species_concentrations'
-        self.simulator_instances = self._set_simulator_instances()
+        model_fp = fetch_sbml_file(self.config['biomodel_id'])
+        self.simulator_instances = self._set_simulator_instances(model_fp)
         self.floating_species_ids = {}
         self.model_parameter_ids = {}
         self.reactions = {}
@@ -126,8 +142,9 @@ class ODEComparator(Process):
 
         return results
 
-    def _set_simulator_instances(self) -> Dict:
+    def _set_simulator_instances(self, model_fp) -> Dict:
         simulator_instances = {}
+        simulators = ['tellurium', 'copasi']
         for simulator in self.config['simulators']:
             module_name = simulator + '_process'
             class_name = simulator.replace(simulator[0], simulator[0].upper()) + 'Process'
@@ -136,6 +153,6 @@ class ODEComparator(Process):
             simulator_instance = getattr(simulator_module, class_name)
             simulator_instances[simulator] = simulator_instance(config={
                 'model': {
-                    'model_source': self.config['sbml_model_file']}
+                    'model_source': model_fp}
             })
         return simulator_instances

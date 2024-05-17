@@ -43,7 +43,7 @@ def prepare_single_ode_process_document(
     """
     species_context = 'concentrations'
     species_port_name = f'floating_species_{species_context}'
-    species_store = [f'{species_port_name}_store']
+    species_store = [f'{process_id}_{species_port_name}_store']
     document = {
         process_id: {
             '_type': 'process',

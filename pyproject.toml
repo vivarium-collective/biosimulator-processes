@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "biosimulator-processes"
-version = "0.0.22"
+version = "0.0.23"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
@@ -36,6 +36,7 @@ tensorstore = "*"
 aiofiles = "*"
 aiobotocore = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+seaborn = "^0.13.2"
 # psutil = "^5.9.8"
 
 [tool.poetry.group.dev.dependencies]

@@ -14,14 +14,18 @@ from biosimulator_processes.utils import register_module
 PROCESSES_TO_REGISTER = [
     ('cobra', 'cobra_process.CobraProcess'),
     ('copasi', 'copasi_process.CopasiProcess'),
+    ('_copasi', 'copasi_process._CopasiProcess'),
     ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
-    ('amici', 'amici_process.AmiciProcess')]
+    ('amici', 'amici_process.AmiciProcess'),
+    ('compare_ode_process', 'comparator_process.ODEComparatorProcess')]
 
 STEPS_TO_REGISTER = [
-    ('get_sbml', 'get_sbml.GetSbml'),
+    ('get_sbml_step', 'get_sbml.GetSbmlStep'),
     ('plotter', 'viz.CompositionPlotter'),
-    ('plotter2d', 'viz.Plotter2d')]
+    ('plotter2d', 'viz.Plotter2d'),
+    ('compare_ode_step', 'comparator_step.ODEComparatorStep')]
+
 
 # core process registry implementation (unique to this package)
 CORE = ProcessTypes()
@@ -30,4 +34,3 @@ CORE = ProcessTypes()
 CORE.type_registry.register('sed_model', schema={'_type': MODEL_TYPE})
 register_module(PROCESSES_TO_REGISTER, CORE)
 register_module(STEPS_TO_REGISTER, CORE)
-
