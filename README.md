@@ -89,4 +89,4 @@ TODO: copy this from the prompter demo
 ### A NOTE FOR DEVELOPERS:
 This tooling implements version control for dynamically-created composite containers through
 `poetry`. The version control for content on the Python Package Index is performed by 
-`setup.py`.
+`setup.py`. Also, the PyTest configuration resides within `./pyproject.toml` at the root of this repository.
