@@ -75,3 +75,7 @@ class BiosimulationsRestService(RestService):
             f.write(model_file_resp.text)
 
         return model_file_resp.text
+
+
+class BiomodelsRestService(RestService):
+    pass
