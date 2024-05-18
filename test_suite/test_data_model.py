@@ -1,6 +1,6 @@
 import enum
 import abc
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import *
 
 import docker
@@ -114,3 +114,7 @@ class TestCompositionResults:
     def _extract_model_source(self, model_source: Union[ModelFile, OMEXArchive]):
         source_fp = model_source.fp
         # TODO: if isinstance(OMEXArchive): BIOSIMULATORS UTILS METHODS HERE!
+
+
+def test_composition_results():
+    pass
