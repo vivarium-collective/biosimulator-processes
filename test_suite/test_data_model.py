@@ -1,5 +1,6 @@
 import enum
 import abc
+from dataclasses import dataclass
 
 import docker
 
@@ -69,3 +70,45 @@ class TestCase(abc.ABC):
         if pull is None:
             pull = Config().pull_docker_image
         return get_docker_image(docker_client, image_url, pull=pull)
+
+
+@dataclass
+class ModelSource:
+    fp: str
+
+
+@dataclass
+class OMEXArchive(ModelSource):
+    fp: str
+    extraction_dir: str
+
+    def __init__(self):
+        self._extract_archive()
+
+    def _extract_archive(self):
+        # TODO: call biosimulator utils OMEX io methods here for reading
+        pass
+
+
+@dataclass
+class ModelFile(ModelSource):
+    fp: str
+    lang_format: str  # ie: 'sbml'
+
+    def __init__(self):
+        self.lang_format = self.lang_format.lower()
+
+
+class TestCompositionResults:
+    def __init__(self, model_source, expected_results_fp: str):
+        self.evaluate(model_source, expected_results_fp)
+
+    def evaluate(self, model_source, expected_results_fp):
+        source = self._extract_model_source(model_source)
+        # Extract model source
+        # load expected results
+        # run composition
+        # assert equal expected, composition
+
+    def _extract_model_source(self, model_source):
+        pass
