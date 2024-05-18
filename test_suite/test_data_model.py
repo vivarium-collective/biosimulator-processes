@@ -1,6 +1,7 @@
 import enum
 import abc
 from dataclasses import dataclass
+from typing import *
 
 import docker
 
@@ -100,15 +101,16 @@ class ModelFile(ModelSource):
 
 
 class TestCompositionResults:
-    def __init__(self, model_source, expected_results_fp: str):
+    def __init__(self, model_source: Union[ModelFile, OMEXArchive], expected_results_fp: str):
         self.evaluate(model_source, expected_results_fp)
 
-    def evaluate(self, model_source, expected_results_fp):
+    def evaluate(self, model_source: Union[ModelFile, OMEXArchive], expected_results_fp):
         source = self._extract_model_source(model_source)
         # Extract model source
         # load expected results
         # run composition
         # assert equal expected, composition
 
-    def _extract_model_source(self, model_source):
-        pass
+    def _extract_model_source(self, model_source: Union[ModelFile, OMEXArchive]):
+        source_fp = model_source.fp
+        # TODO: if isinstance(OMEXArchive): BIOSIMULATORS UTILS METHODS HERE!
