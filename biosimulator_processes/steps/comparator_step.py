@@ -5,7 +5,7 @@
 
 
 from tempfile import mkdtemp
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from dataclasses import dataclass
 from typing import *
 
@@ -16,7 +16,7 @@ import pandas as pd
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model import BaseModel, _BaseClass
 from biosimulator_processes.data_model.compare_data_model import ParameterMSE, ODEComparisonResult
-from biosimulator_processes.io import fetch_sbml_file
+from biosimulator_processes.io import fetch_biomodel_sbml_file
 
 
 @dataclass
@@ -65,18 +65,21 @@ def generate_ode_process_comparison_data(outputs_copasi, outputs_tellurium, outp
     return _generate_ode_process_comparison_df(matrix, simulators)
 
 
-class SimulatorComparatorStep(Step):
+class SimulatorComparatorStep(ABC, Step):
     config_schema = {
-        'biomodel_id': 'string',
+        'model_entrypoint': 'string',  # either biomodel id or sbml filepath TODO: make from string.
         'duration': 'integer',
         'simulators': {
             '_type': 'list[string]',
             '_default': []}}
 
+    model_entrypoint: str
+    duration: int
+
     def __init__(self, config=None, core=CORE):
         super().__init__(config, core)
-        self.biomodel_id = self.config['biomodel_id']
-        self.duration = self.config['duration']
+        source = config['model_entrypoint']
+        assert 'BIO' in source or '/' in source, "You must enter either a biomodel id or path to an sbml model."
 
     def inputs(self):
         return {}
@@ -85,21 +88,26 @@ class SimulatorComparatorStep(Step):
         return {'comparison_data': 'tree[any]'}
 
     def update(self, state):
-        results = self._run_workflow()
+        results = self._run_composition()
         output = {'comparison_data': results}
         return output
 
+    @abstractmethod
+    def _run_composition(self, comp: Composite) -> Dict:
+        pass
+
+
+# TODO: Implement SED-based naming here.
 
 class ODEComparatorStep(SimulatorComparatorStep):
     """config_schema = {'biomodel_id': 'string', 'duration': 'integer'}"""
 
     def __init__(self, config=None, core=CORE):
         super().__init__(config, core)
-        self.biomodel_id = self.config['biomodel_id']
+        self.model_source = self.config['model_entrypoint']
         self.duration = self.config['duration']
 
-        directory = mkdtemp()
-        model_fp = fetch_sbml_file(self.biomodel_id, save_dir=directory)
+        model_fp = self.model_source if not self.model_source.startswith('BIO') else fetch_biomodel_sbml_file(self.model_source, save_dir=mkdtemp())
         self.document = {
             'copasi_simple': {
                 '_type': 'process',
@@ -155,21 +163,20 @@ class ODEComparatorStep(SimulatorComparatorStep):
                             'time': ['time_store']}}}
 
     # TODO: Do we need this?
-    # def inputs(self):
-    #     return {}
+    def inputs(self):
+        return {}
 
-    # def outputs(self):
-    #     return {'comparison_data': 'tree[any]'}
+    def outputs(self):
+        return {'comparison_data': 'tree[any]'}
 
     def update(self, state):
-        comp = self._generate_composition(self.document)
+        comp = self._generate_composition()
         results = self._run_composition(comp)
         output = {'comparison_data': results}
         return output
 
-    @staticmethod
-    def _generate_composition(document: Dict) -> Composite:
-        return Composite(config={'state': document}, core=CORE)
+    def _generate_composition(self) -> Composite:
+        return Composite(config={'state': self.document}, core=CORE)
 
     def _run_composition(self, comp: Composite) -> Dict:
         comp.run(self.duration)

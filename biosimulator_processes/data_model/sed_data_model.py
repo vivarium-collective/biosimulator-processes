@@ -338,26 +338,8 @@ class Simulator(_BaseClass):
     deps: List[InstallationDependency]
 
 
-class SedDataModel:
-    TimeCourseModel = TimeCourseModel
-    TimeCourseModelChanges = TimeCourseModelChanges
-    ModelChanges = ModelChanges
-    ModelChange = ModelChange
-    TimeCourseProcess = TimeCourseProcess
-    SteadyStateModel = SteadyStateModel
-    SpatialModel = SpatialModel
-    ExperimentMetadata = ExperimentMetadata
-    Experiment = Experiment
-    SimulationResult = SimulationResult
-    SimulationModelParameter = SimulationModelParameter
-    SedModel = SedModel
-    SpeciesChange = SpeciesChange
-    GlobalParameterChange = GlobalParameterChange
-    ReactionParameter = ReactionParameter
-    ReactionChange = ReactionChange
-    ModelUnits = ModelUnits
-    ModelFilepath = ModelFilepath
-    BiomodelID = BiomodelID
+
+
 
 
 # --- Non-Pydantic FromDict classes
@@ -445,3 +427,26 @@ class SedModel(FromDict):
     def __init__(self, _type: Dict = _MODEL_TYPE):
         super().__init__(_type)
 
+
+# SED Enum Data model Store
+class SedDataModel:
+    TimeCourseModel = TimeCourseModel
+    TimeCourseModelChanges = TimeCourseModelChanges
+    ModelChanges = ModelChanges
+    ModelChange = ModelChange
+    TimeCourseProcess = TimeCourseProcess
+    SteadyStateModel = SteadyStateModel
+    SpatialModel = SpatialModel
+    ExperimentMetadata = ExperimentMetadata
+    Experiment = Experiment
+    SimulationResult = SimulationResult
+    SimulationModelParameter = SimulationModelParameter
+    SedModel = SedModel
+    SpeciesChange = SpeciesChange
+    GlobalParameterChange = GlobalParameterChange
+    ReactionParameter = ReactionParameter
+    ReactionChange = ReactionChange
+    ModelUnits = ModelUnits
+    ModelFilepath = ModelFilepath
+    BiomodelID = BiomodelID
+    ModelSchema = MODEL_TYPE
