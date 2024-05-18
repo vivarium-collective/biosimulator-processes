@@ -13,11 +13,9 @@ from biosimulator_processes.data_model.compare_data_model import ODECompositionR
 def test_ode_sed_processes(model_entrypoint: str, num_steps: int, duration: int = 1):
     # TODO: for now, just testing ode processes. Expand this *asap.
     local_ode_sed_process_addresses = ['tellurium', 'copasi', 'amici']
-    results = [
+    return [
         ODECompositionResult(duration=duration, num_steps=num_steps, model_entrypoint=model_entrypoint, simulator_names=[sim_name])
         for sim_name in local_ode_sed_process_addresses]
-
-    pp(results)
 
 
 def test_single_ode_sed_process(process_address: str, biomodel_id: str = None, model_fp: str = None):
