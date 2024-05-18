@@ -7,7 +7,7 @@ import os
 import requests
 from process_bigraph import pp, pf
 
-from test_suite.test_data_model import RestService, ProjectsQuery, ArchiveFiles
+from biosimulator_processes.data_model.service_data_model import RestService, ProjectsQuery, ArchiveFiles
 
 
 class BiosimulationsRestService(RestService):
