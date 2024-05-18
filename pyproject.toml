@@ -50,7 +50,7 @@ flake8 = "*"
 twine = "*"
 
 [tool.pytest.ini_options]
-testpaths = ["biosimulator_processes"]
+testpaths = ["biosimulator_processes", "test_suite"]
 addopts = "--ignore=setup.py"
 python_files = "*.py"
 
