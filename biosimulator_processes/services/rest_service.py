@@ -79,12 +79,11 @@ class BiosimulationsRestService(RestService):
         return model_file_resp.text
 
     @classmethod
-    def read_report_outputs(cls, report_file_path, dataset_label, group_path="simulation.sedml/report") -> BiosimulationsRunOutput:
+    def read_report_outputs(cls, report_file_path, group_path="simulation.sedml/report") -> BiosimulationsRunOutput:
         """Read the outputs from all species in the given report file from biosimulations output.
 
             Args:
                 report_file_path (str): The path to the simulation.sedml/report.h5 HDF5 file.
-                dataset_label (str): The `<dataSet label>` value for the species from the SEDML file.
                 group_path (str): The path to the simulation.sedml/report.h5 HDF5 file. Defaults to `simulation.sedml/report`
 
         """

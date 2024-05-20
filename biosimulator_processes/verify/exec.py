@@ -4,8 +4,57 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from process_bigraph import Process
 
 from biosimulator_processes.data_model.compare_data_model import ODEProcessIntervalComparison, ODEComparisonResult
+from biosimulator_processes.data_model.verify_data_model import OutputAspectVerification
+from biosimulator_processes.services.rest_service import BiosimulationsRestService
+
+
+def _is_equal(a, b):
+    if isinstance(a, list):
+        a = np.array(a)
+    if isinstance(b, list):
+        b = np.array(b)
+
+    return np.allclose(a, b)
+
+
+def is_equal(a, b) -> bool:
+    return a == b or b == a
+
+
+def create_ode_process_instance(process_name: str, biomodel_id=None, sbml_model_file=None) -> Process:
+    module_name = f'{process_name}_process'
+    import_statement = f'biosimulator_processes.processes.{module_name}'
+    module_paths = module_name.split('_')
+    class_name = module_paths[0].replace(module_name[0], module_name[0].upper())
+    class_name += module_paths[1].replace(module_paths[1][0], module_paths[1][0].upper())
+    module = __import__(
+        import_statement, fromlist=[class_name])
+    model_source = biomodel_id or sbml_model_file
+    bigraph_class = getattr(module, class_name)
+    return bigraph_class(config={'model': {'model_source': model_source}})
+
+
+# TODO: make this more general
+def verify_ode_process_output_names(process_name: str, source_report_fp: str, biomodel_id: str = None, sbml_model_file: str = None) -> OutputAspectVerification:
+    # Get the class from the module
+    # TODO: Automatically generate this from the biosimulations rest api
+    process = create_ode_process_instance(process_name, biomodel_id, sbml_model_file)
+    process_keys = list(process.inputs()['floating_species_concentrations'].keys())
+
+    report_outputs = BiosimulationsRestService().read_report_outputs(report_file_path=source_report_fp)
+    report_keys = [datum.dataset_label for datum in report_outputs.data]
+    for i, val in enumerate(report_keys):
+        if report_keys[i].lower() == 'time':
+            report_keys.pop(i)
+
+    return OutputAspectVerification(
+        aspect_type='names',
+        is_verified=is_equal(report_keys, process_keys),
+        expected_data=report_keys,
+        process_data=process_keys)
 
 
 def generate_interval_comparisons(ode_process_comparison_output: ODEComparisonResult):
