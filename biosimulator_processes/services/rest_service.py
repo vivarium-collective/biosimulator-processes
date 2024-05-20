@@ -5,9 +5,10 @@ from abc import ABC, abstractmethod
 import os
 
 import requests
+import h5py
 from process_bigraph import pp, pf
 
-from biosimulator_processes.data_model.service_data_model import RestService, ProjectsQuery, ArchiveFiles
+from biosimulator_processes.data_model.service_data_model import RestService, ProjectsQuery, ArchiveFiles, BiosimulationsRunOutput, BiosimulationsSpeciesOutput
 
 
 class BiosimulationsRestService(RestService):
@@ -39,7 +40,8 @@ class BiosimulationsRestService(RestService):
 
     @classmethod
     async def _get_files(cls, run_id: str, project_name: str) -> ArchiveFiles:
-        get_files_url = f'https://api.biosimulations.dev/files/{run_id}'
+        # get_files_url = f'https://api.biosimulations.dev/files/{run_id}'
+        get_files_url = f'https://api.biosimulations.dev/results/{run_id}/download'
         headers = {'accept': 'application/json'}
         try:
             files_resp = requests.get(get_files_url, headers=headers)
@@ -75,6 +77,33 @@ class BiosimulationsRestService(RestService):
             f.write(model_file_resp.text)
 
         return model_file_resp.text
+
+    @classmethod
+    def read_report_outputs(cls, report_file_path, dataset_label, group_path="simulation.sedml/report") -> BiosimulationsRunOutput:
+        """Read the outputs from all species in the given report file from biosimulations output.
+
+            Args:
+                report_file_path (str): The path to the simulation.sedml/report.h5 HDF5 file.
+                dataset_label (str): The `<dataSet label>` value for the species from the SEDML file.
+                group_path (str): The path to the simulation.sedml/report.h5 HDF5 file. Defaults to `simulation.sedml/report`
+
+        """
+        # TODO: implement auto gen from run id here.
+        outputs = []
+        with h5py.File(report_file_path, 'r') as f:
+            if group_path in f:
+                group = f[group_path]
+                dataset_labels = group.attrs['sedmlDataSetLabels']
+                for label in dataset_labels:
+                    dataset_index = list(dataset_labels).index(label)
+                    data = group[()]
+
+                    specific_data = data[dataset_index]
+                    output = BiosimulationsSpeciesOutput(dataset_label=label, data=specific_data)
+                    outputs.append(output)
+                return BiosimulationsRunOutput(report_path=report_file_path, data=outputs)
+            else:
+                print(f"Group '{group_path}' not found in the file.")
 
 
 class SimDataRestService(RestService):
