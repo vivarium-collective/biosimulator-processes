@@ -29,4 +29,7 @@ def test_main():
 
 
 if __name__ == '__main__':
-    test_main()
+    pubmed_id = "33108355"
+    details = wf.get_pubmed_article(pubmed_id, use_local=True)
+    model, reasoning = wf.generate_sbml(details, use_local=True)
+    print(model)

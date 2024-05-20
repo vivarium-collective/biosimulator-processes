@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" level="3" version="1">
+  <model id="NF1_Neurofibroma" name="Neurofibroma Pathogenesis due to NF1 Loss">
+    <!-- Define compartments -->
+    <listOfCompartments>
+      <compartment id="cytosol" size="1"/>
+    </listOfCompartments>
+
+    <!-- Define species -->
+    <listOfSpecies>
+      <species id="hiPSC_WT" compartment="cytosol" initialAmount="100"/>
+      <species id="hiPSC_Het" compartment="cytosol" initialAmount="100"/>
+      <species id="hiPSC_Null" compartment="cytosol" initialAmount="100"/>
+      <species id="SLC_WT" compartment="cytosol" initialAmount="0"/>
+      <species id="SLC_Het" compartment="cytosol" initialAmount="0"/>
+      <species id="SLC_Null" compartment="cytosol" initialAmount="0"/>
+      <species id="SOX10" compartment="cytosol" initialAmount="0"/>
+    </listOfSpecies>
+
+    <!-- Define reactions -->
+    <listOfReactions>
+      <!-- Differentiation reactions -->
+      <reaction id="Differentiation_WT" reversible="false">
+        <listOfReactants>
+          <speciesReference species="hiPSC_WT"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SLC_WT"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <ci> k_diff_WT </ci>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Differentiation_Het" reversible="false">
+        <listOfReactants>
+          <speciesReference species="hiPSC_Het"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SLC_Het"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <ci> k_diff_Het </ci>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Differentiation_Null" reversible="false">
+        <listOfReactants>
+          <speciesReference species="hiPSC_Null"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SLC_Null"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <ci> k_diff_Null </ci>
+          </math>
+        </kineticLaw>
+      </reaction>
+
+      <!-- Tumor formation reaction -->
+      <reaction id="TumorFormation_Null" reversible="false">
+        <listOfReactants>
+          <speciesReference species="SLC_Null"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SOX10"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <ci> k_tumor </ci>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <!-- Signaling pathway reactions can be added here -->
+    </listOfReactions>
+
+    <!-- Define parameters -->
+    <listOfParameters>
+      <parameter id="k_diff_WT" value="0.1"/>
+      <parameter id="k_diff_Het" value="0.05"/>
+      <parameter id="k_diff_Null" value="0.2"/>
+      <parameter id="k_tumor" value="0.05"/>
+    </listOfParameters>
+  </model>
+</sbml>

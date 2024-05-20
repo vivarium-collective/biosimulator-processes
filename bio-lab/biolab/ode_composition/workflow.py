@@ -32,7 +32,7 @@ def call_openai_gpt(prompt):
 def call_local_gpt(prompt):
     inputs = TOKENIZER.encode(prompt, return_tensors='pt')
     outputs = MODEL.generate(inputs, max_length=1500, num_return_sequences=1)
-    response = TOKENIZER.decode(outputs[0], skip_special_tokens=True)
+    response = TOKENIZER.decode(outputs, skip_special_tokens=True)
     return response
 
 
