@@ -11,6 +11,7 @@ from biosimulator_processes.data_model.verify_data_model import OutputAspectVeri
 from biosimulator_processes.services.rest_service import BiosimulationsRestService
 
 
+# *VERIFICATION*å
 def _is_equal(a, b):
     if isinstance(a, list):
         a = np.array(a)
@@ -37,6 +38,21 @@ def create_ode_process_instance(process_name: str, biomodel_id=None, sbml_model_
     return bigraph_class(config={'model': {'model_source': model_source}})
 
 
+def verify_ode_process_outputs(process_name: str, target_report_fp: str, biomodel_id: str = None, sbml_model_file: str = None):
+    process = create_ode_process_instance(process_name, biomodel_id, sbml_model_file)
+    process_keys = list(process.inputs()['floating_species_concentrations'].keys())
+
+    report_outputs = BiosimulationsRestService().read_report_outputs(report_file_path=target_report_fp)
+
+    names_verification = verify_ode_process_output_names(process_name, target_report_fp, biomodel_id, sbml_model_file)
+
+    # TODO: here, read the SEDML file to determine the duration of time used for expected results.
+    for d in report_outputs.data:
+        print(f'Species: {d.dataset_label}, Num points: {len(d.data)}')
+
+    # TODO: iterate over d.data length to infer number of steps used in original simulation.
+
+
 # TODO: make this more general
 def verify_ode_process_output_names(process_name: str, source_report_fp: str, biomodel_id: str = None, sbml_model_file: str = None) -> OutputAspectVerification:
     # Get the class from the module
@@ -57,6 +73,16 @@ def verify_ode_process_output_names(process_name: str, source_report_fp: str, bi
         process_data=process_keys)
 
 
+def transform_data(data: list[float], r: tuple, data_type: str = 'float64') -> np.ndarray:
+    """Transform the `data` to fit range `r`, where `r=(rangeStart, rangeStop)`"""
+    min_orig = min(data)
+    max_orig = max(data)
+    s, e = r[0], r[1]
+    normalized_data = [s + ((x - min_orig) * (e - s) / (max_orig - min_orig)) for x in data]
+    return np.array(normalized_data, dtype=data_type)
+
+
+# *COMPARISONS*
 def generate_interval_comparisons(ode_process_comparison_output: ODEComparisonResult):
     all_comparison_data = []
 

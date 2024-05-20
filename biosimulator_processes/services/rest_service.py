@@ -8,7 +8,7 @@ import requests
 import h5py
 from process_bigraph import pp, pf
 
-from biosimulator_processes.data_model.service_data_model import RestService, ProjectsQuery, ArchiveFiles, BiosimulationsRunOutput, BiosimulationsSpeciesOutput
+from biosimulator_processes.data_model.service_data_model import RestService, ProjectsQuery, ArchiveFiles, BiosimulationsRunOutputData, BiosimulationsSpeciesOutput
 
 
 class BiosimulationsRestService(RestService):
@@ -79,7 +79,7 @@ class BiosimulationsRestService(RestService):
         return model_file_resp.text
 
     @classmethod
-    def read_report_outputs(cls, report_file_path, group_path="simulation.sedml/report") -> BiosimulationsRunOutput:
+    def read_report_outputs(cls, report_file_path, group_path="simulation.sedml/report") -> BiosimulationsRunOutputData:
         """Read the outputs from all species in the given report file from biosimulations output.
 
             Args:
@@ -100,7 +100,7 @@ class BiosimulationsRestService(RestService):
                     specific_data = data[dataset_index]
                     output = BiosimulationsSpeciesOutput(dataset_label=label, data=specific_data)
                     outputs.append(output)
-                return BiosimulationsRunOutput(report_path=report_file_path, data=outputs)
+                return BiosimulationsRunOutputData(report_path=report_file_path, data=outputs)
             else:
                 print(f"Group '{group_path}' not found in the file.")
 

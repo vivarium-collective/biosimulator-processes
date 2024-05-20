@@ -14,7 +14,7 @@ class BiosimulationsSpeciesOutput:
 
 
 @dataclass
-class BiosimulationsRunOutput:
+class BiosimulationsRunOutputData:
     report_path: str
     data: list[BiosimulationsSpeciesOutput]
 
