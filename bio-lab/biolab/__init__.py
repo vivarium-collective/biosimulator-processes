@@ -1,24 +1,3 @@
-from biolab.biolab_data_model import (
-    TimeCourseProcess,
-    TimeCourseModelChanges,
-    TimeCourseModel,
-    ModelChanges,
-    ModelChange,
-    SteadyStateModel,
-    SpatialModel,
-    Experiment,
-    ExperimentMetadata,
-    SimulationModelParameter,
-    SimulationResult,
-    SedModel,
-    SpeciesChange,
-    GlobalParameterChange,
-    ReactionChange,
-    ReactionParameter,
-    ModelUnits
-)
-
-
 '''class SedDataModel:
     TimeCourseModel = TimeCourseModel
     TimeCourseModelChanges = TimeCourseModelChanges
