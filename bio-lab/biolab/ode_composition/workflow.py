@@ -1,13 +1,15 @@
 import os
 
 import dotenv
-import openai
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from openai import OpenAI
 
 
 # Set your API key for OpenAI
 dotenv.load_dotenv()
-openai.api_key = os.environ["OPENAI_SECRET"]
+OPENAI_SECRET = os.environ['OPENAI_SECRET']
+
+OPENAI_CLIENT = OpenAI(api_key=OPENAI_SECRET)
 
 # Initialize the local GPT model
 MODEL_NAME = 'gpt2'  # You can use 'gpt2-medium', 'gpt2-large', etc.
@@ -17,11 +19,10 @@ TOKENIZER = GPT2Tokenizer.from_pretrained(MODEL_NAME)
 
 # Function to generate a response using OpenAI API
 def call_openai_gpt(prompt):
-    response = openai.Completion.create(
-        engine="davinci-codex",  # Use the custom model name if available
+    response = OPENAI_CLIENT.completions.create(
+        model="davinci-002",  # Use the custom model name if available
         prompt=prompt,
-        max_tokens=1500
-    )
+        max_tokens=1500)
     return response.choices[0].text.strip()
 
 
