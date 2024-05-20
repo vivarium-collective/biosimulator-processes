@@ -1,0 +1,41 @@
+<model id="Neurofibroma_Model" name="Neurofibroma Pathogenesis">
+    <listOfCompartments>
+        <compartment id="cytosol" name="Cytosol" size="1" units="volume"/>
+    </listOfCompartments>
+    <listOfSpecies>
+        <species id="NF1_WT" compartment="cytosol" initialAmount="1000"/>
+        <species id="NF1_Het" compartment="cytosol" initialAmount="500"/>
+        <species id="NF1_KO" compartment="cytosol" initialAmount="0"/>
+        <species id="SOX10" compartment="cytosol" initialAmount="100"/>
+        <species id="GAP43" compartment="cytosol" initialAmount="100"/>
+        <species id="Schwann_Cell_WT" compartment="cytosol" initialAmount="1000"/>
+        <species id="Schwann_Cell_Het" compartment="cytosol" initialAmount="500"/>
+        <species id="Schwann_Cell_KO" compartment="cytosol" initialAmount="0"/>
+    </listOfSpecies>
+    <listOfReactions>
+        <reaction id="NF1_Mutation" reversible="false">
+            <listOfReactants>
+                <speciesReference species="NF1_WT"/>
+            </listOfReactants>
+            <listOfProducts>
+                <speciesReference species="NF1_KO"/>
+            </listOfProducts>
+        </reaction>
+        <reaction id="SOX10_Expression" reversible="false">
+            <listOfReactants>
+                <speciesReference species="NF1_KO"/>
+            </listOfReactants>
+            <listOfProducts>
+                <speciesReference species="SOX10"/>
+            </listOfProducts>
+        </reaction>
+        <reaction id="GAP43_Expression" reversible="false">
+            <listOfReactants>
+                <speciesReference species="SOX10"/>
+            </listOfReactants>
+            <listOfProducts>
+                <speciesReference species="GAP43"/>
+            </listOfProducts>
+        </reaction>
+    </listOfReactions>
+</model>
