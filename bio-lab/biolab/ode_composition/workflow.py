@@ -7,7 +7,7 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 # Set your API key for OpenAI
 dotenv.load_dotenv()
-openai.api_key = os.environ["OPEN_API_SECRET"]
+openai.api_key = os.environ["OPENAI_SECRET"]
 
 # Initialize the local GPT model
 MODEL_NAME = 'gpt2'  # You can use 'gpt2-medium', 'gpt2-large', etc.
