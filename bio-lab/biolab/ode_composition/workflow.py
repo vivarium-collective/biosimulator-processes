@@ -1,13 +1,18 @@
+import os
+
+import dotenv
 import openai
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
+
 # Set your API key for OpenAI
-openai.api_key = 'your-api-key'
+dotenv.load_dotenv()
+openai.api_key = os.environ["OPEN_API_SECRET"]
 
 # Initialize the local GPT model
-model_name = 'gpt2'  # You can use 'gpt2-medium', 'gpt2-large', etc.
-model = GPT2LMHeadModel.from_pretrained(model_name)
-tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+MODEL_NAME = 'gpt2'  # You can use 'gpt2-medium', 'gpt2-large', etc.
+MODEL = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
+TOKENIZER = GPT2Tokenizer.from_pretrained(MODEL_NAME)
 
 
 # Function to generate a response using OpenAI API
@@ -22,9 +27,9 @@ def call_openai_gpt(prompt):
 
 # Function to generate a response using local GPT model
 def call_local_gpt(prompt):
-    inputs = tokenizer.encode(prompt, return_tensors='pt')
-    outputs = model.generate(inputs, max_length=1500, num_return_sequences=1)
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    inputs = TOKENIZER.encode(prompt, return_tensors='pt')
+    outputs = MODEL.generate(inputs, max_length=1500, num_return_sequences=1)
+    response = TOKENIZER.decode(outputs[0], skip_special_tokens=True)
     return response
 
 

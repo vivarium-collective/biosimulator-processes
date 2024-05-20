@@ -28,6 +28,17 @@ class _BaseClass:
 
 
 @dataclass
+class ProcessBigraphAnalystDecision(_BaseClass):
+    subject: object
+    reason: str
+
+
+@dataclass
+class ProcessBigraphAnalystOutput(_BaseClass):
+    data: any
+
+
+@dataclass
 class SimulationModelParameter(_BaseClass):
     """
         Attributes:

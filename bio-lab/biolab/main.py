@@ -1,41 +1,32 @@
-from biolab.ode_composition.fetch_article import fetch_article
-from biolab.ode_composition.parse_article import parse_article
-from biolab.ode_composition.create_sbml import create_sbml_model
-from biolab.ode_composition.generate_composition import generate_composition
-from biolab.ode_composition.run_composition import run_composition
-from biolab.ode_composition.verify_output import verify_output
-from libsbml import writeSBML
+from biolab.ode_composition import workflow as wf
 
 
-def main(pubmed_id):
-    # Fetch the article
-    article_html = fetch_article(pubmed_id)
+def main(pubmed_id, use_local=False):
+    article_details = wf.get_pubmed_article(pubmed_id, use_local)
+    print("Article Details:", article_details)
 
-    # Parse the article
-    article_info = parse_article(article_html)
+    sbml_model, sbml_reasoning = wf.generate_sbml(article_details, use_local)
+    print("SBML Model:", sbml_model)
+    print("Reasoning:", sbml_reasoning)
 
-    # Create SBML model
-    sbml_document = create_sbml_model(article_info)
-    sbml_file = 'example_model.xml'
-    writeSBML(sbml_document, sbml_file)
-
-    # Generate composition
-    composition = generate_composition(sbml_file)
-
-    # Run simulation
-    simulation_results = run_composition(composition)
-
-    # Verify output
-    verified_results = verify_output(simulation_results)
-
-    # Display results
-    print("Article Info:", article_info)
+    composition, composition_reasoning = wf.create_biosimulator_composition(sbml_model, use_local)
     print("Composition:", composition)
-    print("Simulation Results:", simulation_results)
-    print("Verified Results:", verified_results)
+    print("Reasoning:", composition_reasoning)
+
+    results, results_reasoning = wf.run_simulation(composition, use_local)
+    print("Simulation Results:", results)
+    print("Reasoning:", results_reasoning)
+
+    verification, verification_reasoning = wf.verify_output(results, use_local)
+    print("Verification:", verification)
+    print("Reasoning:", verification_reasoning)
 
 
 # Example usage
 def test_main():
-    pubmed_id = "33108355"  # Replace with actual PubMed ID
+    pubmed_id = "33108355"
     main(pubmed_id)
+
+
+if __name__ == '__main__':
+    test_main()
