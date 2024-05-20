@@ -5,6 +5,8 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from openai import OpenAI
 
 
+# TODO: Add the OpenAI key NOT chat key
+
 # Set your API key for OpenAI
 dotenv.load_dotenv()
 OPENAI_SECRET = os.environ['OPENAI_SECRET']
