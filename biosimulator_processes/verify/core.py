@@ -56,7 +56,7 @@ def verify_ode_process_outputs(process_name: str, target_report_fp: str, biomode
 # TODO: make this more general
 def verify_ode_process_output_names(process_name: str, source_report_fp: str, biomodel_id: str = None, sbml_model_file: str = None) -> OutputAspectVerification:
     # Get the class from the module
-    # TODO: Automatically generate this from the biosimulations rest api
+    # TODO: Automatically generate this from the biosimulations rest server
     process = create_ode_process_instance(process_name, biomodel_id, sbml_model_file)
     process_keys = list(process.inputs()['floating_species_concentrations'].keys())
 

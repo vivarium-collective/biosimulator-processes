@@ -39,7 +39,7 @@ class BiosimulationsRestService(RestService):
             print(f'Failed to fetch OMEX archive:\n{e}')
 
     @classmethod
-    async def _get_files(cls, run_id: str, project_name: str) -> ArchiveFiles:
+    def get_project_files(cls, run_id: str, project_name: str = None) -> ArchiveFiles:
         get_files_url = f'https://api.biosimulations.dev/files/{run_id}'
         # get_files_url = f'https://api.biosimulations.dev/results/{run_id}/download'
         headers = {'accept': 'application/json'}
@@ -60,7 +60,7 @@ class BiosimulationsRestService(RestService):
 
         selected_project_id = options_menu[user_selection]
         simulation_run_id = archive_query.project_data[selected_project_id]['simulationRun']
-        simulation_run_files = await cls._get_files(simulation_run_id, selected_project_id)
+        simulation_run_files = cls.get_project_files(simulation_run_id, selected_project_id)
         return simulation_run_files
 
     @classmethod

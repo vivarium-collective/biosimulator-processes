@@ -37,7 +37,7 @@ class CopasiProcess(SedProcess):
                 specification requires the presence of reactions which inherently define species types and optionally
                 addition parameters. See Basico for more details. There are two types of objects that are accepted
                 for this specification:
-                    - A high-level api object from `biosimulator_processes.data_model`,
+                    - A high-level server object from `biosimulator_processes.data_model`,
                         ie: `TimeCourseModel` or `SedModel`. (Recommended for first-time users). The parameters with
                         which these dataclasses are instantiated correspond to the `config_schema` for a given
                         process implementation. In the config schema, the outermost keys could be considered
@@ -271,7 +271,7 @@ class workingcopasiprocess(SedProcess):
                 specification requires the presence of reactions which inherently define species types and optionally
                 addition parameters. See Basico for more details. There are two types of objects that are accepted
                 for this specification:
-                    - A high-level api object from `biosimulator_processes.data_model`,
+                    - A high-level server object from `biosimulator_processes.data_model`,
                         ie: `TimeCourseModel` or `SedModel`. (Recommended for first-time users). The parameters with
                         which these dataclasses are instantiated correspond to the `config_schema` for a given
                         process implementation. In the config schema, the outermost keys could be considered
