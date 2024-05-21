@@ -40,8 +40,8 @@ class BiosimulationsRestService(RestService):
 
     @classmethod
     async def _get_files(cls, run_id: str, project_name: str) -> ArchiveFiles:
-        # get_files_url = f'https://api.biosimulations.dev/files/{run_id}'
-        get_files_url = f'https://api.biosimulations.dev/results/{run_id}/download'
+        get_files_url = f'https://api.biosimulations.dev/files/{run_id}'
+        # get_files_url = f'https://api.biosimulations.dev/results/{run_id}/download'
         headers = {'accept': 'application/json'}
         try:
             files_resp = requests.get(get_files_url, headers=headers)
