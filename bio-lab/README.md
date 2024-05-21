@@ -7,4 +7,7 @@ To properly interact with this GPT-based tooling, you must have the ability to p
 
 Create a file called `.env` at the root of this project, `biolab` and add the following content:
 
-`OPENAI_SECRET=<YOUR API KEY HERE>`
+```
+    OPENAI_SECRET=<YOUR API KEY HERE>
+    OPENAI_PROJECT_ID=<YOUR OPEN AI PROJECT'S ID>
+```

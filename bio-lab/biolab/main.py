@@ -1,4 +1,4 @@
-from biolab.ode_composition import workflow as wf
+from biolab.ode_composition import ode_workflow as wf
 
 
 def main(pubmed_id, use_local=False):

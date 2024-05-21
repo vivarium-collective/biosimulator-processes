@@ -14,7 +14,7 @@ OPENAI_SECRET = os.environ['OPENAI_SECRET']
 OPENAI_CLIENT = OpenAI(api_key=OPENAI_SECRET)
 
 # Initialize the local GPT model
-MODEL_NAME = 'gpt2'  # You can use 'gpt2-medium', 'gpt2-large', etc.
+MODEL_NAME = 'gpt-4-turbo'  # You can use 'gpt2-medium', 'gpt2-large', etc.
 MODEL = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 TOKENIZER = GPT2Tokenizer.from_pretrained(MODEL_NAME)
 
