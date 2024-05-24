@@ -17,7 +17,7 @@ COPY ./biosimulator_processes /app/biosimulator_processes
 COPY composer-notebooks /app/notebooks
 
 # copy files
-COPY ./pyproject.toml ./poetry.lock ./data ./scripts/trust-notebooks.sh /app/
+COPY toml ./poetry.lock ./data ./scripts/trust-notebooks.sh /app/
 COPY ./scripts/enter-lab.sh /usr/local/bin/enter-lab.sh
 # COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
