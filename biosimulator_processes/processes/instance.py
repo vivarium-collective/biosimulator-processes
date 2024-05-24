@@ -28,7 +28,7 @@ class ProcessObservable(_BaseClass):
 def generate_ode_process_instance(
         entrypoint: Union[str, dict[str, any]],  # either sbml model path or sed_model dict which conforms to the spec in sed data model in this repo.
         process_address: str,
-        observables: List[str],
+        observables: List[List[str]],
         step_size: float,
         duration: float,
         **process_config
