@@ -33,3 +33,5 @@ playground.ipynb
 composer-notebooks/playground.ipynb
 *model_dir/
 commit.sh
+test_env/
+release_env

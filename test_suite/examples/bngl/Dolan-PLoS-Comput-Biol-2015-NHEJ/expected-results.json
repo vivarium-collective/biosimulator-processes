@@ -1,0 +1,43 @@
+{
+  "name": "Dolan et al. PLoS Computational Biology 2015: DNA damage repair by non-homologous end joining",
+  "filename": "Dolan-PLoS-Comput-Biol-2015-NHEJ.omex",
+  "taskRequirements": [{
+    "modelFormat": "format_3972",
+    "modelFormatFeatures": [],
+    "simulationAlgorithm": "KISAO_0000263"
+  }],
+  "skippedSimulators": [],
+  "expectedReports": [{
+    "id": "Dolan2015.sedml/report",
+    "dataSets": [
+      {"id": "time", "label": "time"},
+      {"id": "MDM2_mRNA", "label": "MDM2_mRNA"},
+      {"id": "MDM2", "label": "MDM2"}
+    ],
+    "points": [101],
+    "values": [{
+      "id": "time",
+      "label": "time",
+      "value": {
+        "0": 0.0,
+        "100": 100
+      }
+    }]
+  }],
+  "expectedPlots": [{
+    "id": "Dolan2015.sedml/Figure"
+  }],
+  "runtimeFailureAlertType": "exception",
+  "author": "David W. P. Dolan, Anze Zupanic, Glyn Nelson, Philip Hall, Satomi Miwa, Thomas B. L. Kirkwood & Daryl P. Shanley",
+  "identifiers": [{
+      "namespace": "doi",
+      "id": "10.1371/journal.pcbi.1004246",
+      "url": "https://doi.org/10.1371/journal.pcbi.1004246"
+    },
+    {
+      "namespace": "RuleHub",
+      "id": "Dolan2015",
+      "url": "https://github.com/RuleWorld/RuleHub/tree/master/Published/Dolan2015"
+    }
+  ]
+}

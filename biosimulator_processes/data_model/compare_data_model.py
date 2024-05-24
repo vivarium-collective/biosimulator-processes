@@ -216,6 +216,90 @@ class ODEComparisonResult(_BaseClass):
         return {'outputs': output[('emitter',)]}
 
 
+@dataclass
+class ODECompositionResult(_BaseClass):
+    """Generalized class for composition results.  TODO: switch to using this instead of ode comparison result. """
+    duration: int
+    num_steps: int
+    model_entrypoint: str  # One of: biomodel id or sbml fp
+    simulator_names: List[str]
+    timestamp: Optional[str] = str(datetime.now()).replace(' ', '-').replace(':', '_').replace('.', '-')
+    outputs: Optional[List[ODEIntervalResult]] = None
+
+    def __init__(self, duration, num_steps, model_entrypoint, simulator_names):
+        super().__init__()
+        self.duration = duration
+        self.num_steps = num_steps
+        self.model_entrypoint = model_entrypoint
+        self.simulator_names = simulator_names
+        self.outputs = self._set_outputs()
+
+    def _set_outputs(self):
+        return self.generate_ode_interval_outputs(
+            self.duration,
+            self.num_steps)
+
+    def generate_ode_interval_outputs(self, duration: int, n_steps: int) -> List[ODEIntervalResult]:
+        return self._generate_ode_interval_results(duration, n_steps)
+
+    def _generate_ode_interval_results(self, duration: int, n_steps: int) -> List[ODEIntervalResult]:
+        results_dict = self.generate_ode_comparison(self.model_entrypoint, duration)
+        interval_results = []
+
+        for global_time_index, interval_result_data in enumerate(results_dict['outputs']):
+            interval_config = {
+                'interval_id': float(global_time_index),
+                'time': interval_result_data['time']
+            }
+
+            for k, v in interval_result_data.items():
+                for simulator_name in self.simulator_names:
+                    if simulator_name in k:
+                        interval_config[f'{simulator_name}_floating_species_concentrations'] = v
+
+            interval_result = ODEIntervalResult(**interval_config)
+            interval_results.append(interval_result)
+
+        return interval_results
+
+    @classmethod
+    def generate_ode_comparison(cls, model_entrypoint: str, dur: int) -> Dict:
+        """Run the `compare_ode_step` composite and return data which encapsulates another composite
+            workflow specified by dir.
+
+            Args:
+                model_entrypoint:`str`: A Valid Biomodel ID.
+                dur:`int`: duration of the internal composite simulation.
+
+            Returns:
+                `Dict` of simulation comparison results like `{'outputs': {...etc}}`
+        """
+        compare = {
+            'compare_ode': {
+                '_type': 'step',
+                'address': 'local:compare_ode_step',
+                'config': {'model_entrypoint': model_entrypoint, 'duration': dur},
+                'inputs': {},
+                'outputs': {'comparison_data': ['comparison_store']}
+            },
+            'verification_data': {
+                '_type': 'step',
+                'address': 'local:ram-emitter',
+                'config': {
+                    'emit': {'comparison_data': 'tree[any]'}
+                },
+                'inputs': {'comparison_data': ['comparison_store']}
+            }
+        }
+
+        wf = Composite(config={'state': compare}, core=CORE)
+        wf.run(1)
+        comparison_results = wf.gather_results()
+        output = comparison_results[("verification_data"),][0]['comparison_data']
+
+        return {'outputs': output[('emitter',)]}
+
+
 class CompositeRunError(BaseModel):
     exception: Exception
 

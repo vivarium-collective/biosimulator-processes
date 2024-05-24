@@ -1,15 +1,14 @@
 from typing import Dict, Union, List, Tuple
 from types import FunctionType
 import os
+
 import numpy as np
 from basico import biomodels, load_model_from_string
-from process_bigraph import Composite, pf
+from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
-from pydantic import Field
-from biosimulator_processes.data_model import _BaseModel
 
 
-def register_module(items_to_register: List[Tuple[str, str]], core) -> None:
+def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes) -> None:
     for process_name, path in items_to_register:
         module_name, class_name = path.rsplit('.', 1)
         try:
@@ -26,9 +25,12 @@ def register_module(items_to_register: List[Tuple[str, str]], core) -> None:
 
             # Register the process
             core.process_registry.register(process_name, bigraph_class)
-            print(f"{class_name} registered successfully.")
+            print(f"{class_name} registered successfully as {process_name}.\n")
         except ImportError as e:
             print(f"{class_name} not available. Error: {e}")
+            return
+    print(f'Available processes:\n{pf(list(core.process_registry.registry.keys()))}')
+
 
 
 def prepare_single_ode_process_document(

@@ -13,7 +13,7 @@ def get_simulators(sims: List[str]):
         and format as a dictionary. This dictionary is used as configuration for the dynamic
         creation of containers.
     """
-    with open('biosimulator_processes/poetry.lock') as file:
+    with open('biosimulator_processes/_lock') as file:
         lock_data = toml.load(file)
 
     simulators = []
@@ -76,7 +76,7 @@ def generate_dockerfile_contents(config: dict) -> str:
     """
 
     base_path = 'biosimulator_processes/Dockerfile-base'
-    # TODO: automate mapping simulators to poetry.lock: ie: simulators arg that searches the lock file
+    # TODO: automate mapping simulators to _lock: ie: simulators arg that searches the lock file
     with open(base_path, 'r') as fp:
         dockerfile_contents = fp.read()
         for simulator in config['simulators']:

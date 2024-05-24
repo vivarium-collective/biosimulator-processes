@@ -1,0 +1,43 @@
+{
+  "name": "Toy gene regulatory network",
+  "filename": "test-bngl.omex",
+  "taskRequirements": [{
+    "modelFormat": "format_3972",
+    "modelFormatFeatures": [],
+    "simulationAlgorithm": "KISAO_0000019"
+  }],
+  "skippedSimulators": [],
+  "expectedReports": [{
+    "id": "test.sedml/report",
+    "dataSets": [
+      {"id": "data_set_time", "label": "time"},
+      {"id": "data_set_Atot", "label": "Atot"},
+      {"id": "data_set_Btot", "label": "Btot"},
+      {"id": "data_set_GA00tot", "label": "GA00tot"},
+      {"id": "data_set_GA01tot", "label": "GA01tot"},
+      {"id": "data_set_GA10tot", "label": "GA10tot"},
+      {"id": "data_set_GB00tot", "label": "GB00tot"},
+      {"id": "data_set_GB01tot", "label": "GB01tot"},
+      {"id": "data_set_GB10tot", "label": "GB10tot"}
+    ],
+    "points": [101],
+    "values": [{
+      "id": "data_set_time",
+      "label": "time",
+      "value": {
+        "0": 0.0,
+        "100": 10
+      }
+    }]
+  }],
+  "expectedPlots": [{
+    "id": "test.sedml/Figure"
+  }],
+  "runtimeFailureAlertType": "exception",
+  "author": "Ali Sinan Saglam",
+  "identifiers": [{
+    "namespace": "github",
+    "id": "biosimulators/Biosimulators_BioNetGen/blob/dev/tests/fixtures/test.bngl",
+    "url": "https://github.com/biosimulators/Biosimulators_BioNetGen/blob/dev/tests/fixtures/test.bngl"
+  }]
+}
