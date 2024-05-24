@@ -137,6 +137,23 @@ def generate_ode_process_interval_comparison_data(outputs: list[np.array], time_
         time_id=time_id)
 
 
+def generate_comparison_matrix(arr1: np.ndarray, arr2: np.ndarray, *simulators: str, use_tol: bool = False) -> pd.DataFrame:
+    """Generate a Mean Squared Error comparison matrix of arr1 and arr2, indexed by simulators by default, or an AllClose Tolerance routine if `use_tol` is set to true."""
+
+    # TODO: map arrs to simulators more tightly.
+    mse_matrix = np.zeros((3, 3), dtype=float)
+    outputs = [arr1, arr2]
+
+    # fill the matrices with the calculated values
+    for i in range(len(simulators)):
+        for j in range(i, len(simulators)):
+            mse_matrix[i, j] = calculate_mse(outputs[i], outputs[j])
+            if i != j:
+                mse_matrix[j, i] = mse_matrix[i, j]
+
+    return pd.DataFrame(mse_matrix, index=simulators, columns=simulators)
+
+
 def plot_ode_process_comparison(
         mse_df: pd.DataFrame,
         rmse_df: pd.DataFrame,
