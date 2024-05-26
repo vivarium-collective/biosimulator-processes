@@ -59,7 +59,7 @@ setup(
         "bigraph-builder",
         "python-libsbml",  # ==5.20.2",
         "docker>=7.0",
-        "toml",
+        "pyproject.toml",
         "python-libnuml==1.1.6",  # ">=1.0.0"
         "seaborn"
     ],

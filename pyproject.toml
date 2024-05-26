@@ -7,12 +7,12 @@ readme = "README.md"
 packages = [{include = "biosimulator_processes"}, {include = "test_suite"}]
 
 [tool.poetry.dependencies]
-python = ">=3.10"
+python = "^3.11"
 zarr = "*"
 termcolor = "*"
 jupyterlab = "*"
 bigraph-schema = "*"
-process-bigraph = "^0.0.17"
+process-bigraph = "*"
 bigraph-viz = "*"
 bigraph-builder = "*"
 numpy = "*"
@@ -20,16 +20,15 @@ copasi-basico = "*"
 cobra = "*"
 tellurium = "*"
 amici = "*"
-# smoldyn = {version = ">=2.72", optional = true}
-python-libsbml = "^5.20.2"
-docker = ">=7.0"
-python-libnuml = "^1.1.6"
-notebook = "^7.1.1"
+# smoldyn = {version = "*", optional = true}
+python-libsbml = "*"
+docker = "*"
+python-libnuml = "*"
+notebook = "*"
 toml = "*"
 pyyaml = "*"
 pydantic = "*"
-seaborn = "^0.13.2"
-# psutil = "^5.9.8"
+seaborn = "*"
 
 [tool.poetry.extras]
 smoldyn = ["smoldyn"]
@@ -37,7 +36,7 @@ smoldyn = ["smoldyn"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
-mypy = ">=1.8.0"
+mypy = "*"
 flake8 = "*"
 twine = "*"
 
