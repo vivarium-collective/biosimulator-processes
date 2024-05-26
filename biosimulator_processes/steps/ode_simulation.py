@@ -136,12 +136,9 @@ class CopasiStep(OdeSimulation):
         return results
 
 
-
-
-
-
-
-
+class TelluriumStep(OdeSimulation):
+    def __init__(self, sbml_filepath, time_config: dict[str, float], config=None, core=CORE):
+        super().__init__(sbml_filepath, time_config, config, core)
 
 
 class ODEProcess(RunProcess):

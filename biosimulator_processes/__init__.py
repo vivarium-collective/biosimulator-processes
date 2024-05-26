@@ -20,6 +20,7 @@ PROCESSES_TO_REGISTER = [
 
 STEPS_TO_REGISTER = [
     # ('get_sbml_step', 'get_sbml.GetSbmlStep'),
+    ('copasi-step', 'ode_simulation.CopasiStep'),
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d')]
 
