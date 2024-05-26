@@ -2,7 +2,9 @@ from typing import Dict, Union, Optional, List
 from datetime import datetime
 import json
 
+
 from process_bigraph import Process
+from amici import amici, sbml_import, SbmlImporter
 from COPASI import CDataModel
 from pandas import DataFrame
 from basico import (
