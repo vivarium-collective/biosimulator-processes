@@ -4,43 +4,87 @@ from process_bigraph import Step
 from process_bigraph.experiments.parameter_scan import RunProcess
 
 from biosimulator_processes import CORE
+from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
 
 
 class OdeSimulation(Step, abc.ABC):
     config_schema = {
         'sbml_filepath': 'string',
-        'n_steps': 'integer',
-        'step_size': 'float',
-        'duration': {
-            '_type': 'string',
-            '_default': 10}
+        'time_config': {
+            'step_size': 'maybe[float]',
+            'num_steps': 'maybe[float]',
+            'duration': 'maybe[float]'
+        }
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
+        assert len(list(self.config['time_config'].values())) >= 2, "you must pass two of either: step size, n steps, or duration."
+        self.step_size = self.config.get('step_size')
+        self.num_steps = self.config.get('num_steps')
+        self.duration = self.config.get('duration')
+        self._set_time_params()
+
+    def _set_time_params(self):
+        if self.step_size and self.num_steps:
+            self.duration = calc_duration(self.num_steps, self.step_size)
+        elif self.step_size and self.duration:
+            self.num_steps = calc_num_steps(self.duration, self.step_size)
+        else:
+            self.step_size = calc_step_size(self.duration, self.num_steps)
+
     @abc.abstractmethod
+    def _set_simulator(self, sbml_fp: str) -> object:
+        """Load simulator instance"""
+        pass
+
+    @abc.abstractmethod
+    def _get_floating_species_ids(self) -> list[str]:
+        """Sim specific method"""
+        pass
+
+    '''@abc.abstractmethod
+    def _set_floating_species(self):
+        """Sim specific method for starting values relative to this property."""
+        pass
+
+    @abc.abstractmethod
+    def _set_global_parameters(self):
+        """Sim specific method for starting values relative to this property."""
+        pass
+
+    @abc.abstractmethod
+    def _set_reactions(self):
+        """Sim specific method for starting values relative to this property."""
+        pass'''
+
     def inputs(self):
-        pass
+        """For now, none"""
+        return {}
 
-    @abc.abstractmethod
     def outputs(self):
-        pass
+        return {
+            'time': 'float',
+            'floating_species': {
+                spec_id: 'float'
+                for spec_id in self.floating_species_ids
+            }
+        }
 
+    @abc.abstractmethod
     def update(self, inputs):
+        """Iteratively update over self.floating_species_ids as per the requirements of the simulator library."""
         pass
 
-    @abc.abstractmethod
-    def set_species_list(self):
-        pass
 
-    @abc.abstractmethod
-    def set_global_parameters(self):
-        pass
 
-    @abc.abstractmethod
-    def set_reactions(self):
-        pass
+
+
+
+
+
+
 
 
 class ODEProcess(RunProcess):

@@ -8,6 +8,18 @@ from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
 
 
+def calc_num_steps(dur, step_size):
+    return dur / step_size
+
+
+def calc_duration(n_steps, step_size):
+    return n_steps * step_size
+
+
+def calc_step_size(dur, n_steps):
+    return dur / n_steps
+
+
 def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes) -> None:
     for process_name, path in items_to_register:
         module_name, class_name = path.rsplit('.', 1)
