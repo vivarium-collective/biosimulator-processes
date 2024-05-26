@@ -27,8 +27,9 @@ from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_ste
 
 
 class OdeSimulation(Step, abc.ABC):
+
     config_schema = {
-        'sbml_filepath': 'string',
+        'model': MODEL_TYPE,
         'time_config': {
             'step_size': 'maybe[float]',
             'num_steps': 'maybe[float]',
@@ -39,16 +40,21 @@ class OdeSimulation(Step, abc.ABC):
     def __init__(self, sbml_filepath: str = None, time_config: dict[str, float] = None, config=None, core=CORE):
         assert sbml_filepath and time_config or config, "You must pass either a time config and sbml_filepath or a config dict."
         configuration = config or {
-            'sbml_filepath': sbml_filepath,
+            'model': {
+                'model_source': sbml_filepath
+                # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
+            },
             'time_config': time_config
         }
-        super().__init__(config=configuration, core=core)
-
-        assert len(list(self.config['time_config'].values())) >= 2, "you must pass two of either: step size, n steps, or duration."
-        self.step_size = self.config.get('step_size')
-        self.num_steps = self.config.get('num_steps')
-        self.duration = self.config.get('duration')
+        assert len(list(time_config.values())) >= 2, "you must pass two of either: step size, n steps, or duration."
+        self.step_size = time_config.get('step_size')
+        self.num_steps = time_config.get('num_steps')
+        self.duration = time_config.get('duration')
         self._set_time_params()
+        super().__init__(config=configuration, core=core)
+        self.simulator = self._set_simulator(sbml_filepath)
+        self.floating_species_ids = self._get_floating_species_ids()
+        self.t = [float(n) for n in range(self.duration)]
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:
@@ -59,7 +65,7 @@ class OdeSimulation(Step, abc.ABC):
             self.step_size = calc_step_size(self.duration, self.num_steps)
 
     @abc.abstractmethod
-    def _set_simulator(self) -> object:
+    def _set_simulator(self, sbml_fp: str) -> object:
         """Load simulator instance with self.config['sbml_filepath']"""
         pass
 
@@ -68,18 +74,26 @@ class OdeSimulation(Step, abc.ABC):
         """Sim specific method"""
         pass
 
-    '''@abc.abstractmethod
-    def _set_floating_species(self):
+    '''
+    @abc.abstractmethod
+    def _set_model_changes(self, **changes):
+        self._set_floating_species_changes(**changes)
+        self._set_global_parameters_changes(**changes)
+        self._set_reactions_changes(**changes)
+    
+    
+    @abc.abstractmethod
+    def _set_floating_species_changes(self):
         """Sim specific method for starting values relative to this property."""
         pass
 
     @abc.abstractmethod
-    def _set_global_parameters(self):
+    def _set_global_parameters_changes(self):
         """Sim specific method for starting values relative to this property."""
         pass
 
     @abc.abstractmethod
-    def _set_reactions(self):
+    def _set_reactions_changes(self):
         """Sim specific method for starting values relative to this property."""
         pass'''
 
@@ -112,7 +126,7 @@ class CopasiStep(OdeSimulation):
         return load_model(sbml_fp)
 
     def _get_floating_species_ids(self) -> list[str]:
-        species_data = get_species(model=self.copasi_model_object)
+        species_data = get_species(model=self.simulator)
         assert species_data is not None, "Could not load species ids."
         return species_data.index.tolist()
 
@@ -124,7 +138,7 @@ class CopasiStep(OdeSimulation):
             update_model=True,
             model=self.simulator)
 
-        results = {'time': [float(t) for t in range(self.duration)]}
+        results = {'time': self.t}
         results['floating_species'] = {
             mol_id: float(get_species(
                 name=mol_id,
@@ -139,6 +153,27 @@ class CopasiStep(OdeSimulation):
 class TelluriumStep(OdeSimulation):
     def __init__(self, sbml_filepath, time_config: dict[str, float], config=None, core=CORE):
         super().__init__(sbml_filepath, time_config, config, core)
+        self.simulator = self._set_simulator(sbml_filepath)
+
+    def _set_simulator(self, sbml_fp) -> object:
+        return te.loadSBMLModel(sbml_fp)
+
+    def _get_floating_species_ids(self) -> list[str]:
+        return self.simulator.getFloatingSpeciesIds()
+
+    def update(self, inputs):
+        # run the simulation
+        simulation_result = self.simulator.simulate(0, self.duration, self.num_steps)
+
+        # extract the results and convert to update
+        results = {'time': self.t}
+        results['floating_species'] = {
+            mol_id: float(self.simulator.getValue(mol_id))
+            for mol_id in self.floating_species_list
+        }
+
+        return results
+
 
 
 class ODEProcess(RunProcess):
