@@ -20,7 +20,8 @@ PROCESSES_TO_REGISTER = [
 
 STEPS_TO_REGISTER = [
     ('copasi-step', 'ode_simulation.CopasiStep'),
-    ('tellurium-step', 'ode_simulation.CopasiStep'),
+    ('tellurium-step', 'ode_simulation.TelluriumStep'),
+    ('amici-step', 'ode_simulation.AmiciStep'),
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d')]
 
