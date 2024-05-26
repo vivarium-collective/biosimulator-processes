@@ -19,7 +19,7 @@ PROCESSES_TO_REGISTER = [
     ('amici', 'amici_process.AmiciProcess')]
 
 STEPS_TO_REGISTER = [
-    ('get_sbml_step', 'get_sbml.GetSbmlStep'),
+    # ('get_sbml_step', 'get_sbml.GetSbmlStep'),
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d')]
 
