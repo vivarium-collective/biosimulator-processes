@@ -1,4 +1,5 @@
 import abc
+import logging
 
 from process_bigraph import Step
 from process_bigraph.experiments.parameter_scan import RunProcess
@@ -51,7 +52,9 @@ class OdeSimulation(Step, abc.ABC):
         self.num_steps = time_config.get('num_steps')
         self.duration = time_config.get('duration')
         self._set_time_params()
+
         super().__init__(config=configuration, core=core)
+
         self.simulator = self._set_simulator(sbml_filepath)
         self.floating_species_ids = self._get_floating_species_ids()
         self.t = [float(n) for n in range(self.duration)]
@@ -119,8 +122,8 @@ class OdeSimulation(Step, abc.ABC):
 class CopasiStep(OdeSimulation):
     def __init__(self, sbml_filepath, time_config: dict[str, float], config=None, core=CORE):
         super().__init__(sbml_filepath, time_config, config, core)
-        self.simulator = self._set_simulator(self.config['sbml_filepath'])
-        self.floating_species_ids = self._get_floating_species_ids()
+        # self.simulator = self._set_simulator(self.config['sbml_filepath'])
+        # self.floating_species_ids = self._get_floating_species_ids()
 
     def _set_simulator(self, sbml_fp: str) -> object:
         return load_model(sbml_fp)
@@ -153,7 +156,7 @@ class CopasiStep(OdeSimulation):
 class TelluriumStep(OdeSimulation):
     def __init__(self, sbml_filepath, time_config: dict[str, float], config=None, core=CORE):
         super().__init__(sbml_filepath, time_config, config, core)
-        self.simulator = self._set_simulator(sbml_filepath)
+        # self.simulator = self._set_simulator(sbml_filepath)
 
     def _set_simulator(self, sbml_fp) -> object:
         return te.loadSBMLModel(sbml_fp)
@@ -166,6 +169,49 @@ class TelluriumStep(OdeSimulation):
         simulation_result = self.simulator.simulate(0, self.duration, self.num_steps)
 
         # extract the results and convert to update
+        results = {'time': self.t}
+        results['floating_species'] = {
+            mol_id: float(self.simulator.getValue(mol_id))
+            for mol_id in self.floating_species_list
+        }
+
+        return results
+
+
+class AmiciStep(OdeSimulation):
+    def __init__(self, sbml_filepath, time_config: dict[str, float], model_dir: str, config=None, core=CORE):
+        super().__init__(sbml_filepath, time_config, config, core)
+        self.simulator = self._set_simulator(sbml_filepath, model_dir)
+
+    def _set_simulator(self, sbml_fp, model_dir) -> amici.Model:
+        # get and compile libsbml model from fp
+        sbml_reader = libsbml.SBMLReader()
+        sbml_doc = sbml_reader.readSBML(model_fp)
+        self.sbml_model_object: libsbml.Model = sbml_doc.getModel()
+
+        # get model args from config
+        model_id = self.config['model'].get('model_id', None) \
+            or sbml_fp.split('/')[-1].replace('.', '_').split('_')[0]
+
+        model_output_dir = model_dir
+
+        # compile sbml to amici
+        sbml_importer = SbmlImporter(sbml_fp)
+        sbml_importer.sbml2amici(
+            model_name=model_id,
+            output_dir=model_output_dir,
+            verbose=logging.INFO)
+            # observables=self.config.get('observables'),
+            # constant_parameters=self.config.get('constant_parameters'),
+            # sigmas=self.config.get('sigmas'))
+        model_module = import_model_module(model_id, model_output_dir)
+
+        return model_module.getModel()
+
+    def _get_floating_species_ids(self) -> list[str]:
+        return self.simulator.getObservableIds()
+
+    def update(self, inputs):
         results = {'time': self.t}
         results['floating_species'] = {
             mol_id: float(self.simulator.getValue(mol_id))
