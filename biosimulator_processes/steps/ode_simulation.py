@@ -195,15 +195,16 @@ class AmiciStep(OdeSimulation):
 
         model_output_dir = model_dir
 
+        # TODO: integrate # observables=self.config.get('observables'),
+        #             # constant_parameters=self.config.get('constant_parameters'),
+        #             # sigmas=self.config.get('sigmas'))
+
         # compile sbml to amici
         sbml_importer = SbmlImporter(sbml_fp)
         sbml_importer.sbml2amici(
             model_name=model_id,
             output_dir=model_output_dir,
             verbose=logging.INFO)
-            # observables=self.config.get('observables'),
-            # constant_parameters=self.config.get('constant_parameters'),
-            # sigmas=self.config.get('sigmas'))
         model_module = import_model_module(model_id, model_output_dir)
 
         return model_module.getModel()
