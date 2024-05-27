@@ -1,8 +1,20 @@
+"""
+`Instance` API:
+
+Higher-level API related to using the process-bigraph `Step` and/or `Process` interface.
+"""
+
+
+from dataclasses import dataclass
+from typing import *
+
 import matplotlib.pyplot as plt
+import numpy as np
 from process_bigraph.experiments.parameter_scan import RunProcess
 
 from biosimulator_processes import CORE
-from biosimulator_processes.steps.ode_simulation import ODEProcess
+from biosimulator_processes.steps.ode_simulation import ODEProcess, CopasiStep
+from biosimulator_processes.data_model import _BaseClass
 
 
 def get_observables(proc: RunProcess):
@@ -39,23 +51,41 @@ def generate_ode_instance(process_address: str, model_fp: str, step_size: float,
 
 
 def plot_ode_output_data(data: dict):
-    time = data.get('results', data['time'])
-    spec_outputs = []
+    time: np.ndarray = data.get('results', data['time'])
+    plt.figure(figsize=(20, 8))
     for name, output in data['floating_species'].items():
-        spec_outputs.append({name: output})
-
-    # Plotting the data
-    plt.figure(figsize=(15, 8))
-    for output in spec_outputs:
-        for name, out in output.items():
-            plt.plot(time, out, label=name)
+        plt.plot(time, output, label=name)
 
     plt.xlabel('Time')
     plt.ylabel('Concentration')
     plt.title('Species Concentrations Over Time')
     plt.legend()
     plt.grid(True)
-    plt.xlim([0, time[-1]])  # Set x-axis limits from 0 to the last time value
-    plt.ylim([min(sum([list(v.values())[0] for v in spec_outputs])), max(sum([list(v.values())[0] for v in spec_outputs]))])  # Adjust y-axis to fit all data
+    # plt.xlim([0, time[-1]])  # Set x-axis limits from 0 to the last time value
+    # plt.ylim([min([list(v.values())[0] for v in spec_outputs]), max([list(v.values())[0] for v in spec_outputs])])  # Adjust y-axis to fit all data
     plt.show()
+
+
+# TODO: use this in server
+@dataclass
+class ODESimulationOutput(_BaseClass):
+    t: List[float]
+    floating_species: Dict[str, List[float]]
+
+    def __init__(self, data: Dict):
+        self.data = data
+        self.t = data['time']
+        self.floating_species = {
+            name: output
+            for name, output in data['floating_species'].items()}
+
+    def plot(self):
+        return plot_ode_output_data(self.data)
+
+
+def run_copasi_step_from_omex(archive_dir_fp: str) -> ODESimulationOutput:
+    step = CopasiStep(archive_dirpath=archive_dir_fp)
+    result = step.update({})
+    return ODESimulationOutput(data=result)
+
 

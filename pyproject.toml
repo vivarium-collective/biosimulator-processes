@@ -29,6 +29,7 @@ toml = "*"
 pyyaml = "*"
 pydantic = "*"
 seaborn = "*"
+h5py = "*"
 
 [tool.poetry.extras]
 smoldyn = ["smoldyn"]

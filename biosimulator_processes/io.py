@@ -27,7 +27,10 @@ def get_model_file_location(archive_root: str) -> FilePath:
     return get_archive_file_location(archive_root, '.xml')
 
 
-def parse_expected_timecourse_config(archive_root: str = None, expected_results_fp: str = None) -> Dict[str, float]:
+def parse_expected_timecourse_config(
+        archive_root: str = None,
+        expected_results_fp: str = None
+        ) -> Dict[str, Union[int, float]]:
     source = expected_results_fp or os.path.join(archive_root, 'expected-results.json')
     with open(source, 'r') as fp:
         expected = json.load(fp)
@@ -40,11 +43,13 @@ def parse_expected_timecourse_config(archive_root: str = None, expected_results_
             reported_time_vals = report['values'][0]['value']
             time_indices = list(reported_time_vals.keys())
             time_values = list(reported_time_vals.values())
+            print(time_values)
             end_time_index = float(time_values[-1])
             return {
-                'duration': end_time_index,
+                'duration':  int(time_indices[-1]),  # int(end_time_index),
                 'step_size': time_values[-1] / end_time_index,
-                'num_steps': int(time_indices[-1])}
+                'num_steps': int(end_time_index),  # int(time_indices[-1])
+            }
 
 
 def fetch_biomodel_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -> FilePath:

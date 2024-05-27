@@ -8,15 +8,15 @@ from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
 
 
-def calc_num_steps(dur, step_size):
-    return dur / step_size
+def calc_num_steps(dur, step_size) -> int:
+    return int(dur / step_size)
 
 
-def calc_duration(n_steps, step_size):
-    return n_steps * step_size
+def calc_duration(n_steps, step_size) -> int:
+    return int(n_steps * step_size)
 
 
-def calc_step_size(dur, n_steps):
+def calc_step_size(dur, n_steps) -> float:
     return dur / n_steps
 
 

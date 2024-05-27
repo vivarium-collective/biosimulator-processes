@@ -81,7 +81,6 @@ class OdeSimulation(Step, abc.ABC):
         assert archive_dirpath or sbml_filepath and time_config or config, \
             "You must pass either an omex archive filepath, time config and sbml_filepath, or a config dict."
 
-
         utc_config = parse_expected_timecourse_config(archive_root=archive_dirpath) \
             if archive_dirpath else time_config
 
@@ -96,7 +95,8 @@ class OdeSimulation(Step, abc.ABC):
         self.step_size = utc_config.get('step_size')
         self.num_steps = utc_config.get('num_steps')
         self.duration = utc_config.get('duration')
-        self._set_time_params()
+        if len(list(utc_config.values())) < 3:
+            self._set_time_params()
 
         super().__init__(config=configuration, core=core)
 
@@ -140,7 +140,6 @@ class OdeSimulation(Step, abc.ABC):
         """Iteratively update over self.floating_species_ids as per the requirements of the simulator library over
             this class' `t` attribute, which is are linearly spaced time-point vectors.
         """
-        print(f'running with {self.step_size}')
         results = {
             'time': self.t,
             'floating_species': {
