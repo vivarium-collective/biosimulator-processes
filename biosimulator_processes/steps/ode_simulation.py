@@ -1,3 +1,29 @@
+'''TODO: Implement this in ODESimulation base class:
+
+    @abc.abstractmethod
+    def _set_model_changes(self, **changes):
+        self._set_floating_species_changes(**changes)
+        self._set_global_parameters_changes(**changes)
+        self._set_reactions_changes(**changes)
+
+
+    @abc.abstractmethod
+    def _set_floating_species_changes(self):
+        """Sim specific method for starting values relative to this property."""
+        pass
+
+    @abc.abstractmethod
+    def _set_global_parameters_changes(self):
+        """Sim specific method for starting values relative to this property."""
+        pass
+
+    @abc.abstractmethod
+    def _set_reactions_changes(self):
+        """Sim specific method for starting values relative to this property."""
+        pass
+'''
+
+
 import abc
 import logging
 from typing import *
@@ -32,7 +58,7 @@ from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 class OdeSimulation(Step, abc.ABC):
 
     config_schema = {
-        'model': MODEL_TYPE,
+        'model': MODEL_TYPE,  # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
         'time_config': {
             'step_size': 'maybe[float]',
             'num_steps': 'maybe[float]',
@@ -41,15 +67,14 @@ class OdeSimulation(Step, abc.ABC):
     }
 
     def __init__(self, sbml_filepath: str = None, time_config: dict[str, float] = None, config=None, core=CORE):
+        # verify entrypoints
         assert sbml_filepath and time_config or config, "You must pass either a time config and sbml_filepath or a config dict."
-        configuration = config or {
-            'model': {
-                'model_source': sbml_filepath
-                # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
-            },
-            'time_config': time_config
-        }
         assert len(list(time_config.values())) >= 2, "you must pass two of either: step size, n steps, or duration."
+
+        # parse config
+        configuration = config or {'model': {'model_source': sbml_filepath}, 'time_config': time_config}
+
+        # calc/set time params
         self.step_size = time_config.get('step_size')
         self.num_steps = time_config.get('num_steps')
         self.duration = time_config.get('duration')
@@ -57,9 +82,10 @@ class OdeSimulation(Step, abc.ABC):
 
         super().__init__(config=configuration, core=core)
 
+        # set simulator library-specific attributes
         self.simulator = self._set_simulator(sbml_filepath)
         self.floating_species_ids = self._get_floating_species_ids()
-        self.t = [float(n) for n in range(int(self.duration))]
+        self.t = np.linspace(0, self.duration, self.num_steps)
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:
@@ -79,29 +105,6 @@ class OdeSimulation(Step, abc.ABC):
         """Sim specific method"""
         pass
 
-    '''
-    @abc.abstractmethod
-    def _set_model_changes(self, **changes):
-        self._set_floating_species_changes(**changes)
-        self._set_global_parameters_changes(**changes)
-        self._set_reactions_changes(**changes)
-    
-    
-    @abc.abstractmethod
-    def _set_floating_species_changes(self):
-        """Sim specific method for starting values relative to this property."""
-        pass
-
-    @abc.abstractmethod
-    def _set_global_parameters_changes(self):
-        """Sim specific method for starting values relative to this property."""
-        pass
-
-    @abc.abstractmethod
-    def _set_reactions_changes(self):
-        """Sim specific method for starting values relative to this property."""
-        pass'''
-
     def inputs(self):
         """For now, none"""
         return {}
@@ -117,15 +120,15 @@ class OdeSimulation(Step, abc.ABC):
 
     @abc.abstractmethod
     def update(self, inputs) -> Dict[str, Union[float, Dict[str, float]]]:
-        """Iteratively update over self.floating_species_ids as per the requirements of the simulator library."""
+        """Iteratively update over self.floating_species_ids as per the requirements of the simulator library over
+            this class' `t` attribute, which is are linearly spaced time-point vectors.
+        """
         pass
 
 
 class CopasiStep(OdeSimulation):
     def __init__(self, sbml_filepath, time_config: dict[str, float], config=None, core=CORE):
         super().__init__(sbml_filepath, time_config, config, core)
-        # self.simulator = self._set_simulator(self.config['sbml_filepath'])
-        # self.floating_species_ids = self._get_floating_species_ids()
 
     def _set_simulator(self, sbml_fp: str) -> object:
         return load_model(sbml_fp)
@@ -141,10 +144,6 @@ class CopasiStep(OdeSimulation):
             'floating_species': {
                 mol_id: 'list[float]'
                 for mol_id in self.floating_species_ids
-            },
-            'species_data': {
-                mol_id: 'list[float]'
-                for mol_id in self.floating_species_ids
             }
         }
 
@@ -153,35 +152,31 @@ class CopasiStep(OdeSimulation):
             'time': self.t,
             'floating_species': {
                 mol_id: []
-                for mol_id in self.floating_species_ids
-            },
-            'species_data': {
-                mol_id: []
-                for mol_id in self.floating_species_ids
-            }
-        }
-        i = 0.0
-        for n in range(int(self.duration)):
+                for mol_id in self.floating_species_ids}}
+
+        for i, ti in enumerate(self.t):
+            start = t[i - 1] if ti > 0 else ti
+            end = t[i]
             timecourse = run_time_course(
-                start_time=i,
-                duration=float(n),
+                start_time=start,
+                duration=end,
                 step_number=1,
                 # step_number=self.num_steps,
                 update_model=True,
                 model=self.simulator)
 
-
-
-            # TODO: just return the run time course
+            # TODO: just return the run time course return
 
             for mol_id in self.floating_species_ids:
-                output = float(get_species(
-                    name=mol_id,
-                    exact=True,
-                    model=self.simulator).concentration[0])
+                output = float(
+                    get_species(
+                        name=mol_id,
+                        exact=True,
+                        model=self.simulator
+                    ).concentration[0]
+                )
 
                 results['floating_species'][mol_id].append(output)
-            i += 1
 
         return results
 
