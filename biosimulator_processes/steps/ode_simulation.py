@@ -1,5 +1,6 @@
 import abc
 import logging
+from typing import *
 
 from process_bigraph import Step
 from process_bigraph.experiments.parameter_scan import RunProcess
@@ -25,6 +26,7 @@ from basico import (
 
 from biosimulator_processes import CORE
 from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
+from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 
 
 class OdeSimulation(Step, abc.ABC):
@@ -57,7 +59,7 @@ class OdeSimulation(Step, abc.ABC):
 
         self.simulator = self._set_simulator(sbml_filepath)
         self.floating_species_ids = self._get_floating_species_ids()
-        self.t = [float(n) for n in range(self.duration)]
+        self.t = [float(n) for n in range(int(self.duration))]
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:
@@ -114,7 +116,7 @@ class OdeSimulation(Step, abc.ABC):
         }
 
     @abc.abstractmethod
-    def update(self, inputs):
+    def update(self, inputs) -> Dict[str, Union[float, Dict[str, float]]]:
         """Iteratively update over self.floating_species_ids as per the requirements of the simulator library."""
         pass
 
@@ -133,22 +135,42 @@ class CopasiStep(OdeSimulation):
         assert species_data is not None, "Could not load species ids."
         return species_data.index.tolist()
 
-    def update(self, inputs):
-        timecourse = run_time_course(
-            start_time=0,
-            duration=self.duration,
-            step_number=self.num_steps,
-            update_model=True,
-            model=self.simulator)
+    def outputs(self):
+        return {
+            'time': 'list[float]',
+            'floating_species': {
+                mol_id: 'list[float]'
+                for mol_id in self.floating_species_ids
+            }
+        }
 
-        results = {'time': self.t}
-        results['floating_species'] = {
-            mol_id: float(get_species(
-                name=mol_id,
-                exact=True,
-                model=self.simulator
-            ).concentration[0])
-            for mol_id in self.floating_species_ids}
+    def update(self, inputs):
+        results = {
+            'time': self.t,
+            'floating_species': {
+                mol_id: []
+                for mol_id in self.floating_species_ids
+            }
+        }
+        i = 0.0
+        for n in range(int(self.duration)):
+            timecourse = run_time_course(
+                start_time=i,
+                duration=1.0,
+                # step_number=self.num_steps,
+                update_model=True,
+                model=self.simulator)
+
+            # TODO: just return the run time course
+
+            for mol_id in self.floating_species_ids:
+                output = float(get_species(
+                    name=mol_id,
+                    exact=True,
+                    model=self.simulator).concentration[0])
+
+                results['floating_species'][mol_id].append(output)
+            i += 1
 
         return results
 
