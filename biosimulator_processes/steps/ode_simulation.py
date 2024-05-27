@@ -141,6 +141,10 @@ class CopasiStep(OdeSimulation):
             'floating_species': {
                 mol_id: 'list[float]'
                 for mol_id in self.floating_species_ids
+            },
+            'species_data': {
+                mol_id: 'list[float]'
+                for mol_id in self.floating_species_ids
             }
         }
 
@@ -150,16 +154,23 @@ class CopasiStep(OdeSimulation):
             'floating_species': {
                 mol_id: []
                 for mol_id in self.floating_species_ids
+            },
+            'species_data': {
+                mol_id: []
+                for mol_id in self.floating_species_ids
             }
         }
         i = 0.0
         for n in range(int(self.duration)):
             timecourse = run_time_course(
                 start_time=i,
-                duration=1.0,
+                duration=float(n),
+                step_number=1,
                 # step_number=self.num_steps,
                 update_model=True,
                 model=self.simulator)
+
+
 
             # TODO: just return the run time course
 

@@ -39,13 +39,13 @@ def generate_ode_instance(process_address: str, model_fp: str, step_size: float,
 
 
 def plot_ode_output_data(data: dict):
-    time = data['results']['time']
+    time = data.get('results', data['time'])
     spec_outputs = []
-    for name, output in data['results']['floating_species_concentrations'].items():
+    for name, output in data['floating_species'].items():
         spec_outputs.append({name: output})
 
     # Plotting the data
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(8, 6))
     for output in spec_outputs:
         for name, out in output.items():
             plt.plot(time, out, label=name)
