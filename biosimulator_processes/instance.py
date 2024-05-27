@@ -50,11 +50,13 @@ def generate_ode_instance(process_address: str, model_fp: str, step_size: float,
         duration=duration)
 
 
-def plot_ode_output_data(data: dict):
+def plot_ode_output_data(data: dict, sample_size: int = None):
     time: np.ndarray = data.get('results', data['time'])
     plt.figure(figsize=(20, 8))
     for name, output in data['floating_species'].items():
-        plt.plot(time, output, label=name)
+        x = time[:sample_size] if sample_size else time
+        y = output[:sample_size] if sample_size else output
+        plt.plot(x, y, label=name)
 
     plt.xlabel('Time')
     plt.ylabel('Concentration')

@@ -46,9 +46,9 @@ def parse_expected_timecourse_config(
             print(time_values)
             end_time_index = float(time_values[-1])
             return {
-                'duration':  int(time_indices[-1]),  # int(end_time_index),
+                'duration':  int(end_time_index),
                 'step_size': time_values[-1] / end_time_index,
-                'num_steps': int(end_time_index),  # int(time_indices[-1])
+                'num_steps': int(num_points[0])  # int(end_time_index),  # int(time_indices[-1])
             }
 
 
