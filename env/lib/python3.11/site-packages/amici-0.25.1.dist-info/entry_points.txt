@@ -1,0 +1,3 @@
+[console_scripts]
+amici_import_petab = amici.petab.cli.import_petab:_main
+amici_import_petab.py = amici.petab.cli.import_petab:_main

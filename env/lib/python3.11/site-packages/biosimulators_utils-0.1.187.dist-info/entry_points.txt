@@ -1,0 +1,2 @@
+[console_scripts]
+biosimulators-utils = biosimulators_utils.__main__:main

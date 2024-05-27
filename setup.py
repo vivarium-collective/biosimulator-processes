@@ -40,7 +40,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    python_requires=">=3.10",
+    python_requires=">=3.11",
     install_requires=[
         "bigraph-schema",
         "process-bigraph",

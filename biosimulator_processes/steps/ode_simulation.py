@@ -26,6 +26,7 @@
 
 import abc
 import logging
+import os.path
 from typing import *
 
 import tellurium as te
@@ -54,7 +55,7 @@ from basico import (
 from biosimulator_processes import CORE
 from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
-from biosimulator_processes.io import parse_expected_timecourse_config
+from biosimulator_processes.io import parse_expected_timecourse_config, get_model_file_location, FilePath
 
 
 class OdeSimulation(Step, abc.ABC):
@@ -62,27 +63,34 @@ class OdeSimulation(Step, abc.ABC):
     config_schema = {
         'model': MODEL_TYPE,  # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
         'archive_filepath': 'maybe[string]',
-        'sbml_filepath': 'maybe[string]'
+        'time_config': {
+            'duration': 'float',
+            'num_steps': 'float',
+            'step_size': 'float'
+        }
     }
 
     def __init__(self,
-                 archive_filepath: str = None,
+                 archive_dirpath: str = None,
                  sbml_filepath: str = None,
                  time_config: Dict[str, Union[int, float]] = None,
                  config=None,
                  core=CORE):
 
         # verify entrypoints
-        assert archive_filepath or sbml_filepath and time_config or config, \
+        assert archive_dirpath or sbml_filepath and time_config or config, \
             "You must pass either an omex archive filepath, time config and sbml_filepath, or a config dict."
 
-        utc_config = parse_expected_timecourse_config(archive_root=archive_filepath) \
-            if archive_filepath else time_config
+
+        utc_config = parse_expected_timecourse_config(archive_root=archive_dirpath) \
+            if archive_dirpath else time_config
 
         assert len(list(utc_config.values())) >= 2, "you must pass two of either: step size, n steps, or duration."
 
         # parse config
-        configuration = config or {'model': {'model_source': sbml_filepath}, 'time_config': time_config}
+        sbml_fp = sbml_filepath or get_model_file_location(archive_dirpath).path
+        print(os.path.exists(sbml_fp))
+        configuration = config or {'model': {'model_source': sbml_fp}, 'time_config': utc_config}
 
         # calc/set time params
         self.step_size = utc_config.get('step_size')
@@ -93,7 +101,7 @@ class OdeSimulation(Step, abc.ABC):
         super().__init__(config=configuration, core=core)
 
         # set simulator library-specific attributes
-        self.simulator = self._set_simulator(sbml_filepath)
+        self.simulator = self._set_simulator(sbml_fp)
         self.floating_species_ids = self._get_floating_species_ids()
         self.t = np.linspace(0, self.duration, self.num_steps)
 
@@ -132,6 +140,7 @@ class OdeSimulation(Step, abc.ABC):
         """Iteratively update over self.floating_species_ids as per the requirements of the simulator library over
             this class' `t` attribute, which is are linearly spaced time-point vectors.
         """
+        print(f'running with {self.step_size}')
         results = {
             'time': self.t,
             'floating_species': {
@@ -166,8 +175,13 @@ class OdeSimulation(Step, abc.ABC):
 
 
 class CopasiStep(OdeSimulation):
-    def __init__(self, sbml_filepath, time_config: dict[str, float], config=None, core=CORE):
-        super().__init__(sbml_filepath, time_config, config, core)
+    def __init__(self,
+                 archive_dirpath: str = None,
+                 sbml_filepath: str = None,
+                 time_config: Dict[str, Union[int, float]] = None,
+                 config=None,
+                 core=CORE):
+        super().__init__(archive_dirpath, sbml_filepath, time_config, config, core)
 
     def _set_simulator(self, sbml_fp: str) -> object:
         return load_model(sbml_fp)
@@ -231,9 +245,13 @@ class CopasiStep(OdeSimulation):
 
 
 class TelluriumStep(OdeSimulation):
-    def __init__(self, sbml_filepath, time_config: dict[str, float], config=None, core=CORE):
-        super().__init__(sbml_filepath, time_config, config, core)
-        # self.simulator = self._set_simulator(sbml_filepath)
+    def __init__(self,
+                 archive_dirpath: str = None,
+                 sbml_filepath: str = None,
+                 time_config: Dict[str, Union[int, float]] = None,
+                 config=None,
+                 core=CORE):
+        super().__init__(archive_dirpath, sbml_filepath, time_config, config, core)
 
     def _set_simulator(self, sbml_fp) -> object:
         return te.loadSBMLModel(sbml_fp)
@@ -256,8 +274,13 @@ class TelluriumStep(OdeSimulation):
 
 
 class AmiciStep(OdeSimulation):
-    def __init__(self, sbml_filepath, time_config: dict[str, float], model_dir: str, config=None, core=CORE):
-        super().__init__(sbml_filepath, time_config, config, core)
+    def __init__(self,
+                 archive_dirpath: str = None,
+                 sbml_filepath: str = None,
+                 time_config: Dict[str, Union[int, float]] = None,
+                 config=None,
+                 core=CORE):
+        super().__init__(archive_dirpath, sbml_filepath, time_config, config, core)
         self.simulator = self._set_simulator(sbml_filepath, model_dir)
 
     def _set_simulator(self, sbml_fp, model_dir) -> amici.Model:

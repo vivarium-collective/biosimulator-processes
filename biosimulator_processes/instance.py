@@ -45,7 +45,7 @@ def plot_ode_output_data(data: dict):
         spec_outputs.append({name: output})
 
     # Plotting the data
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(15, 8))
     for output in spec_outputs:
         for name, out in output.items():
             plt.plot(time, out, label=name)
@@ -55,5 +55,7 @@ def plot_ode_output_data(data: dict):
     plt.title('Species Concentrations Over Time')
     plt.legend()
     plt.grid(True)
+    plt.xlim([0, time[-1]])  # Set x-axis limits from 0 to the last time value
+    plt.ylim([min(sum([list(v.values())[0] for v in spec_outputs])), max(sum([list(v.values())[0] for v in spec_outputs]))])  # Adjust y-axis to fit all data
     plt.show()
 

@@ -15,15 +15,16 @@ class FilePath(_BaseClass):
     path: str
 
 
-def extract_archive_file_location(archive_root: str, filename: str) -> FilePath:
+def get_archive_file_location(archive_root: str, filename: str) -> FilePath:
     for f in os.listdir(archive_root):
-        if filename in f:
-            path = os.path.join(archive_root, filename)
+        if f.endswith(filename):
+            path = os.path.join(archive_root, f)
+            print(path)
             return FilePath(name=filename, path=path)
 
 
-def extract_model_file_location(archive_root: str) -> FilePath:
-    return extract_archive_file(archive_root, '.xml')
+def get_model_file_location(archive_root: str) -> FilePath:
+    return get_archive_file_location(archive_root, '.xml')
 
 
 def parse_expected_timecourse_config(archive_root: str = None, expected_results_fp: str = None) -> Dict[str, float]:
@@ -39,11 +40,11 @@ def parse_expected_timecourse_config(archive_root: str = None, expected_results_
             reported_time_vals = report['values'][0]['value']
             time_indices = list(reported_time_vals.keys())
             time_values = list(reported_time_vals.values())
-            end_time_index = float(time_indices[-1])
+            end_time_index = float(time_values[-1])
             return {
                 'duration': end_time_index,
                 'step_size': time_values[-1] / end_time_index,
-                'num_steps': num_points[0]}
+                'num_steps': int(time_indices[-1])}
 
 
 def fetch_biomodel_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -> FilePath:
