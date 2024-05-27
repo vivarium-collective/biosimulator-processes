@@ -28,9 +28,10 @@ import abc
 import logging
 from typing import *
 
+import tellurium as te
+import numpy as np
 from process_bigraph import Step
 from process_bigraph.experiments.parameter_scan import RunProcess
-import tellurium as te
 from amici import amici, sbml_import, SbmlImporter
 from COPASI import CDataModel
 from pandas import DataFrame
@@ -53,31 +54,40 @@ from basico import (
 from biosimulator_processes import CORE
 from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulator_processes.io import parse_expected_timecourse_config
 
 
 class OdeSimulation(Step, abc.ABC):
 
     config_schema = {
         'model': MODEL_TYPE,  # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
-        'time_config': {
-            'step_size': 'maybe[float]',
-            'num_steps': 'maybe[float]',
-            'duration': 'maybe[float]'
-        }
+        'archive_filepath': 'maybe[string]',
+        'sbml_filepath': 'maybe[string]'
     }
 
-    def __init__(self, sbml_filepath: str = None, time_config: dict[str, float] = None, config=None, core=CORE):
+    def __init__(self,
+                 archive_filepath: str = None,
+                 sbml_filepath: str = None,
+                 time_config: Dict[str, Union[int, float]] = None,
+                 config=None,
+                 core=CORE):
+
         # verify entrypoints
-        assert sbml_filepath and time_config or config, "You must pass either a time config and sbml_filepath or a config dict."
-        assert len(list(time_config.values())) >= 2, "you must pass two of either: step size, n steps, or duration."
+        assert archive_filepath or sbml_filepath and time_config or config, \
+            "You must pass either an omex archive filepath, time config and sbml_filepath, or a config dict."
+
+        utc_config = parse_expected_timecourse_config(archive_root=archive_filepath) \
+            if archive_filepath else time_config
+
+        assert len(list(utc_config.values())) >= 2, "you must pass two of either: step size, n steps, or duration."
 
         # parse config
         configuration = config or {'model': {'model_source': sbml_filepath}, 'time_config': time_config}
 
         # calc/set time params
-        self.step_size = time_config.get('step_size')
-        self.num_steps = time_config.get('num_steps')
-        self.duration = time_config.get('duration')
+        self.step_size = utc_config.get('step_size')
+        self.num_steps = utc_config.get('num_steps')
+        self.duration = utc_config.get('duration')
         self._set_time_params()
 
         super().__init__(config=configuration, core=core)
@@ -118,11 +128,40 @@ class OdeSimulation(Step, abc.ABC):
             }
         }
 
-    @abc.abstractmethod
-    def update(self, inputs) -> Dict[str, Union[float, Dict[str, float]]]:
+    def update(self, inputs, **simulator_kwargs) -> Dict[str, Union[float, Dict[str, float]]]:
         """Iteratively update over self.floating_species_ids as per the requirements of the simulator library over
             this class' `t` attribute, which is are linearly spaced time-point vectors.
         """
+        results = {
+            'time': self.t,
+            'floating_species': {
+                mol_id: []
+                for mol_id in self.floating_species_ids}}
+
+        for i, ti in enumerate(self.t):
+            start = self.t[i - 1] if ti > 0 else ti
+            end = self.t[i]
+            timecourse = self._run_simulation(
+                start_time=start,
+                duration=end,
+                **simulator_kwargs)
+
+            # TODO: just return the run time course return
+
+            for mol_id in self.floating_species_ids:
+                output = float(self._get_floating_species_concentrations(species_id=mol_id, model=self.simulator))
+                results['floating_species'][mol_id].append(output)
+
+        return results
+
+    @abc.abstractmethod
+    def _run_simulation(self, start_time, duration, **kwargs):
+        """Run timecourse simulation as per simulator library requirements"""
+        pass
+
+    @abc.abstractmethod
+    def _get_floating_species_concentrations(self, species_id: str, model: object = None):
+        """Get floating species concentration values as per specific simulator library requirements"""
         pass
 
 
@@ -147,7 +186,7 @@ class CopasiStep(OdeSimulation):
             }
         }
 
-    def update(self, inputs):
+    """def update(self, inputs):
         results = {
             'time': self.t,
             'floating_species': {
@@ -178,7 +217,17 @@ class CopasiStep(OdeSimulation):
 
                 results['floating_species'][mol_id].append(output)
 
-        return results
+        return results"""
+
+    def _run_simulation(self, start_time, duration, **kwargs):
+        return run_time_course(
+            start_time=start_time,
+            duration=duration,
+            update_model=True,
+            model=self.simulator)
+
+    def _get_floating_species_concentrations(self, species_id: str, model: object = None):
+        return get_species(name=species_id, exact=True, model=self.simulator).concentration[0]
 
 
 class TelluriumStep(OdeSimulation):

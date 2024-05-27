@@ -1,14 +1,15 @@
 from typing import *
 from tempfile import mkdtemp
+from dataclasses import dataclass
 import requests
 import zipfile as zf
-from dataclasses import dataclass
+import json
 import os
 
 from biosimulator_processes.data_model import _BaseClass
 
 
-@dataclass(frozen=True)
+@dataclass
 class FilePath(_BaseClass):
     name: str
     path: str
@@ -42,7 +43,7 @@ def parse_expected_timecourse_config(archive_root: str = None, expected_results_
             return {
                 'duration': end_time_index,
                 'step_size': time_values[-1] / end_time_index,
-                'num_steps': float(num_points[0])}
+                'num_steps': num_points[0]}
 
 
 def fetch_biomodel_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -> FilePath:
