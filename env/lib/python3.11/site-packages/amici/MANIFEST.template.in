@@ -1,3 +1,0 @@
-include *.cpp *.h
-include CMakeLists.txt
-recursive-include swig/ *
