@@ -6,7 +6,10 @@ import zipfile as zf
 import json
 import os
 
+import h5py
+import numpy as np
 from biosimulator_processes.data_model import _BaseClass
+from biosimulator_processes.data_model.service_data_model import BiosimulationsRunOutputData, BiosimulationsReportOutput
 
 
 @dataclass
@@ -27,6 +30,14 @@ def get_model_file_location(archive_root: str) -> FilePath:
     return get_archive_file_location(archive_root, '.xml')
 
 
+def get_published_t(omex_dirpath: str = None, report_fp: str = None) -> np.ndarray:
+    report_fp = get_archive_file_location(
+        omex_dirpath, 'reports.h5').path if not report_fp else report_fp
+
+    published_outputs = read_report_outputs(report_fp)
+    return published_outputs.data[0].data
+
+
 def parse_expected_timecourse_config(
         archive_root: str = None,
         expected_results_fp: str = None
@@ -39,7 +50,7 @@ def parse_expected_timecourse_config(
     for report in expected_reports:
         report_id = report['id'].lower()
         if 'report' in report_id:
-            num_points = report['points']
+            num_points = int(report['points'][0])
             reported_time_vals = report['values'][0]['value']
             time_indices = list(reported_time_vals.keys())
             time_values = list(reported_time_vals.values())
@@ -48,7 +59,7 @@ def parse_expected_timecourse_config(
             return {
                 'duration':  int(end_time_index),
                 'step_size': time_values[-1] / end_time_index,
-                'num_steps': int(num_points[0])  # int(end_time_index),  # int(time_indices[-1])
+                'num_steps': num_points  # int(end_time_index),  # int(time_indices[-1])
             }
 
 
@@ -73,3 +84,28 @@ def fetch_biomodel_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -
             return FilePath(name=model_filename, path=p)
         except Exception as e:
             print(e)
+
+
+# OUTPUTS
+def read_report_outputs(report_file_path) -> BiosimulationsRunOutputData:
+    """Read the outputs from all species in the given report file from biosimulations output.
+        Args:
+            report_file_path (str): The path to the simulation.sedml/report.h5 HDF5 file.
+    """
+    # TODO: implement auto gen from run id here.
+    outputs = []
+    with h5py.File(report_file_path, 'r') as f:
+        k = list(f.keys())
+        group_path = k[0] + '/report'
+        if group_path in f:
+            group = f[group_path]
+            dataset_labels = group.attrs['sedmlDataSetLabels']
+            for label in dataset_labels:
+                dataset_index = list(dataset_labels).index(label)
+                data = group[()]
+                specific_data = data[dataset_index]
+                output = BiosimulationsReportOutput(dataset_label=label, data=specific_data)
+                outputs.append(output)
+            return BiosimulationsRunOutputData(report_path=report_file_path, data=outputs)
+        else:
+            print(f"Group '{group_path}' not found in the file.")

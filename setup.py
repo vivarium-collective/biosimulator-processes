@@ -2,7 +2,7 @@ import re
 from setuptools import setup, find_packages
 
 
-__version__ = "0.0.24"
+__version__ = "0.0.25"
 
 with open("README.md", "r") as readme:
     description = readme.read()
@@ -48,7 +48,7 @@ setup(
         "bigraph-viz",
         "amici",
         "numpy",
-        "pytest>=6.2.5",
+        "pytest",
         "tellurium",
         "copasi-basico",
         "cobra",
@@ -58,9 +58,9 @@ setup(
         "notebook",
         "bigraph-builder",
         "python-libsbml",  # ==5.20.2",
-        "docker>=7.0",
+        "docker",
         "pyproject.toml",
-        "python-libnuml==1.1.6",  # ">=1.0.0"
+        "python-libnuml",  # ">=1.0.0"
         "seaborn"
     ],
     extras_require={

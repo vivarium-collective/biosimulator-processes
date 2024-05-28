@@ -8,7 +8,7 @@ from biosimulator_processes.data_model import _BaseClass
 
 
 @dataclass
-class BiosimulationsSpeciesOutput(_BaseClass):
+class BiosimulationsReportOutput(_BaseClass):
     dataset_label: str
     data: np.ndarray
 
@@ -16,7 +16,7 @@ class BiosimulationsSpeciesOutput(_BaseClass):
 @dataclass
 class BiosimulationsRunOutputData(_BaseClass):
     report_path: str
-    data: list[BiosimulationsSpeciesOutput]
+    data: list[BiosimulationsReportOutput]
 
 
 @dataclass

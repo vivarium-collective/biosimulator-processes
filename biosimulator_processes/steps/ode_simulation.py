@@ -29,10 +29,12 @@ import logging
 import os.path
 from tempfile import mkdtemp
 from typing import *
+from typing import Dict, List, Any
 
 import libsbml
 import numpy as np
 import tellurium as te
+from numpy import ndarray, dtype
 from tellurium.roadrunner.extended_roadrunner import ExtendedRoadRunner
 from amici import (
     amici,
@@ -59,11 +61,12 @@ from basico import (
     add_parameter)
 from process_bigraph import Step
 from process_bigraph.experiments.parameter_scan import RunProcess
+from biosimulators_utils.combine.io import CombineArchiveReader
 
 from biosimulator_processes import CORE
 from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
-from biosimulator_processes.io import parse_expected_timecourse_config, get_model_file_location, FilePath
+from biosimulator_processes.io import parse_expected_timecourse_config, get_model_file_location, FilePath, get_published_t
 
 
 class OdeSimulation(Step, abc.ABC):
@@ -71,6 +74,7 @@ class OdeSimulation(Step, abc.ABC):
     config_schema = {
         'model': MODEL_TYPE,  # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
         'archive_filepath': 'maybe[string]',
+        'working_dirpath': 'maybe[string]',
         'time_config': {
             'duration': 'float',
             'num_steps': 'float',
@@ -79,23 +83,44 @@ class OdeSimulation(Step, abc.ABC):
     }
 
     def __init__(self,
-                 archive_dirpath: str = None,
+                 archive_filepath: str = None,
                  sbml_filepath: str = None,
+                 working_dirpath: str = None,
                  time_config: Dict[str, Union[int, float]] = None,
+                 sed_model_config: Dict = None,
                  config=None,
                  core=CORE):
+        """Abstract base class which implements the `process_bigraph.Step` interface for ODE-based simulations and simulators. The implementer
+            must implement the specific abstract methods defined here.
+
+            Parameters:
+                archive_filepath:`optional[str]`: path to either an OMEX/Combine file (`.omex`), or a directory of an "unpacked/extracted" archive containing
+                    reports and/or expected results.
+                sbml_filepath:`optional[str]`: path to an sbml model file.
+                working_dirpath:`optional[str]`: path to working directory to unpack archive and/or save outputs.
+                time_config:`dict`: defining duration, num_steps, and step_size (two of the three must be specified).
+                sed_model_config:`dict`: defining model specs as per SED standards. See `./data_model.sed_data_model.MODEL_TYPE` for more information.
+                    at least `{'model': {'model_source': ...}}` must be defined.
+                config:`dict`: process-bigraph-style configuration.
+                core: typesystem used.
+        """
 
         # verify entrypoints
-        assert archive_dirpath or sbml_filepath and time_config or config, \
+        assert archive_filepath or sbml_filepath and time_config or config, \
             "You must pass either an omex archive filepath, time config and sbml_filepath, or a config dict."
 
-        utc_config = parse_expected_timecourse_config(archive_root=archive_dirpath) \
-            if archive_dirpath else time_config
+        # extract archive file into working dir if needed
+        if archive_filepath and not os.path.isdir(archive_filepath):
+            working_dir = working_dirpath or mkdtemp()
+            archive_filepath = CombineArchiveReader().run(in_file=archive_filepath, out_dir=working_dir)
 
+        # parse expected results timecourse config
+        utc_config = parse_expected_timecourse_config(archive_root=archive_filepath) \
+            if archive_filepath else time_config
         assert len(list(utc_config.values())) >= 2, "you must pass two of either: step size, n steps, or duration."
 
         # parse config
-        sbml_fp = sbml_filepath or get_model_file_location(archive_dirpath).path
+        sbml_fp = sbml_filepath or get_model_file_location(archive_filepath).path
         print(os.path.exists(sbml_fp))
         configuration = config or {'model': {'model_source': sbml_fp}, 'time_config': utc_config}
 
@@ -111,7 +136,7 @@ class OdeSimulation(Step, abc.ABC):
         # set simulator library-specific attributes
         self.simulator = self._set_simulator(sbml_fp)
         self.floating_species_ids = self._get_floating_species_ids()
-        self.t = np.linspace(0, self.duration, self.num_steps)
+        self.t = np.linspace(0, self.duration, self.num_steps) if not archive_filepath else get_published_t(archive_filepath)
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:
@@ -144,7 +169,7 @@ class OdeSimulation(Step, abc.ABC):
             }
         }
 
-    def update(self, inputs, **simulator_kwargs) -> Dict[str, Union[float, Dict[str, float]]]:
+    def update(self, inputs, **simulator_kwargs) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
         """Iteratively update over self.floating_species_ids as per the requirements of the simulator library over
             this class' `t` attribute, which is are linearly spaced time-point vectors.
         """
