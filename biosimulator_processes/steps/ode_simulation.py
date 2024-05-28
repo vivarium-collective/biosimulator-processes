@@ -96,12 +96,13 @@ class OdeSimulation(Step, abc.ABC):
             Parameters:
                 archive_filepath:`optional[str]`: path to either an OMEX/Combine file (`.omex`), or a directory of an "unpacked/extracted" archive containing
                     reports and/or expected results.
-                sbml_filepath:`optional[str]`: path to an sbml model file.
+                sbml_filepath:`optional[str]`: path to a sbml file.
                 working_dirpath:`optional[str]`: path to working directory to unpack archive and/or save outputs.
-                time_config:`dict`: defining duration, num_steps, and step_size (two of the three must be specified).
-                sed_model_config:`dict`: defining model specs as per SED standards. See `./data_model.sed_data_model.MODEL_TYPE` for more information.
-                    at least `{'model': {'model_source': ...}}` must be defined.
-                config:`dict`: process-bigraph-style configuration.
+                time_config:`optional[dict]`: defining duration, num_steps, and step_size (two of the three must be specified).
+                sed_model_config:`optional[dict]`: defining model specs as per SED standards.
+                    See `biosimulator_processes.data_model.sed_data_model.MODEL_TYPE` for more information.
+                    At least `{'model': {'model_source': ...}}` must be defined.
+                config:`optional[dict]`: process-bigraph-style configuration.
                 core: typesystem used.
         """
 
@@ -158,21 +159,21 @@ class OdeSimulation(Step, abc.ABC):
 
     def inputs(self):
         """For now, none"""
-        return {}
+        return {'duration': 'maybe[int]',
+                'num_steps': 'maybe[int]',
+                'step_size': 'maybe[float]'}
 
     def outputs(self):
-        return {
-            'time': 'list[float]',
-            'floating_species': {
-                spec_id: 'float'
-                for spec_id in self.floating_species_ids
-            }
-        }
+        return {'time': 'list[float]',
+                'floating_species': {spec_id: 'float' for spec_id in self.floating_species_ids}}
 
-    def update(self, inputs, **simulator_kwargs) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
+    def update(self, inputs=None, **simulator_kwargs) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
         """Iteratively update over self.floating_species_ids as per the requirements of the simulator library over
-            this class' `t` attribute, which is are linearly spaced time-point vectors.
+            this class' `t` attribute, which is are linearly spaced time-point vectors. Inputs may be passed to override
+            anything in this method and/or class in general.
         """
+        if inputs is None:
+            self._parse_input_state(inputs, **simulator_kwargs)
         results = {
             'time': self.t,
             'floating_species': {
@@ -208,15 +209,25 @@ class OdeSimulation(Step, abc.ABC):
         """Get floating species concentration values as per specific simulator library requirements"""
         pass
 
+    # @abc.abstractmethod
+    # def _parse_input_state(self, inputs, **simulator_kwargs):
+        """Set species/param values and override constructor settings prior to simulation.
+            1. iterate over requested overrides and call a `get` routine over the given class data id attributes like `floating_species_ids`, etc.
+            2. update `self.t` if any time overrides are requested by recalculating self.duration, etc.
+            3. set any simulator data if any "global" or "local" simulator-specific overrides are requested in the `**simulator_kwargs`
+            TODO: finish this.
+        """
+        # pass
+
 
 class CopasiStep(OdeSimulation):
     def __init__(self,
-                 archive_dirpath: str = None,
+                 archive_filepath: str = None,
                  sbml_filepath: str = None,
                  time_config: Dict[str, Union[int, float]] = None,
                  config=None,
                  core=CORE):
-        super().__init__(archive_dirpath, sbml_filepath, time_config, config, core)
+        super().__init__(archive_filepath, sbml_filepath, time_config, config, core)
 
     def _set_simulator(self, sbml_fp: str) -> CDataModel:
         return load_model(sbml_fp)
@@ -240,12 +251,12 @@ class CopasiStep(OdeSimulation):
 
 class TelluriumStep(OdeSimulation):
     def __init__(self,
-                 archive_dirpath: str = None,
+                 archive_filepath: str = None,
                  sbml_filepath: str = None,
                  time_config: Dict[str, Union[int, float]] = None,
                  config=None,
                  core=CORE):
-        super().__init__(archive_dirpath, sbml_filepath, time_config, config, core)
+        super().__init__(archive_filepath, sbml_filepath, time_config, config, core)
 
     def _set_simulator(self, sbml_fp) -> ExtendedRoadRunner:
         return te.loadSBMLModel(sbml_fp)
@@ -263,13 +274,13 @@ class TelluriumStep(OdeSimulation):
 class AmiciStep(OdeSimulation):
     """`config` includes 'model_dir' for model compilation."""
     def __init__(self,
-                 archive_dirpath: str = None,
+                 archive_filepath: str = None,
                  sbml_filepath: str = None,
                  time_config: Dict[str, Union[int, float]] = None,
                  model_dir: str = None,
                  config=None,
                  core=CORE):
-        super().__init__(archive_dirpath, sbml_filepath, time_config, config, core)
+        super().__init__(archive_filepath, sbml_filepath, time_config, config, core)
         self.model_dir = model_dir or config.get('model_dir') or mkdtemp()
         self.sbml_model_object = self._set_sbml_model(sbml_filepath)
         self.simulator = self._set_simulator(sbml_filepath)

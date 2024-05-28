@@ -50,44 +50,5 @@ def generate_ode_instance(process_address: str, model_fp: str, step_size: float,
         duration=duration)
 
 
-def plot_ode_output_data(data: dict, sample_size: int = None):
-    time: np.ndarray = data.get('results', data['time'])
-    plt.figure(figsize=(20, 8))
-    for name, output in data['floating_species'].items():
-        x = time[:sample_size] if sample_size else time
-        y = output[:sample_size] if sample_size else output
-        plt.plot(x, y, label=name)
-
-    plt.xlabel('Time')
-    plt.ylabel('Concentration')
-    plt.title('Species Concentrations Over Time')
-    plt.legend()
-    plt.grid(True)
-    # plt.xlim([0, time[-1]])  # Set x-axis limits from 0 to the last time value
-    # plt.ylim([min([list(v.values())[0] for v in spec_outputs]), max([list(v.values())[0] for v in spec_outputs])])  # Adjust y-axis to fit all data
-    plt.show()
-
-
-# TODO: use this in server
-@dataclass
-class ODESimulationOutput(_BaseClass):
-    t: List[float]
-    floating_species: Dict[str, List[float]]
-
-    def __init__(self, data: Dict):
-        self.data = data
-        self.t = data['time']
-        self.floating_species = {
-            name: output
-            for name, output in data['floating_species'].items()}
-
-    def plot(self, sample_size: None):
-        return plot_ode_output_data(self.data, sample_size=sample_size)
-
-
-def run_copasi_step_from_omex(archive_dir_fp: str) -> ODESimulationOutput:
-    step = CopasiStep(archive_dirpath=archive_dir_fp)
-    result = step.update({})
-    return ODESimulationOutput(data=result)
 
 

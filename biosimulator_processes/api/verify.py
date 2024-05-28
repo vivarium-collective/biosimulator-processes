@@ -9,6 +9,7 @@ from process_bigraph import Process
 from biosimulator_processes.data_model.compare_data_model import ODEProcessIntervalComparison, ODEComparisonResult
 from biosimulator_processes.data_model.verify_data_model import OutputAspectVerification
 from biosimulator_processes.services.rest_service import BiosimulationsRestService
+from biosimulator_processes.steps.ode_simulation import OdeSimulation
 
 
 # *VERIFICATION*å
