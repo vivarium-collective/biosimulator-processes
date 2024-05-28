@@ -69,27 +69,28 @@ from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 from biosimulator_processes.io import parse_expected_timecourse_config, get_model_file_location, FilePath, get_published_t
 
 
-class OdeSimulation(Step, abc.ABC):
+class UniformTimeCourse(Step, abc.ABC):
 
     config_schema = {
         'model': MODEL_TYPE,  # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
         'archive_filepath': 'maybe[string]',
         'working_dirpath': 'maybe[string]',
         'time_config': {
-            'duration': 'float',
+            'duration': 'float',  # make these maybes
             'num_steps': 'float',
             'step_size': 'float'
         }
+        # add simulator kwargs
     }
 
     def __init__(self,
+                 config=None,
+                 core=CORE,
                  archive_filepath: str = None,
                  sbml_filepath: str = None,
                  working_dirpath: str = None,
                  time_config: Dict[str, Union[int, float]] = None,
-                 sed_model_config: Dict = None,
-                 config=None,
-                 core=CORE):
+                 sed_model_config: Dict = None):
         """Abstract base class which implements the `process_bigraph.Step` interface for ODE-based simulations and simulators. The implementer
             must implement the specific abstract methods defined here.
 
@@ -137,7 +138,7 @@ class OdeSimulation(Step, abc.ABC):
         # set simulator library-specific attributes
         self.simulator = self._set_simulator(sbml_fp)
         self.floating_species_ids = self._get_floating_species_ids()
-        self.t = np.linspace(0, self.duration, self.num_steps) if not archive_filepath else get_published_t(archive_filepath)
+        self.t = np.linspace(0, self.duration, self.num_steps) if not archive_filepath else get_published_t(archive_filepath)  # create SEDML-SED translator
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:
@@ -167,13 +168,12 @@ class OdeSimulation(Step, abc.ABC):
         return {'time': 'list[float]',
                 'floating_species': {spec_id: 'float' for spec_id in self.floating_species_ids}}
 
-    def update(self, inputs=None, **simulator_kwargs) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
+    def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
         """Iteratively update over self.floating_species_ids as per the requirements of the simulator library over
             this class' `t` attribute, which is are linearly spaced time-point vectors. Inputs may be passed to override
             anything in this method and/or class in general.
         """
-        if inputs is None:
-            self._parse_input_state(inputs, **simulator_kwargs)
+
         results = {
             'time': self.t,
             'floating_species': {
@@ -185,8 +185,7 @@ class OdeSimulation(Step, abc.ABC):
             end = self.t[i]
             timecourse = self._run_simulation(
                 start_time=start,
-                duration=end,
-                **simulator_kwargs)
+                duration=end)
 
             # TODO: just return the run time course return
 
@@ -197,7 +196,7 @@ class OdeSimulation(Step, abc.ABC):
         return results
 
     def run(self, input_state: Dict[str, Union[List[str], Dict[str, List[float]]]] = None, **simulator_kwargs):
-        return self.update(inputs=input_state or {}, **simulator_kwargs)
+        return self.update(inputs=input_state or {})
 
     @abc.abstractmethod
     def _run_simulation(self, start_time, duration, **simulator_kwargs):
@@ -220,14 +219,14 @@ class OdeSimulation(Step, abc.ABC):
         # pass
 
 
-class CopasiStep(OdeSimulation):
+class CopasiStep(UniformTimeCourse):
     def __init__(self,
                  archive_filepath: str = None,
                  sbml_filepath: str = None,
                  time_config: Dict[str, Union[int, float]] = None,
                  config=None,
                  core=CORE):
-        super().__init__(archive_filepath, sbml_filepath, time_config, config, core)
+        super().__init__(archive_filepath=archive_filepath, sbml_filepath=sbml_filepath, time_config=time_config, config=config, core=core)
 
     def _set_simulator(self, sbml_fp: str) -> CDataModel:
         return load_model(sbml_fp)
@@ -248,30 +247,18 @@ class CopasiStep(OdeSimulation):
     def _get_floating_species_concentrations(self, species_id: str, model: object = None):
         return get_species(name=species_id, exact=True, model=self.simulator).concentration[0]
 
-
-class TelluriumStep(OdeSimulation):
-    def __init__(self,
-                 archive_filepath: str = None,
-                 sbml_filepath: str = None,
-                 time_config: Dict[str, Union[int, float]] = None,
-                 config=None,
-                 core=CORE):
-        super().__init__(archive_filepath, sbml_filepath, time_config, config, core)
-
-    def _set_simulator(self, sbml_fp) -> ExtendedRoadRunner:
-        return te.loadSBMLModel(sbml_fp)
-
-    def _get_floating_species_ids(self) -> list[str]:
-        return self.simulator.getFloatingSpeciesIds()
-
-    def _run_simulation(self, start_time, duration, **simulator_kwargs):
-        return self.simulator.simulate(start_time, duration, **simulator_kwargs)
-
-    def _get_floating_species_concentrations(self, species_id: str, model: object = None):
-        return self.simulator.getValue(species_id)
+    def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
+        tc = run_time_course(start_time=0, duration=self.duration, step_number=self.num_steps, model=self.simulator)
+        return {
+            'time': self.t.tolist(),
+            'floating_species': {
+                mol_id: tc.to_dict().get(mol_id)
+                for mol_id in self.floating_species_ids
+            }
+        }
 
 
-class AmiciStep(OdeSimulation):
+class AmiciStep(UniformTimeCourse):
     """`config` includes 'model_dir' for model compilation."""
     def __init__(self,
                  archive_filepath: str = None,
@@ -280,10 +267,11 @@ class AmiciStep(OdeSimulation):
                  model_dir: str = None,
                  config=None,
                  core=CORE):
-        super().__init__(archive_filepath, sbml_filepath, time_config, config, core)
         self.model_dir = model_dir or config.get('model_dir') or mkdtemp()
-        self.sbml_model_object = self._set_sbml_model(sbml_filepath)
+        super().__init__(archive_filepath=archive_filepath, sbml_filepath=sbml_filepath, time_config=time_config, config=config, core=core)
+        self.sbml_model_object = None
         self.simulator = self._set_simulator(sbml_filepath)
+        self.simulator.setTimepoints(self.t)
 
     @staticmethod
     def _set_sbml_model(sbml_fp: str) -> libsbml.Model:
@@ -293,7 +281,7 @@ class AmiciStep(OdeSimulation):
 
     def _set_simulator(self, sbml_fp: str) -> amici.Model:
         # get and compile libsbml model from fp
-        self._set_sbml_model(sbml_fp)
+        self.sbml_model_object = self._set_sbml_model(sbml_fp)
         model_id = self.config['model'].get('model_id', None) \
             or sbml_fp.split('/')[-1].replace('.', '_').split('_')[0]
 
@@ -313,13 +301,53 @@ class AmiciStep(OdeSimulation):
     def _get_floating_species_ids(self) -> List[str]:
         return list(self.simulator.getObservableIds())
 
-    def _run_simulation(self, start_time, duration, **simulator_kwargs) -> ReturnDataView:
+    def _run_simulation(self) -> ReturnDataView:
         sol = self.simulator.getSolver()
-        return runAmiciSimulation(solver=sol, model=self.simulator, **simulator_kwargs)
+        return runAmiciSimulation(solver=sol, model=self.simulator)
+
+    def _get_floating_species_concentrations(self, rdata: ReturnDataView):
+        """TODO: Finish this."""
+        return dict(zip(
+            self.floating_species_ids,
+            list(map(
+                lambda x: rdata.by_id(f'{x}'),
+                self.floating_species_ids))
+        ))
+
+    def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
+        # TODO: handle changes, if any.
+        rdata = self._run_simulation()
+        species_data = self._get_floating_species_concentrations(rdata)
+        return {
+            'time': self.t.tolist(),
+            'floating_species': species_data
+        }
+
+
+class TelluriumStep(UniformTimeCourse):
+    def __init__(self,
+                 archive_filepath: str = None,
+                 sbml_filepath: str = None,
+                 time_config: Dict[str, Union[int, float]] = None,
+                 config=None,
+                 core=CORE):
+        super().__init__(archive_filepath=archive_filepath, sbml_filepath=sbml_filepath, time_config=time_config, config=config, core=core)
+
+    def _set_simulator(self, sbml_fp) -> ExtendedRoadRunner:
+        return te.loadSBMLModel(sbml_fp)
+
+    def _get_floating_species_ids(self) -> list[str]:
+        return self.simulator.getFloatingSpeciesIds()
+
+    def _run_simulation(self, start_time, duration, **simulator_kwargs):
+        return self.simulator.simulate(start_time, duration, **simulator_kwargs)
 
     def _get_floating_species_concentrations(self, species_id: str, model: object = None):
-        """TODO: Finish this."""
-        pass
+        return self.simulator.getValue(species_id)
+
+    def update(self, inputs=None):
+        results = self.simulator.simulate(0, self.duration, self.num_steps)
+        pass  # TODO: finish this.
 
 
 class ODEProcess(RunProcess):

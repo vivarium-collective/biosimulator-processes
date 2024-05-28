@@ -7,10 +7,9 @@ from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
 
-from biosimulator_processes.data_model.api_data_model import ODESimulationOutput
 
 
-def create_ode_step_instance(simulator_name: str, **step_kwargs) -> ODESimulationOutput:
+def create_ode_step_instance(simulator_name: str, **step_kwargs):
     module_name = 'ode_simulation'
     import_statement = 'biosimulator_processes.steps.ode_simulation'
     class_name = f'{simulator_name.replace(simulator_name[0], simulator_name[0].upper())}Step'

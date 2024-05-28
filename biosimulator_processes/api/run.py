@@ -3,7 +3,6 @@ from typing import Dict
 from numpy import ndarray
 import matplotlib.pyplot as plt
 
-from biosimulator_processes.data_model.api_data_model import ODESimulationOutput
 from biosimulator_processes.steps.ode_simulation import CopasiStep, TelluriumStep, AmiciStep
 
 
@@ -25,14 +24,15 @@ def plot_ode_output_data(data: Dict, sample_size: int = None) -> None:
     plt.show()
 
 
-def run_ode_step_from_omex(archive_dir_fp: str, simulator_name: str) -> ODESimulationOutput:
+def run_ode_step_from_omex(archive_dir_fp: str, simulator_name: str):
     ode_simulators = ['copasi', 'tellurium', 'amici']
     for ode_sim in ode_simulators:
         if simulator_name.lower() in ode_sim:
+            pass
 
 
 
-def run_copasi_step_from_omex(archive_dir_fp: str) -> ODESimulationOutput:
+def run_copasi_step_from_omex(archive_dir_fp: str):
     step = CopasiStep(archive_dirpath=archive_dir_fp)
     result = step.update({})
     return ODESimulationOutput(data=result)
