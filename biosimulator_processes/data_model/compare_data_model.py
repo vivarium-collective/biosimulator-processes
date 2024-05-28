@@ -28,7 +28,7 @@ from process_bigraph import Composite, pf
 from pydantic import Field, field_validator
 
 from biosimulator_processes.utils import prepare_single_ode_process_document
-from biosimulator_processes.data_model import BaseModel, _BaseClass
+from biosimulator_processes.data_model import BaseModel, _BaseClass, _BaseModel
 from biosimulator_processes import CORE
 
 
@@ -36,20 +36,23 @@ from biosimulator_processes import CORE
     # and cols are simulator id.
 
 
-class PairwiseComparison(BaseModel):
+@dataclass
+class PairwiseComparison(_BaseClass):
     edge: Tuple[np.ndarray, np.ndarray]
     value: bool
 
 
-class SimulatorComparison(BaseModel):
+@dataclass
+class SimulatorComparison(_BaseClass):
     project_id: str
     data: List[PairwiseComparison]
 
 
-class ComparisonMatrix(BaseModel):
+@dataclass
+class ComparisonMatrix(_BaseClass):
     data: pd.DataFrame
-    name: Optional[str] = Field(default="Unknown")
-    ground_truth: Optional[np.ndarray] = Field(default=None)
+    name: Optional[str] = None
+    ground_truth: Optional[np.ndarray] = None
 
 
 class ParamIntervalOutputData(BaseModel):
@@ -316,7 +319,8 @@ class ODECompositionResult(_BaseClass):
         return {'outputs': output[('emitter',)]}
 
 
-class CompositeRunError(BaseModel):
+@dataclass
+class CompositeRunError(_BaseClass):
     exception: Exception
 
 
