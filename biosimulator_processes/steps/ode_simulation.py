@@ -76,9 +76,9 @@ class UniformTimeCourse(Step, abc.ABC):
         'archive_filepath': 'maybe[string]',
         'working_dirpath': 'maybe[string]',
         'time_config': {
-            'duration': 'float',  # make these maybes
-            'num_steps': 'float',
-            'step_size': 'float'
+            'duration': 'maybe[float]',  # make these maybes
+            'num_steps': 'maybe[float]',
+            'step_size': 'maybe[float]'
         }
         # add simulator kwargs
     }
@@ -160,9 +160,10 @@ class UniformTimeCourse(Step, abc.ABC):
 
     def inputs(self):
         """For now, none"""
-        return {'duration': 'maybe[int]',
-                'num_steps': 'maybe[int]',
-                'step_size': 'maybe[float]'}
+        # return {'duration': 'maybe[int]',
+                # 'num_steps': 'maybe[int]',
+                # 'step_size': 'maybe[float]'}
+        return {}
 
     def outputs(self):
         return {'time': 'list[float]',
@@ -220,6 +221,18 @@ class UniformTimeCourse(Step, abc.ABC):
 
 
 class CopasiStep(UniformTimeCourse):
+    config_schema = {
+        'model': MODEL_TYPE,  # model changes can go here. A dict of dicts of dicts: {'model_changes': {'floating_species': {'t': {'initial_concentration' value'}}}}
+        'archive_filepath': 'maybe[string]',
+        'working_dirpath': 'maybe[string]',
+        'time_config': {
+            'duration': 'maybe[float]',  # make these maybes
+            'num_steps': 'maybe[float]',
+            'step_size': 'maybe[float]'
+        }
+        # add simulator kwargs
+    }
+
     def __init__(self,
                  archive_filepath: str = None,
                  sbml_filepath: str = None,

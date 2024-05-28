@@ -2,8 +2,15 @@ from typing import Dict
 
 from numpy import ndarray
 import matplotlib.pyplot as plt
+from process_bigraph import Composite
 
-from biosimulator_processes.steps.ode_simulation import CopasiStep, TelluriumStep, AmiciStep
+from biosimulator_processes import CORE
+
+
+class Workflow(Composite):
+    # TODO: finish this.
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
 
 
 def plot_ode_output_data(data: Dict, sample_size: int = None) -> None:
@@ -24,15 +31,24 @@ def plot_ode_output_data(data: Dict, sample_size: int = None) -> None:
     plt.show()
 
 
-def run_ode_step_from_omex(archive_dir_fp: str, simulator_name: str):
+def run_ode_steps_from_omex(archive_dir_fp: str):
     ode_simulators = ['copasi', 'tellurium', 'amici']
+    sim_doc = {}
     for ode_sim in ode_simulators:
-        if simulator_name.lower() in ode_sim:
-            pass
+        sim_doc[ode_sim] = {
+                'address': f'local:{ode_sim}',
+                '_type': 'step',
+                'config': {
+                    'archive_filepath': 'archive_dir_fp'
+                },
+                'inputs': {},
+                'outputs': {
+                    'time': ['time_store'],
+                    'floating_species': ['floating_species_store'],
+                }
+        }
+    bridge = {'inputs': {}, 'outputs': {'time': ['time_store'], 'floating_species': ['floating_species_store']}}
+    wf = Workflow(config={'state': sim_doc, 'bridge': bridge}, core=CORE)
+    wf.run(0)
+    print(wf.gather_results())
 
-
-
-def run_copasi_step_from_omex(archive_dir_fp: str):
-    step = CopasiStep(archive_dirpath=archive_dir_fp)
-    result = step.update({})
-    return ODESimulationOutput(data=result)
