@@ -240,6 +240,8 @@ class CopasiStep(UniformTimeCourse):
         return run_time_course(
             start_time=start_time,
             duration=duration,
+            automatic=True,
+            step_number=self.num_steps,
             update_model=True,
             model=self.simulator,
             **simulator_kwargs)
@@ -248,11 +250,11 @@ class CopasiStep(UniformTimeCourse):
         return get_species(name=species_id, exact=True, model=self.simulator).concentration[0]
 
     def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
-        tc = run_time_course(start_time=0, duration=self.duration, step_number=self.num_steps, model=self.simulator)
+        tc = run_time_course(start_time=0, duration=self.duration, step_number=self.num_steps - 1, model=self.simulator)
         return {
-            'time': self.t.tolist(),
+            'time': self.t,
             'floating_species': {
-                mol_id: tc.to_dict().get(mol_id)
+                mol_id: np.array(list(tc.to_dict().get(mol_id).values()))
                 for mol_id in self.floating_species_ids
             }
         }
@@ -319,7 +321,7 @@ class AmiciStep(UniformTimeCourse):
         rdata = self._run_simulation()
         species_data = self._get_floating_species_concentrations(rdata)
         return {
-            'time': self.t.tolist(),
+            'time': self.t,
             'floating_species': species_data
         }
 

@@ -3,10 +3,28 @@ from types import FunctionType
 import os
 
 import numpy as np
+import matplotlib.pyplot as plt
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
 
+
+def plot_ode_output_data(data: dict, simulator_name: str, sample_size: int = None) -> None:
+    time: np.ndarray = data.get('results', data['time'])
+    plt.figure(figsize=(20, 8))
+    for name, output in data['floating_species'].items():
+        x = np.array(time)
+        y = output
+        plt.plot(x, y, label=name)
+
+    plt.xlabel('Time')
+    plt.ylabel('Concentration')
+    plt.title(f'Species Concentrations Over Time with {simulator_name}')
+    plt.legend()
+    plt.grid(True)
+    # plt.xlim([0, time[-1]])  # Set x-axis limits from 0 to the last time value
+    # plt.ylim([min([list(v.values())[0] for v in spec_outputs]), max([list(v.values())[0] for v in spec_outputs])])  # Adjust y-axis to fit all data
+    plt.show()
 
 
 def create_ode_step_instance(simulator_name: str, **step_kwargs):
@@ -54,7 +72,6 @@ def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes
             print(f"{class_name} not available. Error: {e}")
             return
     print(f'Available processes:\n{pf(list(core.process_registry.registry.keys()))}')
-
 
 
 def prepare_single_ode_process_document(
