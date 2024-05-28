@@ -34,9 +34,13 @@ import libsbml
 import numpy as np
 import tellurium as te
 from tellurium.roadrunner.extended_roadrunner import ExtendedRoadRunner
-from process_bigraph import Step
-from process_bigraph.experiments.parameter_scan import RunProcess
-from amici import amici, sbml_import, SbmlImporter, import_model_module
+from amici import (
+    amici,
+    sbml_import,
+    SbmlImporter,
+    import_model_module,
+    runAmiciSimulation,
+    ReturnDataView)
 from COPASI import CDataModel
 from pandas import DataFrame
 from basico import (
@@ -52,8 +56,9 @@ from basico import (
     add_reaction,
     set_reaction,
     set_parameters,
-    add_parameter
-)
+    add_parameter)
+from process_bigraph import Step
+from process_bigraph.experiments.parameter_scan import RunProcess
 
 from biosimulator_processes import CORE
 from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
@@ -165,8 +170,11 @@ class OdeSimulation(Step, abc.ABC):
 
         return results
 
+    def run(self, input_state: Dict[str, Union[List[str], Dict[str, List[float]]]] = None, **simulator_kwargs):
+        return self.update(inputs=input_state or {}, **simulator_kwargs)
+
     @abc.abstractmethod
-    def _run_simulation(self, start_time, duration):
+    def _run_simulation(self, start_time, duration, **simulator_kwargs):
         """Run timecourse simulation as per simulator library requirements"""
         pass
 
@@ -193,12 +201,13 @@ class CopasiStep(OdeSimulation):
         assert species_data is not None, "Could not load species ids."
         return species_data.index.tolist()
 
-    def _run_simulation(self, start_time: float, duration: int):
+    def _run_simulation(self, start_time: float, duration: int, **simulator_kwargs):
         return run_time_course(
             start_time=start_time,
             duration=duration,
             update_model=True,
-            model=self.simulator)
+            model=self.simulator,
+            **simulator_kwargs)
 
     def _get_floating_species_concentrations(self, species_id: str, model: object = None):
         return get_species(name=species_id, exact=True, model=self.simulator).concentration[0]
@@ -219,8 +228,8 @@ class TelluriumStep(OdeSimulation):
     def _get_floating_species_ids(self) -> list[str]:
         return self.simulator.getFloatingSpeciesIds()
 
-    def _run_simulation(self, start_time, duration):
-        return self.simulator.simulate(start_time, duration, steps=self.num_steps)
+    def _run_simulation(self, start_time, duration, **simulator_kwargs):
+        return self.simulator.simulate(start_time, duration, **simulator_kwargs)
 
     def _get_floating_species_concentrations(self, species_id: str, model: object = None):
         return self.simulator.getValue(species_id)
@@ -268,10 +277,13 @@ class AmiciStep(OdeSimulation):
     def _get_floating_species_ids(self) -> List[str]:
         return list(self.simulator.getObservableIds())
 
-    def _run_simulation(self, start_time, duration) -> amici.ReturnData:
+    def _run_simulation(self, start_time, duration, **simulator_kwargs) -> ReturnDataView:
         sol = self.simulator.getSolver()
-        return amici.runAmiciSimulation(solver=sol, model=self.simulator)
+        return runAmiciSimulation(solver=sol, model=self.simulator, **simulator_kwargs)
 
+    def _get_floating_species_concentrations(self, species_id: str, model: object = None):
+        """TODO: Finish this."""
+        pass
 
 
 class ODEProcess(RunProcess):

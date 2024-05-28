@@ -81,8 +81,8 @@ class ODESimulationOutput(_BaseClass):
             name: output
             for name, output in data['floating_species'].items()}
 
-    def plot(self):
-        return plot_ode_output_data(self.data)
+    def plot(self, sample_size: None):
+        return plot_ode_output_data(self.data, sample_size=sample_size)
 
 
 def run_copasi_step_from_omex(archive_dir_fp: str) -> ODESimulationOutput:
