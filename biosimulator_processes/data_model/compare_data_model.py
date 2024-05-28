@@ -28,12 +28,28 @@ from process_bigraph import Composite, pf
 from pydantic import Field, field_validator
 
 from biosimulator_processes.utils import prepare_single_ode_process_document
-from biosimulator_processes.data_model import _BaseModel as BaseModel, _BaseClass
+from biosimulator_processes.data_model import BaseModel, _BaseClass
 from biosimulator_processes import CORE
 
 
 # TODO: Transpose data frame and make col vectors for each param, where the index is param name,
     # and cols are simulator id.
+
+
+class PairwiseComparison(BaseModel):
+    edge: Tuple[np.ndarray, np.ndarray]
+    value: bool
+
+
+class SimulatorComparison(BaseModel):
+    project_id: str
+    data: List[PairwiseComparison]
+
+
+class ComparisonMatrix(BaseModel):
+    data: pd.DataFrame
+    name: Optional[str] = Field(default="Unknown")
+    ground_truth: Optional[np.ndarray] = Field(default=None)
 
 
 class ParamIntervalOutputData(BaseModel):
