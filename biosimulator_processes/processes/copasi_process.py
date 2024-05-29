@@ -28,6 +28,106 @@ from biosimulator_processes.processes.utc_process import UniformTimeCourse
 from biosimulator_processes.processes.sed_process import SedProcess
 
 
+class UtcCopasi(UniformTimeCourse):
+    config_schema = UTC_CONFIG_TYPE
+    config_schema['method'] = {
+        '_type': 'string',
+        '_default': 'deterministic'
+    }
+
+    def __init__(self,
+                 config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
+                 core: Dict = CORE,
+                 simulator_kwargs: dict = None):
+        super().__init__(config, core)
+        self.model_changes = self.config['model']['model_changes']
+        self._set_reaction_changes()
+        self._set_species_changes()
+        self._set_global_param_changes()
+        self.compartments_list = get_compartments(model=self.simulator).index.tolist()
+
+        # ----SOLVER: Get the solver (defaults to deterministic)
+        self.method = self.config['method']
+
+    def _load_simulator(self, model_fp: str, **kwargs):
+        return load_model(model_fp)
+
+    def _get_reactions(self) -> list[str]:
+        reactions = get_reactions(model=self.simulator)
+        return reactions.index.tolist() if reactions is not None else []
+
+    def _get_floating_species(self) -> list[str]:
+        species_data = get_species(model=self.simulator)
+        return species_data.index.tolist()
+
+    def _get_model_parameters(self) -> list[str]:
+        model_parameters = get_parameters(model=self.simulator)
+        return model_parameters.index.tolist() \
+            if isinstance(model_parameters, DataFrame) else []
+
+    def _generate_results(self, inputs=None):
+        tc = run_time_course(start_time=self.output_start_time, duration=self.duration, step_number=self.num_steps - 1, model=self.simulator)
+        return {
+            'time': self.t,
+            'floating_species': {
+                mol_id: array(list(tc.to_dict().get(mol_id).values()))
+                for mol_id in self.floating_species_list
+            }
+        }
+
+    def _set_reaction_changes(self):
+        # ----REACTIONS: set reactions
+        existing_reactions = get_reactions(model=self.simulator)
+        existing_reaction_names = existing_reactions.index.tolist() if existing_reactions is not None else []
+        reaction_changes = self.model_changes.get('reaction_changes', [])
+        if reaction_changes:
+            for reaction_change in reaction_changes:
+                reaction_name: str = reaction_change['reaction_name']
+                param_changes: list[dict[str, float]] = reaction_change['parameter_changes']
+                scheme_change: str = reaction_change.get('reaction_scheme')
+                # handle changes to existing reactions
+                if param_changes:
+                    for param_name, param_change_val in param_changes:
+                        set_reaction_parameters(param_name, value=param_change_val, model=self.simulator)
+                if scheme_change:
+                    set_reaction(name=reaction_name, scheme=scheme_change, model=self.simulator)
+                # handle new reactions
+                if reaction_name not in existing_reaction_names and scheme_change:
+                    add_reaction(reaction_name, scheme_change, model=self.simulator)
+
+    def _set_species_changes(self):
+        # ----SPECS: set species changes
+        species_changes = self.model_changes.get('species_changes', [])
+        if species_changes:
+            for species_change in species_changes:
+                if isinstance(species_change, dict):
+                    species_name = species_change.pop('name')
+                    changes_to_apply = {}
+                    for spec_param_type, spec_param_value in species_change.items():
+                        if spec_param_value:
+                            changes_to_apply[spec_param_type] = spec_param_value
+                    set_species(**changes_to_apply, model=self.simulator)
+
+    def _set_global_param_changes(self):
+        # ----GLOBAL PARAMS: set global parameter changes
+        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
+        if global_parameter_changes:
+            for param_change in global_parameter_changes:
+                param_name = param_change.pop('name')
+                for param_type, param_value in param_change.items():
+                    if not param_value:
+                        param_change.pop(param_type)
+                    # handle changes to existing params
+                    set_parameters(name=param_name, **param_change, model=self.simulator)
+                    # set new params
+                    global_params = get_parameters(model=self.simulator)
+                    if global_params:
+                        existing_global_parameters = global_params.index
+                        if param_name not in existing_global_parameters:
+                            assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
+                            add_parameter(name=param_name, **param_change, model=self.simulator)
+
+
 class CopasiProcess(SedProcess):
     config_schema = UTC_CONFIG_TYPE
 
@@ -238,104 +338,3 @@ class CopasiProcess(SedProcess):
                         if param_name not in existing_global_parameters:
                             assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
-
-
-class UtcCopasi(UniformTimeCourse):
-    config_schema = UTC_CONFIG_TYPE
-    config_schema['method'] = {
-        '_type': 'string',
-        '_default': 'deterministic'
-    }
-
-    def __init__(self,
-                 config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
-                 core: Dict = CORE,
-                 simulator_kwargs: dict = None):
-        super().__init__(config, core)
-        self.model_changes = self.config['model']['model_changes']
-        self._set_reaction_changes()
-        self._set_species_changes()
-        self._set_global_param_changes()
-        self.compartments_list = get_compartments(model=self.simulator).index.tolist()
-
-        # ----SOLVER: Get the solver (defaults to deterministic)
-        self.method = self.config['method']
-
-    def _load_simulator(self, model_fp: str, **kwargs):
-        return load_model(model_fp)
-
-    def _get_reactions(self) -> list[str]:
-        reactions = get_reactions(model=self.simulator)
-        return reactions.index.tolist() if reactions is not None else []
-
-    def _get_floating_species(self) -> list[str]:
-        species_data = get_species(model=self.simulator)
-        return species_data.index.tolist()
-
-    def _get_model_parameters(self) -> list[str]:
-        model_parameters = get_parameters(model=self.simulator)
-        return model_parameters.index.tolist() \
-            if isinstance(model_parameters, DataFrame) else []
-
-    def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
-        tc = run_time_course(start_time=self.output_start_time, duration=self.duration, step_number=self.num_steps - 1, model=self.simulator)
-        self.results = {
-            'time': self.t,
-            'floating_species': {
-                mol_id: array(list(tc.to_dict().get(mol_id).values()))
-                for mol_id in self.floating_species_list
-            }
-        }
-        return self.results
-
-    def _set_reaction_changes(self):
-        # ----REACTIONS: set reactions
-        existing_reactions = get_reactions(model=self.simulator)
-        existing_reaction_names = existing_reactions.index.tolist() if existing_reactions is not None else []
-        reaction_changes = self.model_changes.get('reaction_changes', [])
-        if reaction_changes:
-            for reaction_change in reaction_changes:
-                reaction_name: str = reaction_change['reaction_name']
-                param_changes: list[dict[str, float]] = reaction_change['parameter_changes']
-                scheme_change: str = reaction_change.get('reaction_scheme')
-                # handle changes to existing reactions
-                if param_changes:
-                    for param_name, param_change_val in param_changes:
-                        set_reaction_parameters(param_name, value=param_change_val, model=self.simulator)
-                if scheme_change:
-                    set_reaction(name=reaction_name, scheme=scheme_change, model=self.simulator)
-                # handle new reactions
-                if reaction_name not in existing_reaction_names and scheme_change:
-                    add_reaction(reaction_name, scheme_change, model=self.simulator)
-
-    def _set_species_changes(self):
-        # ----SPECS: set species changes
-        species_changes = self.model_changes.get('species_changes', [])
-        if species_changes:
-            for species_change in species_changes:
-                if isinstance(species_change, dict):
-                    species_name = species_change.pop('name')
-                    changes_to_apply = {}
-                    for spec_param_type, spec_param_value in species_change.items():
-                        if spec_param_value:
-                            changes_to_apply[spec_param_type] = spec_param_value
-                    set_species(**changes_to_apply, model=self.simulator)
-
-    def _set_global_param_changes(self):
-        # ----GLOBAL PARAMS: set global parameter changes
-        global_parameter_changes = self.model_changes.get('global_parameter_changes', [])
-        if global_parameter_changes:
-            for param_change in global_parameter_changes:
-                param_name = param_change.pop('name')
-                for param_type, param_value in param_change.items():
-                    if not param_value:
-                        param_change.pop(param_type)
-                    # handle changes to existing params
-                    set_parameters(name=param_name, **param_change, model=self.simulator)
-                    # set new params
-                    global_params = get_parameters(model=self.simulator)
-                    if global_params:
-                        existing_global_parameters = global_params.index
-                        if param_name not in existing_global_parameters:
-                            assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
-                            add_parameter(name=param_name, **param_change, model=self.simulator)

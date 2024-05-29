@@ -118,8 +118,8 @@ class UtcAmici(Step):
         self.amici_model_object: amici.Model = model_module.getModel()
 
         # set species context (concentrations for ODE by default)
-        context_type = self.config['species_context']
-        self.species_context_key = f'floating_species_{context_type}'
+        self.context_type = self.config['species_context']
+        self.species_context_key = f'floating_species'
         self.use_counts = 'counts' in self.species_context_key
 
         # get species names
@@ -154,7 +154,7 @@ class UtcAmici(Step):
         self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
 
         self.amici_model_object.setTimepoints(self.t)
-        self.results = {}
+        self._results = {}
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
@@ -175,11 +175,11 @@ class UtcAmici(Step):
         """Plot ODE simulation observables with Seaborn."""
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
-            sns.lineplot(x=self.results['time'], y=list(self.results['floating_species_concentrations'].values())[n])
+            sns.lineplot(x=self._results['time'], y=list(self._results['floating_species_concentrations'].values())[n])
         return self.flush_results() if flush else None
 
     def flush_results(self):
-        return self.results.clear()
+        return self._results.clear()
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:
@@ -197,7 +197,7 @@ class UtcAmici(Step):
             zip(self.model_parameters_list, self.model_parameters_values))
         return {
             'time': 0.0,
-            'floating_species_concentrations': floating_species_dict,
+            'floating_species': floating_species_dict,
             'model_parameters': model_parameters_dict}
 
     def inputs(self):
@@ -236,8 +236,9 @@ class UtcAmici(Step):
             'time': 'float',
             self.species_context_key: 'tree[string]'}  # floating_species_type}
 
-    def update(self, inputs=None):
-        if inputs is not None:
+    def _generate_results(self, inputs=None):
+        x = inputs or {}
+        if not len(x.keys()):
             set_values = []
             for species_id, value in inputs[self.species_context_key].items():
                 set_values.append(value)
@@ -248,8 +249,11 @@ class UtcAmici(Step):
             self.floating_species_list,
             list(map(lambda x: result_data.by_id(f'{x}'), self.floating_species_list))))
 
-        self.results = {
+        return {
             'time': self.t,
-            'floating_species_concentrations': floating_species_results
-        }
-        return self.results
+            'floating_species_concentrations': floating_species_results}
+
+    def update(self, inputs=None):
+        results = self._generate_results(inputs)
+        self._results = results.copy()
+        return results

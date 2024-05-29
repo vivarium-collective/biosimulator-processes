@@ -2,6 +2,7 @@ import os
 import logging
 from tempfile import mkdtemp
 from abc import ABC, abstractmethod
+from typing import Any
 
 import libsbml
 import numpy as np
@@ -82,7 +83,7 @@ class UniformTimeCourse(Step):
         self.reaction_list = self._get_reactions()
         self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
 
-        self.results = {}
+        self._results = {}
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
@@ -106,6 +107,26 @@ class UniformTimeCourse(Step):
             self.num_steps = calc_num_steps(self.duration, self.step_size)
         else:
             self.step_size = calc_step_size(self.duration, self.num_steps)
+
+    @abstractmethod
+    def _load_simulator(self, model_fp: str, **kwargs):
+        pass
+
+    @abstractmethod
+    def _get_floating_species(self) -> list[str]:
+        pass
+
+    @abstractmethod
+    def _get_model_parameters(self) -> list[str]:
+        pass
+
+    @abstractmethod
+    def _get_reactions(self) -> list[str]:
+        pass
+
+    @abstractmethod
+    def _generate_results(self, inputs=None):
+        pass
 
     def inputs(self):
         # dependent on species context set in self.config
@@ -132,33 +153,19 @@ class UniformTimeCourse(Step):
             'time': 'float',
             self.species_context_key: 'tree[string]'}  # floating_species_type}
 
+    def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | np.ndarray[Any, np.dtype[Any]] | np.ndarray]:
+        """Public method which adheres to the process bigraph interface"""
+        results = self._generate_results(inputs)
+        self._results = results.copy()
+        return results
+
     def plot_results(self, flush=True):
         """Plot ODE simulation observables with Seaborn."""
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
-            sns.lineplot(x=self.results['time'], y=list(self.results.get('floating_species_concentrations', self.results['floating_species']).values())[n])
+            sns.lineplot(x=self._results['time'], y=list(self._results.get('floating_species_concentrations', self._results['floating_species']).values())[n])
 
-        return self.flush_results() if flush else None
+        return self._flush_results() if flush else None
 
-    def flush_results(self):
-        return self.results.clear()
-
-    @abstractmethod
-    def _load_simulator(self, model_fp: str, **kwargs):
-        pass
-
-    @abstractmethod
-    def _get_floating_species(self) -> list[str]:
-        pass
-
-    @abstractmethod
-    def _get_model_parameters(self) -> list[str]:
-        pass
-
-    @abstractmethod
-    def _get_reactions(self) -> list[str]:
-        pass
-
-    @abstractmethod
-    def update(self, inputs=None):
-        return self.results
+    def _flush_results(self):
+        return self._results.clear()
