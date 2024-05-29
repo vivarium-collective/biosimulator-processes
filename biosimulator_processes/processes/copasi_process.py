@@ -241,29 +241,7 @@ class CopasiProcess(SedProcess):
 
 
 class CopasiUtc(UniformTimeCourse):
-    """
-        Entrypoint Options:
-
-            A. Filepath whose reference is a valid SBML model file(`str`),
-            B. A valid BioModel id which will return a simulator-instance object(`str`),
-            C. A specification of model configuration parameters whose values reflect those required by BasiCo. This
-                specification requires the presence of reactions which inherently define species types and optionally
-                addition parameters. See Basico for more details. There are two types of objects that are accepted
-                for this specification:
-                    - A high-level server object from `biosimulator_processes.data_model`,
-                        ie: `TimeCourseModel` or `SedModel`. (Recommended for first-time users). The parameters with
-                        which these dataclasses are instantiated correspond to the `config_schema` for a given
-                        process implementation. In the config schema, the outermost keys could be considered
-                        parameters/kwargs for a process implementation's construction. The values are all terminally
-                        strings that define the parameter "type" according to bigraph-schema.
-                    - A dictionary which defines the same kwargs/values as the high-level objects. See
-                        `biosimulator_processes.data_model.MODEL_TYPE` for details.
-
-        Config:
-            model: see datamodel for more details.
-            species_context: the context by which you measure the species data:: one of: 'concentrations', 'counts'. # TODO: map these to method inference
-            method: basico timecourse setting. Defaults to 'lsoda'.
-    """
+    config_schema = UTC_CONFIG_TYPE
 
     def __init__(self,
                  config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
