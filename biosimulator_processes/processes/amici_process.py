@@ -72,7 +72,6 @@ class AmiciUTC(Step):
                  sed_model_config: dict = None):
 
         # A. no config but either an omex file/dir or sbml file path
-        dirsource = False
         configuration = config or {}
         if not configuration and model_source:
             configuration = {'model': {'model_source': model_source}}
@@ -86,7 +85,6 @@ class AmiciUTC(Step):
             # Ca: user has passed a dirpath of omex archive
             if os.path.isdir(omex_path) or omex_path.endswith('.omex'):
                 if os.path.isdir(omex_path):
-                    dirsource = True
                     configuration['model']['model_source'] = get_archive_model_filepath(omex_path)
                     configuration['time_config'] = self._set_sedml_time_params(omex_path)
                 # Cb: user has passed a zipped archive file
@@ -161,8 +159,7 @@ class AmiciUTC(Step):
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
-        if not dirsource:
-            self.t = np.linspace(0, self.duration, self.num_steps)
+        self.t = np.linspace(0, self.duration, self.num_steps)
 
         self.amici_model_object.setTimepoints(self.t)
 
