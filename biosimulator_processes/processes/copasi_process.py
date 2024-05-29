@@ -278,7 +278,7 @@ class UtcCopasi(UniformTimeCourse):
             if isinstance(model_parameters, DataFrame) else []
 
     def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
-        tc = run_time_course(start_time=0, duration=self.duration, step_number=self.num_steps - 1, model=self.simulator)
+        tc = run_time_course(start_time=self.output_start_time, duration=self.duration, step_number=self.num_steps - 1, model=self.simulator)
         self.results = {
             'time': self.t,
             'floating_species': {
