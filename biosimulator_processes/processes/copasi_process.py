@@ -240,7 +240,7 @@ class CopasiProcess(SedProcess):
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
 
 
-class CopasiUtc(UniformTimeCourse):
+class UtcCopasi(UniformTimeCourse):
     config_schema = UTC_CONFIG_TYPE
 
     def __init__(self,

@@ -17,7 +17,7 @@ from biosimulator_processes.processes.utc_process import UniformTimeCourse
 from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size
 
 
-class AmiciUtc(Step):
+class UtcAmici(Step):
     """
        Parameters:
             config:`Dict`: dict keys include:

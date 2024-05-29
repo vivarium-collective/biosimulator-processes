@@ -14,10 +14,17 @@ from biosimulator_processes.helpers import register_module
 PROCESSES_TO_REGISTER = [
     ('cobra-process', 'cobra_process.CobraProcess'),
     ('copasi-process', 'copasi_process.CopasiProcess'),
-    # ('smoldyn-process', 'smoldyn_process.SmoldynProcess'),
     ('tellurium-process', 'tellurium_process.TelluriumProcess'),
-    ('amici-utc', 'amici_process.AmiciUtc'),
-    ('copasi-utc', 'copasi_process.CopasiUtc')]
+    ('utc-amici', 'amici_process.UtcAmici'),
+    ('utc-copasi', 'copasi_process.UtcCopasi')]
+
+
+try:
+    import smoldyn
+    PROCESSES_TO_REGISTER.append(('smoldyn-process', 'smoldyn_process.SmoldynProcess'))
+except:
+    print('Smoldyn is not properly installed in this environment and thus its process implementation cannot be registered. Please consult smoldyn documentation.')
+
 
 STEPS_TO_REGISTER = [
     ('copasi-step', 'ode_simulation.CopasiStep'),
