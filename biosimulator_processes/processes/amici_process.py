@@ -6,14 +6,14 @@ import libsbml
 import numpy as np
 from amici import amici, SbmlImporter, import_model_module, Model, runAmiciSimulation
 from amici.sbml_import import get_species_initial
-from process_bigraph import Process
+from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
 
 
-class AmiciProcess(Process):
+class AmiciUTC(Step):
     """
        Parameters:
             config:`Dict`: dict keys include:
@@ -168,9 +168,7 @@ class AmiciProcess(Process):
     def inputs(self):
         # dependent on species context set in self.config
         floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
+            species_id: 'list[float]'
             for species_id in self.floating_species_list
         }
 
@@ -188,26 +186,27 @@ class AmiciProcess(Process):
 
         return {
             'time': 'float',
-            self.species_context_key: floating_species_type,
+            self.species_context_key: 'tree[string]',  # floating_species_type,
             'model_parameters': model_params_type,
             'reactions': reactions_type}
 
     def outputs(self):
-        floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for species_id in self.floating_species_list
-        }
+        # floating_species_type = {
+        #     species_id: {
+        #         '_type': 'float',
+        #         '_apply': 'set'}
+        #     for species_id in self.floating_species_list
+        # }
         return {
             'time': 'float',
-            self.species_context_key: floating_species_type}
+            self.species_context_key: 'tree[string]'}  # floating_species_type}
 
-    def update(self, inputs, interval):
-        set_values = []
-        for species_id, value in inputs[self.species_context_key].items():
-            set_values.append(value)
-        self.amici_model_object.setInitialStates(set_values)
+    def update(self, inputs=None):
+        if inputs is not None:
+            set_values = []
+            for species_id, value in inputs[self.species_context_key].items():
+                set_values.append(value)
+            self.amici_model_object.setInitialStates(set_values)
 
         result_data = runAmiciSimulation(solver=self.method, model=self.amici_model_object)
         floating_species_results = dict(zip(
@@ -215,6 +214,6 @@ class AmiciProcess(Process):
             list(map(lambda x: result_data.by_id(f'{x}'), self.floating_species_list))))
 
         return {
-            'time': interval,
+            'time': self.t,
             'floating_species_concentrations': floating_species_results
         }

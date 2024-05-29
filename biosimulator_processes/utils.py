@@ -4,12 +4,27 @@ import os
 
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
 
 
+def plot_utc_outputs(data: dict, simulator_name: str) -> None:
+    """Plot ODE simulation observables with Seaborn."""
+    plt.figure(figsize=(20, 8))
+    species_data = data.get('floating_species') or data.get('floating_species_concentrations')
+    return sns.lineplot(species_data)
+
+
 def plot_ode_output_data(data: dict, simulator_name: str, sample_size: int = None) -> None:
+    """
+    Args:
+        data: outermost keys are 'time' and 'floating_species'
+
+    Returns:
+
+    """
     time: np.ndarray = data.get('results', data['time'])
     plt.figure(figsize=(20, 8))
     for name, output in data['floating_species'].items():

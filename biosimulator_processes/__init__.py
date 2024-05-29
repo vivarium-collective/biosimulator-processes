@@ -16,7 +16,7 @@ PROCESSES_TO_REGISTER = [
     ('copasi', 'copasi_process.CopasiProcess'),
     # ('smoldyn', 'smoldyn_process.SmoldynProcess'),
     ('tellurium', 'tellurium_process.TelluriumProcess'),
-    ('amici', 'amici_process.AmiciProcess')]
+    ('amici', 'amici_process.AmiciUTC')]
 
 STEPS_TO_REGISTER = [
     ('copasi-step', 'ode_simulation.CopasiStep'),
