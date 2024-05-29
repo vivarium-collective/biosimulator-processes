@@ -53,15 +53,34 @@ class AmiciProcess(Process):
             '_default': mkdtemp(),
             '_type': 'string'
         },
+        'working_dir': {
+            '_default': '',
+            '_type': 'string'
+        },
         'observables': 'maybe[tree[string]]',
         'constant_parameters': 'maybe[list[string]]',
         'sigmas': 'maybe[tree[string]]'
         # TODO: add more amici-specific fields:: MODEL_TYPE should be enough to encompass this.
     }
 
-    def __init__(self, config=None, core=CORE):
-        super().__init__(config, core)
-        # TODO: Enable counts species_context
+    def __init__(self,
+                 config=None,
+                 core=CORE,
+                 time_config: dict = None,
+                 model_source: str = None,
+                 sed_model_config: dict = None):
+
+        if not config and model_source:
+            config = {'model': {'model_source': model_source}}
+        elif sed_model_config and config is not None:
+            config['model'] = sed_model_config
+        elif os.path.isdir(config.get('model')['model_source']):
+            config['model']['model_source'] = [[os.path.join(root, f) for f in files if f.endswith('.xml') and not f.lower().startswith('manifest')][0] for root, _, files in os.walk(config.get('model').get('model_source'))][0]
+
+        if time_config and not len(config.get('time_config', {}).keys()):
+            config['time_config'] = time_config
+
+        super().__init__(config=config, core=core)
 
         # reference model source and assert filepath
         model_fp = self.config['model'].get('model_source')
@@ -115,6 +134,8 @@ class AmiciProcess(Process):
 
         # set time config and model with time config
         utc_config = self.config.get('time_config')
+        assert utc_config, \
+            "For now you must manually pass time_config: {duration: , num_steps: , step_size: , } in the config."
         self.step_size = utc_config.get('step_size')
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
