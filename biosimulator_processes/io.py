@@ -106,6 +106,18 @@ def fetch_biomodel_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -
 
 
 # OUTPUTS
+def standardize_report_outputs(reports_path):
+    """Fit output of reports to process bigraph structure"""
+    published_results = read_report_outputs(reports_path)
+    data = {'floating_species': {}, 'time': []}
+    for report_output in published_results.data:
+        if not report_output.dataset_label.lower() == 'time':
+            data['floating_species'][report_output.dataset_label] = report_output.data
+        else:
+            data['time'] = report_output.data
+    return data
+
+
 def read_report_outputs(report_file_path) -> BiosimulationsRunOutputData:
     """Read the outputs from all species in the given report file from biosimulations output.
         Args:
