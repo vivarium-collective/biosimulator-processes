@@ -8,38 +8,34 @@ packages = [{include = "biosimulator_processes"}, {include = "test_suite"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-zarr = "*"
-termcolor = "*"
-jupyterlab = "*"
-bigraph-schema = "*"
-process-bigraph = "*"
-bigraph-viz = "*"
-bigraph-builder = "*"
-numpy = "*"
-copasi-basico = "*"
-cobra = "*"
-tellurium = "*"
-amici = "*"
-# smoldyn = {version = "*", optional = true}
-python-libsbml = "*"
-docker = "*"
-python-libnuml = "*"
-notebook = "*"
-toml = "*"
-pyyaml = "*"
-pydantic = "*"
-seaborn = "*"
-h5py = "*"
-
-[tool.poetry.extras]
-smoldyn = ["smoldyn"]
-# simulariumio = "*"
+zarr = "^2.18.2"
+termcolor = "^2.4.0"
+jupyterlab = "^4.2.1"
+bigraph-schema = "^0.0.37"
+process-bigraph = "^0.0.18"
+bigraph-viz = "^0.0.33"
+bigraph-builder = "^0.0.4"
+numpy = "^1.26.4"
+copasi-basico = "^0.69"
+cobra = "^0.29.0"
+tellurium = "^2.2.10"
+amici = "^0.25.1"
+python-libsbml = "^5.20.2"
+docker = "^7.1.0"
+python-libnuml = "^1.1.6"
+notebook = "^7.2.0"
+toml = "^0.10.2"
+pyyaml = "^6.0.1"
+pydantic = "^2.7.2"
+seaborn = "^0.13.2"
+h5py = "^3.11.0"
+smoldyn = {version = "^2.73", optional = true, extras = ["simulariumio"]}
 
 [tool.poetry.group.dev.dependencies]
-pytest = "*"
-mypy = "*"
-flake8 = "*"
-twine = "*"
+pytest = "^8.2.1"
+mypy = "^1.10.0"
+flake8 = "^7.0.0"
+twine = "^5.1.0"
 
 [tool.pytest.ini_options]
 testpaths = ["biosimulator_processes", "test_suite"]
