@@ -32,5 +32,5 @@ CORE = ProcessTypes()
 
 # core type system implementation (unique to this package)
 CORE.type_registry.register('sed_model', schema={'_type': MODEL_TYPE})
-register_module(PROCESSES_TO_REGISTER, CORE)
-register_module(STEPS_TO_REGISTER, CORE)
+register_module(PROCESSES_TO_REGISTER, CORE, verbose=False)
+register_module(STEPS_TO_REGISTER, CORE, verbose=True)

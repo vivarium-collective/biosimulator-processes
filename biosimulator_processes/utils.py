@@ -81,12 +81,10 @@ def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes
 
             # Register the process
             core.process_registry.register(process_name, bigraph_class)
-            if verbose:
-                print(f"{class_name} registered successfully as {process_name}.\n")
         except ImportError as e:
-            print(f"{class_name} not available. Error: {e}")
+            print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
             return
-    print(f'Available processes:\n{pf(list(core.process_registry.registry.keys()))}')
+    print(f'Available processes:\n{pf(list(core.process_registry.registry.keys()))}') if verbose else None
 
 
 def prepare_single_ode_process_document(
