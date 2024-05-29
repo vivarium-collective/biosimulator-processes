@@ -6,8 +6,61 @@ Tellurium Process
 import numpy as np
 import tellurium as te
 from process_bigraph import Process, Composite, pf, Step
+
 from biosimulator_processes import CORE
+from biosimulator_processes.processes.utc_process import UniformTimeCourse
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+
+"""
+
+    def _generate_results(self, inputs=None):
+        tc = run_time_course(self.output_start_time, self.duration, self.num_steps, automatic=False, model=self.simulator).to_dict()
+        results = {'time': self.t, 'floating_species': {}}
+        for i, spec_id in enumerate(self.basico_species_ids):
+            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))
+        # return {
+        #     'time': self.t,
+        #     'floating_species': {
+        #         mol_id: array(list(tc.to_dict().get(mol_id).values()))
+        #         for mol_id in self.floating_species_list
+        #     }
+        # }
+        return results
+"""
+
+
+class UtcTellurium(UniformTimeCourse):
+    def __init__(self,
+                 config=None,
+                 core=CORE,
+                 time_config: dict = None,
+                 model_source: str = None,
+                 sed_model_config: dict = None):
+        super().__init__(config, core, time_config, model_source, sed_model_config)
+
+    def _load_simulator(self, model_fp: str, **kwargs):
+        return te.loadSBMLModel(model_fp)
+
+    def _get_reactions(self) -> list[str]:
+        return self.simulator.getReactionIds()
+
+    def _get_floating_species(self) -> list[str]:
+        return self.simulator.getFloatingSpeciesIds()
+
+    def _get_model_parameters(self) -> list[str]:
+        return self.simulator.getGlobalParameterIds()
+
+    def _generate_results(self, inputs=None):
+        # TODO: set vals if inputs here.
+        s = self.simulator.simulate(start=self.output_start_time, end=self.duration, steps=self.num_steps)
+        outputs = {'floating_species': {}}
+        for i, row in enumerate(s.transpose()):
+            if i < 1:
+                outputs['time'] = row
+            else:
+                for name in self.floating_species_list:
+                    outputs['floating_species'][name] = row
+        return outputs
 
 
 class TelluriumStep(Step):

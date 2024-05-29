@@ -36,10 +36,12 @@ class UtcCopasi(UniformTimeCourse):
     }
 
     def __init__(self,
-                 config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
-                 core: Dict = CORE,
-                 simulator_kwargs: dict = None):
-        super().__init__(config, core)
+                 config=None,
+                 core=CORE,
+                 time_config: dict = None,
+                 model_source: str = None,
+                 sed_model_config: dict = None):
+        super().__init__(config, core, time_config, model_source, sed_model_config)
 
         self.sbml_species_mapping = get_species(model=self.simulator)[['sbml_id']].to_dict()['sbml_id']
         self.floating_species_list = list(self.sbml_species_mapping.values())
