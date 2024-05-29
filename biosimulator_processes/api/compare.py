@@ -38,7 +38,7 @@ def exec_compare(reports_path: str, process_results: dict, save_dir: str):
             method='mse',
             ground_truth=truth,
             matrix_id=f'truth_{i}')
-        comparison.data.to_csv(os.path.join(save_dir, comparison.name))
+        comparison.data.to_csv(os.path.join(save_dir, comparison.name) + '.csv')
 
 
 # exec comparisons used at high level
