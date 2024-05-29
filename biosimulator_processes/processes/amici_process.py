@@ -75,7 +75,7 @@ class AmiciUtc(Step):
         else:
             omex_path = configuration.get('model').get('model_source')
             # Da: user has passed a dirpath of omex archive or the path to an unzipped archive as model source
-            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir') or mkdtemp()) \
+            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir', mkdtemp())) \
                 if source.endswith('.omex') else source
 
             # set expected model path for init

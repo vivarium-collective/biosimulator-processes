@@ -19,12 +19,14 @@ class FilePath(_BaseClass):
     path: str
 
 
-def unpack_omex_archive(archive_filepath: str, working_dir: str) -> str:
+def unpack_omex_archive(archive_filepath: str, working_dir: str, use_temp: bool = True, write: bool = False) -> str:
     archive_name = archive_filepath.replace('.omex', '')
-    unpacking_dirpath = os.path.join(working_dir, archive_name)
-    if not os.path.exists(unpacking_dirpath):
+    unpacking_dirpath = working_dir if not use_temp else mkdtemp()
+
+    if not os.path.exists(unpacking_dirpath) and write:
         os.mkdir(unpacking_dirpath)
-    with ZipFile(archive_filepath + '.omex', 'r') as f:
+
+    with ZipFile(archive_filepath, 'r') as f:
         f.extractall(path=unpacking_dirpath)
 
     return unpacking_dirpath
