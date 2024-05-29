@@ -70,17 +70,20 @@ class AmiciUTC(Step):
                  model_source: str = None,
                  sed_model_config: dict = None):
 
-        if not config and model_source:
-            config = {'model': {'model_source': model_source}}
-        elif sed_model_config and config is not None:
-            config['model'] = sed_model_config
-        elif os.path.isdir(config.get('model')['model_source']):
-            config['model']['model_source'] = [[os.path.join(root, f) for f in files if f.endswith('.xml') and not f.lower().startswith('manifest')][0] for root, _, files in os.walk(config.get('model').get('model_source'))][0]
+        # no config but either an omex file/dir or sbml file path
+        configuration = config or {}
+        if not configuration and model_source:
+            configuration = {'model': {'model_source': model_source}}
+        #
+        elif sed_model_config and configuration:
+            configuration['model'] = sed_model_config
+        elif os.path.isdir(configuration.get('model')['model_source']):
+            configuration['model']['model_source'] = [[os.path.join(root, f) for f in files if f.endswith('.xml') and not f.lower().startswith('manifest')][0] for root, _, files in os.walk(config.get('model').get('model_source'))][0]
 
-        if time_config and not len(config.get('time_config', {}).keys()):
-            config['time_config'] = time_config
+        if time_config and not len(configuration.get('time_config', {}).keys()):
+            configuration['time_config'] = time_config
 
-        super().__init__(config=config, core=core)
+        super().__init__(config=configuration, core=core)
 
         # reference model source and assert filepath
         model_fp = self.config['model'].get('model_source')
