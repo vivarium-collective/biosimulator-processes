@@ -40,6 +40,10 @@ class UtcCopasi(UniformTimeCourse):
                  core: Dict = CORE,
                  simulator_kwargs: dict = None):
         super().__init__(config, core)
+
+        self.sbml_species_mapping = get_species(model=self.simulator)[['sbml_id']].to_dict()['sbml_id']
+        self.floating_species_list = list(self.sbml_species_mapping.values())
+        self.basico_species_ids = list(self.sbml_species_mapping.keys())
         self.model_changes = self.config['model']['model_changes']
         self._set_reaction_changes()
         self._set_species_changes()
@@ -66,14 +70,18 @@ class UtcCopasi(UniformTimeCourse):
             if isinstance(model_parameters, DataFrame) else []
 
     def _generate_results(self, inputs=None):
-        tc = run_time_course(start_time=self.output_start_time, duration=self.duration, step_number=self.num_steps - 1, model=self.simulator)
-        return {
-            'time': self.t,
-            'floating_species': {
-                mol_id: array(list(tc.to_dict().get(mol_id).values()))
-                for mol_id in self.floating_species_list
-            }
-        }
+        tc = run_time_course(self.output_start_time, self.duration, self.num_steps, automatic=False, model=self.simulator).to_dict()
+        results = {'time': self.t, 'floating_species': {}}
+        for i, spec_id in enumerate(self.basico_species_ids):
+            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))
+        # return {
+        #     'time': self.t,
+        #     'floating_species': {
+        #         mol_id: array(list(tc.to_dict().get(mol_id).values()))
+        #         for mol_id in self.floating_species_list
+        #     }
+        # }
+        return results
 
     def _set_reaction_changes(self):
         # ----REACTIONS: set reactions

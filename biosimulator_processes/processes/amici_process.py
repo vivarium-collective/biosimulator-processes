@@ -175,7 +175,7 @@ class UtcAmici(Step):
         """Plot ODE simulation observables with Seaborn."""
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
-            sns.lineplot(x=self._results['time'], y=list(self._results['floating_species_concentrations'].values())[n])
+            sns.lineplot(x=self._results['time'], y=list(self._results['floating_species'].values())[n])
         return self.flush_results() if flush else None
 
     def flush_results(self):
@@ -197,7 +197,7 @@ class UtcAmici(Step):
             zip(self.model_parameters_list, self.model_parameters_values))
         return {
             'time': 0.0,
-            'floating_species': floating_species_dict,
+            self.species_context_key: floating_species_dict,
             'model_parameters': model_parameters_dict}
 
     def inputs(self):
@@ -238,7 +238,7 @@ class UtcAmici(Step):
 
     def _generate_results(self, inputs=None):
         x = inputs or {}
-        if not len(x.keys()):
+        if len(x.keys()):
             set_values = []
             for species_id, value in inputs[self.species_context_key].items():
                 set_values.append(value)
@@ -251,7 +251,7 @@ class UtcAmici(Step):
 
         return {
             'time': self.t,
-            'floating_species_concentrations': floating_species_results}
+            self.species_context_key: floating_species_results}
 
     def update(self, inputs=None):
         results = self._generate_results(inputs)

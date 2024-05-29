@@ -163,8 +163,7 @@ class UniformTimeCourse(Step):
         """Plot ODE simulation observables with Seaborn."""
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
-            sns.lineplot(x=self._results['time'], y=list(self._results.get('floating_species_concentrations', self._results['floating_species']).values())[n])
-
+            sns.lineplot(x=self._results['time'], y=list(self._results['floating_species'].values())[n])
         return self._flush_results() if flush else None
 
     def _flush_results(self):
