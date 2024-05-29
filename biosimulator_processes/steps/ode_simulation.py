@@ -66,7 +66,7 @@ from biosimulators_utils.combine.io import CombineArchiveReader
 from biosimulator_processes import CORE
 from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
-from biosimulator_processes.io import parse_expected_timecourse_config, get_model_file_location, FilePath, get_published_t
+from biosimulator_processes.io import get_model_file_location, FilePath, get_published_t, get_sedml_time_config
 
 
 class UniformTimeCourse(Step, abc.ABC):
@@ -117,7 +117,7 @@ class UniformTimeCourse(Step, abc.ABC):
             archive_filepath = CombineArchiveReader().run(in_file=archive_filepath, out_dir=working_dir)
 
         # parse expected results timecourse config
-        utc_config = parse_expected_timecourse_config(archive_root=archive_filepath) \
+        utc_config = get_sedml_time_config(os.path.join(archive_filepath, 'simulation.sedml')) \
             if archive_filepath else time_config
         assert len(list(utc_config.values())) >= 2, "you must pass two of either: step size, n steps, or duration."
 

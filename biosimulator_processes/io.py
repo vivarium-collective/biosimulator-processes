@@ -5,7 +5,6 @@ import xml.etree.ElementTree as ET
 import requests
 import zipfile as zf
 from zipfile import ZipFile
-import json
 import os
 
 import h5py
@@ -79,31 +78,6 @@ def get_published_t(omex_dirpath: str = None, report_fp: str = None) -> np.ndarr
 
     published_outputs = read_report_outputs(report_fp)
     return published_outputs.data[0].data
-
-
-def parse_expected_timecourse_config(
-        archive_root: str = None,
-        expected_results_fp: str = None
-        ) -> Dict[str, Union[int, float]]:
-    source = expected_results_fp or os.path.join(archive_root, 'expected-results.json')
-    with open(source, 'r') as fp:
-        expected = json.load(fp)
-
-    expected_reports = expected['expectedReports']
-    for report in expected_reports:
-        report_id = report['id'].lower()
-        if 'report' in report_id:
-            num_points = int(report['points'][0])
-            reported_time_vals = report['values'][0]['value']
-            time_indices = list(reported_time_vals.keys())
-            time_values = list(reported_time_vals.values())
-            print(time_values)
-            end_time_index = float(time_values[-1])
-            return {
-                'duration':  int(end_time_index),
-                'step_size': time_values[-1] / end_time_index,
-                'num_steps': num_points  # int(end_time_index),  # int(time_indices[-1])
-            }
 
 
 def fetch_biomodel_sbml_file(biomodel_id: str, save_dir: Optional[str] = None) -> FilePath:

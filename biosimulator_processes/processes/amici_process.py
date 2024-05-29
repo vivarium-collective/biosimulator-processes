@@ -133,7 +133,7 @@ class AmiciUTC(Step):
 
         # get species names
         self.species_objects = self.sbml_model_object.getListOfSpecies()
-        self.floating_species_list = list(self.amici_model_object.getObservableIds())
+        self.floating_species_list = list(self.amici_model_object.getStateIds())
         self.floating_species_initial = list(self.amici_model_object.getInitialStates())
 
         # get model parameters
