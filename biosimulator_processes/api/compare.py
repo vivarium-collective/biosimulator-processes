@@ -5,11 +5,40 @@ import numpy as np
 import pandas as pd
 
 from biosimulator_processes.data_model.compare_data_model import ComparisonMatrix
+from biosimulator_processes.io import read_report_outputs
 
 
 __all__ = [
-    'generate_comparison'
+    'generate_comparison',
+    'exec_compare'
 ]
+
+
+def exec_compare(reports_path: str, process_results: dict, save_dir: str):
+    """Execute a comparison against an individual process results against a ground truth
+        whose origin resides in the reports path. TODO: More carefully index this report
+        data using species ids in the processes.
+    """
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+
+    species_outputs = process_results.get('floating_species_concentrations', 'floating_species')
+    species_ids = list(species_outputs.keys())
+    process_output_vals = [
+        v for k, v in species_outputs.items()
+    ]
+    report_outputs = read_report_outputs(reports_path)
+    report_outputs.data.pop(0)  # remove for time
+    ground_truth = np.stack([output.data for output in report_outputs.data])
+    for i, truth in enumerate(ground_truth):
+        v = [process_output_vals[i]]
+        comparison = generate_comparison(
+            outputs=[process_output_vals[i]],
+            simulators=['amici'],
+            method='mse',
+            ground_truth=truth,
+            matrix_id=f'truth_{i}')
+        comparison.data.to_csv(os.path.join(save_dir, comparison.name))
 
 
 # exec comparisons used at high level
