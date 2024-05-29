@@ -7,7 +7,7 @@ from process_bigraph import Composite
 
 from biosimulator_processes.steps.viz import CompositionPlotter, Plotter2d
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
-from biosimulator_processes.utils import register_module
+from biosimulator_processes.helpers import register_module
 
 
 # Define a list of processes to attempt to import and register

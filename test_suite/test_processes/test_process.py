@@ -6,7 +6,7 @@ import json
 from process_bigraph import Composite, pp
 
 from biosimulator_processes import CORE
-from biosimulator_processes.utils import prepare_single_ode_process_document
+from biosimulator_processes.helpers import prepare_single_ode_process_document
 from biosimulator_processes.data_model.compare_data_model import ODECompositionResult
 
 

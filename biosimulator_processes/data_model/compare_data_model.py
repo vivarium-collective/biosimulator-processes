@@ -27,7 +27,7 @@ import pandas as pd
 from process_bigraph import Composite, pf
 from pydantic import Field, field_validator
 
-from biosimulator_processes.utils import prepare_single_ode_process_document
+from biosimulator_processes.helpers import prepare_single_ode_process_document
 from biosimulator_processes.data_model import BaseModel, _BaseClass, _BaseModel
 from biosimulator_processes import CORE
 

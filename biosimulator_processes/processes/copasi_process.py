@@ -21,7 +21,7 @@ from basico import (
     add_parameter
 )
 
-from biosimulator_processes.utils import fetch_biomodel
+from biosimulator_processes.helpers import fetch_biomodel
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.processes.utc_process import UniformTimeCourse

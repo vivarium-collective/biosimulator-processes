@@ -64,7 +64,7 @@ from process_bigraph.experiments.parameter_scan import RunProcess
 from biosimulators_utils.combine.io import CombineArchiveReader
 
 from biosimulator_processes import CORE
-from biosimulator_processes.utils import calc_num_steps, calc_duration, calc_step_size
+from biosimulator_processes.helpers import calc_num_steps, calc_duration, calc_step_size
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 from biosimulator_processes.io import get_model_file_location, FilePath, get_published_t, get_sedml_time_config
 

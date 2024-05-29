@@ -14,7 +14,7 @@ from biosimulator_processes import CORE
 from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.processes.utc_process import UniformTimeCourse
-from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
+from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size
 
 
 class AmiciUtc(Step):
