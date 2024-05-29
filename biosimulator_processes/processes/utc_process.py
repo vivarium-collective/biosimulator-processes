@@ -80,7 +80,7 @@ class UniformTimeCourse(Step):
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
-        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps + 1)
+        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
 
         self.results = {}
 
@@ -136,7 +136,7 @@ class UniformTimeCourse(Step):
         """Plot ODE simulation observables with Seaborn."""
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
-            sns.lineplot(x=self.results['time'], y=list(self.results['floating_species_concentrations'].values())[n])
+            sns.lineplot(x=self.results['time'], y=list(self.results.get('floating_species_concentrations', self.results['floating_species']).values())[n])
 
         return self.flush_results() if flush else None
 

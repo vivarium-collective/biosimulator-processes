@@ -242,6 +242,10 @@ class CopasiProcess(SedProcess):
 
 class UtcCopasi(UniformTimeCourse):
     config_schema = UTC_CONFIG_TYPE
+    config_schema['method'] = {
+        '_type': 'string',
+        '_default': 'deterministic'
+    }
 
     def __init__(self,
                  config: Dict[str, Union[str, Dict[str, str], Dict[str, Optional[Dict[str, str]]], Optional[Dict[str, str]]]] = None,
