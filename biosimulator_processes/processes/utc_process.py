@@ -132,7 +132,7 @@ class UniformTimeCourse(Step):
             'time': 'float',
             self.species_context_key: 'tree[string]'}  # floating_species_type}
 
-    def plot_results(self, flush=False):
+    def plot_results(self, flush=True):
         """Plot ODE simulation observables with Seaborn."""
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
