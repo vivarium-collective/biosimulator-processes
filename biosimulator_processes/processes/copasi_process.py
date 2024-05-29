@@ -248,13 +248,7 @@ class CopasiUtc(UniformTimeCourse):
                  core: Dict = CORE,
                  simulator_kwargs: dict = None):
         super().__init__(config, core)
-
-        # insert copasi process model config
-        model_source = self.config['model'].get('model_source') or self.config.get('sbml_fp')
-        assert model_source is not None, 'You must specify a model source of either a valid biomodel id or model filepath.'
-        model_changes = self.config['model'].get('model_changes', {})
-        self.model_changes = {} if model_changes is None else model_changes
-
+        self.model_changes = self.config['model']['model_changes']
         self._set_reaction_changes()
         self._set_species_changes()
         self._set_global_param_changes()

@@ -38,8 +38,6 @@ class AmiciUtc(Step):
                 sigmas: for example:
                     sigmas = {"observable_x1withsigma": "observable_x1withsigma_sigma"}
 
-
-
     """
     config_schema = UTC_CONFIG_TYPE
 
@@ -61,25 +59,30 @@ class AmiciUtc(Step):
 
         # A. no config but either an omex file/dir or sbml file path
         configuration = config or {}
+        source = configuration.get('model').get('model_source')
         if not configuration and model_source:
             configuration = {'model': {'model_source': model_source}}
 
         # B. has a config but wishes to override TODO: fix this.
         if sed_model_config and configuration:
             configuration['model'] = sed_model_config
-        # C. has a config passed with an archive dirpath or filepath or sbml filepath as its model source:
+
+        # C. has a source of sbml file path as expected.
+        elif source and source.endswith('.xml') and not source.lower().startswith('manifest'):
+            pass
+
+        # D. has a config passed with an archive dirpath or filepath or sbml filepath as its model source:
         else:
             omex_path = configuration.get('model').get('model_source')
-            # Ca: user has passed a dirpath of omex archive
-            if os.path.isdir(omex_path) or omex_path.endswith('.omex'):
-                if os.path.isdir(omex_path):
-                    configuration['model']['model_source'] = get_archive_model_filepath(omex_path)
-                    configuration['time_config'] = self._get_sedml_time_params(omex_path)
-                # Cb: user has passed a zipped archive file
-                elif omex_path.endswith('.omex'):  # TODO: fix this.
-                    archive_dirpath = unpack_omex_archive(omex_path, working_dir=config.get('working_dir') or mkdtemp())
-                    configuration['model']['model_source'] = get_archive_model_filepath(archive_dirpath)
-                    configuration['time_config'] = self._get_sedml_time_params(archive_dirpath)
+            # Da: user has passed a dirpath of omex archive or the path to an unzipped archive as model source
+            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir') or mkdtemp()) \
+                if source.endswith('.omex') else source
+
+            # set expected model path for init
+            configuration['model']['model_source'] = get_archive_model_filepath(archive_dir)
+
+            # extract the time config from archive's sedml
+            configuration['time_config'] = self._get_sedml_time_params(archive_dir)
 
         if time_config and not len(configuration.get('time_config', {}).keys()):
             configuration['time_config'] = time_config
