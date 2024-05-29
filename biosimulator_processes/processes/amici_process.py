@@ -170,8 +170,8 @@ class AmiciUTC(Step):
     def _set_sedml_time_params(omex_path: str):
         sedml_fp = os.path.join(omex_path, 'simulation.sedml')
         sedml_utc_config = get_sedml_time_config(sedml_fp)
-        duration = sedml_utc_config['outputEndTime'] - sedml_utc_config['outputStartTime']
-        n_steps = sedml_utc_config['numberOfPoints']
+        duration = int(sedml_utc_config['outputEndTime']) - int(sedml_utc_config['outputStartTime'])
+        n_steps = int(sedml_utc_config['numberOfPoints'])
         return {
             'duration': duration,
             'num_steps': n_steps,
