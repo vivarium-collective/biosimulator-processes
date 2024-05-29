@@ -86,12 +86,12 @@ class AmiciUTC(Step):
             if os.path.isdir(omex_path) or omex_path.endswith('.omex'):
                 if os.path.isdir(omex_path):
                     configuration['model']['model_source'] = get_archive_model_filepath(omex_path)
-                    configuration['time_config'] = self._set_sedml_time_params(omex_path)
+                    configuration['time_config'] = self._get_sedml_time_params(omex_path)
                 # Cb: user has passed a zipped archive file
                 elif omex_path.endswith('.omex'):  # TODO: fix this.
                     archive_dirpath = unpack_omex_archive(omex_path, working_dir=config.get('working_dir') or mkdtemp())
                     configuration['model']['model_source'] = get_archive_model_filepath(archive_dirpath)
-                    configuration['time_config'] = self._set_sedml_time_params(archive_dirpath)
+                    configuration['time_config'] = self._get_sedml_time_params(archive_dirpath)
 
         if time_config and not len(configuration.get('time_config', {}).keys()):
             configuration['time_config'] = time_config
@@ -155,24 +155,28 @@ class AmiciUTC(Step):
         self.step_size = utc_config.get('step_size')
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
+        self.output_start_time = utc_config.get('output_start_time') or 0
 
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
-        self.t = np.linspace(0, self.duration, self.num_steps + 1)
+        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps + 1)
 
         self.amici_model_object.setTimepoints(self.t)
 
     @staticmethod
-    def _set_sedml_time_params(omex_path: str):
+    def _get_sedml_time_params(omex_path: str):
         sedml_fp = os.path.join(omex_path, 'simulation.sedml')
         sedml_utc_config = get_sedml_time_config(sedml_fp)
-        duration = int(sedml_utc_config['outputEndTime']) - int(sedml_utc_config['outputStartTime'])
+        output_end = int(sedml_utc_config['outputEndTime'])
+        output_start = int(sedml_utc_config['outputStartTime'])
+        duration = output_end - output_start
         n_steps = int(sedml_utc_config['numberOfPoints'])
         return {
             'duration': duration,
             'num_steps': n_steps,
-            'step_size': calc_step_size(duration, n_steps)
+            'step_size': calc_step_size(duration, n_steps),
+            'output_start_time': output_start
         }
 
     def _set_time_params(self):
