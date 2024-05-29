@@ -9,7 +9,7 @@ from amici.sbml_import import get_species_initial
 from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
-from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath
+from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
 
@@ -72,6 +72,7 @@ class AmiciUTC(Step):
                  sed_model_config: dict = None):
 
         # A. no config but either an omex file/dir or sbml file path
+        dirsource = False
         configuration = config or {}
         if not configuration and model_source:
             configuration = {'model': {'model_source': model_source}}
@@ -83,12 +84,16 @@ class AmiciUTC(Step):
         else:
             omex_path = configuration.get('model').get('model_source')
             # Ca: user has passed a dirpath of omex archive
-            if os.path.isdir(omex_path):
-                configuration['model']['model_source'] = get_archive_model_filepath(omex_path)
-            # Cb: user has passed a zipped archive file
-            elif omex_path.endswith('.omex'):  # TODO: fix this.
-                archive_dirpath = unpack_omex_archive(omex_path, working_dir=config.get('working_dir') or mkdtemp())
-                configuration['model']['model_source'] = get_archive_model_filepath(archive_dirpath)
+            if os.path.isdir(omex_path) or omex_path.endswith('.omex'):
+                if os.path.isdir(omex_path):
+                    dirsource = True
+                    configuration['model']['model_source'] = get_archive_model_filepath(omex_path)
+                    configuration['time_config'] = self._set_sedml_time_params(omex_path)
+                # Cb: user has passed a zipped archive file
+                elif omex_path.endswith('.omex'):  # TODO: fix this.
+                    archive_dirpath = unpack_omex_archive(omex_path, working_dir=config.get('working_dir') or mkdtemp())
+                    configuration['model']['model_source'] = get_archive_model_filepath(archive_dirpath)
+                    configuration['time_config'] = self._set_sedml_time_params(archive_dirpath)
 
         if time_config and not len(configuration.get('time_config', {}).keys()):
             configuration['time_config'] = time_config
@@ -156,8 +161,22 @@ class AmiciUTC(Step):
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
-        self.t = np.linspace(0, self.duration, self.num_steps)
+        if not dirsource:
+            self.t = np.linspace(0, self.duration, self.num_steps)
+
         self.amici_model_object.setTimepoints(self.t)
+
+    @staticmethod
+    def _set_sedml_time_params(omex_path: str):
+        sedml_fp = os.path.join(omex_path, 'simulation.sedml')
+        sedml_utc_config = get_sedml_time_config(sedml_fp)
+        duration = sedml_utc_config['outputEndTime'] - sedml_utc_config['outputStartTime']
+        n_steps = sedml_utc_config['numberOfPoints']
+        return {
+            'duration': duration,
+            'num_steps': n_steps,
+            'step_size': calc_step_size(duration, n_steps)
+        }
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:

@@ -36,7 +36,7 @@ def get_archive_model_filepath(config_model_source: str) -> str:
             root, _, files in os.walk(config_model_source)][0]
 
 
-def extract_sedml_time_config(sedml_filepath: str) -> List[Dict]:
+def get_sedml_time_config(sedml_filepath: str) -> Dict:
     # Parse the XML file
     tree = ET.parse(sedml_filepath)
     root = tree.getroot()
@@ -58,7 +58,7 @@ def extract_sedml_time_config(sedml_filepath: str) -> List[Dict]:
         }
         utc_data.append(data)
 
-    return utc_data
+    return utc_data[0]
 
 
 def get_archive_file_location(archive_root: str, filename: str) -> FilePath:
