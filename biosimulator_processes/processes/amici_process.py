@@ -171,7 +171,7 @@ class AmiciUtc(Step):
             'output_start_time': output_start
         }
 
-    def plot_results(self, flush=False):
+    def plot_results(self, flush=True):
         """Plot ODE simulation observables with Seaborn."""
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
