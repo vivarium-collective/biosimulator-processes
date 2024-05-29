@@ -1,6 +1,7 @@
 from typing import *
 from tempfile import mkdtemp
 from dataclasses import dataclass
+import xml.etree.ElementTree as ET
 import requests
 import zipfile as zf
 import json
@@ -16,6 +17,31 @@ from biosimulator_processes.data_model.service_data_model import BiosimulationsR
 class FilePath(_BaseClass):
     name: str
     path: str
+
+
+def extract_uniform_time_course(sedml_filepath: str) -> List[Dict]:
+    # Parse the XML file
+    tree = ET.parse(sedml_filepath)
+    root = tree.getroot()
+
+    namespace = {'sedml': 'http://sed-ml.org/sed-ml/level1/version3'}
+
+    utc_elements = root.findall('.//sedml:uniformTimeCourse', namespace)
+
+    # Extract data from each uniformTimeCourse element
+    utc_data = []
+    for utc in utc_elements:
+        data = {
+            'id': utc.get('id'),
+            'initialTime': utc.get('initialTime'),
+            'outputStartTime': utc.get('outputStartTime'),
+            'outputEndTime': utc.get('outputEndTime'),
+            'numberOfPoints': utc.get('numberOfPoints'),
+            'algorithm': utc.find('.//sedml:algorithm', namespace).get('kisaoID')
+        }
+        utc_data.append(data)
+
+    return utc_data
 
 
 def get_archive_file_location(archive_root: str, filename: str) -> FilePath:
