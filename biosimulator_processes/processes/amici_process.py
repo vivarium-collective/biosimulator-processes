@@ -9,6 +9,7 @@ from amici.sbml_import import get_species_initial
 from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
+from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
 
@@ -39,7 +40,7 @@ class AmiciUTC(Step):
     """
     config_schema = {
         # SED and ODE-specific types
-        'model': MODEL_TYPE,
+        'model': MODEL_TYPE,  # user may enter with one of sbml filepath, omex dirpath, or omex filepath in 'model_source'
         'time_config': {
             '_type': 'tree[string]',
             '_default': {}
@@ -48,13 +49,13 @@ class AmiciUTC(Step):
             '_default': 'concentrations',
             '_type': 'string'
         },
+        'working_dir': {
+            '_default': '',
+            '_type': 'string'
+        },
         # AMICI-specific types
         'model_output_dir': {
             '_default': mkdtemp(),
-            '_type': 'string'
-        },
-        'working_dir': {
-            '_default': '',
             '_type': 'string'
         },
         'observables': 'maybe[tree[string]]',
@@ -70,15 +71,22 @@ class AmiciUTC(Step):
                  model_source: str = None,
                  sed_model_config: dict = None):
 
-        # no config but either an omex file/dir or sbml file path
+        # A. no config but either an omex file/dir or sbml file path
         configuration = config or {}
         if not configuration and model_source:
             configuration = {'model': {'model_source': model_source}}
-        #
-        elif sed_model_config and configuration:
+
+        # B. has a config but wishes to override TODO: fix this.
+        if sed_model_config and configuration:
             configuration['model'] = sed_model_config
-        elif os.path.isdir(configuration.get('model')['model_source']):
-            configuration['model']['model_source'] = [[os.path.join(root, f) for f in files if f.endswith('.xml') and not f.lower().startswith('manifest')][0] for root, _, files in os.walk(config.get('model').get('model_source'))][0]
+        # C. has a config passed with an archive dirpath or filepath or sbml filepath as its model source:
+        else:
+            config_source = configuration.get('model').get('model_source')
+            if os.path.isdir(config_source):
+                configuration['model']['model_source'] = get_archive_model_filepath(configuration)
+            if config_source.endswith('.omex'):  # TODO: fix this.
+                configuration['model']['model_source'] = unpack_omex_archive(config_source, working_dir=config.get('working_dir') or mkdtemp())
+                configuration['model']['model_source'] = get_archive_model_filepath(configuration)
 
         if time_config and not len(configuration.get('time_config', {}).keys()):
             configuration['time_config'] = time_config

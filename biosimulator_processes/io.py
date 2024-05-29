@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import xml.etree.ElementTree as ET
 import requests
 import zipfile as zf
+from zipfile import ZipFile
 import json
 import os
 
@@ -19,7 +20,23 @@ class FilePath(_BaseClass):
     path: str
 
 
-def extract_uniform_time_course(sedml_filepath: str) -> List[Dict]:
+def unpack_omex_archive(archive_filepath: str, working_dir: str) -> str:
+    archive_name = archive_filepath.replace('.omex', '')
+    unpacking_dirpath = os.path.join(working_dir, archive_name)
+    if not os.path.exists(unpacking_dirpath):
+        os.mkdir(unpacking_dirpath)
+    with ZipFile(archive_filepath + '.omex', 'r') as f:
+        f.extractall(path=unpacking_dirpath)
+
+    return unpacking_dirpath
+
+
+def get_archive_model_filepath(configuration: dict) -> str:
+    return [[os.path.join(root, f) for f in files if f.endswith('.xml') and not f.lower().startswith('manifest')][0] for
+            root, _, files in os.walk(configuration.get('model').get('model_source'))][0]
+
+
+def extract_sedml_time_config(sedml_filepath: str) -> List[Dict]:
     # Parse the XML file
     tree = ET.parse(sedml_filepath)
     root = tree.getroot()
