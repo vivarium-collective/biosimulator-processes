@@ -3,12 +3,14 @@ import logging
 from tempfile import mkdtemp
 
 import libsbml
+import numpy as np
 from amici import amici, SbmlImporter, import_model_module, Model, runAmiciSimulation
 from amici.sbml_import import get_species_initial
 from process_bigraph import Process
 
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
 
 
 class AmiciProcess(Process):
@@ -38,6 +40,10 @@ class AmiciProcess(Process):
     config_schema = {
         # SED and ODE-specific types
         'model': MODEL_TYPE,
+        'time_config': {
+            '_type': 'tree[string]',
+            '_default': {}
+        },
         'species_context': {
             '_default': 'concentrations',
             '_type': 'string'
@@ -107,6 +113,26 @@ class AmiciProcess(Process):
         # get method
         self.method = self.amici_model_object.getSolver()
 
+        # set time config and model with time config
+        utc_config = self.config.get('time_config')
+        self.step_size = utc_config.get('step_size')
+        self.duration = utc_config.get('duration')
+        self.num_steps = utc_config.get('num_steps')
+
+        if len(list(utc_config.keys())) < 3:
+            self._set_time_params()
+
+        self.t = np.linspace(0, self.duration, self.num_steps)
+        self.amici_model_object.setTimepoints(self.t)
+
+    def _set_time_params(self):
+        if self.step_size and self.num_steps:
+            self.duration = calc_duration(self.num_steps, self.step_size)
+        elif self.step_size and self.duration:
+            self.num_steps = calc_num_steps(self.duration, self.step_size)
+        else:
+            self.step_size = calc_step_size(self.duration, self.num_steps)
+
     def initial_state(self):
         floating_species_dict = dict(
             zip(self.floating_species_list, self.floating_species_initial))
@@ -162,10 +188,12 @@ class AmiciProcess(Process):
             set_values.append(value)
         self.amici_model_object.setInitialStates(set_values)
 
-        result_data = runAmiciSimulation(self.amici_model_object, self.method)
+        result_data = runAmiciSimulation(solver=self.method, model=self.amici_model_object)
+        floating_species_results = dict(zip(
+            self.floating_species_list,
+            list(map(lambda x: result_data.by_id(f'{x}'), self.floating_species_list))))
 
-        results = {'time': interval}
-        results[self.species_context_key] = dict(
-            zip(self.floating_species_list, self.floating_species_initial))
-
-        return results
+        return {
+            'time': interval,
+            'floating_species_concentrations': floating_species_results
+        }
