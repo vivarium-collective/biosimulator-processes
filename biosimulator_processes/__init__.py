@@ -12,11 +12,12 @@ from biosimulator_processes.utils import register_module
 
 # Define a list of processes to attempt to import and register
 PROCESSES_TO_REGISTER = [
-    ('cobra', 'cobra_process.CobraProcess'),
-    ('copasi', 'copasi_process.CopasiProcess'),
-    # ('smoldyn', 'smoldyn_process.SmoldynProcess'),
-    ('tellurium', 'tellurium_process.TelluriumProcess'),
-    ('amici', 'amici_process.AmiciUTC')]
+    ('cobra-process', 'cobra_process.CobraProcess'),
+    ('copasi-process', 'copasi_process.CopasiProcess'),
+    # ('smoldyn-process', 'smoldyn_process.SmoldynProcess'),
+    ('tellurium-process', 'tellurium_process.TelluriumProcess'),
+    ('amici-utc', 'amici_process.AmiciUtc'),
+    ('copasi-utc', 'copasi_process.CopasiUtc')]
 
 STEPS_TO_REGISTER = [
     ('copasi-step', 'ode_simulation.CopasiStep'),

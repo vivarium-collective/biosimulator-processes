@@ -281,13 +281,14 @@ class CopasiUtc(UniformTimeCourse):
 
     def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | ndarray[Any, dtype[Any]] | ndarray]:
         tc = run_time_course(start_time=0, duration=self.duration, step_number=self.num_steps - 1, model=self.simulator)
-        return {
+        self.results = {
             'time': self.t,
             'floating_species': {
                 mol_id: array(list(tc.to_dict().get(mol_id).values()))
                 for mol_id in self.floating_species_list
             }
         }
+        return self.results
 
     def _set_reaction_changes(self):
         # ----REACTIONS: set reactions

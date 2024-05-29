@@ -4,8 +4,10 @@ from tempfile import mkdtemp
 
 import libsbml
 import numpy as np
+import seaborn as sns
 from amici import amici, SbmlImporter, import_model_module, Model, runAmiciSimulation
 from amici.sbml_import import get_species_initial
+from matplotlib import pyplot as plt
 from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
@@ -15,7 +17,7 @@ from biosimulator_processes.processes.utc_process import UniformTimeCourse
 from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
 
 
-class AmiciUTC(Step):
+class AmiciUtc(Step):
     """
        Parameters:
             config:`Dict`: dict keys include:
@@ -146,9 +148,10 @@ class AmiciUTC(Step):
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
-        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps + 1)
+        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
 
         self.amici_model_object.setTimepoints(self.t)
+        self.results = {}
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
@@ -164,6 +167,15 @@ class AmiciUTC(Step):
             'step_size': calc_step_size(duration, n_steps),
             'output_start_time': output_start
         }
+
+    def plot_results(self, flush=False):
+        """Plot ODE simulation observables with Seaborn."""
+        plt.figure(figsize=(20, 8))
+        for n in range(len(self.floating_species_list)):
+            sns.lineplot(x=self.results['time'], y=list(self.results['floating_species_concentrations'].values())[n])
+
+    def flush_results(self):
+        return self.results.clear()
 
     def _set_time_params(self):
         if self.step_size and self.num_steps:
@@ -232,7 +244,8 @@ class AmiciUTC(Step):
             self.floating_species_list,
             list(map(lambda x: result_data.by_id(f'{x}'), self.floating_species_list))))
 
-        return {
+        self.results = {
             'time': self.t,
             'floating_species_concentrations': floating_species_results
         }
+        return self.results

@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 
 import libsbml
 import numpy as np
+import seaborn as sns
+from matplotlib import pyplot as plt
 from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
@@ -75,6 +77,8 @@ class UniformTimeCourse(Step):
         self.reaction_list = self._get_reactions()
         self.t = np.linspace(self.output_start_time, self.duration, self.num_steps + 1)
 
+        self.results = {}
+
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
         sedml_fp = os.path.join(omex_path, 'simulation.sedml')
@@ -123,6 +127,15 @@ class UniformTimeCourse(Step):
             'time': 'float',
             self.species_context_key: 'tree[string]'}  # floating_species_type}
 
+    def plot_results(self, flush=False):
+        """Plot ODE simulation observables with Seaborn."""
+        plt.figure(figsize=(20, 8))
+        for n in range(len(self.floating_species_list)):
+            sns.lineplot(x=self.results['time'], y=list(self.results['floating_species_concentrations'].values())[n])
+
+    def flush_results(self):
+        return self.results.clear()
+
     @abstractmethod
     def _load_simulator(self, model_fp: str, **kwargs):
         pass
@@ -141,4 +154,4 @@ class UniformTimeCourse(Step):
 
     @abstractmethod
     def update(self, inputs=None):
-        pass
+        return self.results
