@@ -27,7 +27,7 @@ def plot_ode_output_data(data: dict, simulator_name: str, sample_size: int = Non
     """
     time: np.ndarray = data.get('results', data['time'])
     plt.figure(figsize=(20, 8))
-    for name, output in data['floating_species'].items():
+    for name, output in data.get('floating_species', 'floating_species_concentrations').items():
         x = np.array(time)
         y = output
         plt.plot(x, y, label=name)
