@@ -9,28 +9,13 @@ from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
 from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
-from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
 
 
 class UniformTimeCourse(Step):
     """ABC for UTC process declarations and simulations."""
-    config_schema = {
-        # SED and ODE-specific types
-        'model': MODEL_TYPE,  # user may enter with one of sbml filepath, omex dirpath, or omex filepath in 'model_source'
-        'time_config': {
-            '_type': 'tree[string]',
-            '_default': {}
-        },
-        'species_context': {
-            '_default': 'concentrations',
-            '_type': 'string'
-        },
-        'working_dir': {
-            '_default': '',
-            '_type': 'string'
-        }
-    }
+    config_schema = UTC_CONFIG_TYPE
 
     def __init__(self,
                  config=None,
@@ -71,6 +56,8 @@ class UniformTimeCourse(Step):
         assert model_fp is not None and '/' in model_fp, 'You must pass a valid path to an SBML model file.'
         model_config = self.config['model']
 
+        self.simulator = self._load_simulator(model_fp)
+
         # set time config and model with time config
         utc_config = self.config.get('time_config')
         assert utc_config, \
@@ -79,11 +66,10 @@ class UniformTimeCourse(Step):
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
         self.output_start_time = utc_config.get('output_start_time') or 0
-        self.species_context_key = 'floating_species_concentrations'
-
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
+        self.species_context_key = 'floating_species_concentrations'
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
@@ -136,6 +122,10 @@ class UniformTimeCourse(Step):
         return {
             'time': 'float',
             self.species_context_key: 'tree[string]'}  # floating_species_type}
+
+    @abstractmethod
+    def _load_simulator(self, model_fp: str, **kwargs):
+        pass
 
     @abstractmethod
     def _get_floating_species(self) -> list[str]:

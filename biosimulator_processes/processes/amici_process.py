@@ -10,7 +10,7 @@ from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
 from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
-from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.processes.utc_process import UniformTimeCourse
 from biosimulator_processes.utils import calc_duration, calc_num_steps, calc_step_size
 
@@ -39,31 +39,16 @@ class AmiciUTC(Step):
 
 
     """
-    config_schema = {
-        # SED and ODE-specific types
-        'model': MODEL_TYPE,  # user may enter with one of sbml filepath, omex dirpath, or omex filepath in 'model_source'
-        'time_config': {
-            '_type': 'tree[string]',
-            '_default': {}
-        },
-        'species_context': {
-            '_default': 'concentrations',
-            '_type': 'string'
-        },
-        'working_dir': {
-            '_default': '',
-            '_type': 'string'
-        },
-        # AMICI-specific types
-        'model_output_dir': {
-            '_default': mkdtemp(),
-            '_type': 'string'
-        },
-        'observables': 'maybe[tree[string]]',
-        'constant_parameters': 'maybe[list[string]]',
-        'sigmas': 'maybe[tree[string]]'
-        # TODO: add more amici-specific fields:: MODEL_TYPE should be enough to encompass this.
+    config_schema = UTC_CONFIG_TYPE
+
+    # AMICI-specific fields
+    config_schema['model_output_dir'] = {
+        '_default': mkdtemp(),
+        '_type': 'string'
     }
+    config_schema['observables'] = 'maybe[tree[string]]'
+    config_schema['constant_parameters'] = 'maybe[list[string]]'
+    config_schema['sigmas'] = 'maybe[tree[string]]'
 
     def __init__(self,
                  config=None,

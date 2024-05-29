@@ -363,6 +363,24 @@ MODEL_TYPE = {
         'model_units': 'maybe[tree[string]]'}
 
 
+UTC_CONFIG_TYPE = {
+    # SED and ODE-specific types
+    'model': MODEL_TYPE,
+    'time_config': {
+        '_type': 'tree[string]',
+        '_default': {}
+    },
+    'species_context': {
+        '_default': 'concentrations',
+        '_type': 'string'
+    },
+    'working_dir': {
+        '_default': '',
+        '_type': 'string'
+    }
+}
+
+
 class FromDict(dict):
     def __init__(self, value: Dict):
         super().__init__(value)
