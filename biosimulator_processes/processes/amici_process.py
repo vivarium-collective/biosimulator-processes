@@ -81,12 +81,14 @@ class AmiciUTC(Step):
             configuration['model'] = sed_model_config
         # C. has a config passed with an archive dirpath or filepath or sbml filepath as its model source:
         else:
-            config_source = configuration.get('model').get('model_source')
-            if os.path.isdir(config_source):
-                configuration['model']['model_source'] = get_archive_model_filepath(configuration)
-            if config_source.endswith('.omex'):  # TODO: fix this.
-                configuration['model']['model_source'] = unpack_omex_archive(config_source, working_dir=config.get('working_dir') or mkdtemp())
-                configuration['model']['model_source'] = get_archive_model_filepath(configuration)
+            omex_path = configuration.get('model').get('model_source')
+            # Ca: user has passed a dirpath of omex archive
+            if os.path.isdir(omex_path):
+                configuration['model']['model_source'] = get_archive_model_filepath(omex_path)
+            # Cb: user has passed a zipped archive file
+            elif omex_path.endswith('.omex'):  # TODO: fix this.
+                archive_dirpath = unpack_omex_archive(omex_path, working_dir=config.get('working_dir') or mkdtemp())
+                configuration['model']['model_source'] = get_archive_model_filepath(archive_dirpath)
 
         if time_config and not len(configuration.get('time_config', {}).keys()):
             configuration['time_config'] = time_config

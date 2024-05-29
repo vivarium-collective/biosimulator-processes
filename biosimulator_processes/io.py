@@ -31,9 +31,9 @@ def unpack_omex_archive(archive_filepath: str, working_dir: str) -> str:
     return unpacking_dirpath
 
 
-def get_archive_model_filepath(configuration: dict) -> str:
+def get_archive_model_filepath(config_model_source: str) -> str:
     return [[os.path.join(root, f) for f in files if f.endswith('.xml') and not f.lower().startswith('manifest')][0] for
-            root, _, files in os.walk(configuration.get('model').get('model_source'))][0]
+            root, _, files in os.walk(config_model_source)][0]
 
 
 def extract_sedml_time_config(sedml_filepath: str) -> List[Dict]:
