@@ -104,7 +104,8 @@ def generate_matrix_data(
 
     use_tol_method = method.lower() == 'prox'
     matrix_dtype = float if not use_tol_method else bool
-    mse_matrix = np.zeros((3, 3), dtype=matrix_dtype)
+    num_simulators = len(simulators)
+    mse_matrix = np.zeros((num_simulators, num_simulators), dtype=matrix_dtype)
 
     # fill the matrices with the calculated values
     for i in range(len(simulators)):
