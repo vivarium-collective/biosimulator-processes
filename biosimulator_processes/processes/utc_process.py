@@ -73,7 +73,8 @@ class UniformTimeCourse(Step):
         self.step_size = utc_config.get('step_size')
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
-        self.output_start_time = utc_config.get('output_start_time') or 0
+        self.initial_time = utc_config.get('initial_time') or 0
+        self.output_start_time = utc_config.get('output_start_time')
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
@@ -81,7 +82,7 @@ class UniformTimeCourse(Step):
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
-        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
+        self.t = np.linspace(self.initial_time, self.duration, self.num_steps)
 
         self._results = {}
 
@@ -94,10 +95,11 @@ class UniformTimeCourse(Step):
         duration = output_end - output_start
         n_steps = int(sedml_utc_config['numberOfPoints'])
         return {
-            'duration': duration,
-            'num_steps': n_steps,
+            'duration': output_end,  # duration,
+            'num_steps': n_steps - 1,  # to account for self comparison
             'step_size': calc_step_size(duration, n_steps),
-            'output_start_time': output_start
+            'output_start_time': output_start,
+            'initial_time': int(sedml_utc_config['initialTime'])
         }
 
     def _set_time_params(self):
@@ -159,12 +161,14 @@ class UniformTimeCourse(Step):
         self._results = results.copy()
         return results
 
-    def plot_results(self, flush=True):
-        """Plot ODE simulation observables with Seaborn."""
+    def plot_results(self):
+        """Default class method for plotting. May be (and most likely will be) overridden by simulator-specific plotting methods.
+            Plot ODE simulation observables with Seaborn.
+        """
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
             sns.lineplot(x=self._results['time'], y=list(self._results['floating_species'].values())[n])
-        return self._flush_results() if flush else None
+        return self._flush_results()
 
     def _flush_results(self):
         return self._results.clear()

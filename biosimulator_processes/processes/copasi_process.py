@@ -54,7 +54,10 @@ class UtcCopasi(UniformTimeCourse):
 
         # ----SOLVER: Get the solver (defaults to deterministic)
         self.method = self.config['method']
-        self.tc = None
+        self._tc = None
+
+    def plot_results(self):
+        return self._tc.plot()
 
     def _load_simulator(self, model_fp: str, **kwargs):
         return load_model(model_fp)
@@ -73,18 +76,11 @@ class UtcCopasi(UniformTimeCourse):
             if isinstance(model_parameters, DataFrame) else []
 
     def _generate_results(self, inputs=None):
-        self.tc = run_time_course(self.output_start_time, self.duration, self.num_steps, automatic=False, model=self.simulator)
-        tc = self.tc.to_dict()
+        self._tc = run_time_course(0, self.duration, self.num_steps, model=self.simulator)
+        tc = self._tc.to_dict()
         results = {'time': self.t, 'floating_species': {}}
         for i, spec_id in enumerate(self.basico_species_ids):
             results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))
-        # return {
-        #     'time': self.t,
-        #     'floating_species': {
-        #         mol_id: array(list(tc.to_dict().get(mol_id).values()))
-        #         for mol_id in self.floating_species_list
-        #     }
-        # }
         return results
 
     def _set_reaction_changes(self):

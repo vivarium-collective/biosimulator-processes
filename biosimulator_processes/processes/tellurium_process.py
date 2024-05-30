@@ -38,6 +38,9 @@ class UtcTellurium(UniformTimeCourse):
                  sed_model_config: dict = None):
         super().__init__(config, core, time_config, model_source, sed_model_config)
 
+    def plot_results(self):
+        return self.simulator.plot()
+
     def _load_simulator(self, model_fp: str, **kwargs):
         return te.loadSBMLModel(model_fp)
 
@@ -52,7 +55,7 @@ class UtcTellurium(UniformTimeCourse):
 
     def _generate_results(self, inputs=None):
         # TODO: set vals if inputs here.
-        s = self.simulator.simulate(start=self.output_start_time, end=self.duration, steps=self.num_steps)
+        s = self.simulator.simulate(start=self.initial_time, end=self.duration, steps=self.num_steps)
         outputs = {'floating_species': {}}
         for i, row in enumerate(s.transpose()):
             if i < 1:

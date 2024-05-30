@@ -146,12 +146,13 @@ class UtcAmici(Step):
         self.step_size = utc_config.get('step_size')
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
-        self.output_start_time = utc_config.get('output_start_time') or 0
+        self.initial_time = utc_config.get('initial_time') or 0
+        self.output_start_time = utc_config.get('output_start_time')
 
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
-        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
+        self.t = np.linspace(self.initial_time, self.duration, self.num_steps)
 
         self.amici_model_object.setTimepoints(self.t)
         self._results = {}
@@ -165,10 +166,11 @@ class UtcAmici(Step):
         duration = output_end - output_start
         n_steps = int(sedml_utc_config['numberOfPoints'])
         return {
-            'duration': duration,
-            'num_steps': n_steps,
+            'duration': output_end,  # duration,
+            'num_steps': n_steps,  # to account for self comparison
             'step_size': calc_step_size(duration, n_steps),
-            'output_start_time': output_start
+            'output_start_time': output_start,
+            'initial_time': int(sedml_utc_config['initialTime'])
         }
 
     def plot_results(self, flush=True):
