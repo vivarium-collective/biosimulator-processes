@@ -56,12 +56,15 @@ setup(
         "termcolor",
         "jupyterlab",
         "notebook",
-        "bigraph-builder",
-        "python-libsbml",  # ==5.20.2",
+        "python-libsbml",
         "docker",
-        "pyproject.toml",
-        "python-libnuml",  # ">=1.0.0"
-        "seaborn"
+        "python-libnuml",
+        "seaborn",
+        "toml",
+        "pyyaml",
+        "pydantic",
+        "h5py",
+        "biosimulators-utils"
     ],
     extras_require={
         "smoldyn": ["smoldyn", "simulariumio"],
