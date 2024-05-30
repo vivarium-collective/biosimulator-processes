@@ -44,7 +44,7 @@ def write_utc_comparison_reports(
             simulators=['copasi', 'amici', 'tellurium'],
             ground_truth=ground_truth_results['floating_species'][spec_name],
             method=method,
-            matrix_id=f'{spec_name}_comparison')
+            matrix_id=f'{spec_name.replace(" ", "_")}_comparison')
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
         comparison.data.to_csv(os.path.join(save_dir, f'{comparison.name}.csv'))
