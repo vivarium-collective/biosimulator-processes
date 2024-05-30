@@ -14,6 +14,42 @@ __all__ = [
 ]
 
 
+def write_utc_comparison_reports(
+        save_dir: str,
+        sbml_species_mapping: dict,
+        copasi_results: dict,
+        amici_results: dict,
+        tellurium_results: dict,
+        ground_truth_results: dict = None,
+        method='prox') -> None:
+    """Generate a comparison between copasi, tellurium, and amici outputs. Add an optional ground_truth to the comparison. Please NOTE: all results
+        must be formatted as a dict, where: {'time': [...], 'floating_species': {spec_id: [...]}}. The corresponds to the result format of Utc process
+        results.
+
+            Args:
+                save_dir (:obj:`str`): working directory in which to save
+                sbml_species_mapping (:obj:`dict`): sbml species mapping in which keys are species names, and values are the references of the key names
+                    within the SBML modeling standard.
+                copasi_results (:obj:`dict`): copasi results
+                tellurium_results (:obj:`dict`): tellurium results
+                amici_results (:obj:`dict`): amici results
+                ground_truth_results (:obj:`dict`): ground truth results
+                method (:obj:`str`): method with which to generate the comparison matrix data. One of: `'mse'` or `'prox'`. Defaults to the
+                    prox method which returns a boolean of value proximities given a tolerance.
+    """
+    for spec_name, sbml_id in sbml_species_mapping.items():
+        outputs = [copasi_results['floating_species'][sbml_id], amici_results['floating_species'][sbml_id], tellurium_results['floating_species'][sbml_id]]
+        comparison = generate_comparison(
+            outputs=outputs,
+            simulators=['copasi', 'amici', 'tellurium'],
+            ground_truth=ground_truth_results['floating_species'][spec_name],
+            method=method,
+            matrix_id=f'{spec_name}_comparison')
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+        comparison.data.to_csv(os.path.join(save_dir, f'{comparison.name}.csv'))
+
+
 def exec_compare(reports_path: str, process_results: dict, save_dir: str):
     """Execute a comparison against an individual process results against a ground truth
         whose origin resides in the reports path. TODO: More carefully index this report

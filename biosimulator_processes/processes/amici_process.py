@@ -167,7 +167,7 @@ class UtcAmici(Step):
         n_steps = int(sedml_utc_config['numberOfPoints'])
         return {
             'duration': output_end,  # duration,
-            'num_steps': n_steps,  # to account for self comparison
+            'num_steps': n_steps + 1,  # to account for self comparison
             'step_size': calc_step_size(duration, n_steps),
             'output_start_time': output_start,
             'initial_time': int(sedml_utc_config['initialTime'])
