@@ -37,6 +37,7 @@ pytest = "^8.2.1"
 mypy = "^1.10.0"
 flake8 = "^7.0.0"
 twine = "^5.1.0"
+wheel = "^0.43.0"
 
 [tool.pytest.ini_options]
 testpaths = ["biosimulator_processes", "test_suite"]

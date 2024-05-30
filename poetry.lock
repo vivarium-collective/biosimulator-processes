@@ -5517,6 +5517,20 @@ optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
 
 [[package]]
+name = "wheel"
+version = "0.43.0"
+description = "A built-package format for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "wheel-0.43.0-py3-none-any.whl", hash = "sha256:55c570405f142630c6b9f72fe09d9b67cf1477fcf543ae5b8dcb1f5b7377da81"},
+    {file = "wheel-0.43.0.tar.gz", hash = "sha256:465ef92c69fa5c5da2d1cf8ac40559a8c940886afcef87dcf14b9470862f1d85"},
+]
+
+[package.extras]
+test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
+
+[[package]]
 name = "yamldown"
 version = "0.1.8"
 description = "Python library for loading and dumping \"yamldown\" (markdown with embedded yaml) files."
@@ -5569,4 +5583,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "d4021073c7884ed9baf77d632a081ccbcc55e49665ff476adb482c626e949ab5"
+content-hash = "40058c62bb718b8fe534b55c94daf461c88e68ee631809100d824e1af4fc256c"
