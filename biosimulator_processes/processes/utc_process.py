@@ -30,6 +30,7 @@ class UniformTimeCourse(Step):
         # A. no config but either an omex file/dir or sbml file path
         configuration = config or {}
         source = configuration.get('model').get('model_source')
+        archive_dir_source = os.path.isdir(source)
         if not configuration and model_source:
             configuration = {'model': {'model_source': model_source}}
 
@@ -45,8 +46,7 @@ class UniformTimeCourse(Step):
         else:
             omex_path = configuration.get('model').get('model_source')
             # Da: user has passed a dirpath of omex archive or the path to an unzipped archive as model source
-            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir') or mkdtemp()) \
-                if source.endswith('.omex') else source
+            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir') or mkdtemp()) if not archive_dir_source else source
 
             # set expected model path for init
             configuration['model']['model_source'] = get_archive_model_filepath(archive_dir)
@@ -60,9 +60,9 @@ class UniformTimeCourse(Step):
         super().__init__(config=configuration, core=core)
 
         # reference model source and assert filepath
-        model_fp = self.config['model'].get('model_source')
-        assert model_fp is not None and '/' in model_fp, 'You must pass a valid path to an SBML model file.'
         model_config = self.config['model']
+        model_fp = model_config.get('model_source')
+        assert model_fp is not None and '/' in model_fp, 'You must pass a valid path to an SBML model file.'
 
         self.simulator = self._load_simulator(model_fp)
 
@@ -83,6 +83,15 @@ class UniformTimeCourse(Step):
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
         self.t = np.linspace(self.initial_time, self.duration, self.num_steps)
+
+        sbml_reader = libsbml.SBMLReader()
+        sbml_doc = sbml_reader.readSBML(model_fp)
+        self.sbml_model: libsbml.Model = sbml_doc.getModel()
+        sbml_species_ids = [spec for spec in self.sbml_model.getListOfSpecies()]
+        self.sbml_species_mapping = dict(zip(
+            list(map(lambda s: s.name, sbml_species_ids)),
+            [spec.getId() for spec in sbml_species_ids],
+        ))
 
         self._results = {}
 

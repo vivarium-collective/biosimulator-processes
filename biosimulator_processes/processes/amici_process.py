@@ -56,10 +56,11 @@ class UtcAmici(Step):
                  time_config: dict = None,
                  model_source: str = None,
                  sed_model_config: dict = None):
-
+        self.slice = ()
         # A. no config but either an omex file/dir or sbml file path
         configuration = config or {}
         source = configuration.get('model').get('model_source')
+        archive_dir_source = os.path.isdir(source)
         if not configuration and model_source:
             configuration = {'model': {'model_source': model_source}}
 
@@ -75,8 +76,7 @@ class UtcAmici(Step):
         else:
             omex_path = configuration.get('model').get('model_source')
             # Da: user has passed a dirpath of omex archive or the path to an unzipped archive as model source
-            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir', mkdtemp())) \
-                if source.endswith('.omex') else source
+            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir') or mkdtemp()) if not archive_dir_source else source
 
             # set expected model path for init
             configuration['model']['model_source'] = get_archive_model_filepath(archive_dir)
