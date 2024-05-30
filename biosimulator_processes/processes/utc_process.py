@@ -82,7 +82,7 @@ class UniformTimeCourse(Step):
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
-        self.t = np.linspace(self.initial_time, self.duration, self.num_steps)
+        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
 
         sbml_reader = libsbml.SBMLReader()
         sbml_doc = sbml_reader.readSBML(model_fp)

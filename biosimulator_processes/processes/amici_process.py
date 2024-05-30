@@ -152,7 +152,7 @@ class UtcAmici(Step):
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
-        self.t = np.linspace(self.initial_time, self.duration, self.num_steps)
+        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
 
         self.amici_model_object.setTimepoints(self.t)
         self._results = {}
