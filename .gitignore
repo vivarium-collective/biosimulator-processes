@@ -9,7 +9,6 @@ dist/
 refresh-env.sh
 smoldyn-2.72-mac/
 build/
-commit.sh
 install.sh
 push-image.sh
 release.sh
@@ -32,6 +31,9 @@ Miniforge3-Darwin-arm64.sh
 playground.ipynb
 composer-notebooks/playground.ipynb
 *model_dir/
-commit.sh
+commits.sh
 test_env/
 release_env
+env/
+venv/
+

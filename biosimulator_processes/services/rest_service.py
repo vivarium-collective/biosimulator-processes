@@ -79,17 +79,18 @@ class BiosimulationsRestService(RestService):
         return model_file_resp.text
 
     @classmethod
-    def read_report_outputs(cls, report_file_path, group_path="simulation.sedml/report") -> BiosimulationsRunOutputData:
+    def read_report_outputs(cls, report_file_path) -> BiosimulationsRunOutputData:
         """Read the outputs from all species in the given report file from biosimulations output.
 
             Args:
                 report_file_path (str): The path to the simulation.sedml/report.h5 HDF5 file.
-                group_path (str): The path to the simulation.sedml/report.h5 HDF5 file. Defaults to `simulation.sedml/report`
 
         """
         # TODO: implement auto gen from run id here.
         outputs = []
         with h5py.File(report_file_path, 'r') as f:
+            k = list(f.keys())
+            group_path = k[0] + '/report'
             if group_path in f:
                 group = f[group_path]
                 dataset_labels = group.attrs['sedmlDataSetLabels']

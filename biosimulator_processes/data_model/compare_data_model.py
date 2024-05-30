@@ -27,13 +27,32 @@ import pandas as pd
 from process_bigraph import Composite, pf
 from pydantic import Field, field_validator
 
-from biosimulator_processes.utils import prepare_single_ode_process_document
-from biosimulator_processes.data_model import _BaseModel as BaseModel, _BaseClass
+from biosimulator_processes.helpers import prepare_single_ode_process_document
+from biosimulator_processes.data_model import BaseModel, _BaseClass, _BaseModel
 from biosimulator_processes import CORE
 
 
 # TODO: Transpose data frame and make col vectors for each param, where the index is param name,
     # and cols are simulator id.
+
+
+@dataclass
+class PairwiseComparison(_BaseClass):
+    edge: Tuple[np.ndarray, np.ndarray]
+    value: bool
+
+
+@dataclass
+class SimulatorComparison(_BaseClass):
+    project_id: str
+    data: List[PairwiseComparison]
+
+
+@dataclass
+class ComparisonMatrix(_BaseClass):
+    data: pd.DataFrame
+    name: Optional[str] = None
+    ground_truth: Optional[np.ndarray] = None
 
 
 class ParamIntervalOutputData(BaseModel):
@@ -300,7 +319,8 @@ class ODECompositionResult(_BaseClass):
         return {'outputs': output[('emitter',)]}
 
 
-class CompositeRunError(BaseModel):
+@dataclass
+class CompositeRunError(_BaseClass):
     exception: Exception
 
 

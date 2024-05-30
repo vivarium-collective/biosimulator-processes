@@ -2,7 +2,7 @@ import re
 from setuptools import setup, find_packages
 
 
-__version__ = "0.0.24"
+__version__ = "0.0.25"
 
 with open("README.md", "r") as readme:
     description = readme.read()
@@ -40,7 +40,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    python_requires=">=3.10",
+    python_requires=">=3.11",
     install_requires=[
         "bigraph-schema",
         "process-bigraph",
@@ -48,7 +48,7 @@ setup(
         "bigraph-viz",
         "amici",
         "numpy",
-        "pytest>=6.2.5",
+        "pytest",
         "tellurium",
         "copasi-basico",
         "cobra",
@@ -56,12 +56,15 @@ setup(
         "termcolor",
         "jupyterlab",
         "notebook",
-        "bigraph-builder",
-        "python-libsbml",  # ==5.20.2",
-        "docker>=7.0",
-        "pyproject.toml",
-        "python-libnuml==1.1.6",  # ">=1.0.0"
-        "seaborn"
+        "python-libsbml",
+        "docker",
+        "python-libnuml",
+        "seaborn",
+        "toml",
+        "pyyaml",
+        "pydantic",
+        "h5py",
+        "biosimulators-utils"
     ],
     extras_require={
         "smoldyn": ["smoldyn", "simulariumio"],

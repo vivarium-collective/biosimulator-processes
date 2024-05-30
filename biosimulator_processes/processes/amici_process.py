@@ -3,15 +3,21 @@ import logging
 from tempfile import mkdtemp
 
 import libsbml
+import numpy as np
+import seaborn as sns
 from amici import amici, SbmlImporter, import_model_module, Model, runAmiciSimulation
 from amici.sbml_import import get_species_initial
-from process_bigraph import Process
+from matplotlib import pyplot as plt
+from process_bigraph import Process, Step
 
 from biosimulator_processes import CORE
-from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
+from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
+from biosimulator_processes.processes.utc_process import UniformTimeCourse
+from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size
 
 
-class AmiciProcess(Process):
+class UtcAmici(Step):
     """
        Parameters:
             config:`Dict`: dict keys include:
@@ -32,30 +38,56 @@ class AmiciProcess(Process):
                 sigmas: for example:
                     sigmas = {"observable_x1withsigma": "observable_x1withsigma_sigma"}
 
-
-
     """
-    config_schema = {
-        # SED and ODE-specific types
-        'model': MODEL_TYPE,
-        'species_context': {
-            '_default': 'concentrations',
-            '_type': 'string'
-        },
-        # AMICI-specific types
-        'model_output_dir': {
-            '_default': mkdtemp(),
-            '_type': 'string'
-        },
-        'observables': 'maybe[tree[string]]',
-        'constant_parameters': 'maybe[list[string]]',
-        'sigmas': 'maybe[tree[string]]'
-        # TODO: add more amici-specific fields:: MODEL_TYPE should be enough to encompass this.
-    }
+    config_schema = UTC_CONFIG_TYPE
 
-    def __init__(self, config=None, core=CORE):
-        super().__init__(config, core)
-        # TODO: Enable counts species_context
+    # AMICI-specific fields
+    config_schema['model_output_dir'] = {
+        '_default': mkdtemp(),
+        '_type': 'string'
+    }
+    config_schema['observables'] = 'maybe[tree[string]]'
+    config_schema['constant_parameters'] = 'maybe[list[string]]'
+    config_schema['sigmas'] = 'maybe[tree[string]]'
+
+    def __init__(self,
+                 config=None,
+                 core=CORE,
+                 time_config: dict = None,
+                 model_source: str = None,
+                 sed_model_config: dict = None):
+
+        # A. no config but either an omex file/dir or sbml file path
+        configuration = config or {}
+        source = configuration.get('model').get('model_source')
+        if not configuration and model_source:
+            configuration = {'model': {'model_source': model_source}}
+
+        # B. has a config but wishes to override TODO: fix this.
+        if sed_model_config and configuration:
+            configuration['model'] = sed_model_config
+
+        # C. has a source of sbml file path as expected.
+        elif source and source.endswith('.xml') and not source.lower().startswith('manifest'):
+            pass
+
+        # D. has a config passed with an archive dirpath or filepath or sbml filepath as its model source:
+        else:
+            omex_path = configuration.get('model').get('model_source')
+            # Da: user has passed a dirpath of omex archive or the path to an unzipped archive as model source
+            archive_dir = unpack_omex_archive(archive_filepath=source, working_dir=config.get('working_dir', mkdtemp())) \
+                if source.endswith('.omex') else source
+
+            # set expected model path for init
+            configuration['model']['model_source'] = get_archive_model_filepath(archive_dir)
+
+            # extract the time config from archive's sedml
+            configuration['time_config'] = self._get_sedml_time_params(archive_dir)
+
+        if time_config and not len(configuration.get('time_config', {}).keys()):
+            configuration['time_config'] = time_config
+
+        super().__init__(config=configuration, core=core)
 
         # reference model source and assert filepath
         model_fp = self.config['model'].get('model_source')
@@ -86,13 +118,13 @@ class AmiciProcess(Process):
         self.amici_model_object: amici.Model = model_module.getModel()
 
         # set species context (concentrations for ODE by default)
-        context_type = self.config['species_context']
-        self.species_context_key = f'floating_species_{context_type}'
+        self.context_type = self.config['species_context']
+        self.species_context_key = f'floating_species'
         self.use_counts = 'counts' in self.species_context_key
 
         # get species names
         self.species_objects = self.sbml_model_object.getListOfSpecies()
-        self.floating_species_list = list(self.amici_model_object.getStateNames())
+        self.floating_species_list = list(self.amici_model_object.getStateIds())
         self.floating_species_initial = list(self.amici_model_object.getInitialStates())
 
         # get model parameters
@@ -107,6 +139,58 @@ class AmiciProcess(Process):
         # get method
         self.method = self.amici_model_object.getSolver()
 
+        # set time config and model with time config
+        utc_config = self.config.get('time_config')
+        assert utc_config, \
+            "For now you must manually pass time_config: {duration: , num_steps: , step_size: , } in the config."
+        self.step_size = utc_config.get('step_size')
+        self.duration = utc_config.get('duration')
+        self.num_steps = utc_config.get('num_steps')
+        self.initial_time = utc_config.get('initial_time') or 0
+        self.output_start_time = utc_config.get('output_start_time')
+
+        if len(list(utc_config.keys())) < 3:
+            self._set_time_params()
+
+        self.t = np.linspace(self.initial_time, self.duration, self.num_steps)
+
+        self.amici_model_object.setTimepoints(self.t)
+        self._results = {}
+
+    @staticmethod
+    def _get_sedml_time_params(omex_path: str):
+        sedml_fp = os.path.join(omex_path, 'simulation.sedml')
+        sedml_utc_config = get_sedml_time_config(sedml_fp)
+        output_end = int(sedml_utc_config['outputEndTime'])
+        output_start = int(sedml_utc_config['outputStartTime'])
+        duration = output_end - output_start
+        n_steps = int(sedml_utc_config['numberOfPoints'])
+        return {
+            'duration': output_end,  # duration,
+            'num_steps': n_steps + 1,  # to account for self comparison
+            'step_size': calc_step_size(duration, n_steps),
+            'output_start_time': output_start,
+            'initial_time': int(sedml_utc_config['initialTime'])
+        }
+
+    def plot_results(self, flush=True):
+        """Plot ODE simulation observables with Seaborn."""
+        plt.figure(figsize=(20, 8))
+        for n in range(len(self.floating_species_list)):
+            sns.lineplot(x=self._results['time'], y=list(self._results['floating_species'].values())[n])
+        return self.flush_results() if flush else None
+
+    def flush_results(self):
+        return self._results.clear()
+
+    def _set_time_params(self):
+        if self.step_size and self.num_steps:
+            self.duration = calc_duration(self.num_steps, self.step_size)
+        elif self.step_size and self.duration:
+            self.num_steps = calc_num_steps(self.duration, self.step_size)
+        else:
+            self.step_size = calc_step_size(self.duration, self.num_steps)
+
     def initial_state(self):
         floating_species_dict = dict(
             zip(self.floating_species_list, self.floating_species_initial))
@@ -115,15 +199,13 @@ class AmiciProcess(Process):
             zip(self.model_parameters_list, self.model_parameters_values))
         return {
             'time': 0.0,
-            'floating_species_concentrations': floating_species_dict,
+            self.species_context_key: floating_species_dict,
             'model_parameters': model_parameters_dict}
 
     def inputs(self):
         # dependent on species context set in self.config
         floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
+            species_id: 'list[float]'
             for species_id in self.floating_species_list
         }
 
@@ -141,31 +223,39 @@ class AmiciProcess(Process):
 
         return {
             'time': 'float',
-            self.species_context_key: floating_species_type,
+            self.species_context_key: 'tree[string]',  # floating_species_type,
             'model_parameters': model_params_type,
             'reactions': reactions_type}
 
     def outputs(self):
-        floating_species_type = {
-            species_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for species_id in self.floating_species_list
-        }
+        # floating_species_type = {
+        #     species_id: {
+        #         '_type': 'float',
+        #         '_apply': 'set'}
+        #     for species_id in self.floating_species_list
+        # }
         return {
             'time': 'float',
-            self.species_context_key: floating_species_type}
+            self.species_context_key: 'tree[string]'}  # floating_species_type}
 
-    def update(self, inputs, interval):
-        set_values = []
-        for species_id, value in inputs[self.species_context_key].items():
-            set_values.append(value)
-        self.amici_model_object.setInitialStates(set_values)
+    def _generate_results(self, inputs=None):
+        x = inputs or {}
+        if len(x.keys()):
+            set_values = []
+            for species_id, value in inputs[self.species_context_key].items():
+                set_values.append(value)
+            self.amici_model_object.setInitialStates(set_values)
 
-        result_data = runAmiciSimulation(self.amici_model_object, self.method)
+        result_data = runAmiciSimulation(solver=self.method, model=self.amici_model_object)
+        floating_species_results = dict(zip(
+            self.floating_species_list,
+            list(map(lambda x: result_data.by_id(f'{x}'), self.floating_species_list))))
 
-        results = {'time': interval}
-        results[self.species_context_key] = dict(
-            zip(self.floating_species_list, self.floating_species_initial))
+        return {
+            'time': self.t,
+            self.species_context_key: floating_species_results}
 
+    def update(self, inputs=None):
+        results = self._generate_results(inputs)
+        self._results = results.copy()
         return results
