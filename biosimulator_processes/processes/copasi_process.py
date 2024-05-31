@@ -22,7 +22,7 @@ from basico import (
     add_parameter
 )
 
-from biosimulator_processes.helpers import fetch_biomodel
+from biosimulator_processes.helpers import fetch_biomodel, plot_utc_outputs
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.processes.utc_process import UniformTimeCourse
@@ -58,7 +58,9 @@ class UtcCopasi(UniformTimeCourse):
         self._tc = None
 
     def plot_results(self):
-        return self._tc.plot()
+        return plot_utc_outputs(
+            data=self._results,
+            t=np.append(self.t, self.t[-1] + self.step_size))
 
     def _load_simulator(self, model_fp: str, **kwargs):
         return load_model(model_fp)
@@ -79,26 +81,21 @@ class UtcCopasi(UniformTimeCourse):
     def _generate_results(self, inputs=None):
         # get the copasi-familiar names
         reported_outputs = [k for k in self.sbml_species_mapping.keys()]
-        # run initial state
-        run_time_course_with_output(
-            start_time=self.initial_time,
-            duration=self.output_start_time,
-            model=self.simulator,
-            output_selection=reported_outputs,
-            update_model=True)
+        reported_outputs.append('Time')
 
         # run specified output range
         self._tc = run_time_course_with_output(
-            start_time=self.output_start_time,
+            start_time=self.initial_time,
             duration=self.duration,
-            step_number=self.num_steps,
+            values=self.t,
             model=self.simulator,
-            output_selection=reported_outputs)
+            output_selection=reported_outputs,
+            use_numbers=True)
 
         tc = self._tc.to_dict()
-        results = {'time': self.t, 'floating_species': {}}
+        results = {'time': array(list(tc['Time'].values())), 'floating_species': {}}
         for i, spec_id in enumerate(self.basico_species_ids):
-            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))
+            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))  # [self.output_start_time:self.duration]
         return results
 
     def _set_reaction_changes(self):

@@ -74,7 +74,7 @@ class UniformTimeCourse(Step):
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
         self.initial_time = utc_config.get('initial_time') or 0
-        self.output_start_time = utc_config.get('output_start_time')
+        self.output_start_time = utc_config.get('output_start_time') or 0
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
@@ -82,15 +82,15 @@ class UniformTimeCourse(Step):
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
-        self.t = np.linspace(self.output_start_time, self.duration, self.num_steps)
+        self.t = np.linspace(self.output_start_time - 1, self.duration, self.num_steps)
 
         sbml_reader = libsbml.SBMLReader()
         sbml_doc = sbml_reader.readSBML(model_fp)
         self.sbml_model: libsbml.Model = sbml_doc.getModel()
-        sbml_species_ids = [spec for spec in self.sbml_model.getListOfSpecies()]
+        self.sbml_species_ids = [spec for spec in self.sbml_model.getListOfSpecies()]
         self.sbml_species_mapping = dict(zip(
-            list(map(lambda s: s.name, sbml_species_ids)),
-            [spec.getId() for spec in sbml_species_ids],
+            list(map(lambda s: s.name, self.sbml_species_ids)),
+            [spec.getId() for spec in self.sbml_species_ids],
         ))
 
         self._results = {}
