@@ -1,5 +1,5 @@
 ,copasi,amici,tellurium,ground_truth
-copasi,0.0,3456.593318525234,1176567.92094336,3457.1060850752133
-amici,3456.593318525234,0.0,1180454.950710301,5.945056392142801e-05
-tellurium,1176567.92094336,1180454.950710301,0.0,1180452.3169096492
-ground_truth,3457.1060850752133,5.945056392142801e-05,1180452.3169096492,0.0
+copasi,True,False,False,False
+amici,False,True,False,True
+tellurium,False,False,True,False
+ground_truth,False,True,False,True
