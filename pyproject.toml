@@ -4,7 +4,7 @@ version = "0.0.29"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
-packages = [{include = "biosimulator_processes"}, {include = "test_suite"}]
+packages = [{include = "biosimulator_processes"}, {include = "test_suite"}, {include = "notebook_api"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10"
