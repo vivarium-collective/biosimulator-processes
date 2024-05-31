@@ -171,11 +171,12 @@ class UniformTimeCourse(Step):
         self._results = results.copy()
         return results
 
-    def plot_results(self):
+    def plot_results(self, simulator_name: str):
         """Default class method for plotting. May be (and most likely will be) overridden by simulator-specific plotting methods.
             Plot ODE simulation observables with Seaborn.
         """
         return plot_utc_outputs(
+            simulator=simulator_name,
             data=self._results,
             t=np.append(self.t, self.t[-1] + self.step_size))
 

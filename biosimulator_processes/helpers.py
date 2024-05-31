@@ -10,12 +10,18 @@ from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
 
 
-def plot_utc_outputs(data: dict, t: Union[np.array, List[float]], x=None, y=None) -> None:
+def plot_utc_outputs(data: dict, t: Union[np.array, List[float]], simulator: str = None, x=None, y=None) -> None:
     """Plot ODE simulation observables with Seaborn."""
     plt.figure(figsize=(20, 8))
     species_data = data.get('floating_species') or data.get('floating_species_concentrations')
     for spec_name, spec_data in species_data.items():
-        sns.lineplot(x=t, y=spec_data)
+        sns.lineplot(x=t, y=spec_data, label=spec_name)
+
+    plt.xlabel('Time')
+    plt.ylabel('Concentration')
+    plt.title(f'Species Concentrations over Time with {simulator or "UTC Simulator"}')
+    plt.legend()
+    plt.grid(True)
     plt.show()
 
 

@@ -39,7 +39,8 @@ class UtcTellurium(UniformTimeCourse):
         super().__init__(config, core, time_config, model_source, sed_model_config)
 
     def plot_results(self):
-        return self.simulator.plot()
+        # return self.simulator.plot()
+        return super().plot_results(simulator_name='Tellurium')
 
     def _load_simulator(self, model_fp: str, **kwargs):
         return te.loadSBMLModel(model_fp)

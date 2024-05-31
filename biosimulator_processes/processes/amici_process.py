@@ -182,6 +182,9 @@ class UtcAmici(Step):
         plt.figure(figsize=(20, 8))
         for n in range(len(self.floating_species_list)):
             sns.lineplot(x=self._results['time'], y=list(self._results['floating_species'].values())[n])
+        plt.xlabel('Time')
+        plt.ylabel('Concentrations')
+        plt.title('Species Concentrations over Time with AMICI')
         return self.flush_results() if flush else None
 
     def flush_results(self):

@@ -58,9 +58,11 @@ class UtcCopasi(UniformTimeCourse):
         self._tc = None
 
     def plot_results(self):
-        return plot_utc_outputs(
-            data=self._results,
-            t=npAppend(self.t, self.t[-1] + self.step_size))
+        #return plot_utc_outputs(
+        #    data=self._results,
+        #    simulator='COPASI',
+        #    t=npAppend(self.t, self.t[-1] + self.step_size))
+        return super().plot_results(simulator_name='Tellurium')
 
     def _load_simulator(self, model_fp: str, **kwargs):
         return load_model(model_fp)
