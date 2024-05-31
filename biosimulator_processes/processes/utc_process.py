@@ -13,7 +13,7 @@ from process_bigraph import Process, Step
 from biosimulator_processes import CORE
 from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
-from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size
+from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size, plot_utc_outputs
 
 
 class UniformTimeCourse(Step):
@@ -94,6 +94,7 @@ class UniformTimeCourse(Step):
         ))
 
         self._results = {}
+        self.output_keys = [list(self.sbml_species_mapping.keys())[i] for i, spec_id in enumerate(self.floating_species_list)]
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
@@ -174,10 +175,9 @@ class UniformTimeCourse(Step):
         """Default class method for plotting. May be (and most likely will be) overridden by simulator-specific plotting methods.
             Plot ODE simulation observables with Seaborn.
         """
-        plt.figure(figsize=(20, 8))
-        for n in range(len(self.floating_species_list)):
-            sns.lineplot(x=self._results['time'], y=list(self._results['floating_species'].values())[n])
-        return self._flush_results()
+        return plot_utc_outputs(
+            data=self._results,
+            t=np.append(self.t, self.t[-1] + self.step_size))
 
     def _flush_results(self):
         return self._results.clear()

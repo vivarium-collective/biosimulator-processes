@@ -62,8 +62,8 @@ class UtcTellurium(UniformTimeCourse):
             if i < 1:
                 outputs['time'] = row
             else:
-                for name in self.floating_species_list:
-                    outputs['floating_species'][name] = row
+                for spec_index, name in enumerate(self.floating_species_list):
+                    outputs['floating_species'][self.output_keys[spec_index]] = row
         return outputs
 
 

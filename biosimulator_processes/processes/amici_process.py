@@ -123,9 +123,12 @@ class UtcAmici(Step):
         self.use_counts = 'counts' in self.species_context_key
 
         # get species names
-        self.species_objects = self.sbml_model_object.getListOfSpecies()
         self.floating_species_list = list(self.amici_model_object.getStateIds())
-        self.floating_species_initial = list(self.amici_model_object.getInitialStates())
+        self.sbml_species_ids = [spec for spec in self.sbml_model_object.getListOfSpecies()]
+        self.sbml_species_mapping = dict(zip(
+            list(map(lambda s: s.name, self.sbml_species_ids)),
+            [spec.getId() for spec in self.sbml_species_ids],
+        ))
 
         # get model parameters
         self.model_parameter_objects = self.sbml_model_object.getListOfParameters()
@@ -156,6 +159,7 @@ class UtcAmici(Step):
 
         self.amici_model_object.setTimepoints(self.t)
         self._results = {}
+        self.output_keys = [list(self.sbml_species_mapping.keys())[i] for i, spec_id in enumerate(self.floating_species_list)]
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
@@ -247,8 +251,10 @@ class UtcAmici(Step):
             self.amici_model_object.setInitialStates(set_values)
 
         result_data = runAmiciSimulation(solver=self.method, model=self.amici_model_object)
+
+        # TODO: ensure that `keys` are threadsafe.
         floating_species_results = dict(zip(
-            self.floating_species_list,
+            self.output_keys,
             list(map(lambda x: result_data.by_id(f'{x}'), self.floating_species_list))))
 
         return {

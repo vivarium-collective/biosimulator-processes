@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 
 from COPASI import CDataModel
-from numpy import ndarray, dtype, array
+from numpy import ndarray, dtype, array, append as npAppend
 from pandas import DataFrame
 from basico import (
     load_model,
@@ -60,7 +60,7 @@ class UtcCopasi(UniformTimeCourse):
     def plot_results(self):
         return plot_utc_outputs(
             data=self._results,
-            t=np.append(self.t, self.t[-1] + self.step_size))
+            t=npAppend(self.t, self.t[-1] + self.step_size))
 
     def _load_simulator(self, model_fp: str, **kwargs):
         return load_model(model_fp)
@@ -86,7 +86,7 @@ class UtcCopasi(UniformTimeCourse):
         # run specified output range
         self._tc = run_time_course_with_output(
             start_time=self.initial_time,
-            duration=self.duration,
+            duration=self.t[-1],
             values=self.t,
             model=self.simulator,
             output_selection=reported_outputs,
@@ -94,8 +94,9 @@ class UtcCopasi(UniformTimeCourse):
 
         tc = self._tc.to_dict()
         results = {'time': array(list(tc['Time'].values())), 'floating_species': {}}
-        for i, spec_id in enumerate(self.basico_species_ids):
-            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))  # [self.output_start_time:self.duration]
+        keys = [list(self.sbml_species_mapping.keys())[i] for i, spec_id in enumerate(self.floating_species_list)]
+        for i, name in enumerate(self.floating_species_list):
+            results['floating_species'][self.output_keys[i]] = array(list(tc.get(self.basico_species_ids[i]).values()))  # [self.output_start_time:self.duration]
         return results
 
     def _set_reaction_changes(self):
