@@ -76,7 +76,12 @@ class UtcCopasi(UniformTimeCourse):
             if isinstance(model_parameters, DataFrame) else []
 
     def _generate_results(self, inputs=None):
-        self._tc = run_time_course(0, self.duration, self.num_steps, model=self.simulator)
+        run_time_course(start_time=self.initial_time, duration=self.output_start_time, model=self.simulator)
+        self._tc = run_time_course(
+            start_time=self.output_start_time,
+            duration=self.duration,
+            step_number=self.num_steps,
+            model=self.simulator)
         tc = self._tc.to_dict()
         results = {'time': self.t, 'floating_species': {}}
         for i, spec_id in enumerate(self.basico_species_ids):
