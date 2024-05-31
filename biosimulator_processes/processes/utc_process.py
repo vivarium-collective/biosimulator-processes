@@ -13,7 +13,7 @@ from process_bigraph import Process, Step
 from biosimulator_processes import CORE
 from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
-from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size
+from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size, plot_utc_outputs
 
 
 class UniformTimeCourse(Step):
@@ -74,7 +74,7 @@ class UniformTimeCourse(Step):
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
         self.initial_time = utc_config.get('initial_time') or 0
-        self.output_start_time = utc_config.get('output_start_time')
+        self.output_start_time = utc_config.get('output_start_time') or 0
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
@@ -82,18 +82,19 @@ class UniformTimeCourse(Step):
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
-        self.t = np.linspace(self.initial_time, self.duration, self.num_steps)
+        self.t = np.linspace(self.output_start_time - 1, self.duration, self.num_steps)
 
         sbml_reader = libsbml.SBMLReader()
         sbml_doc = sbml_reader.readSBML(model_fp)
         self.sbml_model: libsbml.Model = sbml_doc.getModel()
-        sbml_species_ids = [spec for spec in self.sbml_model.getListOfSpecies()]
+        self.sbml_species_ids = [spec for spec in self.sbml_model.getListOfSpecies()]
         self.sbml_species_mapping = dict(zip(
-            list(map(lambda s: s.name, sbml_species_ids)),
-            [spec.getId() for spec in sbml_species_ids],
+            list(map(lambda s: s.name, self.sbml_species_ids)),
+            [spec.getId() for spec in self.sbml_species_ids],
         ))
 
         self._results = {}
+        self.output_keys = [list(self.sbml_species_mapping.keys())[i] for i, spec_id in enumerate(self.floating_species_list)]
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
@@ -170,14 +171,14 @@ class UniformTimeCourse(Step):
         self._results = results.copy()
         return results
 
-    def plot_results(self):
+    def plot_results(self, simulator_name: str):
         """Default class method for plotting. May be (and most likely will be) overridden by simulator-specific plotting methods.
             Plot ODE simulation observables with Seaborn.
         """
-        plt.figure(figsize=(20, 8))
-        for n in range(len(self.floating_species_list)):
-            sns.lineplot(x=self._results['time'], y=list(self._results['floating_species'].values())[n])
-        return self._flush_results()
+        return plot_utc_outputs(
+            simulator=simulator_name,
+            data=self._results,
+            t=np.append(self.t, self.t[-1] + self.step_size))
 
     def _flush_results(self):
         return self._results.clear()

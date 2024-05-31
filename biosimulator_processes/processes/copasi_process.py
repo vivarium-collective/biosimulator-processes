@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 
 from COPASI import CDataModel
-from numpy import ndarray, dtype, array
+from numpy import ndarray, dtype, array, append as npAppend
 from pandas import DataFrame
 from basico import (
     load_model,
@@ -11,6 +11,7 @@ from basico import (
     get_parameters,
     get_reactions,
     set_species,
+    run_time_course_with_output,
     run_time_course,
     get_compartments,
     new_model,
@@ -21,7 +22,7 @@ from basico import (
     add_parameter
 )
 
-from biosimulator_processes.helpers import fetch_biomodel
+from biosimulator_processes.helpers import fetch_biomodel, plot_utc_outputs
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.processes.utc_process import UniformTimeCourse
@@ -57,7 +58,11 @@ class UtcCopasi(UniformTimeCourse):
         self._tc = None
 
     def plot_results(self):
-        return self._tc.plot()
+        #return plot_utc_outputs(
+        #    data=self._results,
+        #    simulator='COPASI',
+        #    t=npAppend(self.t, self.t[-1] + self.step_size))
+        return super().plot_results(simulator_name='Tellurium')
 
     def _load_simulator(self, model_fp: str, **kwargs):
         return load_model(model_fp)
@@ -76,11 +81,24 @@ class UtcCopasi(UniformTimeCourse):
             if isinstance(model_parameters, DataFrame) else []
 
     def _generate_results(self, inputs=None):
-        self._tc = run_time_course(0, self.duration, self.num_steps, model=self.simulator)
+        # get the copasi-familiar names
+        reported_outputs = [k for k in self.sbml_species_mapping.keys()]
+        reported_outputs.append('Time')
+
+        # run specified output range
+        self._tc = run_time_course_with_output(
+            start_time=self.initial_time,
+            duration=self.t[-1],
+            values=self.t,
+            model=self.simulator,
+            output_selection=reported_outputs,
+            use_numbers=True)
+
         tc = self._tc.to_dict()
-        results = {'time': self.t, 'floating_species': {}}
-        for i, spec_id in enumerate(self.basico_species_ids):
-            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))
+        results = {'time': array(list(tc['Time'].values())), 'floating_species': {}}
+        keys = [list(self.sbml_species_mapping.keys())[i] for i, spec_id in enumerate(self.floating_species_list)]
+        for i, name in enumerate(self.floating_species_list):
+            results['floating_species'][self.output_keys[i]] = array(list(tc.get(self.basico_species_ids[i]).values()))  # [self.output_start_time:self.duration]
         return results
 
     def _set_reaction_changes(self):

@@ -38,7 +38,7 @@ def write_utc_comparison_reports(
                     prox method which returns a boolean of value proximities given a tolerance.
     """
     for spec_name, sbml_id in sbml_species_mapping.items():
-        outputs = [copasi_results['floating_species'][sbml_id], amici_results['floating_species'][sbml_id], tellurium_results['floating_species'][sbml_id]]
+        outputs = [copasi_results['floating_species'][spec_name], amici_results['floating_species'][spec_name], tellurium_results['floating_species'][spec_name]]
         comparison = generate_comparison(
             outputs=outputs,
             simulators=['copasi', 'amici', 'tellurium'],
