@@ -55,7 +55,8 @@ class UtcTellurium(UniformTimeCourse):
 
     def _generate_results(self, inputs=None):
         # TODO: set vals if inputs here.
-        s = self.simulator.simulate(start=self.initial_time, end=self.duration, steps=self.num_steps)
+        self.simulator.simulate(start=self.initial_time, end=self.output_start_time)
+        s = self.simulator.simulate(start=self.output_start_time, end=self.duration, steps=self.num_steps)
         outputs = {'floating_species': {}}
         for i, row in enumerate(s.transpose()):
             if i < 1:
