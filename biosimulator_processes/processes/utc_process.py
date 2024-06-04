@@ -78,7 +78,7 @@ class SbmlUniformTimeCourse(Step):
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
-        self.species_context_key = 'floating_species_concentrations'
+        self.species_context_key = f'floating_species'
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()
@@ -155,14 +155,14 @@ class SbmlUniformTimeCourse(Step):
         }
 
         return {
-            'time': 'float',
+            'time': 'list[float]',
             self.species_context_key: 'tree[string]',  # floating_species_type,
             'model_parameters': model_params_type,
             'reactions': reactions_type}
 
     def outputs(self):
         return {
-            'time': 'float',
+            'time': 'list[float]',
             self.species_context_key: 'tree[string]'}  # floating_species_type}
 
     def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | np.ndarray[Any, np.dtype[Any]] | np.ndarray]:

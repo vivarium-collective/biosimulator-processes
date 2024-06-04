@@ -124,6 +124,7 @@ class UtcAmici(Step):
 
         # get species names
         self.floating_species_list = list(self.amici_model_object.getStateIds())
+        # self.floating_species_initial = list(self.amici_model_object.getInitialStates())
         self.sbml_species_ids = [spec for spec in self.sbml_model_object.getListOfSpecies()]
         self.sbml_species_mapping = dict(zip(
             list(map(lambda s: s.name, self.sbml_species_ids)),
@@ -198,16 +199,16 @@ class UtcAmici(Step):
         else:
             self.step_size = calc_step_size(self.duration, self.num_steps)
 
-    def initial_state(self):
-        floating_species_dict = dict(
-            zip(self.floating_species_list, self.floating_species_initial))
-
-        model_parameters_dict = dict(
-            zip(self.model_parameters_list, self.model_parameters_values))
-        return {
-            'time': 0.0,
-            self.species_context_key: floating_species_dict,
-            'model_parameters': model_parameters_dict}
+    # def initial_state(self):
+    #     floating_species_dict = dict(
+    #         zip(self.floating_species_list, self.floating_species_initial))
+#
+    #     model_parameters_dict = dict(
+    #         zip(self.model_parameters_list, self.model_parameters_values))
+    #     return {
+    #         'time': 0.0,
+    #         self.species_context_key: floating_species_dict,
+    #         'model_parameters': model_parameters_dict}
 
     def inputs(self):
         # dependent on species context set in self.config

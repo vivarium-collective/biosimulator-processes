@@ -37,6 +37,28 @@ class UtcTellurium(SbmlUniformTimeCourse):
                  model_source: str = None,
                  sed_model_config: dict = None):
         super().__init__(config, core, time_config, model_source, sed_model_config)
+        self.floating_species_list = self.simulator.getFloatingSpeciesIds()
+        self.boundary_species_list = self.simulator.getBoundarySpeciesIds()
+        self.floating_species_initial = self.simulator.getFloatingSpeciesConcentrations()
+        self.boundary_species_initial = self.simulator.getBoundarySpeciesConcentrations()
+
+        # Get the list of parameters and their values
+        self.model_parameters_list = self.simulator.getGlobalParameterIds()
+        self.model_parameter_values = self.simulator.getGlobalParameterValues()
+
+        # Get a list of reactions
+        self.reaction_list = self.simulator.getReactionIds()
+
+    def initial_state(self, config=None):
+        floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
+        boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
+        model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
+        return {
+            'time': self.t.tolist(),
+            self.species_context_key: floating_species_dict,
+            # 'boundary_species': boundary_species_dict,
+            'model_parameters': model_parameters_dict
+        }
 
     def plot_results(self):
         # return self.simulator.plot()
