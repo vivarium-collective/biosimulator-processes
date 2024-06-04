@@ -345,39 +345,41 @@ class Simulator(_BaseClass):
 # --- Non-Pydantic FromDict classes
 
 MODEL_TYPE = {
-        'model_id': 'string',
-        'model_source': 'string',  # TODO: add antimony support here.
-        'model_language': {
-            '_type': 'string',
-            '_default': 'sbml'
-        },
-        'model_name': {
-            '_type': 'string',
-            '_default': 'composite_process_model'
-        },
-        'model_changes': {
-            'species_changes': 'maybe[tree[string]]',
-            'global_parameter_changes': 'maybe[tree[string]]',
-            'reaction_changes': 'maybe[tree[string]]'
-        },
-        'model_units': 'maybe[tree[string]]'}
+    'model_id': 'string',
+    'model_source': 'string',  # TODO: add antimony support here.
+    'model_language': {
+        '_type': 'string',
+        '_default': 'sbml'
+    },
+    'model_name': {
+        '_type': 'string',
+        '_default': 'composite_process_model'
+    },
+    # 'model_changes': {
+    #     'species_changes': 'maybe[tree[string]]',
+    #     'global_parameter_changes': 'maybe[tree[string]]',
+    #     'reaction_changes': 'maybe[tree[string]]'
+    # },
+    # 'model_units': 'maybe[tree[string]]'}
+    'model_changes': 'tree[string]',
+    'model_units': 'tree[string]'
+}
+
+
+
+
+# TODO: add sbml model type
 
 
 UTC_CONFIG_TYPE = {
     # SED and ODE-specific types
-    'model': MODEL_TYPE,
-    'time_config': {
-        '_type': 'tree[string]',
-        '_default': {}
-    },
+    'model': MODEL_TYPE,  # 'sed_model',
+    'time_config': 'tree[string]',
     'species_context': {
         '_default': 'concentrations',
         '_type': 'string'
     },
-    'working_dir': {
-        '_default': '',
-        '_type': 'string'
-    }
+    'working_dir': 'string'
 }
 
 

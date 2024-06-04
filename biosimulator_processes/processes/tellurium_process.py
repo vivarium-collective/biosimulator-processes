@@ -8,7 +8,7 @@ import tellurium as te
 from process_bigraph import Process, Composite, pf, Step
 
 from biosimulator_processes import CORE
-from biosimulator_processes.processes.utc_process import UniformTimeCourse
+from biosimulator_processes.processes.utc_process import SbmlUniformTimeCourse
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 
 """
@@ -29,7 +29,7 @@ from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 """
 
 
-class UtcTellurium(UniformTimeCourse):
+class UtcTellurium(SbmlUniformTimeCourse):
     def __init__(self,
                  config=None,
                  core=CORE,

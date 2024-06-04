@@ -6,7 +6,7 @@ from bigraph_schema import TypeSystem
 from process_bigraph import Composite
 
 from biosimulator_processes.steps.viz import CompositionPlotter, Plotter2d
-from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE, UTC_CONFIG_TYPE
 from biosimulator_processes.helpers import register_module
 
 
@@ -39,5 +39,6 @@ CORE = ProcessTypes()
 
 # core type system implementation (unique to this package)
 CORE.type_registry.register('sed_model', schema={'_type': MODEL_TYPE})
+CORE.type_registry.register('utc_config', schema={'_type': UTC_CONFIG_TYPE})
 register_module(PROCESSES_TO_REGISTER, CORE, verbose=False)
 register_module(STEPS_TO_REGISTER, CORE, verbose=True)

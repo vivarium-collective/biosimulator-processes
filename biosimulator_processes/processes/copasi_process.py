@@ -2,6 +2,7 @@ from typing import Dict, Union, Optional, List, Any
 from datetime import datetime
 import json
 
+import numpy as np
 from COPASI import CDataModel
 from numpy import ndarray, dtype, array, append as npAppend
 from pandas import DataFrame
@@ -25,11 +26,11 @@ from basico import (
 from biosimulator_processes.helpers import fetch_biomodel, plot_utc_outputs
 from biosimulator_processes import CORE
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
-from biosimulator_processes.processes.utc_process import UniformTimeCourse
+from biosimulator_processes.processes.utc_process import SbmlUniformTimeCourse
 from biosimulator_processes.processes.sed_process import SedProcess
 
 
-class UtcCopasi(UniformTimeCourse):
+class UtcCopasi(SbmlUniformTimeCourse):
     config_schema = UTC_CONFIG_TYPE
     config_schema['method'] = {
         '_type': 'string',
@@ -47,7 +48,7 @@ class UtcCopasi(UniformTimeCourse):
         self.sbml_species_mapping = get_species(model=self.simulator)[['sbml_id']].to_dict()['sbml_id']
         self.floating_species_list = list(self.sbml_species_mapping.values())
         self.basico_species_ids = list(self.sbml_species_mapping.keys())
-        self.model_changes = self.config['model']['model_changes']
+        self.model_changes = self.config['model'].get('model_changes')
         self._set_reaction_changes()
         self._set_species_changes()
         self._set_global_param_changes()
@@ -58,11 +59,7 @@ class UtcCopasi(UniformTimeCourse):
         self._tc = None
 
     def plot_results(self):
-        #return plot_utc_outputs(
-        #    data=self._results,
-        #    simulator='COPASI',
-        #    t=npAppend(self.t, self.t[-1] + self.step_size))
-        return super().plot_results(simulator_name='Tellurium')
+        return super().plot_results(simulator_name='COPASI')
 
     def _load_simulator(self, model_fp: str, **kwargs):
         return load_model(model_fp)
@@ -85,12 +82,15 @@ class UtcCopasi(UniformTimeCourse):
         reported_outputs = [k for k in self.sbml_species_mapping.keys()]
         reported_outputs.append('Time')
 
+        t = np.linspace(self.output_start_time - 1, self.duration + 1, self.num_steps + 1)
         # run specified output range
         self._tc = run_time_course_with_output(
-            start_time=self.initial_time,
-            duration=self.t[-1],
-            values=self.t,
+            # start_time=self.initial_time,
+            start_time=self.output_start_time,
+            duration=t[-1],
+            values=t,
             model=self.simulator,
+            update_model=True,
             output_selection=reported_outputs,
             use_numbers=True)
 

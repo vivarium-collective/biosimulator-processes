@@ -16,7 +16,7 @@ from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size, plot_utc_outputs
 
 
-class UniformTimeCourse(Step):
+class SbmlUniformTimeCourse(Step):
     """ABC for UTC process declarations and simulations."""
     config_schema = UTC_CONFIG_TYPE
 
@@ -73,8 +73,8 @@ class UniformTimeCourse(Step):
         self.step_size = utc_config.get('step_size')
         self.duration = utc_config.get('duration')
         self.num_steps = utc_config.get('num_steps')
-        self.initial_time = utc_config.get('initial_time') or 0
-        self.output_start_time = utc_config.get('output_start_time') or 0
+        self.initial_time = utc_config.get('initial_time', 0)
+        self.output_start_time = utc_config.get('output_start_time', 0)
         if len(list(utc_config.keys())) < 3:
             self._set_time_params()
 
@@ -174,11 +174,19 @@ class UniformTimeCourse(Step):
     def plot_results(self, simulator_name: str):
         """Default class method for plotting. May be (and most likely will be) overridden by simulator-specific plotting methods.
             Plot ODE simulation observables with Seaborn.
+
         """
-        return plot_utc_outputs(
-            simulator=simulator_name,
-            data=self._results,
-            t=np.append(self.t, self.t[-1] + self.step_size))
+        plt.figure(figsize=(20, 8))
+        for spec_id, spec_output in self._results['floating_species'].items():
+            sns.lineplot(x=self._results['time'], y=spec_output, label=spec_id)
+        plt.legend()
+        plt.grid(True)
+        plt.title(f"Species concentrations over time with {simulator_name}")
+        return plt.show()
+        # return plot_utc_outputs(
+            # simulator=simulator_name,
+            # data=self._results,
+            # t=np.append(self.t, self.t[-1] + self.step_size))
 
     def _flush_results(self):
         return self._results.clear()
