@@ -16,7 +16,8 @@ PROCESSES_TO_REGISTER = [
     ('copasi-process', 'copasi_process.CopasiProcess'),
     ('tellurium-process', 'tellurium_process.TelluriumProcess'),
     ('utc-amici', 'amici_process.UtcAmici'),
-    ('utc-copasi', 'copasi_process.UtcCopasi')]
+    ('utc-copasi', 'copasi_process.UtcCopasi'),
+    ('utc-tellurium', 'tellurium_process.UtcTellurium')]
 
 
 try:
