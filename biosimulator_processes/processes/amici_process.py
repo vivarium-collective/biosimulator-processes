@@ -165,7 +165,7 @@ class UtcAmici(Step):
     def initial_state(self):
         species_initial = dict(zip(self.floating_species_list, self.floating_species_initial))
         model_params_initial = dict(zip(self.model_parameters_list, self.model_parameters_values))
-        reactions_initial = dict(zip(self.reaction_list, 0.0))
+        reactions_initial = dict(zip(self.reaction_list, [0.0 for r in self.reaction_list]))
         return {
             'time': [0.0],
             'floating_species': species_initial,

@@ -75,9 +75,9 @@ class UtcCopasi(SbmlUniformTimeCourse):
             zip(self.model_parameters_list, self.model_parameters_values))
 
         floating_species_dict = dict(
-            zip(self.floating_species_list, self.floating_species_initial))
+            zip(self.floating_species_list, self.floating_species_list))
 
-        reactions = dict(zip(self.reaction_list, 0.0))
+        reactions = dict(zip(self.reaction_list, [0.0 for r in self.reaction_list]))
 
         return {
             'time': 0.0,

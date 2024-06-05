@@ -53,7 +53,7 @@ class UtcTellurium(SbmlUniformTimeCourse):
         floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
         # boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
         model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
-        reactions_dict = dict(zip(self.reaction_list, 0.0))
+        reactions_dict = dict(zip(self.reaction_list, [0.0 for r in self.reaction_list]))
         return {
             'time': self.t.tolist(),
             self.species_context_key: floating_species_dict,
