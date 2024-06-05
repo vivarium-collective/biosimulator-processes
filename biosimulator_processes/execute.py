@@ -34,5 +34,8 @@ def sbml_utc_comparison_scan(sbml_source_dir: str, simulators: list[str]):
     scan_results = {}
     for fp in archive_filepaths:
         # comparison_doc = UtcComparisonDocument(model_source=fp)
-        scan_results[fp.split('/')[-1]] = exec_utc_comparison(fp, simulators)
+        try:
+            scan_results[fp.split('/')[-1]] = exec_utc_comparison(fp, simulators)
+        except:
+            pass
     return scan_results
