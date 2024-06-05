@@ -1,26 +1,27 @@
-from process_bigraph import Step 
+from biosimulator_processes import CORE
 
-from biosimulator_processes.api.compare import generate_comparison
+from process_bigraph import Step
+
+from biosimulator_processes.api.compare import generate_utc_species_comparison
 
 
-class Comparator(Step):
+class UtcComparator(Step):
     config_schema = {
         'simulators': 'list[string]',
         'method': {
             '_default': 'proximity',
             '_type': 'string'
+        },
+        'include_output_data': {
+            '_default': True,
+            '_type': 'boolean'
         }
     }
+
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
         self.method = self.config['method']
         self.simulators = self.config['simulators']
-        
-        
-
-class UtcComparator(Comparator):
-    def __init__(self, config=None, core=None):
-        super().__init__(config, core)
 
     def inputs(self): 
         port_schema = {
@@ -32,20 +33,25 @@ class UtcComparator(Comparator):
     
     def outputs(self):
         return {
-            'mean_squared_error': 'tree[string]',
-            'proximity': 'tree[string]',
-            'output_data': 'tree[string]'  # ie: {spec_id: {sim_name: outputarray}}
+            'results': 'tree[string]'  # ie: {spec_id: {sim_name: outputarray}}
         }
         
     def update(self, inputs):
-        for simulator in self.simulators:
-            species_key = f'{simulator}_floating_species'
-            for spec_name, spec_output in inputs[species_key].items():
-                print(spec_name)
-        
-        return {
-            'mean_squared_error': {},
-            'proximity': {},
-            'output_data': {}
+        # TODO: more dynamically infer this. Perhaps use libsbml?
+        species_names = list(inputs['copasi']['copasi_floating_species'].keys())
+        _data = dict(zip(species_names, {}))
+        results = {
+            'results': _data
         }
-                
+
+        for name in species_names:
+            outputs = [inputs[f'{simulator}_floating_species'][name] for simulator in self.simulators]
+            comparison = generate_utc_species_comparison(
+                outputs=outputs,
+                simulators=['copasi', 'amici', 'tellurium'],
+                species_name=name)
+
+            comparison_data = comparison.to_dict()
+            results['results'][name] = comparison_data
+
+        return results
