@@ -22,6 +22,7 @@ class UtcComparator(Step):
         super().__init__(config, core)
         self.method = self.config['method']
         self.simulators = self.config['simulators']
+        self.include_output = self.config['include_output_data']
 
     def inputs(self): 
         port_schema = {
@@ -52,6 +53,9 @@ class UtcComparator(Step):
                 species_name=name)
 
             comparison_data = comparison.to_dict()
+            if not self.include_output:
+                comparison_data.pop('output_data')
+
             results['results'][name] = comparison_data
 
         return results
