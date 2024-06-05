@@ -1,17 +1,13 @@
-from biosimulator_processes import CORE
-
+import pandas as pd
 from process_bigraph import Step
 
+from biosimulator_processes import CORE
 from biosimulator_processes.api.compare import generate_utc_species_comparison
 
 
 class UtcComparator(Step):
     config_schema = {
         'simulators': 'list[string]',
-        'method': {
-            '_default': 'proximity',
-            '_type': 'string'
-        },
         'include_output_data': {
             '_default': True,
             '_type': 'boolean'
@@ -20,7 +16,6 @@ class UtcComparator(Step):
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
-        self.method = self.config['method']
         self.simulators = self.config['simulators']
         self.include_output = self.config['include_output_data']
 
@@ -39,20 +34,28 @@ class UtcComparator(Step):
         
     def update(self, inputs):
         # TODO: more dynamically infer this. Perhaps use libsbml?
-        species_names = list(inputs['copasi']['copasi_floating_species'].keys())
+        species_names = list(inputs['copasi_floating_species'].keys())
         _data = dict(zip(species_names, {}))
         results = {
             'results': _data
         }
 
         for name in species_names:
-            outputs = [inputs[f'{simulator}_floating_species'][name] for simulator in self.simulators]
+            outputs = [
+                inputs[f'{simulator}_floating_species'][name]
+                for simulator in self.simulators]
+            for i, val in enumerate(outputs):
+                if 'copasi' not in self.simulators[i].lower():
+                    outputs.pop(i)
+                    outputs.insert(i, val[:600])
+
             comparison = generate_utc_species_comparison(
                 outputs=outputs,
                 simulators=['copasi', 'amici', 'tellurium'],
                 species_name=name)
 
-            comparison_data = comparison.to_dict()
+            comparison_data = comparison.to_dict() if isinstance(comparison, pd.DataFrame) else comparison
+
             if not self.include_output:
                 comparison_data.pop('output_data')
 

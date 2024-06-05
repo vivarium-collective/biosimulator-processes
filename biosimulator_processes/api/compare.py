@@ -14,8 +14,9 @@ __all__ = [
 ]
 
 
-def generate_utc_species_comparison(outputs, species_name, simulators):
+def generate_utc_species_comparison(outputs: List[np.ndarray], species_name, simulators):
     methods = ['mse', 'prox']
+
     results = dict(zip(
         methods,
         list(map(
@@ -23,13 +24,13 @@ def generate_utc_species_comparison(outputs, species_name, simulators):
             methods
         ))
     ))
-    results['output_data'] = {}
-    for simulator_name in outputs.keys():
-        simulator_vals = list(outputs[simulator_name].values())
-        for i, spec in enumerate(outputs[simulator_name].keys()):
-            if spec in species_name:
-                results['output_data'][simulator_name] = simulator_vals[i].tolist()
-    results['species_name'] = species_name
+    # results['output_data'] = {}
+    # for simulator_name in outputs.keys():
+    #     simulator_vals = list(outputs[simulator_name].values())
+    #     for i, spec in enumerate(outputs[simulator_name].keys()):
+    #         if spec in species_name:
+    #             results['output_data'][simulator_name] = simulator_vals[i].tolist()
+    # results['species_name'] = species_name
     return results
 
 
