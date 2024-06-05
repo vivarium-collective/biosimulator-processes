@@ -48,10 +48,17 @@ class UtcComparator(Step):
             outputs = [
                 inputs[f'{simulator}_floating_species'][name]
                 for simulator in self.simulators]
+
+            shapes = [v.shape[0] for v in outputs]
+            min_len = min(shapes)
             for i, val in enumerate(outputs):
-                if 'copasi' not in self.simulators[i].lower():
+                if val.shape[0] > min_len:
                     outputs.pop(i)
-                    outputs.insert(i, val[:600])
+                    outputs.insert(i, val[:min_len])
+
+                # if 'copasi' not in self.simulators[i].lower():
+                #     outputs.pop(i)
+                #     outputs.insert(i, val[:600])
 
             comparison = generate_utc_species_comparison(
                 outputs=outputs,
