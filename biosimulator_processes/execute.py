@@ -1,3 +1,5 @@
+import os
+
 from biosimulator_processes.processes.amici_process import UtcAmici
 from biosimulator_processes.processes.copasi_process import UtcCopasi
 from biosimulator_processes.processes.tellurium_process import UtcTellurium
