@@ -48,17 +48,22 @@ class UtcCopasi(SbmlUniformTimeCourse):
         self.sbml_species_mapping = get_species(model=self.simulator)[['sbml_id']].to_dict()['sbml_id']
         self.floating_species_list = list(self.sbml_species_mapping.values())
         self.basico_species_ids = list(self.sbml_species_mapping.keys())
+
         self.model_changes = self.config['model'].get('model_changes')
         self._set_reaction_changes()
         self._set_species_changes()
         self._set_global_param_changes()
-        self.compartments_list = get_compartments(model=self.simulator).index.tolist()
+
         model_parameters = get_parameters(model=self.simulator)
         self.model_parameters_list = model_parameters.index.tolist() \
             if isinstance(model_parameters, DataFrame) else []
         self.model_parameters_values = model_parameters.initial_value.tolist() \
             if isinstance(model_parameters, DataFrame) else []
+
+        reactions = get_reactions(model=self.simulator)
         self.reaction_list = reactions.index.tolist() if reactions is not None else []
+
+        self.compartments_list = get_compartments(model=self.simulator).index.tolist()
 
         # ----SOLVER: Get the solver (defaults to deterministic)
         self.method = self.config['method']
@@ -78,6 +83,7 @@ class UtcCopasi(SbmlUniformTimeCourse):
             'time': 0.0,
             'model_parameters': model_parameters_dict,
             self.species_context_key: floating_species_dict,
+            'reactions': reactions
         }
 
     def plot_results(self):
