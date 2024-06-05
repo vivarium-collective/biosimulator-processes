@@ -32,7 +32,8 @@ STEPS_TO_REGISTER = [
     ('tellurium-step', 'ode_simulation.TelluriumStep'),
     ('amici-step', 'ode_simulation.AmiciStep'),
     ('plotter', 'viz.CompositionPlotter'),
-    ('plotter2d', 'viz.Plotter2d')]
+    ('plotter2d', 'viz.Plotter2d'),
+    ('utc-comparator', 'comparator_step.UtcComparator')]
 
 
 # core process registry implementation (unique to this package)
