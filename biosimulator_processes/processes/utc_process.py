@@ -100,7 +100,13 @@ class SbmlUniformTimeCourse(Step):
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
-        sedml_fp = os.path.join(omex_path, 'simulation.sedml')
+        sedml_fp = None
+        for f in os.listdir(omex_path):
+            if f.endswith('.sedml'):
+                sedml_fp = os.path.join(omex_path, f)
+
+        assert sedml_fp is not None, 'Your OMEX archive must contain a valid SEDML file.'
+        # sedml_fp = os.path.join(omex_path, 'simulation.sedml')
         sedml_utc_config = get_sedml_time_config(sedml_fp)
         output_end = int(sedml_utc_config['outputEndTime'])
         output_start = int(sedml_utc_config['outputStartTime'])
