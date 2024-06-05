@@ -79,6 +79,8 @@ class SbmlUniformTimeCourse(Step):
             self._set_time_params()
 
         self.species_context_key = f'floating_species'
+        self.use_counts = self.config['species_context'].lower() == 'counts'
+
         self.floating_species_list = self._get_floating_species()
         self.model_parameters_list = self._get_model_parameters()
         self.reaction_list = self._get_reactions()

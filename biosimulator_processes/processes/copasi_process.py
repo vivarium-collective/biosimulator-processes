@@ -44,9 +44,11 @@ class UtcCopasi(SbmlUniformTimeCourse):
                  model_source: str = None,
                  sed_model_config: dict = None):
         super().__init__(config, core, time_config, model_source, sed_model_config)
-
         self.sbml_species_mapping = get_species(model=self.simulator)[['sbml_id']].to_dict()['sbml_id']
         self.floating_species_list = list(self.sbml_species_mapping.values())
+        species_data = get_species(model=self.simulator)
+        self.floating_species_initial = species_data.particle_number.tolist() \
+            if self.use_counts else species_data.concentration.tolist()
         self.basico_species_ids = list(self.sbml_species_mapping.keys())
 
         self.model_changes = self.config['model'].get('model_changes')
@@ -75,7 +77,7 @@ class UtcCopasi(SbmlUniformTimeCourse):
             zip(self.model_parameters_list, self.model_parameters_values))
 
         floating_species_dict = dict(
-            zip(self.floating_species_list, self.floating_species_list))
+            zip(self.floating_species_list, self.floating_species_initial))
 
         reactions = dict(zip(self.reaction_list, [0.0 for r in self.reaction_list]))
 
