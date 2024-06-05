@@ -56,8 +56,8 @@ class UtcComparator(Step):
 
             comparison_data = comparison.to_dict() if isinstance(comparison, pd.DataFrame) else comparison
 
-            if not self.include_output:
-                comparison_data.pop('output_data')
+            if self.include_output:
+                comparison_data['output_data'] = inputs
 
             results['results'][name] = comparison_data
 
