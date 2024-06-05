@@ -124,7 +124,7 @@ class UtcAmici(Step):
 
         # get species names
         self.floating_species_list = list(self.amici_model_object.getStateIds())
-        # self.floating_species_initial = list(self.amici_model_object.getInitialStates())
+        self.floating_species_initial = list(self.amici_model_object.getInitialStates())
         self.sbml_species_ids = [spec for spec in self.sbml_model_object.getListOfSpecies()]
         self.sbml_species_mapping = dict(zip(
             list(map(lambda s: s.name, self.sbml_species_ids)),
@@ -161,6 +161,17 @@ class UtcAmici(Step):
         self.amici_model_object.setTimepoints(self.t)
         self._results = {}
         self.output_keys = [list(self.sbml_species_mapping.keys())[i] for i, spec_id in enumerate(self.floating_species_list)]
+
+    def initial_state(self):
+        species_initial = dict(zip(self.floating_species_list, self.floating_species_initial))
+        model_params_initial = dict(zip(self.model_parameters_list, self.model_parameters_values))
+        reactions_initial = dict(zip(self.reaction_list, 0.0))
+        return {
+            'time': [0.0],
+            'floating_species': species_initial,
+            'model_parameters': model_params_initial,
+            'reactions': reactions_initial
+        }
 
     @staticmethod
     def _get_sedml_time_params(omex_path: str):
@@ -230,20 +241,14 @@ class UtcAmici(Step):
         }
 
         return {
-            'time': 'float',
+            'time': 'list[float]',
             self.species_context_key: 'tree[string]',  # floating_species_type,
             'model_parameters': model_params_type,
             'reactions': reactions_type}
 
     def outputs(self):
-        # floating_species_type = {
-        #     species_id: {
-        #         '_type': 'float',
-        #         '_apply': 'set'}
-        #     for species_id in self.floating_species_list
-        # }
         return {
-            'time': 'float',
+            'time': 'list[float]',
             self.species_context_key: 'tree[string]'}  # floating_species_type}
 
     def _generate_results(self, inputs=None):

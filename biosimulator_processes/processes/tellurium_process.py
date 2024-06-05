@@ -49,15 +49,16 @@ class UtcTellurium(SbmlUniformTimeCourse):
         # Get a list of reactions
         self.reaction_list = self.simulator.getReactionIds()
 
-    def initial_state(self, config=None):
+    def _get_initial_state_params(self):
         floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
-        boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
+        # boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
         model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
+        reactions_dict = dict(zip(self.reaction_list, 0.0))
         return {
             'time': self.t.tolist(),
             self.species_context_key: floating_species_dict,
-            # 'boundary_species': boundary_species_dict,
-            'model_parameters': model_parameters_dict
+            'model_parameters': model_parameters_dict,
+            'reactions': reactions_dict
         }
 
     def plot_results(self):

@@ -53,10 +53,32 @@ class UtcCopasi(SbmlUniformTimeCourse):
         self._set_species_changes()
         self._set_global_param_changes()
         self.compartments_list = get_compartments(model=self.simulator).index.tolist()
+        model_parameters = get_parameters(model=self.simulator)
+        self.model_parameters_list = model_parameters.index.tolist() \
+            if isinstance(model_parameters, DataFrame) else []
+        self.model_parameters_values = model_parameters.initial_value.tolist() \
+            if isinstance(model_parameters, DataFrame) else []
+        self.reaction_list = reactions.index.tolist() if reactions is not None else []
 
         # ----SOLVER: Get the solver (defaults to deterministic)
         self.method = self.config['method']
         self._tc = None
+
+    def _get_initial_state_params(self):
+        # keep in mind that a valid simulation may not have global parameters
+        model_parameters_dict = dict(
+            zip(self.model_parameters_list, self.model_parameters_values))
+
+        floating_species_dict = dict(
+            zip(self.floating_species_list, self.floating_species_initial))
+
+        reactions = dict(zip(self.reaction_list, 0.0))
+
+        return {
+            'time': 0.0,
+            'model_parameters': model_parameters_dict,
+            self.species_context_key: floating_species_dict,
+        }
 
     def plot_results(self):
         return super().plot_results(simulator_name='COPASI')

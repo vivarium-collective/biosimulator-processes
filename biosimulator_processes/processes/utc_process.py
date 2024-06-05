@@ -137,8 +137,16 @@ class SbmlUniformTimeCourse(Step):
         pass
 
     @abstractmethod
+    def _get_initial_state_params(self):
+        """Initial params include: time, floating_species, model_parameters, and reactions."""
+        pass
+
+    @abstractmethod
     def _generate_results(self, inputs=None):
         pass
+
+    def initial_state(self):
+        return self._get_initial_state_params()
 
     def inputs(self):
         # dependent on species context set in self.config
