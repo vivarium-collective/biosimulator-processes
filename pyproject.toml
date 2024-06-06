@@ -11,8 +11,6 @@ python = ">=3.10"
 zarr = "^2.18.2"
 termcolor = "^2.4.0"
 jupyterlab = "^4.2.1"
-bigraph-schema = "^0.0.37"
-process-bigraph = "^0.0.18"
 bigraph-viz = "^0.0.33"
 bigraph-builder = "^0.0.4"
 numpy = "^1.26.4"
@@ -31,6 +29,8 @@ seaborn = "^0.13.2"
 h5py = "^3.11.0"
 biosimulators-utils = "^0.1.187"
 smoldyn = {version = "^2.73", optional = true, extras = ["simulariumio"]}
+bigraph-schema = "^0.0.38"
+process-bigraph = "^0.0.19"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
