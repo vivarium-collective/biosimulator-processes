@@ -165,16 +165,11 @@ class SbmlUniformTimeCourse(Step):
             for param_id in self.model_parameters_list
         }
 
-        reactions_type = {
-            reaction_id: 'float'
-            for reaction_id in self.reaction_list
-        }
-
         return {
             'time': 'list[float]',
             self.species_context_key: 'tree[float]',  # floating_species_type,
             'model_parameters': model_params_type,
-            'reactions': reactions_type}
+            'reactions': 'list[string]'}
 
     def outputs(self):
         return {

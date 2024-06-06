@@ -165,12 +165,11 @@ class UtcAmici(Step):
     def initial_state(self):
         species_initial = dict(zip(self.floating_species_list, self.floating_species_initial))
         model_params_initial = dict(zip(self.model_parameters_list, self.model_parameters_values))
-        reactions_initial = dict(zip(self.reaction_list, [0.0 for r in self.reaction_list]))
         return {
             'time': [0.0],
             'floating_species': species_initial,
             'model_parameters': model_params_initial,
-            'reactions': reactions_initial
+            'reactions': self.reaction_list
         }
 
     @staticmethod
@@ -216,41 +215,13 @@ class UtcAmici(Step):
         else:
             self.step_size = calc_step_size(self.duration, self.num_steps)
 
-    # def initial_state(self):
-    #     floating_species_dict = dict(
-    #         zip(self.floating_species_list, self.floating_species_initial))
-#
-    #     model_parameters_dict = dict(
-    #         zip(self.model_parameters_list, self.model_parameters_values))
-    #     return {
-    #         'time': 0.0,
-    #         self.species_context_key: floating_species_dict,
-    #         'model_parameters': model_parameters_dict}
-
     def inputs(self):
         # dependent on species context set in self.config
-        floating_species_type = {
-            species_id: 'list[float]'
-            for species_id in self.floating_species_list
-        }
-
-        model_params_type = {
-            param_id: {
-                '_type': 'float',
-                '_apply': 'set'}
-            for param_id in self.model_parameters_list
-        }
-
-        reactions_type = {
-            reaction_id: 'float'
-            for reaction_id in self.reaction_list
-        }
-
         return {
             'time': 'list[float]',
-            self.species_context_key: 'tree[float]',  # floating_species_type,
-            'model_parameters': model_params_type,
-            'reactions': reactions_type}
+            self.species_context_key: 'tree[float]',
+            'model_parameters': 'tree[float]',
+            'reactions': 'list[string]'}
 
     def outputs(self):
         return {
