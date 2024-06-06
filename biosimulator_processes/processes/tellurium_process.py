@@ -77,6 +77,7 @@ class UtcTellurium(SbmlUniformTimeCourse):
         return self.simulator.getGlobalParameterIds()
 
     def _generate_results(self, inputs=None):
+        x = inputs or self.initial_state()
         # TODO: set vals if inputs here.
         output_start = self.output_start_time + 1 if self.output_start_time < 1 else self.output_start_time
         self.simulator.simulate(start=self.initial_time, end=output_start)

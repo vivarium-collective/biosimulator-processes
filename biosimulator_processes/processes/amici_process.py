@@ -229,10 +229,10 @@ class UtcAmici(Step):
             self.species_context_key: 'tree[float]'}  # floating_species_type}
 
     def _generate_results(self, inputs=None):
-        x = inputs or {}
+        x = inputs or self.initial_state()
         if len(x.keys()):
             set_values = []
-            for species_id, value in inputs[self.species_context_key].items():
+            for species_id, value in x[self.species_context_key].items():
                 set_values.append(value)
             self.amici_model_object.setInitialStates(set_values)
 
