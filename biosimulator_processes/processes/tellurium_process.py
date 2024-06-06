@@ -11,23 +11,6 @@ from biosimulator_processes import CORE
 from biosimulator_processes.processes.utc_process import SbmlUniformTimeCourse
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 
-"""
-
-    def _generate_results(self, inputs=None):
-        tc = run_time_course(self.output_start_time, self.duration, self.num_steps, automatic=False, model=self.simulator).to_dict()
-        results = {'time': self.t, 'floating_species': {}}
-        for i, spec_id in enumerate(self.basico_species_ids):
-            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))
-        # return {
-        #     'time': self.t,
-        #     'floating_species': {
-        #         mol_id: array(list(tc.to_dict().get(mol_id).values()))
-        #         for mol_id in self.floating_species_list
-        #     }
-        # }
-        return results
-"""
-
 
 class UtcTellurium(SbmlUniformTimeCourse):
     def __init__(self,

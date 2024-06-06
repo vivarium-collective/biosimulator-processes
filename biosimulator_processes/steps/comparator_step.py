@@ -12,14 +12,14 @@ class UtcComparator(Step):
             '_default': True,
             '_type': 'boolean'
         },
-        'comparison_id': 'maybe[string]'
+        'comparison_id': 'string'
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
         self.simulators = self.config['simulators']
         self.include_output = self.config['include_output_data']
-        self.comparison_id = self.config.get('comparison_id')
+        self.comparison_id = self.config.get('comparison_id', 'utc-comparison')
 
     def inputs(self): 
         port_schema = {
@@ -32,7 +32,7 @@ class UtcComparator(Step):
     def outputs(self):
         return {
             'results': 'tree[float]',  # ie: {spec_id: {sim_name: outputarray}}
-            'id': 'maybe[string]'
+            'id': 'string'
         }
         
     def update(self, inputs):
