@@ -172,14 +172,14 @@ class SbmlUniformTimeCourse(Step):
 
         return {
             'time': 'list[float]',
-            self.species_context_key: 'tree[string]',  # floating_species_type,
+            self.species_context_key: 'tree[float]',  # floating_species_type,
             'model_parameters': model_params_type,
             'reactions': reactions_type}
 
     def outputs(self):
         return {
             'time': 'list[float]',
-            self.species_context_key: 'tree[string]'}  # floating_species_type}
+            self.species_context_key: 'tree[float]'}  # floating_species_type}
 
     def update(self, inputs=None) -> dict[str, dict[str, list[Any]] | np.ndarray[Any, np.dtype[Any]] | np.ndarray]:
         """Public method which adheres to the process bigraph interface"""

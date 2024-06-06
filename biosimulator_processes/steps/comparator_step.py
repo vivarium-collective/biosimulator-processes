@@ -23,7 +23,7 @@ class UtcComparator(Step):
 
     def inputs(self): 
         port_schema = {
-            f'{simulator}_floating_species': 'tree[string]'
+            f'{simulator}_floating_species': 'tree[float]'
             for simulator in self.simulators 
         }
         port_schema['time'] = 'list[float]'
@@ -31,7 +31,7 @@ class UtcComparator(Step):
     
     def outputs(self):
         return {
-            'results': 'tree[string]',  # ie: {spec_id: {sim_name: outputarray}}
+            'results': 'tree[float]',  # ie: {spec_id: {sim_name: outputarray}}
             'id': 'maybe[string]'
         }
         

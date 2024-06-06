@@ -248,14 +248,14 @@ class UtcAmici(Step):
 
         return {
             'time': 'list[float]',
-            self.species_context_key: 'tree[string]',  # floating_species_type,
+            self.species_context_key: 'tree[float]',  # floating_species_type,
             'model_parameters': model_params_type,
             'reactions': reactions_type}
 
     def outputs(self):
         return {
             'time': 'list[float]',
-            self.species_context_key: 'tree[string]'}  # floating_species_type}
+            self.species_context_key: 'tree[float]'}  # floating_species_type}
 
     def _generate_results(self, inputs=None):
         x = inputs or {}
