@@ -6,7 +6,7 @@ from biosimulator_processes.processes.tellurium_process import UtcTellurium
 from biosimulator_processes.steps.comparator_step import UtcComparator
 
 
-def exec_utc_comparison(omex_fp: str, simulators: list[str]):
+def exec_utc_comparison(omex_fp: str, simulators: list[str], comparison_id: str = None):
     utc_tellurium = UtcTellurium(config={'model': {'model_source': omex_fp}})
     tellurium_results = utc_tellurium.update()
 
@@ -21,7 +21,7 @@ def exec_utc_comparison(omex_fp: str, simulators: list[str]):
         'copasi_floating_species': copasi_results['floating_species'],
         'tellurium_floating_species': tellurium_results['floating_species']
     }
-    comparator = UtcComparator(config={'simulators': simulators, 'comparison_id': 'repressilator-comparison'})
+    comparator = UtcComparator(config={'simulators': simulators, 'comparison_id': comparison_id or 'utc-comparison'})
     return comparator.update(comparison_input_state)
 
 

@@ -8,11 +8,13 @@ from biosimulator_processes.api.compare import generate_utc_species_comparison
 class UtcComparator(Step):
     config_schema = {
         'simulators': 'list[string]',
+        'comparison_id': 'string',
+        'comparison_method': 'string',
         'include_output_data': {
             '_default': True,
             '_type': 'boolean'
         },
-        'comparison_id': 'string'
+
     }
 
     def __init__(self, config=None, core=None):
@@ -20,6 +22,7 @@ class UtcComparator(Step):
         self.simulators = self.config['simulators']
         self.include_output = self.config['include_output_data']
         self.comparison_id = self.config.get('comparison_id', 'utc-comparison')
+        self.comparison_method = self.config.get('comparison_method')
 
     def inputs(self): 
         port_schema = {
@@ -62,7 +65,7 @@ class UtcComparator(Step):
 
             comparison = generate_utc_species_comparison(
                 outputs=outputs,
-                simulators=['copasi', 'amici', 'tellurium'],
+                simulators=self.simulators,
                 species_name=name)
 
             comparison_data = comparison.to_dict() if isinstance(comparison, pd.DataFrame) else comparison
