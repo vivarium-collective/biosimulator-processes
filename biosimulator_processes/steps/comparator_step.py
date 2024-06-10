@@ -8,22 +8,25 @@ from biosimulator_processes.api.compare import generate_utc_species_comparison
 class UtcComparator(Step):
     config_schema = {
         'simulators': 'list[string]',
+        'comparison_id': 'string',
+        'comparison_method': 'string',
         'include_output_data': {
             '_default': True,
             '_type': 'boolean'
         },
-        'comparison_id': 'maybe[string]'
+
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
         self.simulators = self.config['simulators']
         self.include_output = self.config['include_output_data']
-        self.comparison_id = self.config.get('comparison_id')
+        self.comparison_id = self.config.get('comparison_id', 'utc-comparison')
+        self.comparison_method = self.config.get('comparison_method')
 
     def inputs(self): 
         port_schema = {
-            f'{simulator}_floating_species': 'tree[string]'
+            f'{simulator}_floating_species': 'tree[float]'
             for simulator in self.simulators 
         }
         port_schema['time'] = 'list[float]'
@@ -31,8 +34,8 @@ class UtcComparator(Step):
     
     def outputs(self):
         return {
-            'results': 'tree[string]',  # ie: {spec_id: {sim_name: outputarray}}
-            'id': 'maybe[string]'
+            'results': 'tree[float]',  # ie: {spec_id: {sim_name: outputarray}}
+            'id': 'string'
         }
         
     def update(self, inputs):
@@ -62,7 +65,7 @@ class UtcComparator(Step):
 
             comparison = generate_utc_species_comparison(
                 outputs=outputs,
-                simulators=['copasi', 'amici', 'tellurium'],
+                simulators=self.simulators,
                 species_name=name)
 
             comparison_data = comparison.to_dict() if isinstance(comparison, pd.DataFrame) else comparison

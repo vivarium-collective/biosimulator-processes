@@ -14,9 +14,8 @@ __all__ = [
 ]
 
 
-def generate_utc_species_comparison(outputs: List[np.ndarray], species_name, simulators):
-    methods = ['mse', 'prox']
-
+def generate_utc_species_comparison(outputs: List[np.ndarray], species_name, simulators, method=None):
+    methods = [method] if method is not None else ['mse', 'prox']
     results = dict(zip(
         methods,
         list(map(

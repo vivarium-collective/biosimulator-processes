@@ -11,23 +11,6 @@ from biosimulator_processes import CORE
 from biosimulator_processes.processes.utc_process import SbmlUniformTimeCourse
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE
 
-"""
-
-    def _generate_results(self, inputs=None):
-        tc = run_time_course(self.output_start_time, self.duration, self.num_steps, automatic=False, model=self.simulator).to_dict()
-        results = {'time': self.t, 'floating_species': {}}
-        for i, spec_id in enumerate(self.basico_species_ids):
-            results['floating_species'][self.floating_species_list[i]] = array(list(tc.get(spec_id).values()))
-        # return {
-        #     'time': self.t,
-        #     'floating_species': {
-        #         mol_id: array(list(tc.to_dict().get(mol_id).values()))
-        #         for mol_id in self.floating_species_list
-        #     }
-        # }
-        return results
-"""
-
 
 class UtcTellurium(SbmlUniformTimeCourse):
     def __init__(self,
@@ -53,12 +36,11 @@ class UtcTellurium(SbmlUniformTimeCourse):
         floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
         # boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
         model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
-        reactions_dict = dict(zip(self.reaction_list, [0.0 for r in self.reaction_list]))
         return {
-            'time': self.t.tolist(),
+            'time': [0.0],
             self.species_context_key: floating_species_dict,
             'model_parameters': model_parameters_dict,
-            'reactions': reactions_dict
+            'reactions': self.reaction_list
         }
 
     def plot_results(self):
@@ -78,6 +60,7 @@ class UtcTellurium(SbmlUniformTimeCourse):
         return self.simulator.getGlobalParameterIds()
 
     def _generate_results(self, inputs=None):
+        x = inputs or self.initial_state()
         # TODO: set vals if inputs here.
         output_start = self.output_start_time + 1 if self.output_start_time < 1 else self.output_start_time
         self.simulator.simulate(start=self.initial_time, end=output_start)

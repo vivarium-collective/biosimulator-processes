@@ -79,13 +79,11 @@ class UtcCopasi(SbmlUniformTimeCourse):
         floating_species_dict = dict(
             zip(self.floating_species_list, self.floating_species_initial))
 
-        reactions = dict(zip(self.reaction_list, [0.0 for r in self.reaction_list]))
-
         return {
-            'time': 0.0,
+            'time': [0.0],
             'model_parameters': model_parameters_dict,
             self.species_context_key: floating_species_dict,
-            'reactions': reactions
+            'reactions': self.reaction_list
         }
 
     def plot_results(self):
@@ -108,6 +106,7 @@ class UtcCopasi(SbmlUniformTimeCourse):
             if isinstance(model_parameters, DataFrame) else []
 
     def _generate_results(self, inputs=None):
+        x = inputs or self.initial_state()
         # get the copasi-familiar names
         reported_outputs = [k for k in self.sbml_species_mapping.keys()]
         reported_outputs.append('Time')
