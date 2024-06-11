@@ -108,10 +108,13 @@ class SbmlUniformTimeCourse(Step):
         assert sedml_fp is not None, 'Your OMEX archive must contain a valid SEDML file.'
         # sedml_fp = os.path.join(omex_path, 'simulation.sedml')
         sedml_utc_config = get_sedml_time_config(sedml_fp)
-        output_end = int(sedml_utc_config['outputEndTime'])
-        output_start = int(sedml_utc_config['outputStartTime'])
+
+        def convert(x): return int(x) if isinstance(x, float) else int(float(x))
+
+        output_end = convert(sedml_utc_config['outputEndTime'])
+        output_start = convert(sedml_utc_config['outputStartTime'])
         duration = output_end - output_start
-        n_steps = int(sedml_utc_config['numberOfPoints'])
+        n_steps = convert(sedml_utc_config['numberOfPoints'])
         return {
             'duration': output_end,  # duration,
             'num_steps': n_steps,  # to account for self comparison

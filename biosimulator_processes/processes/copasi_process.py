@@ -52,9 +52,9 @@ class UtcCopasi(SbmlUniformTimeCourse):
         self.basico_species_ids = list(self.sbml_species_mapping.keys())
 
         self.model_changes = self.config['model'].get('model_changes')
-        self._set_reaction_changes()
-        self._set_species_changes()
-        self._set_global_param_changes()
+        # self._set_reaction_changes()
+        # self._set_species_changes()
+        # self._set_global_param_changes()
 
         model_parameters = get_parameters(model=self.simulator)
         self.model_parameters_list = model_parameters.index.tolist() \
