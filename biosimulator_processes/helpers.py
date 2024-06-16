@@ -97,7 +97,7 @@ def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes
 
 def prepare_single_ode_process_document(
         process_id: str,
-        simulator_name: str,
+        simulator_address_name: str,
         sbml_model_fp: str,
         add_emitter=True
         ) -> Dict:
@@ -111,7 +111,7 @@ def prepare_single_ode_process_document(
     document = {
         process_id: {
             '_type': 'process',
-            'address': f'local:{simulator_name}',
+            'address': f'local:{simulator_address_name}',
             'config': {
                 'model': {
                     'model_source': sbml_model_fp}},
