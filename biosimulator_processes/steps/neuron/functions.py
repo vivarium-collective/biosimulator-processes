@@ -32,20 +32,20 @@ def create_nml_doc(doc_id):
     return component_factory(NeuroMLDocument, id=doc_id)
 
 
-def define_cell_model(nml_doc, cell_model_name: str, cell_model_id: str, **params):
+def define_cell_model(nml_doc, cell_model_name: str, cell_model_id: str, **params) -> object:
     """Params should be specific to the cell model"""
     return nml_doc.add(cell_model_name, id=cell_model_id, **params)
 
 
-def create_network(nml_doc, network_id: str, validate=False):
+def create_network(nml_doc, network_id: str, validate=False) -> object:
     return nml_doc.add("Network", id=network_id, validate=validate)
 
 
-def create_population(network, size: int, pop_id: str, cell_model):
+def create_population(network, size: int, pop_id: str, cell_model) -> object:
     return network.add("Population", id=pop_id, component=cell_model.id, size=size)
 
 
-def _create_explicit_input(network, target_id: str, input_id: str):
+def _create_explicit_input(network, target_id: str, input_id: str) -> object:
     return network.add("ExplicitInput", target=target_id, input=input_id)
 
 

@@ -29,6 +29,8 @@ class SimpleNeuron(Step):
         """Step implementation representing a single neuron model and simulation."""
         super().__init__(config, core)
 
+        # TODO: use functions here.
+
 
 
 class SimpleNeuronNetwork(Step):
