@@ -75,12 +75,15 @@ class SimpleNeuron(Step):
 
         # create the nml file to be used in update for the simulation
         save_dir = self.config['save_dir']
-        filename = self.config.get('nml_filename', f'{model_id}_single_cell_network.nml')
+        filename = self.config['nml_filename']
+        if not len(filename):
+            filename = 'single_cell_neuron.nml'
+
         self.nml_file = write_neuroml_file(filename=filename, nml_doc=nml_doc, save_dir=save_dir)
 
         # get simulation config settings
         sim_config = self.config['simulation_config']
-        self.simulation_id = sim_config.get('simulation_id', f'{model_id}-single-sim')
+        self.simulation_id = sim_config['simulation_id']
         self.duration = sim_config.get('duration', 1000)  # TODO: make this default more relevant
         self.dt = sim_config.get('dt', 0.1)  # TODO: make this default scale automatically with duration
         self.simulation_seed = sim_config.get('simulation_seed', 123)
@@ -111,17 +114,17 @@ class SimpleNeuron(Step):
             nml_file=self.nml_file,
             simulation_seed=seed)
 
-        simulation_fp = generate_output_file(
-            simulation=simulation,
-            sim_id=self.simulation_id,
-            filename='simulation')
+        # simulation_fp = generate_output_file(
+        #     simulation=simulation,
+        #     sim_id=self.simulation_id,
+        #     filename='simulation')
 
-        run_simulation(sim_file=simulation_fp, max_memory=self.max_sim_memory)
-        output_data = read_output_data(self.simulation_id)
+        # run_simulation(sim_file=simulation_fp, max_memory=self.max_sim_memory)
+        # output_data = read_output_data(self.simulation_id)
 
         return {
             'duration': self.duration,
-            'data': output_data
+            'data': {}  # output_data
         }
 
 
