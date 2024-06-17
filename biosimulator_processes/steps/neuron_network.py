@@ -76,6 +76,33 @@ def create_simulation(sim_id: str, duration: int, dt: float, network, nml_file: 
     return simulation
 
 
+def generate_output_file(simulation: LEMSSimulation, sim_id: str, filename: str) -> str:
+    """Save the output file and return its filepath."""
+    simulation.create_output_file("output0", "%s.v.dat" % sim_id)
+    simulation.add_column_to_output_file("output0", 'IzhPop0[0]', 'IzhPop0[0]/v')  # TODO: fix this.
+    return simulation.save_to_file()
+
+
+def run_simulation(sim_file: str, max_memory="2G", nogui=True, plot=False):
+    """Run a LEMSSimulation file with the jNeuroML simulator."""
+    return pynml.run_lems_with_jneuroml(sim_file, max_memory=max_memory, nogui=nogui, plot=plot)
+
+
+def read_output_data(sim_id: str):
+    return np.loadtxt("%s.v.dat" % sim_id)  # TODO: fix this.
+
+
+# -- DATA ANALYSIS --
+
+def plot_recorded_data(data_array, show_plot_already=True):
+    return pynml.generate_plot(
+        [data_array[:, 0]], [data_array[:, 1]],
+        "Membrane potential", show_plot_already=True,
+        xaxis="time (s)", yaxis="membrane potential (V)",
+        save_figure_to="SingleNeuron.png"
+    )
+
+
 # -- STEP IMPLEMENTATIONS --
 
 class SimpleNeuron(Step):
