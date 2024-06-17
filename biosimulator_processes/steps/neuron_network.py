@@ -1,12 +1,10 @@
-import random
 import os
 from tempfile import mkdtemp
 
-from process_bigraph import Process, Step
-from pyneuroml.lems import LEMSSimulation
+from process_bigraph import Step
 
 from biosimulator_processes import CORE
-from biosimulator_processes.steps.neuron.functions import *
+from biosimulator_processes.functions import *
 
 
 class SimpleNeuron(Step):
@@ -41,7 +39,7 @@ class SimpleNeuron(Step):
         'nml_filename': 'string'  # optional
     }
 
-    def __init__(self, config, core):
+    def __init__(self, config, core=CORE):
         """Step implementation representing a single neuron model and simulation."""
         super().__init__(config, core)
 
