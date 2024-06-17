@@ -66,7 +66,7 @@ class SimpleNeuronNetwork(Step):
         # create the network and add populations (neurons)
         net_config = self.config['network_config']
         self.network = nml_doc.add("Network", id=net_config['network_id'], validate=net_config['validate'])
-        for pop_id, pop_config in net_config['population_config']:
+        for pop_id, pop_config in net_config['population_config'].items():
             self._create_population(population_id=pop_id, **pop_config)
 
     def _create_synapse(self, nml_doc: object, name: str, synapse_id: str, gbase: str, erev: str, tau_decay: str):
