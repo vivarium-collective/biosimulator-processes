@@ -91,6 +91,7 @@ class SimpleNeuronNetwork(Step):
 
     def update(self, state):
         return {
-            'synapses': self.synapses
+            'synapses': self.synapses,
+            'network': self.network
         }
 
