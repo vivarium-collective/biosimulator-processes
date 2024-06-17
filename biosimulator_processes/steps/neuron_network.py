@@ -21,15 +21,14 @@ class SimpleNeuronNetwork(Step):
             'param_config': 'tree[string]'
         },
         'synapse_config': 'tree[string]',  # {'synapse_name': {synapse_id: '', synapse_params: {}}}
-        # 'network_config': {
-        #     'network_id': 'string',
-        #     'validate': {
-        #         '_type': 'boolean',
-        #         '_default': False
-        #     },
-        #     'num_population': 'integer',
-        #     'population_config': 'tree'  # indexted by population: population size, etc
-        # }
+        'network_config': {
+            'network_id': 'string',
+            'validate': {
+                '_type': 'boolean',
+                '_default': False
+            },
+            'population_config': 'tree'  # {population_id: {size: 5, property_config: {tag: str, value: str} <-- optional}}
+        }
     }
 
     def __init__(self, config, core=CORE):
@@ -51,12 +50,11 @@ class SimpleNeuronNetwork(Step):
         nml_doc = component_factory(doc_name, id=doc_id)
 
         # add model-specific param state to doc
-        model = nml_doc.add(model_name, id=model_id, **model_params_config)
-        model.info(True)
+        self.model = nml_doc.add(model_name, id=model_id, **model_params_config)
+        self.model.info(True)
 
         # create a synapse component and add it to the doc
         # TODO: parse number of neurons and (n) and create n - 1 synapses.
-
         self.synapses = {}
         for i, synapse_config in enumerate(self.config['synapse_config'].items()):
             self.synapses[f'synapse_{i}'] = self._create_synapse(
@@ -65,12 +63,30 @@ class SimpleNeuronNetwork(Step):
                 synapse_id=synapse_config[1]['synapse_id'],
                 **synapse_config[1]['synapse_params'])
 
+        # create the network and add populations (neurons)
+        net_config = self.config['network_config']
+        self.network = nml_doc.add("Network", id=net_config['network_id'], validate=net_config['validate'])
+        for pop_id, pop_config in net_config['population_config']:
+            self._create_population(population_id=pop_id, **pop_config)
+
     def _create_synapse(self, nml_doc: object, name: str, synapse_id: str, gbase: str, erev: str, tau_decay: str):
         return nml_doc.add(name, id=synapse_id, gbase=gbase, erev=erev, tau_decay=tau_decay)
 
+    def _create_population(self, size: int, population_id: str, property_config: dict = None):
+        population = component_factory(
+            "Population",
+            id=population_id,
+            component=self.model.id,
+            size=size)
+
+        if property_config:
+            population.add("Property", **property_config)
+        return self.network.add(population)
+
     def outputs(self):
         return {
-            'synapses': 'tree'
+            'synapses': 'tree',
+            'network': 'tree'
         }
 
     def update(self, state):
