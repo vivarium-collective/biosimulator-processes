@@ -34,7 +34,7 @@ STEPS_TO_REGISTER = [
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d'),
     ('utc-comparator', 'comparator_step.UtcComparator'),
-    ('simple-neuron-network', 'neuron_network.SimpleNeuronNetwork')]
+    ('simple-neuron-network', 'neuron.neuron_network.SimpleNeuronNetwork')]
 
 
 # core process registry implementation (unique to this package)
