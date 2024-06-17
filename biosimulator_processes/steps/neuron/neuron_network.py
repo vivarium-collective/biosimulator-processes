@@ -3,12 +3,11 @@ import os
 from tempfile import mkdtemp
 
 from process_bigraph import Process, Step
+from pyneuroml.lems import LEMSSimulation
 
 from biosimulator_processes import CORE
 from biosimulator_processes.steps.neuron.functions import *
 
-
-# -- STEP IMPLEMENTATIONS --
 
 class SimpleNeuron(Step):
     config_schema = {
@@ -17,19 +16,117 @@ class SimpleNeuron(Step):
             'doc_id': 'string',
             'model_name': 'string',
             'model_id': 'string',
-            'param_config': 'tree[string]'
+            'param_config': 'tree[string]',  # these should be model-specific params as per neuroml
+            'network_id': 'string'
         },
-        'save_dir': {
+        'simulation_config': 'tree',  # defining simulation_id[str], duration[int], dt[float], simulation_seed[int], max_memory[str]
+        'pulse_gen_config': {  # optional
+            'amplitude': {
+                '_type': 'string',
+                '_default': "0.07 nA"
+            },
+            'delay': {
+                '_type': 'string',
+                '_default': "0ms"
+            },
+            'duration': {
+                '_type': 'string',
+                '_default': "1000ms"
+            }
+        },
+        'save_dir': {  # optional
             '_type': 'string',
             '_default': mkdtemp()
-        }
+        },
+        'nml_filename': 'string'  # optional
     }
 
     def __init__(self, config, core):
         """Step implementation representing a single neuron model and simulation."""
         super().__init__(config, core)
 
-        # TODO: use functions here.
+        doc_config = self.config['doc_config']
+        nml_doc = create_nml_doc(doc_config['doc_id'])
+        model_id = doc_config['model_id']
+
+        # define cell model instance
+        self.cell_model = define_cell_model(
+            nml_doc=nml_doc,
+            cell_model_name=doc_config['model_name'],
+            cell_model_id=model_id,
+            **doc_config['param_config'])
+
+        # define network instance
+        self.network = create_network(
+            nml_doc=nml_doc,
+            network_id=doc_config.get('network_id', f'{model_id}_network'),
+            validate=False)
+
+        # create population for network in this case 1. TODO: dynamically add this based on config for n neurons
+        self.population = create_population(network=self.network, pop_id=f'{model_id}_pop0', cell_model=self.cell_model, size=1)
+
+        # create the pulse generator which simulates and provides values for I
+        pg_config = self.config['pulse_gen_config']
+        pulse_generator, explicit_input = create_pulse_generator(
+            nml_doc=nml_doc,
+            network=self.network,
+            gen_id=f'pulsegen_{model_id}',
+            amplitude=pg_config['amplitude'],
+            duration=pg_config['duration'],
+            delay=pg_config['delay'],
+            pop_id=self.population.id)
+
+        # create the nml file to be used in update for the simulation
+        save_dir = self.config['save_dir']
+        filename = self.config.get('nml_filename', f'{model_id}_single_cell_network.nml')
+        self.nml_file = write_neuroml_file(filename=filename, nml_doc=nml_doc, save_dir=save_dir)
+
+        # get simulation config settings
+        sim_config = self.config['simulation_config']
+        self.simulation_id = sim_config.get('simulation_id', f'{model_id}-single-sim')
+        self.duration = sim_config.get('duration', 1000)  # TODO: make this default more relevant
+        self.dt = sim_config.get('dt', 0.1)  # TODO: make this default scale automatically with duration
+        self.simulation_seed = sim_config.get('simulation_seed', 123)
+        self.max_sim_memory = sim_config.get('max_memory', "2G")
+
+    def initial_state(self):
+        # TODO: possibly override the param config passed in constructor
+        pass
+
+    def inputs(self):
+        # TODO: possibly override initial_state here
+        pass
+
+    def outputs(self):
+        return {'duration': 'string', 'data': 'tree[float]'}
+
+    def update(self, inputs):
+        # TODO: perform the actual simulation here and return the values set in data_array
+        dur = inputs.get('duration', self.duration)
+        dt = inputs.get('dt', self.dt)
+        seed = inputs.get('simulation_seed', self.simulation_seed)
+
+        simulation = create_simulation(
+            sim_id=self.simulation_id,
+            duration=dur,
+            dt=dt,
+            network=self.network,
+            nml_file=self.nml_file,
+            simulation_seed=seed)
+
+        simulation_fp = generate_output_file(
+            simulation=simulation,
+            sim_id=self.simulation_id,
+            filename='simulation')
+
+        run_simulation(sim_file=simulation_fp, max_memory=self.max_sim_memory)
+        output_data = read_output_data(self.simulation_id)
+
+        return {
+            'duration': self.duration,
+            'data': output_data
+        }
+
 
 
 
