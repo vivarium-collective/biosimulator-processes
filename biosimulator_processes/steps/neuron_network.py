@@ -10,7 +10,6 @@ from biosimulator_processes.neuroml_functions import *
 class SimpleNeuron(Step):
     config_schema = {
         'doc_config': {
-            'doc_name': 'string',
             'doc_id': 'string',
             'model_name': 'string',
             'model_id': 'string',
@@ -61,7 +60,7 @@ class SimpleNeuron(Step):
             validate=False)
 
         # create population for network in this case 1. TODO: dynamically add this based on config for n neurons
-        self.population = create_population(network=self.network, pop_id=f'{model_id}_pop0', cell_model=self.cell_model, size=1)
+        self.population = create_population(network=self.network, pop_id=f'IzhPop0', cell_model=self.cell_model, size=1)
 
         # create the pulse generator which simulates and provides values for I
         pg_config = self.config['pulse_gen_config']

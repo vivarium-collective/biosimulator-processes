@@ -59,7 +59,7 @@ def create_pulse_generator(nml_doc, network, gen_id: str, delay: str, duration: 
         amplitude=amplitude
     )
 
-    exp_input = _create_explicit_input(network, target_id=pop_id, input_id=pg.id)
+    exp_input = _create_explicit_input(network, target_id="%s[%i]" % (pop_id, 0), input_id=pg.id)
     return pg, exp_input
 
 
