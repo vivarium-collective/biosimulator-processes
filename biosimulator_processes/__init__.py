@@ -33,7 +33,8 @@ STEPS_TO_REGISTER = [
     ('amici-step', 'ode_simulation.AmiciStep'),
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d'),
-    ('utc-comparator', 'comparator_step.UtcComparator')]
+    ('utc-comparator', 'comparator_step.UtcComparator'),
+    ('simple-neuron-network', 'neuron_network.SimpleNeuronNetwork')]
 
 
 # core process registry implementation (unique to this package)
