@@ -78,6 +78,27 @@ class SimpleNeuronNetwork(Step):
             self.network.add(population)
             self.populations[population.id] = population
 
+        self.network.validate()
+
+        # create inter-population projection. TODO: enable iterative projection construction
+        self.projections = []
+        populations = list(self.populations.values())
+        synapses = list(self.synapses.values())
+        for i, population in enumerate(populations):
+            if i < len(populations):
+                pre_pop_id = populations[i]
+                post_pop_id = populations[i + 1]
+
+                proj = self.network.add(
+                    "Projection",
+                    id=f"proj_{i}",
+                    presynaptic_population=pre_pop_id,
+                    postsynaptic_population=post_pop_id,
+                    synapse=synapses[i - 1]
+                )
+                self.projections.append(proj)
+            else:
+                pass
         # write-out nml file with validation
         save_dir = self.config.get('save_dir')
         self.nml_file = os.path.join(save_dir, f"{model_id}.nml")
@@ -103,12 +124,16 @@ class SimpleNeuronNetwork(Step):
     def outputs(self):
         return {
             'synapses': 'tree',
-            'network': 'tree'
+            'network': 'tree',
+            'populations': 'tree',
+            'projections': 'list'
         }
 
     def update(self, state):
         return {
             'synapses': self.synapses,
-            'network': self.network
+            'network': self.network,
+            'populations': self.populations,
+            'projections': self.projections
         }
 
