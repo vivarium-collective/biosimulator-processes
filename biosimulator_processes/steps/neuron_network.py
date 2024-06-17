@@ -4,7 +4,7 @@ from tempfile import mkdtemp
 from process_bigraph import Step
 
 from biosimulator_processes import CORE
-from biosimulator_processes.functions import *
+from biosimulator_processes.neuroml_functions import *
 
 
 class SimpleNeuron(Step):
