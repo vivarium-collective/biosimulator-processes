@@ -1,4 +1,6 @@
 import random
+import os
+from tempfile import mkdtemp
 
 import numpy as np
 from neuroml.utils import component_factory
@@ -28,7 +30,11 @@ class SimpleNeuronNetwork(Step):
                 '_default': False
             },
             'population_config': 'tree'  # {population_id: {size: 5, property_config: {tag: str, value: str} <-- optional}}
-        }
+        },
+        'save_dir': {
+            '_type': 'string',
+            '_default': mkdtemp()
+        },
     }
 
     def __init__(self, config, core=CORE):
@@ -66,8 +72,17 @@ class SimpleNeuronNetwork(Step):
         # create the network and add populations (neurons)
         net_config = self.config['network_config']
         self.network = nml_doc.add("Network", id=net_config['network_id'], validate=net_config['validate'])
+        self.populations = {}
         for pop_id, pop_config in net_config['population_config'].items():
-            self._create_population(population_id=pop_id, **pop_config)
+            population = self._create_population(population_id=pop_id, **pop_config)
+            self.network.add(population)
+            self.populations[population.id] = population
+
+        # write-out nml file with validation
+        save_dir = self.config.get('save_dir')
+        self.nml_file = os.path.join(save_dir, f"{model_id}.nml")
+        writers.NeuroMLWriter.write(nml_doc, self.nml_file)
+        pynml.validate_neuroml2(self.nml_file)
 
     def _create_synapse(self, nml_doc: object, name: str, synapse_id: str, gbase: str, erev: str, tau_decay: str):
         return nml_doc.add(name, id=synapse_id, gbase=gbase, erev=erev, tau_decay=tau_decay)
@@ -81,7 +96,9 @@ class SimpleNeuronNetwork(Step):
 
         if property_config:
             population.add("Property", **property_config)
-        return self.network.add(population)
+
+        # TODO: Add population projection with pulse generation here.
+        return population
 
     def outputs(self):
         return {
