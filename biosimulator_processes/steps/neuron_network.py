@@ -1,7 +1,11 @@
 import os
 from tempfile import mkdtemp
 
+import numpy as np
 from process_bigraph import Step
+from pyneuroml import pynml
+from pyneuroml.lems import LEMSSimulation
+from neuroml.utils import validate_neuroml2
 
 from biosimulator_processes import CORE
 from biosimulator_processes.neuroml_functions import *
@@ -75,11 +79,13 @@ class SimpleNeuron(Step):
 
         # create the nml file to be used in update for the simulation
         save_dir = self.config['save_dir']
-        filename = self.config['nml_filename']
-        if not len(filename):
-            filename = 'single_cell_neuron.nml'
+        # filename = self.config['nml_filename']
+        # if not len(filename):
+        self.nml_file = 'izhikevich2007_single_cell_network.nml'
+        import neuroml.writers as writers
+        writers.NeuroMLWriter.write(nml_doc, self.nml_file)
 
-        self.nml_file = write_neuroml_file(filename=filename, nml_doc=nml_doc, save_dir=save_dir)
+        # self.nml_file = write_neuroml_file(filename=filename, nml_doc=nml_doc, save_dir=save_dir)
 
         # get simulation config settings
         sim_config = self.config['simulation_config']
@@ -88,6 +94,13 @@ class SimpleNeuron(Step):
         self.dt = sim_config.get('dt', 0.1)  # TODO: make this default scale automatically with duration
         self.simulation_seed = sim_config.get('simulation_seed', 123)
         self.max_sim_memory = sim_config.get('max_memory', "2G")
+        self._results = {}
+
+        try:
+            validate_neuroml2(self.nml_file)
+        except ValueError as ve:
+            print(f'Your model could not be validated:\n{ve}')
+            raise ve
 
     def initial_state(self):
         # TODO: possibly override the param config passed in constructor
@@ -98,7 +111,7 @@ class SimpleNeuron(Step):
         pass
 
     def outputs(self):
-        return {'duration': 'string', 'data': 'tree[float]'}
+        return {'duration': 'string', 'data': 'list'}
 
     def update(self, inputs):
         # TODO: perform the actual simulation here and return the values set in data_array
@@ -106,26 +119,36 @@ class SimpleNeuron(Step):
         dt = inputs.get('dt', self.dt)
         seed = inputs.get('simulation_seed', self.simulation_seed)
 
-        simulation = create_simulation(
-            sim_id=self.simulation_id,
-            duration=dur,
-            dt=dt,
-            network=self.network,
-            nml_file=self.nml_file,
-            simulation_seed=seed)
+        simulation_id = "example-single-izhikevich2007cell-sim"
+        simulation = LEMSSimulation(sim_id=simulation_id,
+                                    duration=1000, dt=0.1, simulation_seed=123)
+        simulation.assign_simulation_target(self.network.id)
+        simulation.include_neuroml2_file(self.nml_file)
 
-        # simulation_fp = generate_output_file(
-        #     simulation=simulation,
-        #     sim_id=self.simulation_id,
-        #     filename='simulation')
+        simulation.create_output_file(
+            "output0",
+            "%s.v.dat" % simulation_id)
+        simulation.add_column_to_output_file("output0", 'IzhPop0[0]', 'IzhPop0[0]/v')
 
-        # run_simulation(sim_file=simulation_fp, max_memory=self.max_sim_memory)
-        # output_data = read_output_data(self.simulation_id)
+        lems_simulation_file = simulation.save_to_file()
+        pynml.run_lems_with_jneuroml(
+            lems_simulation_file,
+            max_memory="2G",
+            nogui=True,
+            plot=False)
 
-        return {
-            'duration': self.duration,
-            'data': {}  # output_data
-        }
+        data_array = np.loadtxt("%s.v.dat" % simulation_id)
+
+        output = {
+            'duration': dur,
+            'data': data_array}
+
+        self._results = output.copy()['data']
+
+        return output
+
+    def plot(self):
+        return plot_recorded_data(data_array=self._results)
 
 
 

@@ -68,7 +68,8 @@ def write_neuroml_file(filename: str, nml_doc, save_dir: str = None) -> str:
     if not filename.endswith('.nml'):
         filename += '.nml'
 
-    dest = os.path.join(save_dir, filename) if save_dir else filename
+    # dest = os.path.join(save_dir, filename) if save_dir else filename
+    dest = filename
     try:
         writers.NeuroMLWriter.write(nml_doc, dest)
         print(f"Written network file to: {dest}")
