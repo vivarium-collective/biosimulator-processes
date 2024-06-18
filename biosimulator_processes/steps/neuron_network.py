@@ -42,7 +42,7 @@ class SimpleNeuron(Step):
         'nml_filename': 'string'  # optional
     }
 
-    def __init__(self, config, core=CORE):
+    def __init__(self, config=None, core=CORE):
         """Step implementation representing a single neuron model and simulation."""
         super().__init__(config, core)
 
@@ -113,7 +113,8 @@ class SimpleNeuron(Step):
     def outputs(self):
         return {'duration': 'string', 'data': 'list'}
 
-    def update(self, inputs):
+    def update(self, inputs=None):
+        inputs = inputs or {}
         # TODO: perform the actual simulation here and return the values set in data_array
         dur = inputs.get('duration', self.duration)
         dt = inputs.get('dt', self.dt)

@@ -1,5 +1,6 @@
 import random
 import os
+import re
 
 import numpy as np
 from neuroml.utils import component_factory
@@ -22,7 +23,8 @@ __all__ = [
     'generate_output_file',
     'run_simulation',
     'read_output_data',
-    'plot_recorded_data'
+    'plot_recorded_data',
+    'modify_param'
 ]
 
 
@@ -113,3 +115,25 @@ def plot_recorded_data(data_array, show_plot_already=True):
         xaxis="time (s)", yaxis="membrane potential (V)",
         save_figure_to="SingleNeuron.png"
     )
+
+
+# -- UTILS --
+
+def modify_param(param, new_value: float | int, method='set') -> str:
+    s = param
+    match = re.search(r'([0-9]*\.?[0-9]+)([a-zA-Z_]+)', s)
+    if match:
+        number = float(match.group(1))
+        unit = match.group(2)
+        m = method.lower()
+
+        if m == 'set':
+            new_number = new_value
+        elif m == 'factor':
+            new_number = number * new_value
+        else:
+            new_number = number
+
+        return f"{new_number:g}{unit}"
+    else:
+        return s
