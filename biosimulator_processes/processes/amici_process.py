@@ -197,7 +197,7 @@ class UtcAmici(Step):
         specified_alg = sedml_utc_config['algorithm'].split(':')[1]
         supported_alg = check_ode_kisao_term(specified_alg)
         if not supported_alg:
-            raise ValueError('Algorithm specified in OMEX archive is non-deterministic and thus not supported by a Uniform Time Course implementation.')
+            raise Exception('Algorithm specified in OMEX archive is non-deterministic and thus not supported by a Uniform Time Course implementation.')
 
         return {
             'duration': output_end,  # duration,
