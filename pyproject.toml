@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "biosimulator-processes"
-version = "0.0.34"
+version = "0.0.35"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
@@ -28,9 +28,12 @@ pydantic = "^2.7.2"
 seaborn = "^0.13.2"
 h5py = "^3.11.0"
 biosimulators-utils = "^0.1.187"
-smoldyn = {version = "^2.73", optional = true, extras = ["simulariumio"]}
 bigraph-schema = "^0.0.38"
 process-bigraph = "^0.0.19"
+smoldyn = {version = "^2.73", optional = true, extras = ["simulariumio"]}
+pyneuroml = {version = "^1.3.0", optional = true}
+neuromllite = {version = "^0.5.9", optional = true}
+neuron = {version = "^8.2.4", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"

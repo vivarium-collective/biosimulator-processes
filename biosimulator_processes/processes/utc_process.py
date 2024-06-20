@@ -13,7 +13,7 @@ from process_bigraph import Process, Step
 from biosimulator_processes import CORE
 from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
-from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size, plot_utc_outputs
+from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size, plot_utc_outputs, check_ode_kisao_term
 
 
 class SbmlUniformTimeCourse(Step):
@@ -115,12 +115,21 @@ class SbmlUniformTimeCourse(Step):
         output_start = convert(sedml_utc_config['outputStartTime'])
         duration = output_end - output_start
         n_steps = convert(sedml_utc_config['numberOfPoints'])
+        initial_time = convert(sedml_utc_config['initialTime'])
+        step_size = calc_step_size(duration, n_steps)
+
+        # check kisao id for supported algorithm/kisao ID
+        specified_alg = sedml_utc_config['algorithm'].split(':')[1]
+        supported_alg = check_ode_kisao_term(specified_alg)
+        if not supported_alg:
+            raise ValueError('Algorithm specified in OMEX archive is non-deterministic and thus not supported by a Uniform Time Course implementation.')
+
         return {
             'duration': output_end,  # duration,
             'num_steps': n_steps,  # to account for self comparison
-            'step_size': calc_step_size(duration, n_steps),
+            'step_size': step_size,
             'output_start_time': output_start,
-            'initial_time': int(sedml_utc_config['initialTime'])
+            'initial_time': initial_time
         }
 
     def _set_time_params(self):

@@ -10,6 +10,19 @@ from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
 
 
+def check_ode_kisao_term(term: str):
+    """Check that a term is representative an ODE algorithm."""
+    from kisao import utils
+    ode_ids = [term.id for term in list(utils.get_ode_algorithms())]
+    for i, id in enumerate(ode_ids):
+        is_term = id.endswith(term)
+        if is_term:
+            return True
+        else:
+            pass
+    return False
+
+
 def plot_utc_outputs(data: dict, t: Union[np.array, List[float]], simulator: str = None, x=None, y=None) -> None:
     """Plot ODE simulation observables with Seaborn."""
     plt.figure(figsize=(20, 8))

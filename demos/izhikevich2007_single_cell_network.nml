@@ -1,0 +1,8 @@
+<neuroml xmlns="http://www.neuroml.org/schema/neuroml2"  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.neuroml.org/schema/neuroml2 https://raw.github.com/NeuroML/NeuroML2/development/Schemas/NeuroML2/NeuroML_v2.3.1.xsd" id="IzSingleNeuron">
+    <izhikevich2007Cell id="izh2007RS0" C="200pF" v0="120mV" k="1.4nS_per_mV" vr="120mV" vt="80mV" vpeak="70mV" a="0.06per_ms" b="4nS" c="100mV" d="200pA"/>
+    <pulseGenerator id="pulsegen_izh2007RS0" delay="0ms" duration="1000ms" amplitude="0.07 nA"/>
+    <network id="IzNet">
+        <population id="IzhPop0" component="izh2007RS0" size="1"/>
+        <explicitInput target="IzhPop0[0]" input="pulsegen_izh2007RS0"/>
+    </network>
+</neuroml>
