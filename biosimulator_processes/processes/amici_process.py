@@ -14,7 +14,7 @@ from biosimulator_processes import CORE
 from biosimulator_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
 from biosimulator_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulator_processes.processes.utc_process import SbmlUniformTimeCourse
-from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size
+from biosimulator_processes.helpers import calc_duration, calc_num_steps, calc_step_size, check_ode_kisao_term
 
 
 class UtcAmici(Step):
@@ -182,16 +182,29 @@ class UtcAmici(Step):
         assert sedml_fp is not None, 'Your OMEX archive must contain a valid SEDML file.'
         # sedml_fp = os.path.join(omex_path, 'simulation.sedml')
         sedml_utc_config = get_sedml_time_config(sedml_fp)
-        output_end = int(sedml_utc_config['outputEndTime'])
-        output_start = int(sedml_utc_config['outputStartTime'])
+
+        def convert(x):
+            return int(x) if isinstance(x, float) else int(float(x))
+
+        output_end = convert(sedml_utc_config['outputEndTime'])
+        output_start = convert(sedml_utc_config['outputStartTime'])
         duration = output_end - output_start
-        n_steps = int(sedml_utc_config['numberOfPoints'])
+        n_steps = convert(sedml_utc_config['numberOfPoints'])
+        initial_time = convert(sedml_utc_config['initialTime'])
+        step_size = calc_step_size(duration, n_steps)
+
+        # check kisao id for supported algorithm/kisao ID
+        specified_alg = sedml_utc_config['algorithm'].split(':')[1]
+        supported_alg = check_ode_kisao_term(specified_alg)
+        if not supported_alg:
+            raise ValueError('Algorithm specified in OMEX archive is non-deterministic and thus not supported by a Uniform Time Course implementation.')
+
         return {
             'duration': output_end,  # duration,
-            'num_steps': n_steps + 1,  # to account for self comparison
-            'step_size': calc_step_size(duration, n_steps),
+            'num_steps': n_steps,  # to account for self comparison
+            'step_size': step_size,
             'output_start_time': output_start,
-            'initial_time': int(sedml_utc_config['initialTime'])
+            'initial_time': initial_time
         }
 
     def plot_results(self, flush=True):
