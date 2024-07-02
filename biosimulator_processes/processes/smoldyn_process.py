@@ -47,6 +47,7 @@
 
 
 """
+import math
 from typing import *
 from uuid import uuid4
 from process_bigraph import Process, Composite, pf, pp
@@ -98,6 +99,7 @@ class SmoldynProcess(Process):
             '_type': 'boolean',
             '_default': False
         }
+        # TODO: Add a more nuanced way to describe and configure dynamic difcs given species interaction patterns
     }
 
     def __init__(self, config: Dict[str, Any] = None, core=None):
@@ -124,7 +126,7 @@ class SmoldynProcess(Process):
                 '''
             )
 
-        # initialize the simulator from a Smoldyn model.txt file.
+        # initialize the simulator from a Smoldyn MinE.txt file.
         self.simulation: sm.Simulation = sm.Simulation.fromFile(self.model_filepath)
 
         # get a list of the simulation species
@@ -165,13 +167,16 @@ class SmoldynProcess(Process):
             for species_name in self.species_names
         }
 
-        # self.molecules_type = {
-        #     mol_id: {
-        #         'coordinates': 'list[float]',
-        #         'species_id': 'string',
-        #         'state': 'string'
-        #     } for mol_id in self.molecule_ids
-        # }
+        self.port_schema = {
+            'species_counts': {
+                species_name: 'int'
+                for species_name in self.species_names
+            },
+            'molecules': 'tree[string]'  # self.molecules_type
+        }
+
+        self._specs = [None for _ in self.species_names]
+        self._vals = dict(zip(self.species_names, [[] for _ in self.species_names]))
 
     def set_uniform(
             self,
@@ -242,26 +247,57 @@ class SmoldynProcess(Process):
 
     def inputs(self):
         # TODO: include velocity and state to this schema (add to constructor as well)
-        counts_type = {
-            species_name: 'int'
-            for species_name in self.species_names
-        }
-
-        return {
-            'species_counts': counts_type,
-            'molecules': 'tree[string]'  # self.molecules_type
-        }
+        return self.port_schema
 
     def outputs(self):
-        counts_type = {
-            species_name: 'int'
-            for species_name in self.species_names
-        }
+        return self.port_schema
 
-        return {
-            'species_counts': counts_type,
-            'molecules': 'tree[string]'  # self.molecules_type
-        }
+    """
+            avals = []
+            # iterate over species with index
+            def new_difc(t, args):
+                global a, avals
+                x, y = args
+                avals.append((t, a.difc['soln']))
+                return x * math.sin(t) + y
+
+            def update_difc(val):
+                global a
+                a.difc = val
+
+            def test_connect():
+                global a, avals
+                sim = smoldyn.Simulation(low=(.......
+                a = sim.addSpecies('a', color=black, difc=0.1)
+
+                # specify either function as target:
+                sim.connect(new_dif, update_difc, step=10, args=[1,1])
+            """
+
+    def _new_difc(self, t, args):
+        minD_count, minE_count = args
+        # TODO: extract real volume
+        volume = 1.0
+
+        # Calculate concentrations from counts
+        minD_conc = minD_count / volume
+        minE_conc = minE_count / volume
+
+        # for example: diffusion coefficient might decrease with high MinD-MinE complex formation
+        minDE_complex = minD_conc * minE_conc  # Simplified interaction term
+        base_diffusion = 2.5  # Baseline diffusion coefficient
+
+        # perturb the parameter of complex formation effect slightly
+        _alpha = 0.1
+        delta = _alpha - (_alpha ** 10)
+        alpha = _alpha - delta
+
+        new_difc = base_diffusion * (1 - alpha * minDE_complex)
+
+        # Ensure the diffusion coefficient remains within a reasonable range
+        new_difc = max(min(new_difc, base_diffusion), 0.01)  # Adjust bounds as needed
+
+        return new_difc
 
     def update(self, inputs: Dict, interval: int) -> Dict:
         """Callback method to be evoked at each Process interval. We want to get the
@@ -281,11 +317,21 @@ class SmoldynProcess(Process):
             TODO: We must account for the mol_ids that are generated in the output based on the interval run,
                 i.e: Shorter intervals will yield both less output molecules and less unique molecule ids.
         """
+
+        # connect the dynamic difc setter
+        minD_count = self.simulation.getMoleculeCount('MinD', MolecState.all)
+        minE_count = self.simulation.getMoleculeCount('MinE', MolecState.all)
+        for i, name in self.species_names:
+            n = name.lower()
+            if n == 'mine' or n == 'mind':
+                self.simulation.connect(self._new_difc, target=f'{n}.difc', step=10, args=[minD_count, minE_count])
+
         # reset the molecules, distribute the mols according to self.boundarieså
         for name in self.species_names:
             self.set_uniform(
                 species_name=name,
                 count=inputs['species_counts'][name],
+                kill_mol=False
             )
 
         # run the simulation for a given interval
@@ -314,7 +360,6 @@ class SmoldynProcess(Process):
         # get and populate the species counts
         for index, name in enumerate(self.species_names):
             input_counts = inputs['species_counts'][name]
-            print(f'INPUT COUNTS: {input_counts}')
             simulation_state['species_counts'][name] = int(final_count[index]) - input_counts
 
         # clear the list of known molecule ids and update the list of known molecule ids (convert to an intstring)

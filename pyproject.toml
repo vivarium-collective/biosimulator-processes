@@ -27,7 +27,7 @@ pyyaml = "^6.0.1"
 pydantic = "^2.7.2"
 seaborn = "^0.13.2"
 h5py = "^3.11.0"
-biosimulators-utils = "^0.1.187"
+# biosimulators-utils = "^0.1.187"
 bigraph-schema = "^0.0.38"
 process-bigraph = "^0.0.19"
 smoldyn = {version = "^2.73", optional = true, extras = ["simulariumio"]}
