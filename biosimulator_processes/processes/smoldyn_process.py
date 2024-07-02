@@ -275,24 +275,25 @@ class SmoldynProcess(Process):
             """
 
     def _new_difc(self, t, args):
-        minD_count, minE_count = args
+        minD_ATP_count, minD_ADP_count, minE_count, minDMinE_count = args
+
         # TODO: extract real volume
-        volume = 1.0
+        volume = 1.0  # Adjust as necessary for the simulation
 
         # Calculate concentrations from counts
-        minD_conc = minD_count / volume
+        minD_ATP_conc = minD_ATP_count / volume
+        minD_ADP_conc = minD_ADP_count / volume
         minE_conc = minE_count / volume
+        minDMinE_conc = minDMinE_count / volume
 
-        # for example: diffusion coefficient might decrease with high MinD-MinE complex formation
-        minDE_complex = minD_conc * minE_conc  # Simplified interaction term
-        base_diffusion = 2.5  # Baseline diffusion coefficient
+        # Example calculation: diffusion coefficient might be affected by the presence of complexes
+        total_minD = minD_ATP_conc + minD_ADP_conc
+        interaction_term = minDMinE_conc / (total_minD + minE_conc + 1e-9)  # Prevent division by zero
 
-        # perturb the parameter of complex formation effect slightly
-        _alpha = 0.1
-        delta = _alpha - (_alpha ** 10)
-        alpha = _alpha - delta
+        base_diffusion = 1.0  # Baseline diffusion coefficient
+        alpha = 0.1  # Parameter adjusting the effect of complex formation
 
-        new_difc = base_diffusion * (1 - alpha * minDE_complex)
+        new_difc = base_diffusion * (1 - alpha * interaction_term)
 
         # Ensure the diffusion coefficient remains within a reasonable range
         new_difc = max(min(new_difc, base_diffusion), 0.01)  # Adjust bounds as needed
@@ -319,12 +320,14 @@ class SmoldynProcess(Process):
         """
 
         # connect the dynamic difc setter
-        minD_count = self.simulation.getMoleculeCount('MinD', MolecState.all)
-        minE_count = self.simulation.getMoleculeCount('MinE', MolecState.all)
-        for i, name in self.species_names:
-            n = name.lower()
-            if n == 'mine' or n == 'mind':
-                self.simulation.connect(self._new_difc, target=f'{n}.difc', step=10, args=[minD_count, minE_count])
+        species_counts = {
+            spec_name: self.simulation.getMoleculeCount(spec_name, MolecState.all)
+            for spec_name in self.species_names
+        }
+
+        # let step correspond to the recording step
+        for name in self.species_names:
+            self.simulation.connect(self._new_difc, target=f'{name}.difc', step=2, args=list(species_counts.values()))
 
         # reset the molecules, distribute the mols according to self.boundarieså
         for name in self.species_names:
