@@ -327,7 +327,7 @@ class SmoldynProcess(Process):
 
         # let step correspond to the recording step
         for name in self.species_names:
-            self.simulation.connect(self._new_difc, target=f'{name}.difc', step=2, args=list(species_counts.values()))
+            self.simulation.connect(self._new_difc, target=f'{name}.difc', step=5, args=list(species_counts.values()))
 
         # reset the molecules, distribute the mols according to self.boundarieså
         for name in self.species_names:
@@ -340,7 +340,8 @@ class SmoldynProcess(Process):
         # run the simulation for a given interval
         self.simulation.run(
             stop=interval,
-            dt=self.simulation.dt
+            dt=self.simulation.dt,
+            overwrite=True  # must be true for dynamic difc
         )
 
         # get the counts data, clear the buffer
