@@ -48,6 +48,7 @@
 
 """
 import math
+import os
 from typing import *
 from uuid import uuid4
 from process_bigraph import Process, Composite, pf, pp
@@ -61,6 +62,9 @@ except:
         'using the SmoldynProcess. Please refer to the README for further information '
         'on installing Smoldyn.'
     )
+
+
+os.environ['SMOLDYN_NO_PROMPT'] = '1'
 
 
 class SmoldynProcess(Process):
@@ -169,10 +173,10 @@ class SmoldynProcess(Process):
 
         self.port_schema = {
             'species_counts': {
-                species_name: 'int'
-                for species_name in self.species_names
+                name: 'int'
+                for name in self.species_names
             },
-            'molecules': 'tree[string]'  # self.molecules_type
+            'molecules': 'tree[float]'  # self.molecules_type
         }
 
         self._specs = [None for _ in self.species_names]
@@ -326,16 +330,16 @@ class SmoldynProcess(Process):
         }
 
         # let step correspond to the recording step
-        for name in self.species_names:
-            self.simulation.connect(self._new_difc, target=f'{name}.difc', step=5, args=list(species_counts.values()))
+        # for name in self.species_names:
+        #     self.simulation.connect(self._new_difc, target=f'{name}.difc', step=5, args=list(species_counts.values()))
 
         # reset the molecules, distribute the mols according to self.boundarieså
-        for name in self.species_names:
-            self.set_uniform(
-                species_name=name,
-                count=inputs['species_counts'][name],
-                kill_mol=False
-            )
+        # for name in self.species_names:
+        #     self.set_uniform(
+        #         species_name=name,
+        #         count=inputs['species_counts'][name],
+        #         kill_mol=True
+        #     )
 
         # run the simulation for a given interval
         self.simulation.run(
