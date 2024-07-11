@@ -251,7 +251,7 @@ class SmoldynProcess(Process):
             'species_counts': initial_species_counts,
             'molecules': {
                 mol_id: {
-                    'coordinates': [],
+                    'coordinates': [0.0, 0.0, 0.0],  # does this define the so-called "entry-point" of the mols into the simulation space?
                     'species_id': self.species_names[i],
                     'state': 0
                 }
