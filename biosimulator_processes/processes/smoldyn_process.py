@@ -165,18 +165,30 @@ class SmoldynProcess(Process):
         if self.config['animate']:
             self.simulation.addGraphics('opengl_better')
 
+        parts = self.model_filepath.split('/')
+        parts.pop(-1)
+        # parts.insert(-1, 'modelout.txt')
+        self.modelout = '/'.join(parts)
+        self.modelout += '/modelout.txt'
+
         # create a re-usable counts and molecules type to be used by both inputs and outputs
         self.counts_type = {
             species_name: 'int'
             for species_name in self.species_names
         }
 
+        # self.port_schema = {
+        #     'species_counts': {
+        #         name: 'int'
+        #         for name in self.species_names
+        #     },
+        #     'molecules': 'tree[float]',  # self.molecules_type
+        #
+        # }
+
         self.port_schema = {
-            'species_counts': {
-                name: 'int'
-                for name in self.species_names
-            },
-            'molecules': 'tree[float]'  # self.molecules_type
+            'species_counts': 'tree[any]',
+            'molecules': 'tree[any]'
         }
 
         self._specs = [None for _ in self.species_names]
@@ -235,13 +247,11 @@ class SmoldynProcess(Process):
             for spec_name in self.species_names
         }
 
-        print(f'INITAL: {initial_species_counts}')
-
         return {
             'species_counts': initial_species_counts,
             'molecules': {
                 mol_id: {
-                    'coordinates': [0.0, 0.0, 0.0],
+                    'coordinates': [],
                     'species_id': self.species_names[i],
                     'state': 0
                 }
@@ -256,50 +266,26 @@ class SmoldynProcess(Process):
     def outputs(self):
         return self.port_schema
 
-    """
-            avals = []
-            # iterate over species with index
-            def new_difc(t, args):
-                global a, avals
-                x, y = args
-                avals.append((t, a.difc['soln']))
-                return x * math.sin(t) + y
-
-            def update_difc(val):
-                global a
-                a.difc = val
-
-            def test_connect():
-                global a, avals
-                sim = smoldyn.Simulation(low=(.......
-                a = sim.addSpecies('a', color=black, difc=0.1)
-
-                # specify either function as target:
-                sim.connect(new_dif, update_difc, step=10, args=[1,1])
-            """
-
     def _new_difc(self, t, args):
         minD_ATP_count, minD_ADP_count, minE_count, minDMinE_count = args
 
         # TODO: extract real volume
-        volume = 1.0  # Adjust as necessary for the simulation
+        volume = 1.0
 
-        # Calculate concentrations from counts
         minD_ATP_conc = minD_ATP_count / volume
         minD_ADP_conc = minD_ADP_count / volume
         minE_conc = minE_count / volume
         minDMinE_conc = minDMinE_count / volume
 
-        # Example calculation: diffusion coefficient might be affected by the presence of complexes
+        # example calculation: diffusion coefficient might be affected by the presence of complexes
         total_minD = minD_ATP_conc + minD_ADP_conc
         interaction_term = minDMinE_conc / (total_minD + minE_conc + 1e-9)  # Prevent division by zero
 
-        base_diffusion = 1.0  # Baseline diffusion coefficient
-        alpha = 0.1  # Parameter adjusting the effect of complex formation
+        base_diffusion = 1.0
+        alpha = 0.1
 
         new_difc = base_diffusion * (1 - alpha * interaction_term)
-
-        # Ensure the diffusion coefficient remains within a reasonable range
+        # ensure suitable range
         new_difc = max(min(new_difc, base_diffusion), 0.01)  # Adjust bounds as needed
 
         return new_difc
@@ -324,22 +310,23 @@ class SmoldynProcess(Process):
         """
 
         # connect the dynamic difc setter
-        species_counts = {
-            spec_name: self.simulation.getMoleculeCount(spec_name, MolecState.all)
-            for spec_name in self.species_names
-        }
+        # species_counts = {
+        #     spec_name: self.simulation.getMoleculeCount(spec_name, MolecState.all)
+        #     for spec_name in self.species_names
+        # }
 
         # let step correspond to the recording step
         # for name in self.species_names:
         #     self.simulation.connect(self._new_difc, target=f'{name}.difc', step=5, args=list(species_counts.values()))
 
-        # reset the molecules, distribute the mols according to self.boundarieså
-        # for name in self.species_names:
-        #     self.set_uniform(
-        #         species_name=name,
-        #         count=inputs['species_counts'][name],
-        #         kill_mol=True
-        #     )
+        # reset the molecules, distribute the mols according to self.boundaries
+        # if interval > 0:
+        #     for name in self.species_names:
+        #         self.set_uniform(
+        #             species_name=name,
+        #             count=inputs['species_counts'][name],
+        #             kill_mol=True
+        #         )
 
         # run the simulation for a given interval
         self.simulation.run(
@@ -362,7 +349,8 @@ class SmoldynProcess(Process):
         # create an empty simulation state mirroring that which is specified in the schema
         simulation_state = {
             'species_counts': {},
-            'molecules': {}
+            'molecules': {},
+            # 'model_out': self.modelout
         }
 
         # get and populate the species counts
