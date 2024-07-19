@@ -194,6 +194,8 @@ class SmoldynProcess(Process):
         self._specs = [None for _ in self.species_names]
         self._vals = dict(zip(self.species_names, [[] for _ in self.species_names]))
 
+        self._outputs = ''
+
     def set_uniform(
             self,
             species_name: str,
@@ -264,7 +266,9 @@ class SmoldynProcess(Process):
         return self.port_schema
 
     def outputs(self):
-        return self.port_schema
+        schema = self.port_schema
+        schema['output_file'] = 'string'
+        return schema
 
     def _new_difc(self, t, args):
         minD_ATP_count, minD_ADP_count, minE_count, minDMinE_count = args
@@ -376,7 +380,14 @@ class SmoldynProcess(Process):
             }
 
         # TODO -- post processing to get effective rates
+        with open(self.modelout, 'r') as f:
+            self._outputs += f.read()
 
+        output_fp = self.modelout.replace('modelout', 'output')
+        with open(output_fp, 'w') as fp:
+            fp.write(self._outputs)
+
+        simulation_state['output_file'] = output_fp
         return simulation_state
 
 

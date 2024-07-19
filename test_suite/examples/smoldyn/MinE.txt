@@ -22,7 +22,7 @@ define L_PARAM2		1.5	# half of cell length minus radius
 define NUMBER_MIND	4000	# number of MinD in cell
 define NUMBER_MINE	1400	# number of MinE in cell
 
-define TIME_STOP	2	 # stopping time
+define TIME_STOP	1	 # stopping time
 
 #define KICK_START	1	# start with MinD_ATP at an end
 
@@ -107,7 +107,7 @@ endif
 compartment_mol NUMBER_MINE MinE cell
 
 output_files modelout.txt
-cmd i 0 TIME_STOP 2 executiontime modelout.txt
-cmd i 0 TIME_STOP 2 listmols modelout.txt
+cmd i 0 TIME_STOP 1 executiontime modelout.txt
+cmd i 0 TIME_STOP 1 listmols modelout.txt
 
 end_file
