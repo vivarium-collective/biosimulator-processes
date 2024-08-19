@@ -1,14 +1,13 @@
 [tool.poetry]
 name = "biosimulator-processes"
-version = "0.0.36"
+version = "0.0.37"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
-packages = [{include = "biosimulator_processes"}, {include = "test_suite"}, {include = "notebook_api"}]
+packages = [{include = "biosimulator_processes"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10"
-zarr = "^2.18.2"
 termcolor = "^2.4.0"
 jupyterlab = "^4.2.1"
 bigraph-viz = "^0.0.33"
@@ -16,7 +15,6 @@ bigraph-builder = "^0.0.4"
 numpy = "^1.26.4"
 copasi-basico = "^0.69"
 cobra = "^0.29.0"
-tellurium = "^2.2.10"
 amici = "^0.25.1"
 python-libsbml = "^5.20.2"
 docker = "^7.1.0"
@@ -28,14 +26,12 @@ seaborn = "^0.13.2"
 h5py = "^3.11.0"
 bigraph-schema = "^0.0.38"
 process-bigraph = "^0.0.19"
-smoldyn = {version = "^2.73", optional = true, extras = ["simulariumio"]}
+smoldyn = {version = "*", optional = true, extras = ["simulariumio"]}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
 mypy = "^1.10.0"
 flake8 = "^7.0.0"
-twine = "^5.1.0"
-wheel = "^0.43.0"
 
 [tool.pytest.ini_options]
 testpaths = ["biosimulator_processes", "test_suite"]

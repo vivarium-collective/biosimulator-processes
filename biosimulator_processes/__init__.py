@@ -1,9 +1,8 @@
 import importlib
 from typing import *
 
-from builder import ProcessTypes
 from bigraph_schema import TypeSystem
-from process_bigraph import Composite
+from process_bigraph import Composite, ProcessTypes
 
 from biosimulator_processes.steps.viz import CompositionPlotter, Plotter2d
 from biosimulator_processes.data_model.sed_data_model import MODEL_TYPE, UTC_CONFIG_TYPE
@@ -34,6 +33,9 @@ STEPS_TO_REGISTER = [
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d'),
     ('utc-comparator', 'comparator_step.UtcComparator'),
+    ('smoldyn-step', 'bio_compose.SmoldynStep'),
+    ('simularium-smoldyn-step', 'bio_compose.SimulariumSmoldynStep'),
+    ('database-emitter', 'bio_compose.MongoDatabaseEmitter'),
     ('simple-neuron', 'neuron_network.SimpleNeuron'),
     ('simple-neuron-network', 'neuron_network.SimpleNeuronNetwork')]
 
