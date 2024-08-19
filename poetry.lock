@@ -4,7 +4,7 @@
 name = "amici"
 version = "0.25.2"
 description = "Advanced multi-language Interface to CVODES and IDAS"
-optional = false
+optional = true
 python-versions = ">=3.10"
 files = [
     {file = "amici-0.25.2.tar.gz", hash = "sha256:a5172dd0031c823c2a64e2da5934ad07de572d8bd1f8c8614cd4100826c5d740"},
@@ -506,7 +506,7 @@ files = [
 name = "cmake"
 version = "3.30.2"
 description = "CMake is an open-source, cross-platform family of tools designed to build, test and package software"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "cmake-3.30.2-py3-none-macosx_11_0_universal2.macosx_10_10_x86_64.macosx_11_0_arm64.whl", hash = "sha256:e706eded76e0e8b09d2cf09cbab0a930f6550084a85950982b7c53f6a79a0451"},
@@ -535,7 +535,7 @@ test = ["coverage (>=4.2)", "pytest (>=3.0.3)", "pytest-cov (>=2.4.0)"]
 name = "cmake-build-extension"
 version = "0.6.0"
 description = "Setuptools extension to build and package CMake projects."
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "cmake_build_extension-0.6.0-py3-none-any.whl", hash = "sha256:54b3cab245e08b1b6e660768b2b1f61d1c7e457e7b81f6869ca9863d0fd8bce2"},
@@ -674,7 +674,7 @@ test-no-images = ["pytest", "pytest-cov", "pytest-xdist", "wurlitzer"]
 name = "copasi-basico"
 version = "0.69"
 description = "Simplified COPASI interface for python"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "copasi_basico-0.69-py3-none-any.whl", hash = "sha256:cd84bcff530e6b19040ced8f1c93d18c2020b856d42ef2d82c6e618671609f7d"},
@@ -1027,7 +1027,7 @@ files = [
 name = "gitdb"
 version = "4.0.11"
 description = "Git Object Database"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "gitdb-4.0.11-py3-none-any.whl", hash = "sha256:81a3407ddd2ee8df444cbacea00e2d038e40150acfa3001696fe0dcf1d3adfa4"},
@@ -1041,7 +1041,7 @@ smmap = ">=3.0.1,<6"
 name = "gitpython"
 version = "3.1.43"
 description = "GitPython is a Python library used to interact with Git repositories"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "GitPython-3.1.43-py3-none-any.whl", hash = "sha256:eec7ec56b92aad751f9912a73404bc02ba212a23adb2c7098ee668417051a1ff"},
@@ -2075,7 +2075,7 @@ files = [
 name = "ninja"
 version = "1.11.1.1"
 description = "Ninja is a small build system with a focus on speed"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "ninja-1.11.1.1-py2.py3-none-macosx_10_9_universal2.macosx_10_9_x86_64.macosx_11_0_arm64.macosx_11_0_universal2.whl", hash = "sha256:376889c76d87b95b5719fdd61dd7db193aa7fd4432e5d52d2e44e4c497bdbbee"},
@@ -2677,7 +2677,7 @@ tests = ["pytest"]
 name = "pyarrow"
 version = "17.0.0"
 description = "Python library for Apache Arrow"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "pyarrow-17.0.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:a5c8b238d47e48812ee577ee20c9a2779e6a5904f1708ae240f53ecbee7c9f07"},
@@ -3006,7 +3006,7 @@ dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments
 name = "python-copasi"
 version = "4.44.295"
 description = "COPASI Python API"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "python-copasi-4.44.295.tar.gz", hash = "sha256:dfdd6f93a25882c67053d365af40a16ed950748c4b95a6f459d0178ba853f722"},
@@ -3727,7 +3727,7 @@ files = [
 name = "scipy"
 version = "1.14.0"
 description = "Fundamental algorithms for scientific computing in Python"
-optional = false
+optional = true
 python-versions = ">=3.10"
 files = [
     {file = "scipy-1.14.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:7e911933d54ead4d557c02402710c2396529540b81dd554fc1ba270eb7308484"},
@@ -3822,7 +3822,7 @@ test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "importlib-metadata
 name = "setuptools-scm"
 version = "8.1.0"
 description = "the blessed package to manage your versions by scm tags"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "setuptools_scm-8.1.0-py3-none-any.whl", hash = "sha256:897a3226a6fd4a6eb2f068745e49733261a21f70b1bb28fce0339feb978d9af3"},
@@ -3854,7 +3854,7 @@ files = [
 name = "smmap"
 version = "5.0.1"
 description = "A pure Python implementation of a sliding window memory map manager"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "smmap-5.0.1-py3-none-any.whl", hash = "sha256:e6d8668fa5f93e706934a62d7b4db19c8d9eb8cf2adbb75ef1b675aa332b69da"},
@@ -4095,7 +4095,7 @@ files = [
 name = "toposort"
 version = "1.10"
 description = "Implements a topological sort algorithm."
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "toposort-1.10-py3-none-any.whl", hash = "sha256:cbdbc0d0bee4d2695ab2ceec97fe0679e9c10eab4b2a87a9372b929e70563a87"},
@@ -4257,4 +4257,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "df053e8d12c0298ffaac2bdfca6976353a2fb8396987c085b195d159efbc6625"
+content-hash = "730b6eb8dd6ea61ca6c5f5b2c50d9ba5e5b010522a24ffe7340c5055da0f1721"

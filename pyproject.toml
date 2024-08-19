@@ -13,9 +13,7 @@ jupyterlab = "^4.2.1"
 bigraph-viz = "^0.0.33"
 bigraph-builder = "^0.0.4"
 numpy = "^1.26.4"
-copasi-basico = "^0.69"
 cobra = "^0.29.0"
-amici = "^0.25.1"
 python-libsbml = "^5.20.2"
 docker = "^7.1.0"
 notebook = "^7.2.0"
@@ -27,6 +25,8 @@ h5py = "^3.11.0"
 bigraph-schema = "^0.0.38"
 process-bigraph = "^0.0.19"
 smoldyn = {version = "*", optional = true, extras = ["simulariumio"]}
+amici = {version = "^0.25.1", optional = true}
+copasi-basico = {version = "^0.69", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
