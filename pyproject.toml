@@ -27,6 +27,10 @@ process-bigraph = "^0.0.19"
 smoldyn = {version = "*", optional = true, extras = ["simulariumio"]}
 amici = {version = "^0.25.1", optional = true}
 copasi-basico = {version = "^0.69", optional = true}
+tellurium = {version = "^2.2.10", optional = true}
+
+[tool.poetry.extras]
+simulators = ["smoldyn", "amici", "copasi-basico", "tellurium"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"

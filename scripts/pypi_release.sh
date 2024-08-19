@@ -55,9 +55,9 @@ function get_pypi_token {
 }
 
 pypi_token=$(get_pypi_token)
-poetry build
-poetry publish --username __token__ --password "$pypi_token"
-rm -r dist
+sudo poetry build
+sudo poetry publish --username __token__ --password "$pypi_token"
+sudo rm -r dist
 
 # If using a non-poetry build
 # python setup.py sdist bdist_wheel
