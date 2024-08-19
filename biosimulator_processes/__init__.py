@@ -35,10 +35,10 @@ STEPS_TO_REGISTER = [
     ('utc-comparator', 'comparator_step.UtcComparator'),
     ('smoldyn-step', 'bio_compose.SmoldynStep'),
     ('simularium-smoldyn-step', 'bio_compose.SimulariumSmoldynStep'),
-    ('database-emitter', 'bio_compose.MongoDatabaseEmitter'),
-    ('simple-neuron', 'neuron_network.SimpleNeuron'),
-    ('simple-neuron-network', 'neuron_network.SimpleNeuronNetwork')]
-
+    ('database-emitter', 'bio_compose.MongoDatabaseEmitter')
+    # ('simple-neuron', 'neuron_network.SimpleNeuron'),
+    # ('simple-neuron-network', 'neuron_network.SimpleNeuronNetwork')]
+]
 
 # core process registry implementation (unique to this package)
 CORE = ProcessTypes()
