@@ -43,7 +43,7 @@ if [ "$branch" != "main" ]; then
 fi
 
 # update internal version
-echo "$version" > ./bio_check/_VERSION
+echo "$version" > ./biosimulator_processes/_VERSION
 
 # Create and push git tag
 git tag -m "Version v$version" "v$version"
