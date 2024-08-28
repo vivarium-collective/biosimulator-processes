@@ -31,7 +31,8 @@ fi
 if [ ! -z "$(git status --untracked-files=no --porcelain)" ]; then
     echo "You have changes that have yet to be committed."
     echo "Aborting PyPI upload and attempting to commit your changes."
-    ../../commit.sh
+    # ../../commit.sh
+    commit
 fi
 
 # Check that we are on main
@@ -43,7 +44,7 @@ if [ "$branch" != "main" ]; then
 fi
 
 # update internal version
-echo "$version" > ./biosimulator_processes/_VERSION
+echo "$version" > ./biosimulators_processes/_VERSION
 
 # Create and push git tag
 git tag -m "Version v$version" "v$version"
