@@ -102,7 +102,7 @@ def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes
 
             # Register the process
             core.process_registry.register(process_name, bigraph_class)
-        except ImportError as e:
+        except Exception as e:
             print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
             return
     print(f'Available processes:\n{pf(list(core.process_registry.registry.keys()))}') if verbose else None
