@@ -2,8 +2,8 @@ import os
 import json
 
 from process_bigraph import Composite, pp
-from biosimulator_processes import CORE
-from biosimulator_processes.data_model.compare_data_model import ODEComparisonDocument
+from biosimulators_processes import CORE
+from biosimulators_processes.data_model.compare_data_model import ODEComparisonDocument
 
 
 def test_ode_comparison_process():

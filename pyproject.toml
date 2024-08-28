@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "biosimulator-processes"
-version = "0.1.2"
+name = "biosimulators-processes"
+version = "0.2.0"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
-packages = [{include = "biosimulator_processes"}]
+packages = [{include = "biosimulators_processes"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10"

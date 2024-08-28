@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget  
 
 # copy and make dirs
-COPY ./biosimulator_processes /app/biosimulator_processes
+COPY biosimulators_processes /app/biosimulator_processes
 # COPY composer-notebooks /app/notebooks
 
 # copy files
@@ -81,7 +81,7 @@ ENV PLOTTING_ENGINE=matplotlib \
 # WORKDIR /app
 #
 # # copy and make dirs
-# COPY ./biosimulator_processes /app/biosimulator_processes
+# COPY ./biosimulators_processes /app/biosimulators_processes
 # COPY composer-notebooks /app/notebooks
 #
 # # copy files

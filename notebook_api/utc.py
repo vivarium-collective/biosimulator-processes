@@ -1,9 +1,9 @@
 from typing import *
 
-from biosimulator_processes.processes.amici_process import UtcAmici
-from biosimulator_processes.processes.copasi_process import UtcCopasi
-from biosimulator_processes.processes.tellurium_process import UtcTellurium
-from biosimulator_processes.processes.utc_process import UniformTimeCourse
+from biosimulators_processes.processes.amici_process import UtcAmici
+from biosimulators_processes.processes.copasi_process import UtcCopasi
+from biosimulators_processes.processes.tellurium_process import UtcTellurium
+from biosimulators_processes.processes.utc_process import UniformTimeCourse
 
 
 def generate_utc_step_outputs(omex_fp: str, simulators: list[str] = None) -> Dict[str, Union[List[UniformTimeCourse], Dict[str, List]]]:

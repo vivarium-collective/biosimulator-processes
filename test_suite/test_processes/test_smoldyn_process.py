@@ -3,7 +3,7 @@ from tests import ProcessUnitTest
 
 
 def test_process():
-    smoldyn_models_root = 'biosimulator_processes/model_files/smoldyn'
+    smoldyn_models_root = 'biosimulators_processes/model_files/smoldyn'
     model_name = 'minE_model.txt'
     model_fp = os.path.join(smoldyn_models_root, model_name)
 

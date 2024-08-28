@@ -2,8 +2,8 @@ import os
 import json
 
 from process_bigraph import Composite, pp
-from biosimulator_processes import CORE
-from biosimulator_processes.helpers import prepare_single_ode_process_document
+from biosimulators_processes import CORE
+from biosimulators_processes.helpers import prepare_single_ode_process_document
 
 
 def test_process():

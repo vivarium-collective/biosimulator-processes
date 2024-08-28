@@ -14,7 +14,7 @@ push-image.sh
 release.sh
 run.sh
 ray_job.sh
-biosimulator_processes/__pycache__
+biosimulators_processes/__pycache__
 .pytest_cache
 submit-biosimulators-container.sh
 .vagrant

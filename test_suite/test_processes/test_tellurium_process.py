@@ -1,12 +1,12 @@
 import os
 from process_bigraph import Composite
-from biosimulator_processes import CORE
+from biosimulators_processes import CORE
 from tests import ProcessUnitTest
 
 
 def test_process():
     # 1. define the instance of the Composite(in this case singular) by its schema
-    sbml_model_files_root = 'biosimulator_processes/model_files/sbml'
+    sbml_model_files_root = 'biosimulators_processes/model_files/sbml'
     model_name = 'vilar-discrete-SSA.xml'  # 'BIOMD0000000061_url.xml'
     model_fp = os.path.join(sbml_model_files_root, model_name)
 
