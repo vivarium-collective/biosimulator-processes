@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "biosimulators-processes"
-version = "0.2.2"
+version = "0.2.3"
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
