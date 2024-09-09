@@ -172,13 +172,13 @@ class SmoldynProcess(Process):
 
         # create a re-usable counts and molecules type to be used by both inputs and outputs
         self.counts_type = {
-            species_name: 'int'
+            species_name: 'integer'
             for species_name in self.species_names
         }
 
         self.port_schema = {
             'species_counts': {
-                species_name: 'int'
+                species_name: 'integer'
                 for species_name in self.species_names
             },
             'molecules': 'tree[string]'  # self.molecules_type
@@ -328,12 +328,12 @@ class SmoldynProcess(Process):
         """
 
         # connect the dynamic difc setter
-        minD_count = self.simulation.getMoleculeCount('MinD', MolecState.all)
-        minE_count = self.simulation.getMoleculeCount('MinE', MolecState.all)
-        for i, name in self.species_names:
-            n = name.lower()
-            if n == 'mine' or n == 'mind':
-                self.simulation.connect(self._new_difc, target=f'{n}.difc', step=10, args=[minD_count, minE_count])
+        # minD_count = self.simulation.getMoleculeCount('MinD', MolecState.all)
+        # minE_count = self.simulation.getMoleculeCount('MinE', MolecState.all)
+        # for i, name in self.species_names:
+        #     n = name.lower()
+        #     if n == 'mine' or n == 'mind':
+        #         self.simulation.connect(self._new_difc, target=f'{n}.difc', step=10, args=[minD_count, minE_count])
 
         # reset the molecules, distribute the mols according to self.boundarieså
         for name in self.species_names:
