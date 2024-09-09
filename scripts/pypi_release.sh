@@ -32,7 +32,9 @@ if [ ! -z "$(git status --untracked-files=no --porcelain)" ]; then
     echo "You have changes that have yet to be committed."
     echo "Aborting PyPI upload and attempting to commit your changes."
     # ../../commit.sh
-    commit
+    git add --all
+    git commit -m "updates for latest release"
+    git push
 fi
 
 # Check that we are on main
