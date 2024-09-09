@@ -17,7 +17,7 @@ try:
     import smoldyn as sm
     from smoldyn._smoldyn import MolecState
 except:
-    raise ImportError(
+    print(
         '\nPLEASE NOTE: Smoldyn is not correctly installed on your system which prevents you from ' 
         'using the SmoldynProcess. Please refer to the README for further information '
         'on installing Smoldyn.'
@@ -43,19 +43,26 @@ CONFIGURATION_INDEXES = [
 
 SECRETS_PATH = 'secrets.json'
 
+# TODO: change this
+DEFAULT_CONNECTION_URI = 'mongodb://localhost:27017/?retryWrites=true&w=majority&appName=biosimulators-processes'
+
 
 # -- emitters --
 
 class MongoDatabaseEmitter(Emitter):
     client_dict: Dict[int, MongoClient] = {}
     config_schema = {
-        'connection_uri': 'string',
+        'emit': 'schema',
+        'connection_uri': 'maybe[string]',
         'experiment_id': 'maybe[string]',
         'emit_limit': {
             '_type': 'integer',
             '_default': 4000000
         },
-        'database': 'maybe[string]'
+        'database': {
+            '_type': 'string',
+            '_default': 'biosimulators_processes'
+        }
     }
 
     @classmethod
@@ -64,7 +71,7 @@ class MongoDatabaseEmitter(Emitter):
         for column in columns:
             table.create_index(column)
 
-    def __init__(self, config: Dict[str, Any] = None) -> None:
+    def __init__(self, config: Dict[str, Any] = None, core=CORE) -> None:
         """Config may have 'host' and 'database' items. The config passed is expected to be:
 
                 {'experiment_id':,
@@ -73,7 +80,7 @@ class MongoDatabaseEmitter(Emitter):
 
                 TODO: Automate this process for the user in builder
         """
-        super().__init__(config)
+        super().__init__(config=config, core=core)
         self.experiment_id = self.config.get('experiment_id', str(uuid.uuid4()))
         # In the worst case, `breakdown_data` can underestimate the size of
         # data by a factor of 4: len(str(0)) == 1 but 0 is a 4-byte int.
@@ -83,14 +90,15 @@ class MongoDatabaseEmitter(Emitter):
         # create new MongoClient per OS process
         curr_pid = os.getpid()
         if curr_pid not in MongoDatabaseEmitter.client_dict:
-            MongoDatabaseEmitter.client_dict[curr_pid] = MongoClient(
-                config['connection_uri'])
+            uri = config.get('connection_uri', DEFAULT_CONNECTION_URI)
+            MongoDatabaseEmitter.client_dict[curr_pid] = MongoClient(uri)
         self.client: MongoClient = MongoDatabaseEmitter.client_dict[curr_pid]
 
         # extract objects from current mongo client instance
         self.db: Database = getattr(self.client, self.config.get('database', 'simulations'))
         self.history_collection: Collection = getattr(self.db, 'history')
         self.configuration: Collection = getattr(self.db, 'configuration')
+        self.history = []
 
         # create column indexes for the given collection objects
         self.create_indexes(self.history_collection, HISTORY_INDEXES)
@@ -98,10 +106,24 @@ class MongoDatabaseEmitter(Emitter):
 
         self.fallback_serializer = make_fallback_serializer_function()
 
-    def query(self, query):
-        return self.history_collection.find_one(query)
+    # def query(self, query):
+        # return self.history_collection.find_one(query)
 
-    def history(self):
+    def query(self, query=None):
+        if isinstance(query, list):
+            result = {}
+            for path in query:
+                element = get_path(self.history, path)
+                result = set_path(result, path, element)
+        else:
+            result = self.history
+
+        return result
+
+    # def history(self):
+        # return [v for v in self.history_collection.find()]
+    
+    def get_history(self):
         return [v for v in self.history_collection.find()]
 
     def flush_history(self):
@@ -109,7 +131,9 @@ class MongoDatabaseEmitter(Emitter):
             self.history_collection.delete_one(v)
 
     def update(self, inputs):
+        import copy 
         self.history_collection.insert_one(inputs)
+        self.history.append(copy.deepcopy(inputs))
         return {}
 
 

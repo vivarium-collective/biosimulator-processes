@@ -104,7 +104,7 @@ def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes
             core.process_registry.register(process_name, bigraph_class)
         except Exception as e:
             print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
-            return
+            continue
 
 
 def prepare_single_ode_process_document(

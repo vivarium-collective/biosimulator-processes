@@ -52,6 +52,7 @@ from typing import *
 from uuid import uuid4
 from process_bigraph import Process, Composite, pf, pp
 from biosimulators_processes import CORE
+from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
 try:
     import smoldyn as sm
     from smoldyn._smoldyn import MolecState
@@ -93,13 +94,20 @@ class SmoldynProcess(Process):
     """
 
     # TODO: Add the ability to pass model parameters and not just a model file.
+    # config_schema = {
+    #     'model_filepath': 'string',
+    #     'animate': {
+    #         '_type': 'boolean',
+    #         '_default': False
+    #     }
+    #     # TODO: Add a more nuanced way to describe and configure dynamic difcs given species interaction patterns
+    # }
     config_schema = {
-        'model_filepath': 'string',
+        'model': MODEL_TYPE,
         'animate': {
             '_type': 'boolean',
             '_default': False
         }
-        # TODO: Add a more nuanced way to describe and configure dynamic difcs given species interaction patterns
     }
 
     def __init__(self, config: Dict[str, Any] = None, core=None):
@@ -115,7 +123,8 @@ class SmoldynProcess(Process):
         super().__init__(config, core)
 
         # specify the model fp for clarity
-        self.model_filepath = self.config.get('model_filepath')
+        # self.model_filepath = self.config.get('model_filepath')
+        self.model_filepath = self.config.get('model').get('model_source')
 
         # enforce model filepath passing
         if not self.model_filepath:
