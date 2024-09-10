@@ -10,25 +10,10 @@ from typing import *
 
 import matplotlib.pyplot as plt
 import numpy as np
-from process_bigraph.experiments.parameter_scan import RunProcess
 
 from biosimulators_processes import CORE
 from biosimulators_processes.steps.ode_simulation import ODEProcess, CopasiStep
 from biosimulators_processes.data_model import _BaseClass
-
-
-def get_observables(proc: RunProcess):
-    observables = []
-    for port_name, port_dict in proc.process.inputs().items():
-        if port_name.lower() == 'floating_species_concentrations':
-            if isinstance(port_dict, dict):
-                for name, typeVal in port_dict.items():
-                    obs = [port_name, name]
-                    observables.append(obs)
-            else:
-                obs = [port_name]
-                observables.append(obs)
-    return observables
 
 
 def generate_ode_instance(process_address: str, model_fp: str, step_size: float, duration: float) -> ODEProcess:

@@ -278,12 +278,12 @@ process-bigraph = "*"
 
 [[package]]
 name = "bigraph-schema"
-version = "0.0.38"
+version = "0.0.43"
 description = "A serializable type schema for compositional systems biology"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "bigraph-schema-0.0.38.tar.gz", hash = "sha256:7d75884261ce5b5e1e109875b29fc9f285a746c2b9f52b2850adda82ba55bb7a"},
+    {file = "bigraph-schema-0.0.43.tar.gz", hash = "sha256:a93dd744d3557445ad82073c42d8529c81272454437303ebedff29496371a7bd"},
 ]
 
 [package.dependencies]
@@ -295,12 +295,12 @@ pytest = "*"
 
 [[package]]
 name = "bigraph-viz"
-version = "0.0.33"
+version = "0.0.34"
 description = "A graphviz-based plotting tool for compositional bigraph schema"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "bigraph-viz-0.0.33.tar.gz", hash = "sha256:abec065149184247967c07dad0c9114a8ac379b331efebf829eecf057fe6dd9c"},
+    {file = "bigraph-viz-0.0.34.tar.gz", hash = "sha256:6efeff53af502c667f27bd1216205fc4bf74673ccdac03011384556519fc27a5"},
 ]
 
 [package.dependencies]
@@ -705,7 +705,7 @@ setuptools-scm = "*"
 name = "cobra"
 version = "0.29.0"
 description = "COBRApy is a package for constraint-based modeling of metabolic networks."
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "cobra-0.29.0-py2.py3-none-any.whl", hash = "sha256:9a9bc4ed1a027c22c5fd4fed111cce7606cda3cdfc44587483c35714ba4dd9f0"},
@@ -940,7 +940,7 @@ files = [
 name = "depinfo"
 version = "2.2.0"
 description = "List any package's direct dependencies and their versions."
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "depinfo-2.2.0-py3-none-any.whl", hash = "sha256:3d9ba933e7a9d718b9915f75c844a38c5603cd3cdba1816ab95e0b148b100d8f"},
@@ -955,7 +955,7 @@ rich = ["rich"]
 name = "diskcache"
 version = "5.6.3"
 description = "Disk Cache -- Disk and file backed persistent cache."
-optional = false
+optional = true
 python-versions = ">=3"
 files = [
     {file = "diskcache-5.6.3-py3-none-any.whl", hash = "sha256:5e31b2d5fbad117cc363ebaf6b689474db18a1f6438bc82358b024abd4c2ca19"},
@@ -1267,7 +1267,7 @@ files = [
 name = "future"
 version = "1.0.0"
 description = "Clean single-source support for Python 3 and 2"
-optional = false
+optional = true
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 files = [
     {file = "future-1.0.0-py3-none-any.whl", hash = "sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216"},
@@ -1438,10 +1438,43 @@ files = [
 ]
 
 [[package]]
+name = "imageio"
+version = "2.35.1"
+description = "Library for reading and writing a wide range of image, video, scientific, and volumetric data formats."
+optional = true
+python-versions = ">=3.8"
+files = [
+    {file = "imageio-2.35.1-py3-none-any.whl", hash = "sha256:6eb2e5244e7a16b85c10b5c2fe0f7bf961b40fcb9f1a9fd1bd1d2c2f8fb3cd65"},
+    {file = "imageio-2.35.1.tar.gz", hash = "sha256:4952dfeef3c3947957f6d5dedb1f4ca31c6e509a476891062396834048aeed2a"},
+]
+
+[package.dependencies]
+numpy = "*"
+pillow = ">=8.3.2"
+
+[package.extras]
+all-plugins = ["astropy", "av", "imageio-ffmpeg", "psutil", "tifffile"]
+all-plugins-pypy = ["av", "imageio-ffmpeg", "psutil", "tifffile"]
+build = ["wheel"]
+dev = ["black", "flake8", "fsspec[github]", "pytest", "pytest-cov"]
+docs = ["numpydoc", "pydata-sphinx-theme", "sphinx (<6)"]
+ffmpeg = ["imageio-ffmpeg", "psutil"]
+fits = ["astropy"]
+full = ["astropy", "av", "black", "flake8", "fsspec[github]", "gdal", "imageio-ffmpeg", "itk", "numpy (>2)", "numpydoc", "pillow-heif", "psutil", "pydata-sphinx-theme", "pytest", "pytest-cov", "rawpy", "sphinx (<6)", "tifffile", "wheel"]
+gdal = ["gdal"]
+itk = ["itk"]
+linting = ["black", "flake8"]
+pillow-heif = ["pillow-heif"]
+pyav = ["av"]
+rawpy = ["numpy (>2)", "rawpy"]
+test = ["fsspec[github]", "pytest", "pytest-cov"]
+tifffile = ["tifffile"]
+
+[[package]]
 name = "importlib-resources"
 version = "6.4.5"
 description = "Read resources from Python packages"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "importlib_resources-6.4.5-py3-none-any.whl", hash = "sha256:ac29d5f956f01d5e4bb63102a5a19957f1b9175e45649977264a1416783bb717"},
@@ -2205,7 +2238,7 @@ source = ["Cython (>=3.0.11)"]
 name = "markdown-it-py"
 version = "3.0.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "markdown-it-py-3.0.0.tar.gz", hash = "sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"},
@@ -2386,7 +2419,7 @@ files = [
 name = "mdurl"
 version = "0.1.2"
 description = "Markdown URL utilities"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
@@ -2408,7 +2441,7 @@ files = [
 name = "mpmath"
 version = "1.3.0"
 description = "Python library for arbitrary-precision floating-point arithmetic"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "mpmath-1.3.0-py3-none-any.whl", hash = "sha256:a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"},
@@ -2733,7 +2766,7 @@ et-xmlfile = "*"
 name = "optlang"
 version = "1.8.2"
 description = "Formulate optimization problems using sympy expressions and solve them using interfaces to third-party optimization software (e.g. GLPK)."
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "optlang-1.8.2-py2.py3-none-any.whl", hash = "sha256:e990ab097564919c815e11fa9b6301a0af052a73f53c8fb994ad404f38150515"},
@@ -3150,12 +3183,12 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "process-bigraph"
-version = "0.0.19"
+version = "0.0.21"
 description = ""
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "process-bigraph-0.0.19.tar.gz", hash = "sha256:c3378f269120b8f68d4e7f55daec7296e6dc852b7aa6e0ad8f58341f69f52bb1"},
+    {file = "process-bigraph-0.0.21.tar.gz", hash = "sha256:d5063d29ef994c7b6871e16aafdfb675fffb649f7d20cafddeed6b0e7c417b98"},
 ]
 
 [package.dependencies]
@@ -3635,13 +3668,13 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "8.3.2"
+version = "8.3.3"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.3.2-py3-none-any.whl", hash = "sha256:4ba08f9ae7dcf84ded419494d229b48d0903ea6407b030eaec46df5e6a73bba5"},
-    {file = "pytest-8.3.2.tar.gz", hash = "sha256:c132345d12ce551242c87269de812483f5bcc87cdbb4722e48487ba194f9fdce"},
+    {file = "pytest-8.3.3-py3-none-any.whl", hash = "sha256:a6853c7375b2663155079443d2e45de913a911a11d669df02a50814944db57b2"},
+    {file = "pytest-8.3.3.tar.gz", hash = "sha256:70b98107bd648308a7952b06e6ca9a50bc660be218d53c257cc1fc94fda10181"},
 ]
 
 [package.dependencies]
@@ -4374,13 +4407,13 @@ files = [
 
 [[package]]
 name = "rich"
-version = "13.8.0"
+version = "13.8.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
-optional = false
+optional = true
 python-versions = ">=3.7.0"
 files = [
-    {file = "rich-13.8.0-py3-none-any.whl", hash = "sha256:2e85306a063b9492dffc86278197a60cbece75bcb766022f3436f567cae11bdc"},
-    {file = "rich-13.8.0.tar.gz", hash = "sha256:a5ac1f1cd448ade0d59cc3356f7db7a7ccda2c8cbae9c7a90c28ff463d3e91f4"},
+    {file = "rich-13.8.1-py3-none-any.whl", hash = "sha256:1760a3c0848469b97b558fc61c85233e3dafb69c7a071b4d60c38099d3cd4c06"},
+    {file = "rich-13.8.1.tar.gz", hash = "sha256:8260cda28e3db6bf04d2d1ef4dbc03ba80a824c88b0e7668a0f23126a424844a"},
 ]
 
 [package.dependencies]
@@ -4531,7 +4564,7 @@ numpy = ">=1.19"
 name = "ruamel-yaml"
 version = "0.18.6"
 description = "ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "ruamel.yaml-0.18.6-py3-none-any.whl", hash = "sha256:57b53ba33def16c4f3d807c0ccbc00f8a6081827e81ba2491691b76882d0c636"},
@@ -4549,7 +4582,7 @@ jinja2 = ["ruamel.yaml.jinja2 (>=0.2)"]
 name = "ruamel-yaml-clib"
 version = "0.2.8"
 description = "C version of reader, parser and emitter for ruamel.yaml derived from libyaml"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "ruamel.yaml.clib-0.2.8-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:b42169467c42b692c19cf539c38d4602069d8c1505e97b86387fcf7afb766e1d"},
@@ -4976,7 +5009,7 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 name = "swiglpk"
 version = "5.0.10"
 description = "swiglpk - Simple swig bindings for the GNU Linear Programming Kit"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "swiglpk-5.0.10-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:841e87ac08dc7497a3cc738fce188d15140fa800d101c64b1bb8e8fd555c32ae"},
@@ -5043,7 +5076,7 @@ files = [
 name = "sympy"
 version = "1.13.2"
 description = "Computer algebra system (CAS) in Python"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "sympy-1.13.2-py3-none-any.whl", hash = "sha256:c51d75517712f1aed280d4ce58506a4a88d635d6b5dd48b39102a7ae1f3fcfe9"},
@@ -5368,11 +5401,16 @@ files = [
 pyYaml = "*"
 
 [extras]
+amici = ["amici"]
+cobra = ["cobra"]
+copasi = ["copasi-basico"]
 mongo = ["pymongo"]
 simularium = ["simulariumio"]
-simulators = ["amici", "copasi-basico", "smoldyn", "tellurium"]
+simulators = ["amici", "cobra", "copasi-basico", "smoldyn", "tellurium"]
+tellurium = ["tellurium"]
+utc = ["amici", "copasi-basico", "tellurium"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "234548fcf250ea4cf3508124e75556928fa1ba96ad05f733ffd565a2c0d49ef5"
+content-hash = "c3850468f2acd764354b88498435061baeda741b20bb67d723530ea88d8de653"

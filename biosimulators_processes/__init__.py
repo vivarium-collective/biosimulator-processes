@@ -22,6 +22,7 @@ PROCESSES_TO_REGISTER = [
 try:
     import smoldyn
     PROCESSES_TO_REGISTER.append(('smoldyn-process', 'smoldyn_process.SmoldynProcess'))
+    PROCESSES_TO_REGISTER.append(('smoldyn-io-process', 'smoldyn_process.SmoldynIOProcess'))
 except:
     print('Smoldyn is not properly installed in this environment and thus its process implementation cannot be registered. Please consult smoldyn documentation.')
 

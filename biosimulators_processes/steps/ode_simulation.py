@@ -60,7 +60,7 @@ from basico import (
     set_parameters,
     add_parameter)
 from process_bigraph import Step
-from process_bigraph.experiments.parameter_scan import RunProcess
+# from process_bigraph.experiments.parameter_scan import RunProcess
 from biosimulators_utils.combine.io import CombineArchiveReader
 
 from biosimulators_processes import CORE
@@ -365,7 +365,7 @@ class TelluriumStep(UniformTimeCourse):
         pass  # TODO: finish this.
 
 
-class ODEProcess(RunProcess):
+class ODEProcess(dict):
     def __init__(self,
                  address: str,
                  model_fp: str,
