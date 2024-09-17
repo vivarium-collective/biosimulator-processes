@@ -258,12 +258,12 @@
             }
         },
         "substrates_store": {
-            "LacI protein": "3.0",
+            "LacI protein": "1.0",
             "TetR protein": "3.0",
-            "cI protein": "3.0",
+            "cI protein": "1.0",
             "LacI mRNA": "3.0",
             "TetR mRNA": "1.0",
-            "cI mRNA": "3.0"
+            "cI mRNA": "2.0"
         },
         "fluxes_store": {},
         "uptake_rates_store": {},
