@@ -255,11 +255,11 @@
         },
         "substrates_store": {
             "LacI protein": "3.0",
-            "TetR protein": "1.0",
+            "TetR protein": "2.0",
             "cI protein": "1.0",
             "LacI mRNA": "2.0",
-            "TetR mRNA": "1.0",
-            "cI mRNA": "1.0"
+            "TetR mRNA": "3.0",
+            "cI mRNA": "3.0"
         },
         "fluxes_store": {},
         "emitter": {
