@@ -257,19 +257,9 @@
                 "uptake_rates": "tree[float]"
             }
         },
-        "substrates_store": {
-            "LacI protein": "3.0",
-            "TetR protein": "1.0",
-            "cI protein": "3.0",
-            "LacI mRNA": "3.0",
-            "TetR mRNA": "3.0",
-            "cI mRNA": "2.0"
-        },
+        "substrates_store": {},
         "fluxes_store": {},
-        "uptake_rates_store": {
-            "upper": {},
-            "lower": {}
-        },
+        "uptake_rates_store": {},
         "emitter": {
             "_type": "step",
             "address": "local:ram-emitter",
