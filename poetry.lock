@@ -14,9 +14,9 @@ files = [
 cmake-build-extension = "0.6.0"
 mpmath = "*"
 numpy = [
+    {version = ">=1.21.4", markers = "python_version >= \"3.10\" and python_version != \"3.11\" and python_version != \"3.12\""},
     {version = ">=1.23.2", markers = "python_version == \"3.11\""},
     {version = ">=1.26.2", markers = "python_version == \"3.12\""},
-    {version = ">=1.21.4", markers = "python_version >= \"3.10\" and python_version != \"3.11\" and python_version != \"3.12\""},
 ]
 pandas = ">=2.0.2"
 pyarrow = "*"
@@ -2878,9 +2878,9 @@ files = [
 
 [package.dependencies]
 numpy = [
+    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
     {version = ">=1.23.2", markers = "python_version == \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
-    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -3107,13 +3107,13 @@ xarray = ["xarray"]
 
 [[package]]
 name = "platformdirs"
-version = "4.3.3"
+version = "4.3.4"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "platformdirs-4.3.3-py3-none-any.whl", hash = "sha256:50a5450e2e84f44539718293cbb1da0a0885c9d14adf21b77bae4e66fc99d9b5"},
-    {file = "platformdirs-4.3.3.tar.gz", hash = "sha256:d4e0b7d8ec176b341fb03cb11ca12d0276faa8c485f9cd218f613840463fc2c0"},
+    {file = "platformdirs-4.3.4-py3-none-any.whl", hash = "sha256:8b4ba85412f5065dae40aa19feaa02ac2be584c8b14abd70712b5cd11ad80034"},
+    {file = "platformdirs-4.3.4.tar.gz", hash = "sha256:9e8a037c36fe1b1f1b5de4482e60464272cc8dca725e40b568bf2c285f7509cf"},
 ]
 
 [package.extras]
@@ -5393,6 +5393,7 @@ amici = ["amici"]
 cobra = ["cobra"]
 copasi = ["copasi-basico"]
 mongo = ["pymongo"]
+notebook = ["jupyterlab"]
 simularium = ["simulariumio"]
 simulators = ["amici", "cobra", "copasi-basico", "smoldyn", "tellurium"]
 tellurium = ["tellurium"]
@@ -5401,4 +5402,4 @@ utc = ["amici", "biosimulators-utils", "copasi-basico", "tellurium"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "8834ea91f9b6de2a042d42c31eeb74907ae29a0a7b5aeec3bd067370548a73bd"
+content-hash = "774d96c73568923064cf5ba5636ce84eb64db893d770c4c71905194eec30e5f7"
