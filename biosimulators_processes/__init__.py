@@ -11,7 +11,8 @@ from biosimulators_processes.helpers import register_module
 
 # Define a list of processes to attempt to import and register
 PROCESSES_TO_REGISTER = [
-    ('cobra-process', 'cobra_process.CobraProcess'),
+    # ('cobra-process', 'cobra_process.CobraProcess'),
+    # ('cobra-process', 'cobra_process.DynamicFBA'),
     ('copasi-process', 'copasi_process.CopasiProcess'),
     ('tellurium-process', 'tellurium_process.TelluriumProcess'),
     ('utc-amici', 'amici_process.UtcAmici'),

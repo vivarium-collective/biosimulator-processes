@@ -5,149 +5,148 @@ Dynamic FBA simulation
 Process for a pluggable dFBA simulation.
 """
 
-import numpy as np
+import os
 import warnings
+from pathlib import Path
 
+import numpy as np
 import cobra
-from cobra.io import load_model
-from process_bigraph import Process, Composite
+from cobra.io import load_model, read_sbml_model
+from process_bigraph import Process, Composite, ProcessTypes
 
-from biosimulators_processes import CORE
+# from biosimulators_processes import CORE
+from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
 from biosimulators_processes.viz.plot import plot_time_series, plot_species_distributions_to_gif
+
+CORE = ProcessTypes()
+
+
+class CobraProcess(Process):
+    config_schema = {
+        'model': MODEL_TYPE
+    }
+
+    def __init__(self, config, core):
+        super().__init__(config, core)
+
+        # load sbml into cobra
+        model_file = self.config['model']['model_source']
+        data_dir = Path(os.path.dirname(model_file))
+        path = data_dir / model_file.split('/')[-1]
+        self.model = read_sbml_model(str(path.resolve()))
 
 
 # Suppress warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="cobra.util.solver")
-warnings.filterwarnings("ignore", category=FutureWarning, module="cobra.medium.boundary_types")
+# warnings.filterwarnings("ignore", category=UserWarning, module="cobra.util.solver")
+# warnings.filterwarnings("ignore", category=FutureWarning, module="cobra.medium.boundary_types")
+# # create new types
+# def apply_non_negative(schema, current, update, core):
+#     new_value = current + update
+#     return max(0, new_value)
+# def check_sbml(state, schema, core):
+#     # Do something to check that the value is a valid SBML file
+#     valid = cobra.io.sbml.validate_sbml_model(state)  # TODO -- this requires XML
+#     # valid = cobra.io.load_json_model(value)
+#     if valid:
+#         return True
+#     else:
+#         return False
+# positive_float = {
+#     '_type': 'positive_float',
+#     '_inherit': 'float',
+#     '_apply': apply_non_negative
+# }
+# CORE.register('positive_float', positive_float)
+# bounds_type = {
+#     'lower': 'maybe[float]',
+#     'upper': 'maybe[float]'
+# }
+# CORE.register_process('bounds', bounds_type)
+# sbml_type = {
+#     '_inherit': 'string',
+#     '_check': check_sbml,
+#     '_apply': 'set',
+# }
+# # register new types
+# CORE.type_registry.register('sbml', sbml_type)
+# class CobraProcess(Process):
+#     config_schema = {
+#         'model_file': 'sbml',
+#     }
+#     def __init__(self, config=None, core=None):
+#         super().__init__(config, core)
+#         self.model = read_sbml_model(self.config['model_file'])
+#         self.reactions = self.model.reactions
+#         self.metabolites = self.model.metabolites
+#         self.objective = self.model.objective.to_json()['expression']['args'][0]['args'][1]['name']  # TODO -- fix this in cobra
+#         self.boundary = self.model.boundary
+#     def initial_state(self):
+#         solution = self.model.optimize()
+#         optimized_fluxes = solution.fluxes
+#         state = {
+#             'inputs': {
+#                 'reaction_bounds': {}
+#             },
+#             'outputs': {
+#                 'fluxes': {}
+#             }
+#         }
+#         for reaction in self.model.reactions:
+#             state['inputs']['reaction_bounds'][reaction.id] = {
+#                 'lower_bound': reaction.lower_bound,
+#                 'upper_bound': reaction.upper_bound
+#             }
+#             state['outputs']['fluxes'][reaction.id] = optimized_fluxes[reaction.id]
+#         return state
+#     def inputs(self):
+#         return {
+#             'model': 'sbml',
+#             'reaction_bounds': {
+#                 reaction.id: 'bounds' for reaction in self.reactions
+#             },
+#             'objective_reaction': {
+#                 '_type': 'string',
+#                 '_default': self.objective
+#             },
+#         }
+#     def outputs(self):
+#         return {
+#             'fluxes': {
+#                 reaction.id: 'float' for reaction in self.reactions
+#             },
+#             'objective_value': 'float',
+#             'reaction_dual_values': {
+#                 reaction.id: 'float' for reaction in self.reactions
+#             },
+#             'metabolite_dual_values': {
+#                 metabolite.id: 'float' for metabolite in self.metabolites
+#             },
+#             'status': 'string',
+#         }
+#     def update(self, inputs, interval):
+#         # set reaction bounds
+#         reaction_bounds = inputs['reaction_bounds']
+#         for reaction_id, bounds in reaction_bounds.items():
+#             self.model.reactions.get_by_id(reaction_id).bounds = (bounds['lower_bound'], bounds['upper_bound'])
+#         # set objective
+#         # TODO -- look into optlang for specifying objective and constraints
+#         self.model.objective = self.model.reactions.get_by_id(inputs['objective_reaction'])
+#         # run solver
+#         solution = self.model.optimize()
+#         return {
+#             'fluxes': solution.fluxes.to_dict(),
+#             'objective_value': solution.objective_value,
+#             'reaction_dual_values': solution.reduced_costs.to_dict(),
+#             'metabolite_dual_values': solution.shadow_prices.to_dict(),
+#             'status': solution.status,
+#         }
 
-
-# create new types
-def apply_non_negative(schema, current, update, core):
-    new_value = current + update
-    return max(0, new_value)
-
-
-def check_sbml(state, schema, core):
-    # Do something to check that the value is a valid SBML file
-    valid = cobra.io.sbml.validate_sbml_model(state)  # TODO -- this requires XML
-    # valid = cobra.io.load_json_model(value)
-    if valid:
-        return True
-    else:
-        return False
-
-
-positive_float = {
-    '_type': 'positive_float',
-    '_inherit': 'float',
-    '_apply': apply_non_negative
-}
-CORE.register('positive_float', positive_float)
-
-bounds_type = {
-    'lower': 'maybe[float]',
-    'upper': 'maybe[float]'
-}
-CORE.register_process('bounds', bounds_type)
-
-sbml_type = {
-    '_inherit': 'string',
-    '_check': check_sbml,
-    '_apply': 'set',
-}
-
-# register new types
-CORE.type_registry.register('sbml', sbml_type)
 
 # TODO -- can set lower and upper bounds by config instead of hardcoding
 MODEL_FOR_TESTING = load_model('textbook')
 # MODEL_FOR_TESTING.reactions.EX_o2_e.lower_bound = -2  # Limiting oxygen uptake
 # MODEL_FOR_TESTING.reactions.ATPM.lower_bound = 1     # Setting lower bound for ATP maintenance
 # MODEL_FOR_TESTING.reactions.ATPM.upper_bound = 1     # Setting upper bound for ATP maintenance
-
-
-class CobraProcess(Process):
-
-    config_schema = {
-        'model_file': 'sbml',
-    }
-
-    def __init__(self, config=None, core=None):
-        super().__init__(config, core)
-        self.model = read_sbml_model(self.config['model_file'])
-        self.reactions = self.model.reactions
-        self.metabolites = self.model.metabolites
-        self.objective = self.model.objective.to_json()['expression']['args'][0]['args'][1]['name']  # TODO -- fix this in cobra
-        self.boundary = self.model.boundary
-
-    def initial_state(self):
-        solution = self.model.optimize()
-        optimized_fluxes = solution.fluxes
-
-        state = {
-            'inputs': {
-                'reaction_bounds': {}
-            },
-            'outputs': {
-                'fluxes': {}
-            }
-        }
-        for reaction in self.model.reactions:
-            state['inputs']['reaction_bounds'][reaction.id] = {
-                'lower_bound': reaction.lower_bound,
-                'upper_bound': reaction.upper_bound
-            }
-            state['outputs']['fluxes'][reaction.id] = optimized_fluxes[reaction.id]
-        return state
-
-    def inputs(self):
-        return {
-            'model': 'sbml',
-            'reaction_bounds': {
-                reaction.id: 'bounds' for reaction in self.reactions
-            },
-            'objective_reaction': {
-                '_type': 'string',
-                '_default': self.objective
-            },
-        }
-
-    def outputs(self):
-        return {
-            'fluxes': {
-                reaction.id: 'float' for reaction in self.reactions
-            },
-            'objective_value': 'float',
-            'reaction_dual_values': {
-                reaction.id: 'float' for reaction in self.reactions
-            },
-            'metabolite_dual_values': {
-                metabolite.id: 'float' for metabolite in self.metabolites
-            },
-            'status': 'string',
-        }
-
-
-    def update(self, inputs, interval):
-        # set reaction bounds
-        reaction_bounds = inputs['reaction_bounds']
-        for reaction_id, bounds in reaction_bounds.items():
-            self.model.reactions.get_by_id(reaction_id).bounds = (bounds['lower_bound'], bounds['upper_bound'])
-
-        # set objective
-        # TODO -- look into optlang for specifying objective and constraints
-        self.model.objective = self.model.reactions.get_by_id(inputs['objective_reaction'])
-
-        # run solver
-        solution = self.model.optimize()
-
-        return {
-            'fluxes': solution.fluxes.to_dict(),
-            'objective_value': solution.objective_value,
-            'reaction_dual_values': solution.reduced_costs.to_dict(),
-            'metabolite_dual_values': solution.shadow_prices.to_dict(),
-            'status': solution.status,
-        }
 
 
 class DynamicFBA(Process):
@@ -397,27 +396,22 @@ def run_dfba_spatial(
     dfba_results = sim.gather_results()
     # print(dfba_results)
 
-    print('Plotting results...')
-    # plot timeseries
-    plot_time_series(
-        dfba_results,
-        coordinates=[(0, 0), (1, 1), (2, 2)],
-        out_dir='out',
-        filename='dfba_timeseries.png',
-    )
+    # print('Plotting results...')
+    # # plot timeseries
+    # plot_time_series(
+    #     dfba_results,
+    #     coordinates=[(0, 0), (1, 1), (2, 2)],
+    #     out_dir='out',
+    #     filename='dfba_timeseries.png',
+    # )
+    # # make video
+    # plot_species_distributions_to_gif(
+    #     dfba_results,
+    #     out_dir='out',
+    #     filename='dfba_results.gif',
+    #     title='',
+    #     skip_frames=1
+    # )
 
-    # make video
-    plot_species_distributions_to_gif(
-        dfba_results,
-        out_dir='out',
-        filename='dfba_results.gif',
-        title='',
-        skip_frames=1
-    )
+    return dfba_results
 
-
-
-
-
-# if __name__ == '__main__':
-    # run_dfba_spatial()
