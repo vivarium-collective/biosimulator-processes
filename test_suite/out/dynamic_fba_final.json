@@ -1,0 +1,321 @@
+{
+    "state": {
+        "global_time": "10.0",
+        "ode": {
+            "_type": "process",
+            "address": "local:copasi",
+            "config": {
+                "model": {
+                    "model_id": "",
+                    "model_source": "/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/test_suite/examples/sbml-core/Elowitz-Nature-2000-Repressilator/BIOMD0000000012_url.xml",
+                    "model_language": "sbml",
+                    "model_name": "composite_process_model",
+                    "model_changes": {},
+                    "model_units": {}
+                },
+                "method": "deterministic"
+            },
+            "inputs": {
+                "time": [
+                    "time_store"
+                ],
+                "floating_species_concentrations": [
+                    "floating_species_concentrations_store"
+                ],
+                "model_parameters": [
+                    "model_parameters_store"
+                ],
+                "reactions": [
+                    "reactions_store"
+                ]
+            },
+            "outputs": {
+                "time": [
+                    "time_store"
+                ],
+                "floating_species_concentrations": [
+                    "floating_species_concentrations_store"
+                ],
+                "reactions": [
+                    "reactions_store"
+                ]
+            },
+            "interval": 1.0,
+            "_inputs": {
+                "time": "float",
+                "floating_species_concentrations": {
+                    "LacI protein": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "TetR protein": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "cI protein": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "LacI mRNA": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "TetR mRNA": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "cI mRNA": {
+                        "_type": "float",
+                        "_apply": "set"
+                    }
+                },
+                "model_parameters": {
+                    "beta": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "alpha0": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "alpha": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "translation efficiency": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "n": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "KM": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "mRNA half life": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "protein half life": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "average mRNA life time": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "kd_mRNA": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "kd_prot": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "k_tl": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "a_tr": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "tps_active": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "tps_repr": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "a0_tr": {
+                        "_type": "float",
+                        "_apply": "set"
+                    }
+                },
+                "reactions": "tree[string]"
+            },
+            "_outputs": {
+                "time": "float",
+                "floating_species_concentrations": {
+                    "LacI protein": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "TetR protein": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "cI protein": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "LacI mRNA": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "TetR mRNA": {
+                        "_type": "float",
+                        "_apply": "set"
+                    },
+                    "cI mRNA": {
+                        "_type": "float",
+                        "_apply": "set"
+                    }
+                },
+                "reactions": "tree[string]"
+            }
+        },
+        "time_store": "0.0",
+        "floating_species_concentrations_store": {
+            "LacI protein": "4508.036837223343",
+            "TetR protein": "4953.412163246545",
+            "cI protein": "1239.7254754121607",
+            "LacI mRNA": "132.59911818916152",
+            "TetR mRNA": "132.5005229205225",
+            "cI mRNA": "30.000620895204452"
+        },
+        "model_parameters_store": {
+            "beta": "0.2",
+            "alpha0": "0.21640425613334452",
+            "alpha": "216.18785187721116",
+            "translation efficiency": "20.0",
+            "n": "2.0",
+            "KM": "40.0",
+            "mRNA half life": "2.0",
+            "protein half life": "10.0",
+            "average mRNA life time": "2.8853900817779268",
+            "kd_mRNA": "0.34657359027997264",
+            "kd_prot": "0.06931471805599453",
+            "k_tl": "6.931471805599453",
+            "a_tr": "29.97",
+            "tps_active": "0.5",
+            "tps_repr": "0.0005",
+            "a0_tr": "0.03"
+        },
+        "reactions_store": {
+            "degradation of LacI transcripts": "\"LacI mRNA\" -> ",
+            "degradation of TetR transcripts": "\"TetR mRNA\" -> ",
+            "degradation of CI transcripts": "\"cI mRNA\" -> ",
+            "translation of LacI": " -> \"LacI protein\";  \"LacI mRNA\"",
+            "translation of TetR": " -> \"TetR protein\";  \"TetR mRNA\"",
+            "translation of CI": " -> \"cI protein\";  \"cI mRNA\"",
+            "degradation of LacI": "\"LacI protein\" -> ",
+            "degradation of TetR": "\"TetR protein\" -> ",
+            "degradation of CI": "\"cI protein\" -> ",
+            "transcription of LacI": " -> \"LacI mRNA\";  \"cI protein\"",
+            "transcription of TetR": " -> \"TetR mRNA\";  \"LacI protein\"",
+            "transcription of CI": " -> \"cI mRNA\";  \"TetR protein\""
+        },
+        "fba": {
+            "_type": "process",
+            "address": "local:fba",
+            "config": {
+                "model": {
+                    "model_id": "",
+                    "model_source": "/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/test_suite/examples/sbml-core/Elowitz-Nature-2000-Repressilator/BIOMD0000000012_url.xml",
+                    "model_language": "sbml",
+                    "model_name": "composite_process_model",
+                    "model_changes": {},
+                    "model_units": {}
+                },
+                "model_name": "FBA"
+            },
+            "inputs": {
+                "floating_species_concentrations": [
+                    "floating_species_concentrations_store"
+                ],
+                "substrates": [
+                    "substrates_store"
+                ],
+                "reactions": [
+                    "reactions_store"
+                ]
+            },
+            "outputs": {
+                "substrates": [
+                    "substrates_store"
+                ],
+                "fluxes": [
+                    "fluxes_store"
+                ],
+                "uptake_rates": [
+                    "uptake_rates_store"
+                ]
+            },
+            "interval": 1.0,
+            "_inputs": {
+                "reactions": "tree[string]",
+                "substrates": "tree[float]",
+                "floating_species_concentrations": "tree[float]"
+            },
+            "_outputs": {
+                "substrates": "tree[float]",
+                "fluxes": "tree[float]",
+                "uptake_rates": "tree[float]"
+            }
+        },
+        "substrates_store": {
+            "LacI protein": "13.958656247049348",
+            "TetR protein": "22.94669020000427",
+            "cI protein": "16.741925064691124",
+            "LacI mRNA": "16.47936172455444",
+            "TetR mRNA": "21.18101970917744",
+            "cI mRNA": "17.796644004675915"
+        },
+        "fluxes_store": {
+            "degradation of LacI transcripts": "16.479361724554447",
+            "degradation of TetR transcripts": "21.18101970917747",
+            "degradation of CI transcripts": "17.796644004675912",
+            "translation of LacI": "13.958656247049262",
+            "translation of TetR": "22.94669020000355",
+            "translation of CI": "16.741925064691134",
+            "degradation of LacI": "13.958656247049262",
+            "degradation of TetR": "22.94669020000355",
+            "degradation of CI": "16.741925064691134",
+            "transcription of LacI": "16.479361724554447",
+            "transcription of TetR": "21.18101970917747",
+            "transcription of CI": "17.796644004675912"
+        },
+        "uptake_rates_store": {
+            "upper": "17.796644004675912",
+            "lower": "-17.796644004675912"
+        },
+        "emitter": {
+            "_type": "step",
+            "address": "local:ram-emitter",
+            "config": {
+                "emit": {
+                    "floating_species_concentrations": "tree[float]",
+                    "substrates": "tree[float]",
+                    "fluxes": "tree[float]",
+                    "uptake_rates": "tree[float]"
+                }
+            },
+            "inputs": {
+                "floating_species_concentrations": [
+                    "floating_species_concentrations_store"
+                ],
+                "substrates": [
+                    "substrates_store"
+                ],
+                "fluxes": [
+                    "fluxes_store"
+                ],
+                "uptake_rates": [
+                    "uptake_rates_store"
+                ]
+            },
+            "_inputs": {
+                "floating_species_concentrations": "tree[float]",
+                "substrates": "tree[float]",
+                "fluxes": "tree[float]",
+                "uptake_rates": "tree[float]"
+            },
+            "_outputs": {},
+            "outputs": {}
+        }
+    }
+}
