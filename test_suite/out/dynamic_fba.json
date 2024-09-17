@@ -240,6 +240,9 @@
                 ],
                 "fluxes": [
                     "fluxes_store"
+                ],
+                "uptake_rates": [
+                    "uptake_rates_store"
                 ]
             },
             "interval": 1.0,
@@ -250,18 +253,20 @@
             },
             "_outputs": {
                 "substrates": "tree[float]",
-                "fluxes": "tree[float]"
+                "fluxes": "tree[float]",
+                "uptake_rates": "tree[float]"
             }
         },
         "substrates_store": {
             "LacI protein": "3.0",
-            "TetR protein": "2.0",
-            "cI protein": "1.0",
-            "LacI mRNA": "2.0",
-            "TetR mRNA": "3.0",
+            "TetR protein": "3.0",
+            "cI protein": "3.0",
+            "LacI mRNA": "3.0",
+            "TetR mRNA": "1.0",
             "cI mRNA": "3.0"
         },
         "fluxes_store": {},
+        "uptake_rates_store": {},
         "emitter": {
             "_type": "step",
             "address": "local:ram-emitter",
@@ -269,7 +274,8 @@
                 "emit": {
                     "floating_species_concentrations": "tree[float]",
                     "substrates": "tree[float]",
-                    "fluxes": "tree[float]"
+                    "fluxes": "tree[float]",
+                    "uptake_rates": "tree[float]"
                 }
             },
             "inputs": {
@@ -281,12 +287,16 @@
                 ],
                 "fluxes": [
                     "fluxes_store"
+                ],
+                "uptake_rates": [
+                    "uptake_rates_store"
                 ]
             },
             "_inputs": {
                 "floating_species_concentrations": "tree[float]",
                 "substrates": "tree[float]",
-                "fluxes": "tree[float]"
+                "fluxes": "tree[float]",
+                "uptake_rates": "tree[float]"
             },
             "_outputs": {},
             "outputs": {}
