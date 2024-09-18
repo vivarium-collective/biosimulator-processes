@@ -14,11 +14,10 @@ import cobra
 from cobra.io import load_model, read_sbml_model
 from process_bigraph import Process, Composite, ProcessTypes
 
-# from biosimulators_processes import CORE
+from biosimulators_processes import CORE
 from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
+from biosimulators_processes.simulator_functions import SIMULATOR_FUNCTIONS
 from biosimulators_processes.viz.plot import plot_time_series, plot_species_distributions_to_gif
-
-CORE = ProcessTypes()
 
 
 class CobraProcess(Process):
@@ -141,15 +140,13 @@ class CobraProcess(Process):
 #             'status': solution.status,
 #         }
 
+# MAKE DFBA PROCESS WITH SIMULATOR FUNC!
 
 # TODO -- can set lower and upper bounds by config instead of hardcoding
 MODEL_FOR_TESTING = load_model('textbook')
-# MODEL_FOR_TESTING.reactions.EX_o2_e.lower_bound = -2  # Limiting oxygen uptake
-# MODEL_FOR_TESTING.reactions.ATPM.lower_bound = 1     # Setting lower bound for ATP maintenance
-# MODEL_FOR_TESTING.reactions.ATPM.upper_bound = 1     # Setting upper bound for ATP maintenance
 
 
-class DynamicFBA(Process):
+class _DynamicFBA(Process):
     """
     Performs dynamic FBA.
 
