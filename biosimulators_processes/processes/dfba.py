@@ -59,9 +59,16 @@ class DynamicFBA(Process):
         return {'solution': 'tree[float]'}
 
     def update(self, state, interval):
-        species_output_names = get_species(model=self.utc_model).index.tolist()
+        # get state TODO: move this to initial_state()
+        initial_spec_data = get_species(model=self.utc_model)
+        species_output_names = initial_spec_data.index.tolist()
         reactions = self.fba_model.reactions
         reaction_mappings = self._generate_reaction_mappings(species_output_names, reactions)
+        initial_concentrations = list(initial_spec_data.initial_concentration.to_dict().values())
+
+        # run dfba and get solution
+        solution = self._run_dfba_simulation(species_output_names, initial_concentrations, reaction_mappings)
+        return {'solution': solution}
 
     def _set_dynamic_bounds(self, model, concentration_dict, mappings):
         """
@@ -119,8 +126,7 @@ class DynamicFBA(Process):
 
         return fluxes
 
-    # Step 5: Initialize the initial conditions and run the dFBA simulation
-    def run_dfba_simulation(self, species_names, initial_concentrations, mappings):
+    def _run_dfba_simulation(self, species_names, initial_concentrations, mappings):
         """
         Run the dynamic FBA (dFBA) simulation using the dynamic system and solve_ivp.
 
