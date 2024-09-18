@@ -60,11 +60,11 @@ class DynamicFBA(Process):
 
     def update(self, state, interval):
         # get state TODO: move this to initial_state()
-        initial_spec_data = get_species(model=self.utc_model)
-        species_output_names = initial_spec_data.index.tolist()
+        spec_data = get_species(model=self.utc_model)
+        species_output_names = spec_data.index.tolist()
         reactions = self.fba_model.reactions
         reaction_mappings = self._generate_reaction_mappings(species_output_names, reactions)
-        initial_concentrations = list(initial_spec_data.initial_concentration.to_dict().values())
+        initial_concentrations = list(spec_data.initial_concentration.to_dict().values())
 
         # run dfba and get solution
         solution = self._run_dfba_simulation(species_output_names, initial_concentrations, reaction_mappings)
@@ -115,7 +115,8 @@ class DynamicFBA(Process):
             model=self.utc_model,
             start=t,
             end=t + 0.1,  # Small time step
-            steps=1
+            steps=1,
+            update_model=True
         )
 
         # Extract fluxes from the simulation results
