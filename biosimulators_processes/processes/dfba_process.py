@@ -10,6 +10,7 @@ from cobra.io import read_sbml_model
 from basico import *
 from process_bigraph import Process, Composite, ProcessTypes
 from scipy.integrate import solve_ivp
+from scipy.integrate._ivp.ivp import OdeResult
 
 from biosimulators_processes import CORE
 from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
@@ -52,10 +53,10 @@ class DynamicFBA(Process):
         # 1. get initial species concentrations from simulator
         # 2. influence fba bounds with #1
         # 3. call cobra_model.optimize() and give vals
-        pass
+        return {}
 
     def inputs(self):
-        pass
+        return {}
 
     def outputs(self):
         return {'solution': 'tree[float]'}
@@ -70,7 +71,18 @@ class DynamicFBA(Process):
 
         # run dfba and get solution
         solution = self._run_dfba_simulation(species_output_names, initial_concentrations, reaction_mappings)
-        return {'solution': solution.to_frame().to_dict()}
+        output = {'solution': {}}
+        if isinstance(solution, OdeResult):
+            output['solution'] = {
+                't': solution.t,
+                'y': solution.y,
+                'success': solution.success,
+                't_events': solution.t_events,
+                'y_events': solution.y_events
+            }
+        else:
+            output['solution'] = solution.to_frame().to_dict()
+        return output
 
     def _set_dynamic_bounds(self, model, concentration_dict, mappings):
         """
@@ -155,7 +167,7 @@ class DynamicFBA(Process):
         mappings = []
         for reaction in reactions:
             for name in output_names:
-                rxn = [r.lower() for r in list(reaction.values()).split(" ")]
+                rxn = reaction.name.lower().split(" ")  # [r.lower() for r in list(reaction.values()).split(" ")]
                 obs_name = name.split(" ")[0].lower()
                 obs_type = name.split(" ")[-1]
                 if obs_name in rxn:
