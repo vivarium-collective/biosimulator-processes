@@ -11,8 +11,7 @@ from biosimulators_processes.helpers import register_module
 
 # Define a list of processes to attempt to import and register
 PROCESSES_TO_REGISTER = [
-    # ('cobra-process', 'cobra_process.CobraProcess'),
-    # ('cobra-process', 'cobra_process.DynamicFBA'),
+    ('dfba-process', 'dfba_process.DynamicFBA'),
     ('copasi-process', 'copasi_process.CopasiProcess'),
     ('tellurium-process', 'tellurium_process.TelluriumProcess'),
     ('utc-amici', 'amici_process.UtcAmici'),
@@ -35,7 +34,7 @@ STEPS_TO_REGISTER = [
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d'),
     ('utc-comparator', 'comparator_step.UtcComparator'),
-    ('smoldyn-step', 'bio_compose.SmoldynStep'),
+    # ('smoldyn-step', 'bio_compose.SmoldynStep'),
     ('simularium-smoldyn-step', 'bio_compose.SimulariumSmoldynStep'),
     ('database-emitter', 'bio_compose.MongoDatabaseEmitter')
     # ('simple-neuron', 'neuron_network.SimpleNeuron'),
