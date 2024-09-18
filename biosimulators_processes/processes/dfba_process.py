@@ -16,6 +16,8 @@ from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
 from biosimulators_processes.simulator_functions import SIMULATOR_FUNCTIONS
 
 
+# TODO: possibly take in input state of copasi concentrations instead of hardcoded current implementation
+
 class DynamicFBA(Process):
     config_schema = {
         'model': MODEL_TYPE,
@@ -68,7 +70,7 @@ class DynamicFBA(Process):
 
         # run dfba and get solution
         solution = self._run_dfba_simulation(species_output_names, initial_concentrations, reaction_mappings)
-        return {'solution': solution}
+        return {'solution': solution.to_frame().to_dict()}
 
     def _set_dynamic_bounds(self, model, concentration_dict, mappings):
         """
