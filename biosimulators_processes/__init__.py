@@ -13,6 +13,8 @@ from biosimulators_processes.helpers import register_module
 PROCESSES_TO_REGISTER = [
     ('dfba-process', 'dfba_process.DynamicFBA'),
     ('copasi-process', 'copasi_process.CopasiProcess'),
+    ('copasi', 'copasi_process.Copasi'),
+    ('cobra', 'fba_process.Cobra'),
     ('tellurium-process', 'tellurium_process.TelluriumProcess'),
     ('utc-amici', 'amici_process.UtcAmici'),
     ('utc-copasi', 'copasi_process.UtcCopasi'),

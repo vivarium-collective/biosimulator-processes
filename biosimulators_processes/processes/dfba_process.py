@@ -1,188 +1,322 @@
 import os
 import warnings
 from pathlib import Path
-from types import FunctionType
-from typing import *
 
-import numpy as np
-import cobra
-from cobra.io import read_sbml_model
-from basico import *
-from process_bigraph import Process, Composite, ProcessTypes
 from scipy.integrate import solve_ivp
-from scipy.integrate._ivp.ivp import OdeResult
+import matplotlib.pyplot as plt
+import cobra
+from cobra.io import load_model as load_cobra, read_sbml_model
+from basico import * 
+import numpy as np
+from tqdm import tqdm
+from process_bigraph import Process
 
+from biosimulators_processes.helpers import generate_reaction_mappings
 from biosimulators_processes import CORE
 from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
-from biosimulators_processes.simulator_functions import SIMULATOR_FUNCTIONS
+
+
+# Suppress warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="cobra.util.solver")
+warnings.filterwarnings("ignore", category=FutureWarning, module="cobra.medium.boundary_types")
+
+# TODO -- can set lower and upper bounds by config instead of hardcoding
+MODEL_FOR_TESTING = load_cobra('textbook')
 
 
 # TODO: possibly take in input state of copasi concentrations instead of hardcoded current implementation
 
 class DynamicFBA(Process):
+    """
+    Performs dynamic FBA.
+
+    Parameters:
+    - model: The metabolic model for the simulation.
+    - kinetic_params: Kinetic parameters (Km and Vmax) for each substrate.
+    - biomass_reaction: The identifier for the biomass reaction in the model.
+    - substrate_update_reactions: A dictionary mapping substrates to their update reactions.
+    - biomass_identifier: The identifier for biomass in the current state.
+
+    TODO -- check units
+    """
+
     config_schema = {
-        'model': MODEL_TYPE,
-        'simulator': {  # TODO: expand this
+        'model_file': 'string',
+        'model': 'Any',
+        'kinetic_params': 'map[tuple[float,float]]',
+        'biomass_reaction': {
             '_type': 'string',
-            '_default': 'copasi'
+            '_default': 'Biomass_Ecoli_core'
         },
-        'start': 'integer',
-        'stop': 'integer',
-        'steps': 'integer'
+        'substrate_update_reactions': 'map[string]',
+        'biomass_identifier': 'string',
+        'bounds': 'map[bounds]',
     }
 
     def __init__(self, config, core):
         super().__init__(config, core)
-        model_file = self.config['model']['model_source']
-        self.simulator = self.config['simulator']
 
-        # create cobra model
-        data_dir = Path(os.path.dirname(model_file))
-        path = data_dir / model_file.split('/')[-1]
-        self.fba_model = read_sbml_model(str(path.resolve()))
+        if self.config['model_file'] == 'TESTING':
+            self.model = MODEL_FOR_TESTING
+        elif not 'xml' in self.config['model_file']:
+            # use the textbook model if no model file is provided
+            self.model = load_model(self.config['model_file'])
+        elif isinstance(self.config['model_file'], str):
+            self.model = cobra.io.read_sbml_model(self.config['model_file'])
+        else:
+            # error handling
+            raise ValueError('Invalid model file')
 
-        # create utc model (copasi)
-        self.utc_model = load_model(model_file)
-
-        # set time params
-        self.start = self.config['start']
-        self.stop = self.config['stop']
-        self.steps = self.config['steps']
-
-    def initial_state(self):
-        # 1. get initial species concentrations from simulator
-        # 2. influence fba bounds with #1
-        # 3. call cobra_model.optimize() and give vals
-        return {}
+        for reaction_id, bounds in self.config['bounds'].items():
+            if bounds['lower'] is not None:
+                self.model.reactions.get_by_id(reaction_id).lower_bound = bounds['lower']
+            if bounds['upper'] is not None:
+                self.model.reactions.get_by_id(reaction_id).upper_bound = bounds['upper']
 
     def inputs(self):
-        return {}
+        return {
+            'substrates': 'map[positive_float]'
+        }
 
     def outputs(self):
-        return {'solution': 'tree[float]'}
+        return {
+            'substrates': 'map[positive_float]'
+        }
 
+    # TODO -- can we just put the inputs/outputs directly in the function?
     def update(self, state, interval):
-        # get state TODO: move this to initial_state()
-        spec_data = get_species(model=self.utc_model)
-        species_output_names = spec_data.index.tolist()
-        reactions = self.fba_model.reactions
-        reaction_mappings = self._generate_reaction_mappings(species_output_names, reactions)
-        initial_concentrations = list(spec_data.initial_concentration.to_dict().values())
+        substrates_input = state['substrates']
 
-        # run dfba and get solution
-        solution = self._run_dfba_simulation(species_output_names, initial_concentrations, reaction_mappings)
-        output = {'solution': {}}
-        if isinstance(solution, OdeResult):
-            output['solution'] = {
-                't': solution.t,
-                'y': solution.y,
-                'success': solution.success,
-                't_events': solution.t_events,
-                'y_events': solution.y_events
-            }
+        for substrate, reaction_id in self.config['substrate_update_reactions'].items():
+            Km, Vmax = self.config['kinetic_params'][substrate]
+            substrate_concentration = substrates_input[substrate]
+            uptake_rate = Vmax * substrate_concentration / (Km + substrate_concentration)
+            self.model.reactions.get_by_id(reaction_id).lower_bound = -uptake_rate
+
+        substrate_update = {}
+
+        solution = self.model.optimize()
+        if solution.status == 'optimal':
+            current_biomass = substrates_input[self.config['biomass_identifier']]
+            biomass_growth_rate = solution.fluxes[self.config['biomass_reaction']]
+            substrate_update[self.config['biomass_identifier']] = biomass_growth_rate * current_biomass * interval
+
+            for substrate, reaction_id in self.config['substrate_update_reactions'].items():
+                flux = solution.fluxes[reaction_id] * current_biomass * interval
+                old_concentration = substrates_input[substrate]
+                new_concentration = max(old_concentration + flux, 0)  # keep above 0
+                substrate_update[substrate] = new_concentration - old_concentration
+                # TODO -- assert not negative?
         else:
-            output['solution'] = solution.to_frame().to_dict()
-        return output
+            # Handle non-optimal solutions if necessary
+            # print('Non-optimal solution, skipping update')
+            for substrate, reaction_id in self.config['substrate_update_reactions'].items():
+                substrate_update[substrate] = 0
 
-    def _set_dynamic_bounds(self, model, concentration_dict, mappings):
-        """
-        Update reaction bounds dynamically based on species concentrations.
+        return {
+            'substrates': substrate_update,
+        }
 
-        Parameters:
-            model: The COPASI model object
-            concentration_dict: Dictionary of species concentrations (floating concentrations)
-            mappings: List of reaction mappings (from species to reactions)
-        """
-        for species, concentration in concentration_dict.items():
-            for mapping in mappings:
-                if species in mapping:
-                    reaction_name = mapping[species]
-                    # TODO: adjust lower bound based on concentration (you can modify logic as needed)
-                    max_import = -10 * concentration / (5 + concentration)
-                    set_reaction_parameters(
-                        name='lower_bound',
-                        value=max_import,
-                        reaction_name=reaction_name,
-                        model=model
-                    )
 
-    def _dynamic_system(self, t, y, species_names, mappings):
-        """
-        Calculate time derivatives of species using a dynamic system.
+def add_dynamic_bounds(*args):
+    """
+    # 1. get reaction mappings 
+    # 2. y = get_species(model=copasi).initial_concentration.values
+    # 3. for each species in y, calculate max import (TODO: make this specific)
+    # 4. for each species mapping, use the dict val (reaction name) to say fba_model.reactions.get_by_id(reaction_name) = max_import
+    """
+    # Zip species names and their corresponding concentrations for iteration
+    fba_model = args[0]
+    y = args[1]
+    mappings = args[2]
+    species_concentrations = y  # dict(zip(species_names, y))
+    for mapping in mappings:
+        for species, reaction_name in mapping.items():  # Each mapping is a dictionary like {'LacI mRNA': 'degradation of LacI transcripts'}
+            if species in species_concentrations:
+                concentration = species_concentrations[species]
+                rxn_id = reaction_name.replace(" ", "_")
+                for reaction in fba_model.reactions:
+                    # TODO: make this more specific
+                    if "degradation" in reaction_name:
+                        max_import = -10 * concentration / (5 + concentration)
+                        fba_model.reactions.get_by_id(reaction.id).lower_bound = max_import
+                    elif "transcription" in reaction_name:
+                        max_import = 5 * concentration / (3 + concentration)
+                        fba_model.reactions.get_by_id(reaction.id).lower_bound = max_import
+                    elif "translation" in reaction_name:
+                        max_import = 8 * concentration / (4 + concentration)
+                        fba_model.reactions.get_by_id(reaction.id).lower_bound = max_import
 
-        Parameters:
-            t: Current time
-            y: Array of species concentrations
-            mappings: List of mappings (species to reactions)
 
-        Returns:
-            Fluxes calculated based on current concentrations
-        """
-        # Convert the concentrations array (y) into a dictionary for easier handling
-        concentration_dict = dict(zip(species_names, y))
+def apply_mm_kinetics(concentration, Vmax, Km):
+    """Apply Michaelis-Menten kinetics to calculate the flux."""
+    return (Vmax * concentration) / (Km + concentration)
 
-        # Dynamically update reaction bounds based on the current concentrations
-        self._set_dynamic_bounds(self.utc_model, concentration_dict, mappings)
 
-        # Run the time course for a single time step (you can adjust the logic here)
-        results = run_time_course(
-            model=self.utc_model,
-            start=t,
-            end=t + 0.1,  # Small time step
-            steps=1,
-            update_model=True
-        )
+n_dynamic_system_calls = 0
 
-        # Extract fluxes from the simulation results
-        fluxes = []
-        for species in species_names:
-            flux = results[species].values[-1]  # Extract the last value for the species
-            fluxes.append(flux)
+def dynamic_system(t, y, fba_model, utc_model, mappings):
+    # The issue with less time point data vs appropriate scale specified will be solvved with pbg if we simply connect to the copasi process output ports as inputs 
+    # reference global store TODO: this will be state arg within the Pbg update method
+    global n_dynamic_system_calls
+    n_dynamic_system_calls += 1
+    global input_state 
+    # calc duration TODO: again this will be done by pbg
+    t_prev = input_state['time'][-1]
+    # run copasi for teh given dur
+    run_time_course(t_prev, t, 1, model=utc_model, update_model=True, use_numbers=True)
+    # output_names = get_species(model=copasi).index.tolist()
+    # run_time_course_with_output(output_selection=output_names, intervals=1, model=copasi, update_model=True, use_numbers=True)
+    # track times TODO: this will be done by pbg as output AND input ports
+    input_state['time'].append(t)
+    # set y to this value array
+    y = get_species(model=utc_model)['concentration'].to_dict()
+    # update global store TODO: do this with process bigraph
+    for name, value in y.items():
+        input_state['floating_species_concentrations'][name].append(value)
+        concentrations[name].append(value)
+    # update the FBA model's reaction bounds using species concentrations and mappings
+    add_dynamic_bounds(fba_model, utc_model, y, mappings)
+    # Run FBA with updated bounds and calculate fluxes, first clearing constraints
+    # cobra.util.add_lp_feasibility(fba_model)
+    fba_model = add_lp_feasibility_with_check(fba_model)
+    feasibility = cobra.util.fix_objective_as_constraint(fba_model)
+    # Example of reactions to optimize (can vary based on your specific model)
+    reaction_list = [rxn.id for rxn in fba_model.reactions]
+    obj_directions = ['max' for _ in reaction_list]  # TODO: make this more fine-grained
+    lex_constraints = cobra.util.add_lexicographic_constraints(fba_model, reaction_list, obj_directions)
+    # scale fluxes by the concentration for each species at time t: either for biomass or by mm kinetics
+    fluxes = []
+    for species, concentration in y.items():
+        if species in concentrations.keys():
+            # handle scaling by biomass
+            if species == 'biomass':
+                biomass_concentration = y['biomass']
+                flux = lex_constraints.values * biomass_concentration
+                fluxes.append(flux)
+            else:
+                # handle scaling by mm kinetics TODO: change this to be dynamic input
+                Vmax, Km = 10, 5
+                flux = apply_mm_kinetics(concentration, Vmax, Km)
+                fluxes.append(flux)
+        else:
+            # give raw values if not TODO: handle this differently
+            fluxes.append(lex_constraints.values)
+    # update progress bar
+    if dynamic_system.pbar is not None:
+        dynamic_system.pbar.update(1)
+        dynamic_system.pbar.set_description(f't = {t:.3f}')
+    return fluxes
 
-        return fluxes
 
-    def _run_dfba_simulation(self, species_names, initial_concentrations, mappings):
-        """
-        Run the dynamic FBA (dFBA) simulation using the dynamic system and solve_ivp.
+dynamic_system.pbar = None
 
-        Parameters:
-            species_names: Names of species to simulate
-            initial_concentrations: Initial concentrations for the species
-            mappings: List of mappings (species to reactions)
-        """
-        time_points = np.linspace(self.start, self.stop, self.steps)  # From 0 to 15, with 100 time points
+
+def infeasible_event(t, y, fba_model, utc_model, mappings):
+    """
+    Determine solution feasibility.
+
+    Avoiding infeasible solutions is handled by solve_ivp's built-in event detection.
+    This function re-solves the LP to determine whether or not the solution is feasible
+    (and if not, how far it is from feasibility). When the sign of this function changes
+    from -epsilon to positive, we know the solution is no longer feasible.
+
+    """
+    with fba_model:
+        add_dynamic_bounds(fba_model, utc_model, y, mappings)
+        # cobra.util.add_lp_feasibility(fba_model)
+        updated_model = add_lp_feasibility_with_check(fba_model)
+        feasibility = cobra.util.fix_objective_as_constraint(updated_model)
+        # feasibility = fba_model.optimize().objective_value 
+
+    val = feasibility - infeasible_event.epsilon
+    return val
+
+
+def add_lp_feasibility_with_check(fba_model):
+    """Add LP feasibility constraints with a check for existing constraints."""
+    prob = fba_model.problem  # Access the solver
+
+    for met in fba_model.metabolites:
+        # Check if the feasibility variables already exist and remove them
+        s_plus_name = "s_plus_" + met.id
+        s_minus_name = "s_minus_" + met.id
+        
+        if s_plus_name in fba_model.variables:
+            fba_model.remove_cons_vars(fba_model.variables[s_plus_name])
+        if s_minus_name in fba_model.variables:
+            fba_model.remove_cons_vars(fba_model.variables[s_minus_name])
+        
+        # Now add the new variables
+        s_plus = prob.Variable(s_plus_name, lb=0)
+        s_minus = prob.Variable(s_minus_name, lb=0)
+        
+        fba_model.add_cons_vars([s_plus, s_minus])
+
+        # Add constraint if missing
+        if met.id not in fba_model.constraints:
+            fba_model.constraints[met.id] = prob.Constraint(0, name=met.id)
+        
+        # Set the linear coefficients
+        fba_model.constraints[met.id].set_linear_coefficients({s_plus: 1.0, s_minus: -1.0})
+
+    return fba_model
+
+
+def run_dfba():
+    # time params TODO: make these config params
+    start = 400
+    stop = 1000
+    steps = 600
+    ts = np.linspace(start, stop, steps + 1)
+
+    # initial state
+    global concentrations
+    global input_state 
+    initial_concentrations = get_species(model=copasi)['initial_concentration'].to_dict()
+    concentrations = {name: [initial_concentrations[name]] for name in initial_concentrations.keys()}
+    input_state = {
+        'floating_species_concentrations': {name: [initial_concentrations[name]] for name in initial_concentrations.keys()},
+        'time': [start],
+    }
+    y0 = list(initial_concentrations.values())
+    mappings = generate_reaction_mappings(list(initial_concentrations.keys()), cobrapy)
+    # add_dynamic_bounds(cobrapy, copasi, initial_concentrations, mappings)
+
+    # solver params
+    method = 'BDF'  # 'BDF', 'RK45'
+    rTol = 1e-5
+    aTol = 1e-7
+    infeasible_epsilon = 1e-6
+    infeasible_direction = 1 
+
+    # set infeasibility params TODO: make this config params
+    infeasible_event.epsilon = infeasible_epsilon
+    infeasible_event.direction = infeasible_direction
+    infeasible_event.terminal = True
+    # run and get solution
+    with tqdm() as pbar:
+        dynamic_system.pbar = pbar
+
         sol = solve_ivp(
-            fun=lambda t, y: self._dynamic_system(t, y, species_names, mappings),
-            t_span=(self.start, self.stop),
-            y0=initial_concentrations,
-            t_eval=time_points,
-            method='BDF',  # stiff solver TODO: Change this dynamically (check for it)
-            rtol=1e-6,
-            atol=1e-8
+            fun=dynamic_system,
+            events=[infeasible_event],
+            t_span=(ts.min(), ts.max()),
+            y0=y0,
+            t_eval=ts,
+            rtol=rTol,
+            atol=aTol,
+            method=method,
+            args=(cobrapy, copasi, mappings)
         )
-
-        return sol
-
-    def _generate_reaction_mappings(self, output_names, reactions) -> list[dict]:
-        mappings = []
-        for reaction in reactions:
-            for name in output_names:
-                rxn = reaction.name.lower().split(" ")  # [r.lower() for r in list(reaction.values()).split(" ")]
-                obs_name = name.split(" ")[0].lower()
-                obs_type = name.split(" ")[-1]
-                if obs_name in rxn:
-                    mapping = {}
-                    if "transcription" in rxn and obs_type == "mRNA":
-                        mapping = {name: reaction.name}
-                    elif "translation" in rxn and obs_type == "protein":
-                        mapping = {name: reaction.name}
-                    elif "degradation" in rxn:
-                        if "transcripts" in rxn and obs_type == "mRNA":
-                            mapping = {name: reaction.name}
-                        elif "transcripts" not in rxn and obs_type == "protein":
-                            mapping = {name: reaction.name}
-                    if mapping:
-                        mappings.append(mapping)
-        return mappings
-
-
+    state = input_state.copy()
+    state.update({'fluxes': sol.y.tolist()})
+    # remove extra timepoints TODO: pbg will take care of this 
+    for key, val in state.items():
+        if isinstance(val, list):
+            if key == "time":
+                state[key] = sol.t.tolist()
+        else:
+            for name, datum in val.items():
+                state[key][name] = list(set(datum))
+    return state 
