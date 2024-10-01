@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Union, Optional, List, Any
 from datetime import datetime
 import json
@@ -29,6 +30,11 @@ from biosimulators_processes import CORE
 from biosimulators_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulators_processes.processes.utc_process import SbmlUniformTimeCourse
 from biosimulators_processes.processes.sed_process import SedProcess
+
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 
 
 class UtcCopasi(SbmlUniformTimeCourse):
