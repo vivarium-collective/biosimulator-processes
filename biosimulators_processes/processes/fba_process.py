@@ -22,11 +22,16 @@ class Cobra(Process):
 
     def __init__(self, config=None, core=CORE):
         super().__init__(config, core)
+
+        # create model
         self.model = read_sbml_model(self.config['model_file'])
 
         # parse objective
         objective_domain = self.config['objective']['domain']
         objective_name = self.config['objective']['name']
+        if not objective_domain or not objective_name:
+            raise ValueError('Objective domain and objective name must be specified')
+
         for reaction in self.model.reactions:
             rxn_name = reaction.name
             if objective_domain in rxn_name and objective_name in rxn_name:
