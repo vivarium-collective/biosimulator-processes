@@ -402,7 +402,7 @@ class CopasiProcess(SedProcess):
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
 
 
-class Copasi(Process):
+class ODECopasi(Process):
     config_schema = {
         'model_file': 'string'
     }

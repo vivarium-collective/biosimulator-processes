@@ -13,7 +13,7 @@ from biosimulators_processes import CORE
 logging.getLogger('cobra').setLevel(logging.ERROR)
 
 
-class Cobra(Process):
+class FBA(Process):
     config_schema = {
         'model_file': 'string',
         'objective': {
