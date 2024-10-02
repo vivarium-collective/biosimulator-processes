@@ -70,37 +70,28 @@ class Cobra(Process):
         for reaction_name, reaction_flux in state['reaction_fluxes'].items():
             for reaction in self.model.reactions:
                 if reaction.name == reaction_name:
-                    # 1. reset objective weights according to reaction fluxes
+                    # 1. reset objective weights according to reaction fluxes directly
+                    self.model.objective = {
+                        self.model.reactions.get_by_id(reaction.id): reaction_flux
+                    }
+
                     # 2. set lower bound with scaling factor and reaction fluxes
                     self.model.reactions.get_by_id(reaction.id).lower_bound = -self.scaling_factor * abs(reaction_flux)
 
-        # run solver
+        # 3. solve for fluxes
         fluxes = {}
         solution = self.model.optimize()
         if solution.status == "optimal":
-            for reaction in self.model.reactions:
-                flux = solution.fluxes[reaction.id]
-                for reaction_name, reaction_flux in state['reaction_fluxes'].items():
-                    if reaction.name == reaction_name:
-                        fluxes[reaction.name] = flux * reaction_flux
+            fluxes = dict(zip(
+                list(state['reaction_fluxes'].keys()),
+                list(solution.fluxes.to_dict().values())
+            ))
+
+            # TODO: do we want to instead scale by input flux?
+            # for reaction in self.model.reactions:
+            #     flux = solution.fluxes[reaction.id]
+            #     for reaction_name, reaction_flux in state['reaction_fluxes'].items():
+            #         if reaction.name == reaction_name:
+            #             fluxes[reaction.name] = flux * reaction_flux
 
         return fluxes
-
-
-"""
-
-for reaction_name, derivative in reaction_derivatives.items():
-    species_concentration = species_concentrations.get(reaction_name, 1)
-    # Use a weighted combination of concentration and derivative
-    weight = 0.5 * derivative + 0.5 * species_concentration
-    self.model.objective = {self.model.reactions.get_by_id(reaction_name): weight}
-
-
-for reaction in self.model.reactions:
-    # Find the associated species for the reaction and assign a weight
-    associated_species = get_species_for_reaction(reaction)
-    concentration = species_concentrations.get(associated_species, 1)  # Default to 1 if not found
-    normalized_weight = concentration / max(species_concentrations.values())  # Normalization
-    self.model.objective = {reaction: normalized_weight}
-"""
-
