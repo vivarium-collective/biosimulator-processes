@@ -426,7 +426,7 @@ class ODECopasi(Process):
 
         return {
             'species_concentrations': initial_concentrations,
-            'reaction_derivatives': initial_derivatives,
+            'reaction_fluxes': initial_derivatives,
             'time': 0.0
         }
 

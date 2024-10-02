@@ -76,7 +76,7 @@ class FBA(Process):
                     }
 
                     # 2. set lower bound with scaling factor and reaction fluxes
-                    self.model.reactions.get_by_id(reaction.id).lower_bound = -self.scaling_factor * abs(reaction_flux) / (5 + abs(reaction_flux))
+                    self.model.reactions.get_by_id(reaction.id).lower_bound = -self.scaling_factor * abs(reaction_flux)  # / (5 + abs(reaction_flux))
 
         # 3. solve for fluxes
         output_state = {}
