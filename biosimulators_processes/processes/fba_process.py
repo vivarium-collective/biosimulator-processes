@@ -50,8 +50,8 @@ class Cobra(Process):
             self.model.reactions.get_by_id(reaction.id).upper_bound = rand_bound
 
     def initial_state(self):
-        initial_solution = self.model.optimize()
         initial_fluxes = {}
+        initial_solution = self.model.optimize()
         if initial_solution.status == 'optimal':
             initial_fluxes = {
                 reaction.name: reaction.flux
@@ -76,16 +76,17 @@ class Cobra(Process):
                     }
 
                     # 2. set lower bound with scaling factor and reaction fluxes
-                    self.model.reactions.get_by_id(reaction.id).lower_bound = -self.scaling_factor * abs(reaction_flux)
+                    self.model.reactions.get_by_id(reaction.id).lower_bound = -self.scaling_factor * abs(reaction_flux) / (5 + abs(reaction_flux))
 
         # 3. solve for fluxes
-        fluxes = {}
+        output_state = {}
         solution = self.model.optimize()
         if solution.status == "optimal":
-            fluxes = dict(zip(
+            data = dict(zip(
                 list(state['reaction_fluxes'].keys()),
                 list(solution.fluxes.to_dict().values())
             ))
+            output_state['fluxes'] = data
 
             # TODO: do we want to instead scale by input flux?
             # for reaction in self.model.reactions:
@@ -94,4 +95,4 @@ class Cobra(Process):
             #         if reaction.name == reaction_name:
             #             fluxes[reaction.name] = flux * reaction_flux
 
-        return fluxes
+        return output_state
