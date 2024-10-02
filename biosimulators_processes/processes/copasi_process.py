@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Union, Optional, List, Any
 from datetime import datetime
 import json
@@ -22,12 +23,18 @@ from basico import (
     set_parameters,
     add_parameter
 )
+from process_bigraph import Process
 
 from biosimulators_processes.helpers import fetch_biomodel, plot_utc_outputs
 from biosimulators_processes import CORE
 from biosimulators_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
 from biosimulators_processes.processes.utc_process import SbmlUniformTimeCourse
 from biosimulators_processes.processes.sed_process import SedProcess
+
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 
 
 class UtcCopasi(SbmlUniformTimeCourse):
@@ -393,3 +400,94 @@ class CopasiProcess(SedProcess):
                         if param_name not in existing_global_parameters:
                             assert param_change.get('initial_concentration') is not None, "You must pass an initial_concentration value if adding a new global parameter."
                             add_parameter(name=param_name, **param_change, model=self.copasi_model_object)
+
+
+class ODECopasi(Process):
+    config_schema = {
+        'model_file': 'string'
+    }
+
+    def __init__(self, config=None, core=CORE):
+        super().__init__(config, core)
+        self.model = load_model(self.config['model_file'])
+        self.reaction_names = get_reactions(model=self.model).index.tolist()
+        self.species_names = get_species(model=self.model).index.tolist()
+
+    def initial_state(self):
+        initial_concentrations = {
+            species_name: get_species(species_name, model=self.model).initial_concentration[0]
+            for species_name in self.species_names
+        }
+
+        initial_derivatives = {
+            rxn_id: get_reactions(rxn_id, model=self.model).flux[0]
+            for rxn_id in self.reaction_names
+        }
+
+        return {
+            'species_concentrations': initial_concentrations,
+            'reaction_fluxes': initial_derivatives,
+            'time': 0.0
+        }
+
+    def inputs(self):
+        concentrations_type = {
+            name: 'float' for name in self.species_names
+        }
+        return {
+            'species_concentrations': concentrations_type,
+            'time': 'float'
+        }
+
+    def outputs(self):
+        concentrations_type = {
+            name: 'float' for name in self.species_names
+        }
+
+        reaction_fluxes_type = {
+            reaction_name: 'float' for reaction_name in self.reaction_names
+        }
+
+        return {
+            'species_concentrations': concentrations_type,
+            'reaction_fluxes': reaction_fluxes_type,
+            'time': 'float'
+        }
+
+    def update(self, inputs, interval):
+        for cat_id, value in inputs['species_concentrations'].items():
+            set_type = 'concentration'
+            species_config = {
+                'name': cat_id,
+                'model': self.model,
+                set_type: value
+            }
+            set_species(**species_config)
+
+        # run model for "interval" length; we only want the state at the end
+        tc = run_time_course(
+            start_time=inputs['time'],
+            duration=interval,
+            update_model=True,
+            model=self.model
+        )
+
+        results = {'time': interval}
+        results['species_concentrations'] = {
+            mol_id: float(get_species(
+                name=mol_id,
+                exact=True,
+                model=self.model
+            ).concentration[0])
+            for mol_id in self.species_names
+        }
+
+        results['reaction_fluxes'] = {
+            rxn_id: float(get_reactions(
+                name=rxn_id,
+                model=self.model
+            ).flux[0])
+            for rxn_id in self.reaction_names
+        }
+
+        return results

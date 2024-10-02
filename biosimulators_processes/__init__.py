@@ -11,8 +11,10 @@ from biosimulators_processes.helpers import register_module
 
 # Define a list of processes to attempt to import and register
 PROCESSES_TO_REGISTER = [
-    ('cobra-process', 'cobra_process.CobraProcess'),
+    ('dfba-process', 'dfba_process.DynamicFBA'),
     ('copasi-process', 'copasi_process.CopasiProcess'),
+    # ('ode-copasi', 'copasi_process.ODECopasi'),
+    # ('fba', 'fba_process.FBA'),
     ('tellurium-process', 'tellurium_process.TelluriumProcess'),
     ('utc-amici', 'amici_process.UtcAmici'),
     ('utc-copasi', 'copasi_process.UtcCopasi'),
@@ -34,7 +36,7 @@ STEPS_TO_REGISTER = [
     ('plotter', 'viz.CompositionPlotter'),
     ('plotter2d', 'viz.Plotter2d'),
     ('utc-comparator', 'comparator_step.UtcComparator'),
-    ('smoldyn-step', 'bio_compose.SmoldynStep'),
+    # ('smoldyn-step', 'bio_compose.SmoldynStep'),
     ('simularium-smoldyn-step', 'bio_compose.SimulariumSmoldynStep'),
     ('database-emitter', 'bio_compose.MongoDatabaseEmitter')
     # ('simple-neuron', 'neuron_network.SimpleNeuron'),
@@ -48,4 +50,4 @@ CORE = ProcessTypes()
 CORE.type_registry.register('sed_model', schema={'_type': MODEL_TYPE})
 CORE.type_registry.register('utc_config', schema={'_type': UTC_CONFIG_TYPE})
 register_module(PROCESSES_TO_REGISTER, CORE, verbose=False)
-register_module(STEPS_TO_REGISTER, CORE, verbose=True)
+register_module(STEPS_TO_REGISTER, CORE, verbose=False)

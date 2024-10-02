@@ -1,6 +1,7 @@
 from typing import Dict, Union, List, Tuple
 from types import FunctionType
 import os
+from warnings import warn
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,6 +9,45 @@ import seaborn as sns
 from basico import biomodels, load_model_from_string
 from process_bigraph import Composite, pf, pp, ProcessTypes
 import nbformat
+
+COBRA_INSTALLED = False
+try:
+    from cobra import Model, Reaction
+    COBRA_INSTALLED = True
+except ImportError:
+    warn('Cobra is not installed in this environment. Cobra-related functions will not be available.')
+
+
+def generate_reaction_mappings(output_names: list[str], model) -> list[dict]:
+    """Generate a list of output(species) names: the relevant reaction for the given output name.
+    The mappings are domain-specific (i.e., `some_protein: some_translation_reaction_involving_the_protein`).
+
+    :param output_names: (`List[str]`) A list of output (observable, species) names.
+    :param model: (`cobra.Model`) A cobra model.
+    """
+    if not COBRA_INSTALLED:
+        raise EnvironmentError('COBRA must be installed in your environment to use this function.')
+    mappings = []
+    reactions: List[Reaction] = model.reactions
+    for reaction in reactions:
+        for name in output_names:
+            rxn = reaction.name.lower().split(" ")  # [r.lower() for r in list(reaction.values()).split(" ")]
+            obs_name = name.split(" ")[0].lower()
+            obs_type = name.split(" ")[-1]
+            if obs_name in rxn:
+                mapping = {}
+                if "transcription" in rxn and obs_type == "mRNA":
+                    mapping = {name: reaction.name}
+                elif "translation" in rxn and obs_type == "protein":
+                    mapping = {name: reaction.name}
+                elif "degradation" in rxn:
+                    if "transcripts" in rxn and obs_type == "mRNA":
+                        mapping = {name: reaction.name}
+                    elif "transcripts" not in rxn and obs_type == "protein":
+                        mapping = {name: reaction.name}
+                if mapping:
+                    mappings.append(mapping)
+    return mappings
 
 
 def check_ode_kisao_term(term: str):
@@ -103,7 +143,8 @@ def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes
             # Register the process
             core.process_registry.register(process_name, bigraph_class)
         except Exception as e:
-            print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
+            if verbose:
+                print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
             continue
 
 

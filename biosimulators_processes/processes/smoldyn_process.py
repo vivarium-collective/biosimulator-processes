@@ -241,8 +241,6 @@ class SmoldynProcess(Process):
             for spec_name in self.species_names
         }
 
-        print(f'INITAL: {initial_species_counts}')
-
         return {
             'species_counts': initial_species_counts,
             'molecules': {
@@ -337,12 +335,12 @@ class SmoldynProcess(Process):
         #         self.simulation.connect(self._new_difc, target=f'{n}.difc', step=10, args=[minD_count, minE_count])
 
         # reset the molecules, distribute the mols according to self.boundarieså
-        for name in self.species_names:
-            self.set_uniform(
-                species_name=name,
-                count=inputs['species_counts'][name],
-                kill_mol=False
-            )
+        # for name in self.species_names:
+        #     self.set_uniform(
+        #         species_name=name,
+        #         count=inputs['species_counts'][name],
+        #         kill_mol=False
+        #     )
 
         # run the simulation for a given interval
         self.simulation.run(

@@ -1,0 +1,11 @@
+name: biosimulator-processes
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - fenics-dolfinx
+  - mpich
+  - pyvista
+  - pip:
+      - .[cobra, utc]
