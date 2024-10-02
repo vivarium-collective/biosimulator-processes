@@ -1,4 +1,6 @@
 import logging
+import os
+from pathlib import Path
 
 import cobra
 from cobra.io import load_model as load_cobra, read_sbml_model
@@ -16,7 +18,8 @@ class Cobra(Process):
         'model_file': 'string',
         'objective': {
             'domain': 'string',  # either protein or mrna
-            'name': 'string'  # specific to the model: i.e., LacI
+            'name': 'string',  # specific to the model: i.e., LacI
+            'scaling_factor': 'float'
         }
     }
 
@@ -24,59 +27,80 @@ class Cobra(Process):
         super().__init__(config, core)
 
         # create model
-        self.model = read_sbml_model(self.config['model_file'])
+        model_file = self.config['model_file']
+        data_dir = Path(os.path.dirname(model_file))
+        path = data_dir / model_file.split('/')[-1]
+        self.model = read_sbml_model(str(path.resolve()))
 
         # parse objective
-        objective_domain = self.config['objective']['domain']
-        objective_name = self.config['objective']['name']
-        if not objective_domain or not objective_name:
-            raise ValueError('Objective domain and objective name must be specified')
+        self.objective_domain = self.config['objective']['domain']
+        self.objective_name = self.config['objective']['name']
+        self.scaling_factor = self.config['objective'].get('scaling_factor', 10)
 
-        for reaction in self.model.reactions:
-            rxn_name = reaction.name
-            if objective_domain in rxn_name and objective_name in rxn_name:
-                self.model.objective = reaction.id
-
-    def initial_state(self):
-        # set random lower bound for initial state TODO: make this more accurate/dynamic
-        for reaction in self.model.reactions:
-            sampled_lb = np.random.random()
-            self.model.reactions.get_by_id(reaction.id).lower_bound = -sampled_lb
-
-        # solve initially
-        initial_solution = self.model.optimize()
-        initial_fluxes = {
-            reaction.name: initial_solution.fluxes[reaction.id]
+        # set objectives
+        self.model.objective = {
+            self.model.reactions.get_by_id(reaction.id): np.random.random()  # TODO: make this more realistic
             for reaction in self.model.reactions
         }
+
+        # set even bounds
+        for reaction in self.model.reactions:
+            rand_bound = np.random.random()
+            self.model.reactions.get_by_id(reaction.id).lower_bound = -rand_bound  # TODO: What to do here?
+            self.model.reactions.get_by_id(reaction.id).upper_bound = rand_bound
+
+    def initial_state(self):
+        initial_solution = self.model.optimize()
+        initial_fluxes = {}
+        if initial_solution.status == 'optimal':
+            initial_fluxes = {
+                reaction.name: reaction.flux
+                for reaction in self.model.reactions
+            }
 
         return {'fluxes': initial_fluxes}
 
     def inputs(self):
-        return {'reaction_derivatives': 'tree[float]'}
+        return {'reaction_fluxes': 'tree[float]'}
 
     def outputs(self):
         return {'fluxes': 'tree[float]'}
 
     def update(self, state, interval):
-        # add objectives
-        for reaction in self.model.reactions:
-            self.model.objective = reaction.id
-
-        # set lower bound
-        for reaction_name, reaction_derivative in state['reaction_derivatives'].items():
+        for reaction_name, reaction_flux in state['reaction_fluxes'].items():
             for reaction in self.model.reactions:
                 if reaction.name == reaction_name:
-                    self.model.reactions.get_by_id(reaction.id).lower_bound = -reaction_derivative
+                    # 1. reset objective weights according to reaction fluxes
+                    # 2. set lower bound with scaling factor and reaction fluxes
+                    self.model.reactions.get_by_id(reaction.id).lower_bound = -self.scaling_factor * abs(reaction_flux)
 
         # run solver
         fluxes = {}
         solution = self.model.optimize()
         if solution.status == "optimal":
             for reaction in self.model.reactions:
-                rxn_flux = solution.fluxes[reaction.id]
-                fluxes[reaction.name] = rxn_flux
+                flux = solution.fluxes[reaction.id]
+                for reaction_name, reaction_flux in state['reaction_fluxes'].items():
+                    if reaction.name == reaction_name:
+                        fluxes[reaction.name] = flux * reaction_flux
 
         return fluxes
 
+
+"""
+
+for reaction_name, derivative in reaction_derivatives.items():
+    species_concentration = species_concentrations.get(reaction_name, 1)
+    # Use a weighted combination of concentration and derivative
+    weight = 0.5 * derivative + 0.5 * species_concentration
+    self.model.objective = {self.model.reactions.get_by_id(reaction_name): weight}
+
+
+for reaction in self.model.reactions:
+    # Find the associated species for the reaction and assign a weight
+    associated_species = get_species_for_reaction(reaction)
+    concentration = species_concentrations.get(associated_species, 1)  # Default to 1 if not found
+    normalized_weight = concentration / max(species_concentrations.values())  # Normalization
+    self.model.objective = {reaction: normalized_weight}
+"""
 

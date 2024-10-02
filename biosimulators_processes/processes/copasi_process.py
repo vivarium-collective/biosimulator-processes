@@ -444,13 +444,13 @@ class Copasi(Process):
             name: 'float' for name in self.species_names
         }
 
-        reaction_derivatives_type = {
+        reaction_fluxes_type = {
             reaction_name: 'float' for reaction_name in self.reaction_names
         }
 
         return {
             'species_concentrations': concentrations_type,
-            'reaction_derivatives': reaction_derivatives_type,
+            'reaction_fluxes': reaction_fluxes_type,
             'time': 'float'
         }
 
@@ -482,7 +482,7 @@ class Copasi(Process):
             for mol_id in self.species_names
         }
 
-        results['reaction_derivatives'] = {
+        results['reaction_fluxes'] = {
             rxn_id: float(get_reactions(
                 name=rxn_id,
                 model=self.model

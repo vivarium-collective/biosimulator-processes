@@ -143,7 +143,8 @@ def register_module(items_to_register: List[Tuple[str, str]], core: ProcessTypes
             # Register the process
             core.process_registry.register(process_name, bigraph_class)
         except Exception as e:
-            print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
+            if verbose:
+                print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
             continue
 
 
