@@ -18,7 +18,7 @@ from pymongo.database import Database
 from simulariumio import InputFileData, UnitData, DisplayData, DISPLAY_TYPE
 from simulariumio.smoldyn import SmoldynData
 
-from bio_bundles.data_model.bigraph import time_course_node_spec
+from bio_bundles.data_model.specification import time_course_node_spec
 from bio_bundles.compatible import COMPATIBLE_UTC_SIMULATORS
 from bio_bundles.io import normalize_smoldyn_output_path_in_root, get_sbml_species_mapping
 from bio_bundles.simularium_utils import calculate_agent_radius, translate_data_object, write_simularium_file

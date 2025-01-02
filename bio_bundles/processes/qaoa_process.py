@@ -1,5 +1,4 @@
 import numpy as np
-import rustworkx as rx
 import networkx as nx
 from qiskit.primitives import Sampler
 from qiskit_algorithms.optimizers import COBYLA
@@ -7,7 +6,7 @@ from qiskit_algorithms.utils import algorithm_globals
 from qiskit_algorithms import QAOA as QAOASolver
 from process_bigraph import Process
 
-from bio_bundles.quantum.quantum_utils import get_operator, sample_most_likely
+from bio_bundles.utils.quantum_utils import get_operator, sample_most_likely
 
 
 class QAOA(Process):

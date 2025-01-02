@@ -3,7 +3,6 @@ from typing import Callable
 
 import numpy as np
 import rustworkx as rx
-import networkx as nx
 from qiskit.circuit.library import QAOAAnsatz
 
 

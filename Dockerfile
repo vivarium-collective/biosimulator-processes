@@ -40,7 +40,7 @@ COPY biosimulators_processes /app/biosimulator_processes
 
 # copy files
 COPY ./pyproject.toml ./poetry.lock ./README.md ./data ./scripts/trust-notebooks.sh /app/
-COPY ./scripts/enter-lab.sh /usr/local/bin/enter-lab.sh
+COPY assets/scripts/enter-lab.sh /usr/local/bin/enter-lab.sh
 # COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
 
 # poetry deps

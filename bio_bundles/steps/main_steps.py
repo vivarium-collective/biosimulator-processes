@@ -14,7 +14,7 @@ from pymongo.database import Database
 from simulariumio import InputFileData, UnitData, DisplayData, DISPLAY_TYPE
 from simulariumio.smoldyn import SmoldynData
 
-from bio_bundles.data_generator import SBML_EXECUTORS
+from bio_bundles.data_generators import SBML_EXECUTORS
 from bio_bundles.io import get_sbml_species_mapping
 from bio_bundles.simularium_utils import translate_data_object, write_simularium_file, calculate_agent_radius
 
