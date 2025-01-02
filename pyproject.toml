@@ -29,9 +29,9 @@ copasi-basico = "^0.82"
 amici = "^0.30.0"
 
 
-[tool.poetry.group.spatial.dependencies]
-smoldyn = {version = "^2.73", extras = ["simulariumio"]}
-pymem3dg = {version = "*", optional = true}
+# [tool.poetry.group.spatial.dependencies]
+# smoldyn = {version = "^2.73", extras = ["simulariumio"]}
+# pymem3dg = {version = "*", optional = true}
 # readdy = {version = "*", optional = true}
 
 

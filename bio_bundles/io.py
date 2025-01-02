@@ -4,6 +4,30 @@ from typing import List
 
 import libsbml
 
+# from bio_bundles.data_model.quantum import XYZAtom
+
+
+# def read_xyz(xyz_filepath: os.PathLike[str]) -> XYZAtom:
+#     lines = []
+#     with open(xyz_filepath) as f:
+#         file_contents = f.read().splitlines()
+#         for i, line in enumerate(file_contents):
+#             if not file_contents[i] == file_contents[-1]:
+#                 line = f"{line};"
+#             lines.append(line)
+#     return XYZAtom(" ".join(lines))
+
+
+def read_xyz(xyz_filepath: os.PathLike[str]) -> str:
+    lines = []
+    with open(xyz_filepath) as f:
+        file_contents = f.read().splitlines()
+        for i, line in enumerate(file_contents):
+            if not file_contents[i] == file_contents[-1]:
+                line = f"{line};"
+            lines.append(line)
+    return " ".join(lines)
+
 
 def get_sbml_species_mapping(sbml_fp: str) -> dict:
     """
