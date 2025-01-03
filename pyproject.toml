@@ -9,6 +9,7 @@ packages = [
     {include = "tests"}
 ]
 
+# TODO: refactor this such that these groups can be atomically installed and the libraries related to them can be also atomically used
 
 [tool.poetry.dependencies]
 python = "^3.10"
