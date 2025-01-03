@@ -1,4 +1,6 @@
+from bio_bundles.data_model import BaseClass
 import numpy as np
+from dataclasses import dataclass
 
 
 class DiracNotation(np.ndarray):
@@ -16,18 +18,18 @@ class Ket(DiracNotation):
         return Bra(np.conj(ket_value).T)
 
 
-class XYZElements(list):
-    pass
-
-
-class XYZAtom(str):
+class XYZMolecule(str):
     def __new__(cls, *args, **kwargs):
         return str.__new__(cls, *args, **kwargs)
 
     @property
-    def elements(self, unique: bool = False) -> XYZElements:
+    def elements(self, unique: bool = False) -> list:
         items = self.split()
-        elements = XYZElements([line[0] for line in [ln.strip() for ln in self.split(";")]])
+        elements = [line[0] for line in [ln.strip() for ln in self.split(";")]]
         return list(set(elements)) if unique else elements
+
+
+class MoleculeAtom:
+    pass
 
 

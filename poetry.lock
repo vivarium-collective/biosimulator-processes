@@ -2175,8 +2175,8 @@ files = [
 numpy = [
     {version = ">=1.23.3", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\" and python_version < \"3.13\""},
-    {version = ">=1.21.2", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=2.1.0", markers = "python_version >= \"3.13\""},
+    {version = ">=1.21.2", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 
 [package.extras]
@@ -3394,6 +3394,44 @@ files = [
 diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
+name = "pyscf"
+version = "2.7.0"
+description = "PySCF: Python-based Simulations of Chemistry Framework"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyscf-2.7.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:ec4b4356a2e1d801b92757235925efdde1ff6ecf99f0ec1d6d9c1307b5468d6f"},
+    {file = "pyscf-2.7.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:e76aee018da70ccd393a8a5f851a1738098c7289f4394ea840b441aaa692b470"},
+    {file = "pyscf-2.7.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:486638182902963f67224de5e35dae28223b7e1df852c6613ce581259489364f"},
+    {file = "pyscf-2.7.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b83a6685dceac36173a75fcd3366cf528527c5c9236bfa86845b9ebcc490d5a9"},
+    {file = "pyscf-2.7.0.tar.gz", hash = "sha256:ca8efc2f28d72c3130f26a967e7fa8d0bbc4a6b47d16a7c4c732ec85a31b7eec"},
+]
+
+[package.dependencies]
+h5py = ">=2.7"
+numpy = ">=1.13,<1.16 || >1.16,<1.17 || >1.17"
+scipy = ">=1.6.0"
+setuptools = "*"
+
+[package.extras]
+all = ["pyscf[bse,cppe,dispersion,doci,forge,geomopt,properties,pyqmc,semiempirical]"]
+bse = ["basis-set-exchange"]
+cornell-shci = ["pyscf-cornell-shci"]
+cppe = ["cppe"]
+dispersion = ["pyscf-dispersion"]
+doci = ["pyscf-doci"]
+fciqmcscf = ["pyscf-fciqmc"]
+forge = ["pyscf-forge"]
+geomopt = ["geometric (>=0.9.7.2)", "pyberny (>=0.6.2)", "pyscf-qsdopt"]
+icmpspt = ["pyscf-icmpspt"]
+nao = ["pyscf-nao"]
+properties = ["pyscf-properties"]
+pyqmc = ["pyqmc"]
+semiempirical = ["pyscf-semiempirical"]
+shciscf = ["pyscf-shciscf"]
+tblis = ["pyscf-tblis"]
+
+[[package]]
 name = "pyspnego"
 version = "0.11.2"
 description = "Windows Negotiate Authentication Client and Server"
@@ -3486,6 +3524,20 @@ files = [
 
 [package.dependencies]
 six = ">=1.5"
+
+[[package]]
+name = "python-dotenv"
+version = "1.0.1"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
+    {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
 
 [[package]]
 name = "python-json-logger"
@@ -5029,4 +5081,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9851bb1bf9958512b18f142b30be2acc8ef2bc3d30784740157a52907f26a363"
+content-hash = "f7532e0f58338467b489d75596bdbfc768774a45c48c1da0bd8f76faf368850f"
