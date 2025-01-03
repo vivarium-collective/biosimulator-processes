@@ -1,1 +1,0 @@
-### This library represents the highest level "Notebook"/scripting API for interaction with the biosimulator processes.

@@ -5,8 +5,7 @@ description = "Core implementations of process-bigraph.composite.Process alignin
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
 packages = [
-    {include = "biosimulators_processes"},
-    {include = "bio_bundles"},
+    {include = "bsp"},
     {include = "tests"}
 ]
 
