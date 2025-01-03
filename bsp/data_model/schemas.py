@@ -28,7 +28,7 @@ class SEDModelType(BaseClass):
     model_source: FieldSchema = FieldSchema(_type="string")
     model_language: FieldSchema = FieldSchema(_type="string", _default="sbml")
     model_name: FieldSchema = FieldSchema(_type="string", _default="composite_process_model")
-    model_units: FieldSchema = FieldSchema(_type="tree[string")
+    model_units: FieldSchema = FieldSchema(_type="tree[string]")
     model_changes: FieldSchema = FieldSchema(_type="tree[string]")
 
     def to_dict(self):
