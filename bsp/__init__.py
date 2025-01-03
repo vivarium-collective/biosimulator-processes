@@ -13,14 +13,6 @@ STEP_IMPLEMENTATIONS = [
     ('smoldyn_step', 'steps.main_steps.SmoldynStep'),
     ('simularium_smoldyn_step', 'steps.main_steps.SimulariumSmoldynStep'),
     ('mongo-emitter', 'steps.main_steps.MongoDatabaseEmitter'),
-    ('copasi-step', 'steps.ode_simulation.CopasiStep'),
-    ('tellurium-step', 'steps.ode_simulation.TelluriumStep'),
-    ('amici-step', 'steps.ode_simulation.AmiciStep'),
-    # ('plotter', 'viz.CompositionPlotter'),
-    # ('plotter2d', 'viz.Plotter2d'),
-    # ('smoldyn-step', 'bio_compose.SmoldynStep'),
-    # ('simularium-smoldyn-step', 'bio_compose.SimulariumSmoldynStep'),
-    # ('database-emitter', 'bio_compose.MongoDatabaseEmitter')
 ]
 
 PROCESS_IMPLEMENTATIONS = [
@@ -34,7 +26,7 @@ PROCESS_IMPLEMENTATIONS = [
     ('fba', 'bundles.dfba.FBA')
 ]
 
-VERBOSE_REGISTRATION = False
+VERBOSE_REGISTRATION = True
 
 
 # process/implementation registrar

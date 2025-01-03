@@ -28,12 +28,14 @@ imageio = "^2.36.1"
 [tool.poetry.group.ode.dependencies]
 copasi-basico = "^0.82"
 amici = "^0.30.0"
+tellurium = "2.2.10"
+libroadrunner = "^2.7.0"
 
 
 [tool.poetry.group.spatial.dependencies]
-smoldyn = {version = "^2.73", extras = ["simulariumio"]}
+# smoldyn = {version = "^2.73", extras = ["simulariumio"]}
 pymem3dg = {version = "*", optional = true}
-readdy = {version = "*", optional = true}
+# readdy = {version = "*", optional = true}
 
 
 [tool.poetry.group.visualization.dependencies]

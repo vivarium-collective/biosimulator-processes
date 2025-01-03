@@ -11,7 +11,7 @@ from pymongo import ASCENDING
 from bsp.data_model.bigraph import time_course_node_spec
 from bsp.compatibility import COMPATIBLE_UTC_SIMULATORS
 from bsp.io import normalize_smoldyn_output_path_in_root, get_sbml_species_mapping
-from bsp.utils import handle_exception, handle_sbml_exception
+from bsp.utils.base_utils import handle_exception, handle_sbml_exception
 
 # logging TODO: implement this.
 logger: Logger = logging.getLogger("compose.worker.data_generator.log")

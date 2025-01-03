@@ -1,10 +1,13 @@
 import os
 import re
 import zipfile as zf
+import xml.etree.ElementTree as ET
 from tempfile import mkdtemp
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pathlib import Path
 
+import h5py
+import numpy as np
 import requests
 import libsbml
 
@@ -134,4 +137,89 @@ def disable_smoldyn_graphics_in_simulation_configuration(configuration: List[str
             configuration[i_line] = re.sub(r'^graphics +[a-z_]+', 'graphics none', line)
 
 
+def unpack_omex_archive(archive_filepath: str, working_dir: str, use_temp: bool = True, write: bool = False) -> str:
+    archive_name = archive_filepath.replace('.omex', '')
+    unpacking_dirpath = working_dir if not use_temp else mkdtemp()
 
+    if not os.path.exists(unpacking_dirpath) and write:
+        os.mkdir(unpacking_dirpath)
+
+    with zf.ZipFile(archive_filepath, 'r') as f:
+        f.extractall(path=unpacking_dirpath)
+
+    return unpacking_dirpath
+
+
+def get_archive_model_filepath(config_model_source: str) -> str:
+    return [[os.path.join(root, f) for f in files if f.endswith('.xml') and not f.lower().startswith('manifest')][0] for
+            root, _, files in os.walk(config_model_source)][0]
+
+
+def get_sedml_time_config(sedml_filepath: str) -> Dict:
+    # Parse the XML file
+    tree = ET.parse(sedml_filepath)
+    root = tree.getroot()
+
+    namespace = {'sedml': 'http://sed-ml.org/sed-ml/level1/version3'}
+
+    utc_elements = root.findall('.//sedml:uniformTimeCourse', namespace)
+
+    # Extract data from each uniformTimeCourse element
+    utc_data = []
+    for utc in utc_elements:
+        data = {
+            'id': utc.get('id'),
+            'initialTime': utc.get('initialTime'),
+            'outputStartTime': utc.get('outputStartTime'),
+            'outputEndTime': utc.get('outputEndTime'),
+            'numberOfPoints': utc.get('numberOfPoints'),
+            'algorithm': utc.find('.//sedml:algorithm', namespace).get('kisaoID')
+        }
+        utc_data.append(data)
+
+    return utc_data[0]
+
+
+def get_archive_file_location(archive_root: str, filename: str) -> FilePath:
+    for f in os.listdir(archive_root):
+        if f.endswith(filename):
+            path = os.path.join(archive_root, f)
+            print(path)
+            return FilePath(name=filename, path=path)
+
+
+def get_model_file_location(archive_root: str) -> FilePath:
+    return get_archive_file_location(archive_root, '.xml')
+
+
+def get_published_t(omex_dirpath: str = None, report_fp: str = None) -> np.ndarray:
+    report_fp = get_archive_file_location(
+        omex_dirpath, 'reports.h5') if not report_fp else report_fp
+
+    published_outputs = read_report_outputs(report_fp)
+    return published_outputs.data[0].data
+
+
+def read_report_outputs(report_file_path) -> Dict:
+    """Read the outputs from all species in the given report file from biosimulations output.
+        Args:
+            report_file_path (str): The path to the simulation.sedml/report.h5 HDF5 file.
+    """
+    # TODO: implement auto gen from run id here.
+    outputs = []
+    with h5py.File(report_file_path, 'r') as f:
+        k = list(f.keys())
+        group_path = k[0] + '/report'
+        if group_path in f:
+            group = f[group_path]
+            dataset_labels = group.attrs['sedmlDataSetLabels']
+            for label in dataset_labels:
+                dataset_index = list(dataset_labels).index(label)
+                data = group[()]
+                specific_data = data[dataset_index]
+                output = {"dataset_label": label, "data": specific_data}
+                outputs.append(output)
+
+            return {"report_path": report_file_path, "data": outputs}
+        else:
+            print(f"Group '{group_path}' not found in the file.")

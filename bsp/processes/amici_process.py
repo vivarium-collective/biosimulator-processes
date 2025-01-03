@@ -9,9 +9,7 @@ from amici import amici, SbmlImporter, import_model_module, runAmiciSimulation
 from matplotlib import pyplot as plt
 from process_bigraph import Step
 
-from biosimulators_processes import CORE
-from biosimulators_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
-from biosimulators_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
+from bsp.data_model.sed import UTC_CONFIG_TYPE
 from bsp.utils.helpers import calc_duration, calc_num_steps, calc_step_size, check_ode_kisao_term
 
 
@@ -50,7 +48,7 @@ class UtcAmici(Step):
 
     def __init__(self,
                  config=None,
-                 core=CORE,
+                 core=None,
                  time_config: dict = None,
                  model_source: str = None,
                  sed_model_config: dict = None):
