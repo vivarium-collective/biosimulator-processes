@@ -52,8 +52,9 @@ import os
 from typing import *
 from uuid import uuid4
 from process_bigraph import Process, Composite, pf, pp
-from biosimulators_processes import CORE
-from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
+
+from bsp.data_model.schemas import SEDModelType
+
 try:
     import smoldyn as sm
     from smoldyn._smoldyn import MolecState
@@ -66,45 +67,8 @@ except:
 
 
 class SmoldynProcess(Process):
-    """Smoldyn-based implementation of bi-graph process' `Process` API. Please note the following:
-
-    For the purpose of this `Process` implementation,
-    at each `update`, we need the function to do the following for each molecule/species in the simulation:
-
-        - Get the molecule count with Smoldyn lang: (`molcount {molecule_name}`) shape: [time, ...speciesN],
-            so in the case of a two species simulation: [timestamp, specACounts, specBCounts]
-        - Get the molecule positions and relative corresponding time steps,
-            indexed by the molecule name with Smoldyn lang: (`listmols`)[molecule_name]
-        - ?Get the molecule state?
-        - Kill the molecule with smoldyn lang: (`killmol {molecule_name}`)
-        - Add the molecule back to the solution(cytoplasm), effectively resetting it at boundary coordinates with Python API: (`simulation.addMolecules()
-
-    PLEASE NOTE:
-
-        The current implementation of this class assumes 3 key conditions:
-            1. that a smoldyn model file is present and working
-            2. output commands from the aforementioned model file that are left un-commented (disabled) will yield a
-                smoldyn model output file whose data could potentially reflect something other than what is returned by
-                this Process' `schema()`.
-                # TODO: Expand the config_schema to allow model_filepath to be None.
-
-
-    Config Attributes:
-        model_filepath:`str`: filepath to the smoldyn model you want to reference in this Process
-        animate:`bool`: Displays graphical simulation output from smoldyn if set to `True`. Defaults to `False`.
-    """
-
-    # TODO: Add the ability to pass model parameters and not just a model file.
-    # config_schema = {
-    #     'model_filepath': 'string',
-    #     'animate': {
-    #         '_type': 'boolean',
-    #         '_default': False
-    #     }
-    #     # TODO: Add a more nuanced way to describe and configure dynamic difcs given species interaction patterns
-    # }
     config_schema = {
-        'model': MODEL_TYPE,
+        'model': SEDModelType().to_dict(),
         'animate': {
             '_type': 'boolean',
             '_default': False
@@ -402,7 +366,7 @@ class SmoldynIOProcess(Process):
         output_dest: tmp output dir (str)
     """
     config_schema = {
-        'model': MODEL_TYPE,
+        'model': SEDModelType().to_dict(),
         # 'duration': 'integer',  # duration should instead be inferred from Composite
         'output_dest': 'string',
         'animate': {
@@ -411,7 +375,7 @@ class SmoldynIOProcess(Process):
         }
     }
 
-    def __init__(self, config: dict = None, core=CORE):
+    def __init__(self, config: dict = None, core=None):
         super().__init__(config, core)
 
         # get params
@@ -643,12 +607,12 @@ class SmoldynIOProcess(Process):
         return new_difc
 
 
-def test_process():
+def test_process(core):
     """Test the smoldyn process using the crowding model."""
 
     # this is the instance for the composite process to run
     print("RUNNING")
-    CORE.process_registry.register('biosimulators_processes.processes.smoldyn_process.SmoldynProcess', SmoldynProcess)
+    core.process_registry.register('biosimulators_processes.processes.smoldyn_process.SmoldynProcess', SmoldynProcess)
     instance = {
         'smoldyn': {
             '_type': 'process',

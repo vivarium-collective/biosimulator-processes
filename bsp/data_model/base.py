@@ -48,3 +48,12 @@ class Simulator(BaseClass):
     version: str
     deps: List[InstallationDependency]
 
+
+# -- emitter type schemas --
+
+DB_CONFIG_TYPE = {
+    'connection_uri': 'string',
+    'experiment_id': 'maybe[string]',
+    'emit_limit': 'integer',
+    'database': 'maybe[string]',
+}

@@ -17,15 +17,17 @@ from bsp.data_generators import SBML_EXECUTORS
 from bsp.io import get_sbml_species_mapping
 from bsp.utils.simularium_utils import translate_data_object, write_simularium_file, calculate_agent_radius
 
+VERBOSE = False
 try:
     import smoldyn as sm
     from smoldyn._smoldyn import MolecState
 except:
-    print(
-        '\nPLEASE NOTE: Smoldyn is not correctly installed on your system which prevents you from ' 
-        'using the SmoldynProcess. Please refer to the README for further information '
-        'on installing Smoldyn.'
-    )
+    if VERBOSE:
+        print(
+            '\nPLEASE NOTE: Smoldyn is not correctly installed on your system which prevents you from ' 
+            'using the SmoldynProcess. Please refer to the README for further information '
+            'on installing Smoldyn.'
+        )
 
 HISTORY_INDEXES = [
     'data.time',
@@ -517,40 +519,7 @@ def generate_simularium_file(
     })
 
 
-def make_fallback_serializer_function(process_registry) -> Callable:
-    """Creates a fallback function that is called by orjson on data of
-    types that are not natively supported. Define and register instances of
-    :py:class:`vivarium.core.registry.Serializer()` with serialization
-    routines for the types in question."""
 
-    def default(obj: Any) -> Any:
-        # Try to lookup by exclusive type
-        serializer = process_registry.access(str(type(obj)))
-        if not serializer:
-            compatible_serializers = []
-            for serializer_name in process_registry.list():
-                test_serializer = process_registry.access(serializer_name)
-                # Subclasses with registered serializers will be caught here
-                if isinstance(obj, test_serializer.python_type):
-                    compatible_serializers.append(test_serializer)
-            if len(compatible_serializers) > 1:
-                raise TypeError(
-                    f'Multiple serializers ({compatible_serializers}) found '
-                    f'for {obj} of type {type(obj)}')
-            if not compatible_serializers:
-                raise TypeError(
-                    f'No serializer found for {obj} of type {type(obj)}')
-            serializer = compatible_serializers[0]
-            if not isinstance(obj, Process):
-                # We don't warn for processes because since their types
-                # based on their subclasses, it's not possible to avoid
-                # searching through the serializers.
-                warn(
-                    f'Searched through serializers to find {serializer} '
-                    f'for data of type {type(obj)}. This is '
-                    f'inefficient.')
-        return serializer.serialize(obj)
-    return default
 
 
 # -- Output data generators: -- #

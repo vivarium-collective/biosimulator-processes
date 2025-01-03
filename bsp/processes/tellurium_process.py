@@ -7,72 +7,73 @@ import numpy as np
 import tellurium as te
 from process_bigraph import Process, Composite, pf, Step
 
-from biosimulators_processes import CORE
-from biosimulators_processes.processes.utc_process import SbmlUniformTimeCourse
-from biosimulators_processes.data_model.sed_data_model import MODEL_TYPE
+from bsp.data_model.schemas import SEDModelType
+
+# from biosimulators_processes import CORE
+# from biosimulators_processes.processes.utc_process import SbmlUniformTimeCourse
 
 
-class UtcTellurium(SbmlUniformTimeCourse):
-    def __init__(self,
-                 config=None,
-                 core=CORE,
-                 time_config: dict = None,
-                 model_source: str = None,
-                 sed_model_config: dict = None):
-        super().__init__(config, core, time_config, model_source, sed_model_config)
-        self.floating_species_list = self.simulator.getFloatingSpeciesIds()
-        self.boundary_species_list = self.simulator.getBoundarySpeciesIds()
-        self.floating_species_initial = self.simulator.getFloatingSpeciesConcentrations()
-        self.boundary_species_initial = self.simulator.getBoundarySpeciesConcentrations()
-
-        # Get the list of parameters and their values
-        self.model_parameters_list = self.simulator.getGlobalParameterIds()
-        self.model_parameter_values = self.simulator.getGlobalParameterValues()
-
-        # Get a list of reactions
-        self.reaction_list = self.simulator.getReactionIds()
-
-    def _get_initial_state_params(self):
-        floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
-        # boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
-        model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
-        return {
-            'time': [0.0],
-            self.species_context_key: floating_species_dict,
-            'model_parameters': model_parameters_dict,
-            'reactions': self.reaction_list
-        }
-
-    def plot_results(self):
-        # return self.simulator.plot()
-        return super().plot_results(simulator_name='Tellurium')
-
-    def _load_simulator(self, model_fp: str, **kwargs):
-        return te.loadSBMLModel(model_fp)
-
-    def _get_reactions(self) -> list[str]:
-        return self.simulator.getReactionIds()
-
-    def _get_floating_species(self) -> list[str]:
-        return self.simulator.getFloatingSpeciesIds()
-
-    def _get_model_parameters(self) -> list[str]:
-        return self.simulator.getGlobalParameterIds()
-
-    def _generate_results(self, inputs=None):
-        x = inputs or self.initial_state()
-        # TODO: set vals if inputs here.
-        output_start = self.output_start_time + 1 if self.output_start_time < 1 else self.output_start_time
-        self.simulator.simulate(start=self.initial_time, end=output_start)
-        s = self.simulator.simulate(start=output_start, end=self.duration, steps=self.num_steps)
-        outputs = {'floating_species': {}}
-        for i, row in enumerate(s.transpose()):
-            if i < 1:
-                outputs['time'] = row
-            else:
-                for spec_index, name in enumerate(self.floating_species_list):
-                    outputs['floating_species'][self.output_keys[spec_index]] = row
-        return outputs
+# class UtcTellurium(SbmlUniformTimeCourse):
+#     def __init__(self,
+#                  config=None,
+#                  core=CORE,
+#                  time_config: dict = None,
+#                  model_source: str = None,
+#                  sed_model_config: dict = None):
+#         super().__init__(config, core, time_config, model_source, sed_model_config)
+#         self.floating_species_list = self.simulator.getFloatingSpeciesIds()
+#         self.boundary_species_list = self.simulator.getBoundarySpeciesIds()
+#         self.floating_species_initial = self.simulator.getFloatingSpeciesConcentrations()
+#         self.boundary_species_initial = self.simulator.getBoundarySpeciesConcentrations()
+#
+#         # Get the list of parameters and their values
+#         self.model_parameters_list = self.simulator.getGlobalParameterIds()
+#         self.model_parameter_values = self.simulator.getGlobalParameterValues()
+#
+#         # Get a list of reactions
+#         self.reaction_list = self.simulator.getReactionIds()
+#
+#     def _get_initial_state_params(self):
+#         floating_species_dict = dict(zip(self.floating_species_list, self.floating_species_initial))
+#         # boundary_species_dict = dict(zip(self.boundary_species_list, self.boundary_species_initial))
+#         model_parameters_dict = dict(zip(self.model_parameters_list, self.model_parameter_values))
+#         return {
+#             'time': [0.0],
+#             self.species_context_key: floating_species_dict,
+#             'model_parameters': model_parameters_dict,
+#             'reactions': self.reaction_list
+#         }
+#
+#     def plot_results(self):
+#         # return self.simulator.plot()
+#         return super().plot_results(simulator_name='Tellurium')
+#
+#     def _load_simulator(self, model_fp: str, **kwargs):
+#         return te.loadSBMLModel(model_fp)
+#
+#     def _get_reactions(self) -> list[str]:
+#         return self.simulator.getReactionIds()
+#
+#     def _get_floating_species(self) -> list[str]:
+#         return self.simulator.getFloatingSpeciesIds()
+#
+#     def _get_model_parameters(self) -> list[str]:
+#         return self.simulator.getGlobalParameterIds()
+#
+#     def _generate_results(self, inputs=None):
+#         x = inputs or self.initial_state()
+#         # TODO: set vals if inputs here.
+#         output_start = self.output_start_time + 1 if self.output_start_time < 1 else self.output_start_time
+#         self.simulator.simulate(start=self.initial_time, end=output_start)
+#         s = self.simulator.simulate(start=output_start, end=self.duration, steps=self.num_steps)
+#         outputs = {'floating_species': {}}
+#         for i, row in enumerate(s.transpose()):
+#             if i < 1:
+#                 outputs['time'] = row
+#             else:
+#                 for spec_index, name in enumerate(self.floating_species_list):
+#                     outputs['floating_species'][self.output_keys[spec_index]] = row
+#         return outputs
 
 
 class TelluriumStep(Step):
@@ -151,7 +152,7 @@ class TelluriumStep(Step):
 class TelluriumProcess(Process):
     config_schema = {
         'record_history': 'maybe[boolean]',  # TODO -- do we have this type?
-        'model': MODEL_TYPE,
+        'model': SEDModelType().to_dict(),
         'method': {
             '_default': 'cvode',
             '_type': 'string'
@@ -164,6 +165,7 @@ class TelluriumProcess(Process):
     }
 
     simulator: te.roadrunner.extended_roadrunner.ExtendedRoadRunner
+
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
 
@@ -270,9 +272,9 @@ class TelluriumProcess(Process):
         return update
 
 
-def test_process():
+def test_process(core=None):
     # 1. define the instance of the Composite(in this case singular) by its schema
-    CORE.process_registry.register('biosimulators_processes.processes.tellurium_process.TelluriumProcess', TelluriumProcess)
+    core.process_registry.register('biosimulators_processes.processes.tellurium_process.TelluriumProcess', TelluriumProcess)
     instance = {
         'tellurium': {
             '_type': 'process',

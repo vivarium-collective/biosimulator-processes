@@ -1,7 +1,7 @@
 import importlib
 from typing import *
 
-from bsp.data_model.sed import MODEL_TYPE, UTC_CONFIG_TYPE
+from bsp.data_model.schemas import SEDModelType, TimeCourseConfigType
 from bsp.registration import Registrar
 
 
@@ -33,8 +33,8 @@ VERBOSE_REGISTRATION = True
 app_registrar = Registrar()
 
 # register types
-app_registrar.register_type("sed_model", MODEL_TYPE)
-app_registrar.register_type("utc_config", UTC_CONFIG_TYPE)
+app_registrar.register_type("sed_model", SEDModelType().to_dict())
+app_registrar.register_type("utc_config", TimeCourseConfigType().to_dict())
 
 # attempt to add smoldyn implementations
 try:
