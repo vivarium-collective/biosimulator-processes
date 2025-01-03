@@ -9,7 +9,7 @@ from process_bigraph.composite import ProcessTypes, Composite
 from pymongo import ASCENDING
 
 from bsp.data_model.bigraph import time_course_node_spec
-from bsp.compatible import COMPATIBLE_UTC_SIMULATORS
+from bsp.compatibility import COMPATIBLE_UTC_SIMULATORS
 from bsp.io import normalize_smoldyn_output_path_in_root, get_sbml_species_mapping
 from bsp.utils import handle_exception, handle_sbml_exception
 

@@ -5,7 +5,7 @@ from process_bigraph import Composite, ProcessTypes
 from builder import Builder
 
 from bsp.data_model.base import BaseClass
-from bsp.registry import Registrar
+from bsp.registration import Registrar
 
 
 class BSPBuilder(Builder):

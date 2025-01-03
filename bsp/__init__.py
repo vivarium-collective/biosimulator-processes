@@ -2,7 +2,7 @@ import importlib
 from typing import *
 
 from bsp.data_model.sed import MODEL_TYPE, UTC_CONFIG_TYPE
-from bsp.registry import Registrar
+from bsp.registration import Registrar
 
 
 # -- step and process implementation references for registration --
