@@ -59,18 +59,31 @@ class Registrar(object):
         if verbose:
             print(f"Successfully registered {implementation} to address: {address}")
 
-    def register_module(self, type_registry: ProcessTypes, import_statement: str, address: str, verbose=False) -> None:
+    def register_module(self, process_name: str, path: str, package: str = "bsp", verbose=False) -> None:
+        library, module_name, class_name = path.rsplit('.', 3)
+        try:
+            # library = 'steps' if 'process' not in path else 'processes'
+            import_statement = f'{package}.{library}.{module_name}'
+            module = __import__(
+                 import_statement, fromlist=[class_name])
+            bigraph_class = getattr(module, class_name)
+            self.core.process_registry.register(process_name, bigraph_class)
+        except Exception as e:
+            if verbose:
+                print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
+
+    def register_initial_modules(self, items_to_register: List[Tuple[str, str]], package: str = "bsp", verbose=False) -> None:
+        for process_name, path in items_to_register:
+            self.register_module(process_name, path, package, verbose)
+
+    def _register_module(self, type_registry: ProcessTypes, import_statement: str, address: str, verbose=False) -> None:
         class_name = import_statement.split('.')[-1]
         try:
-
             module = __import__(
                 import_statement, fromlist=[class_name])
-
             # module = importlib.import_module(import_statement)
-
             # Get the class from the module
             bigraph_class = getattr(module, class_name)
-
             # Register the process
             type_registry.process_registry.register(address, bigraph_class)
             if verbose:
@@ -79,11 +92,11 @@ class Registrar(object):
             if verbose:
                 print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
 
-    def register_initial_modules(self, items_to_register: List[Tuple[str, str]], package: str = "bsp", verbose=False) -> None:
+    def _register_initial_modules(self, items_to_register: List[Tuple[str, str]], package: str = "bsp", verbose=False) -> None:
         for process_name, path in items_to_register:
-            module_name, class_name = path.rsplit('.', 1)
+            library, module_name, class_name = path.rsplit('.', 3)
             try:
-                library = 'steps' if 'process' not in path else 'processes'
+                # library = 'steps' if 'process' not in path else 'processes'
                 import_statement = f'{package}.{library}.{module_name}'
                 module = __import__(
                      import_statement, fromlist=[class_name])

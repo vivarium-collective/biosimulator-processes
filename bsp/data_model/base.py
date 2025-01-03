@@ -38,7 +38,7 @@ class DependencyFile(BaseClass):
 class InstallationDependency(BaseClass):
     name: str
     version: str
-    markers: str = Field(default='')  # ie: "markers": "platform_system == \"Windows\""
+    markers: str  # ie: "markers": "platform_system == \"Windows\""
     # files: List[DependencyFile] = Field(default=[])
 
 

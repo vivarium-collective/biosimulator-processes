@@ -9,9 +9,9 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from process_bigraph import Step
 
-from biosimulators_processes import CORE
 from biosimulators_processes.io import unpack_omex_archive, get_archive_model_filepath, get_sedml_time_config
 from biosimulators_processes.data_model.sed_data_model import UTC_CONFIG_TYPE
+
 from bsp.utils.helpers import calc_duration, calc_num_steps, calc_step_size, check_ode_kisao_term
 
 
