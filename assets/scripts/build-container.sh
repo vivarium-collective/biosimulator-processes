@@ -16,10 +16,15 @@ docker buildx inspect --bootstrap
 
 set -e
 
+# docker build \
+#   --no-cache \
+#   --platform linux/amd64 \
+#   -t ghcr.io/vivarium-collective/biosimulator-processes:"${version}" .
+
 docker build \
   --no-cache \
   --platform linux/amd64 \
-  -t ghcr.io/vivarium-collective/biosimulator-processes:"${version}" .
+  -t ghcr.io/vivarium-collective/bsp:"${version}" .
 
 if [ "${run}" == "-r" ]; then
   ./scripts/run-container.sh "${version}"
