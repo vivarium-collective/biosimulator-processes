@@ -1,11 +1,19 @@
-from bsp import registrar
-from bsp.data_model import BaseClass
-from bsp.registry import Registrar
-from bsp import registrar as app_registrar
 from dataclasses import dataclass
 from typing import *
 
-from process_bigraph import Composite
+from process_bigraph import Composite, ProcessTypes
+from builder import Builder
+
+from bsp.data_model.base import BaseClass
+from bsp.registry import Registrar
+
+
+class BSPBuilder(Builder):
+    _is_initialized = False
+
+    def __init__(self, schema: Dict = None, tree: Dict = None, filepath: str = None, core: ProcessTypes = None):
+        if not self._is_initialized:
+            super().__init__(schema=schema, tree=tree, file_path=filepath, core=core)
 
 
 @dataclass
@@ -41,9 +49,9 @@ class CompositionBuilder:
     document: CompositionDocument
 
     def __init__(self,
-                 registrar: Optional[Registrar] = None,
+                 registrar: Registrar,
                  nodes: Optional[List[CompositionNode]] = None):
-        self.registrar = registrar or app_registrar
+        self.registrar = registrar
         self.nodes = nodes
         self.document = self.to_document()
 
@@ -82,7 +90,7 @@ class CompositionBuilder:
             self.document.pop(node_name)
 
 
-def test():
+def test(registrar: Optional[Registrar] = None):
     qaoa_spec = CompositionNode(
         name="qaoa",
         _type="process",

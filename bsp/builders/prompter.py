@@ -1,25 +1,14 @@
 from typing import *
 import ast
-import requests
-from pydantic import BaseModel
-from graphviz import Digraph
 from process_bigraph import Composite
 from builder import Builder
-from biosimulators_processes import CORE
-from biosimulators_processes.data_model import _BaseClass
 
-
-class BiosimulatorBuilder(Builder):
-    _is_initialized = False
-
-    def __init__(self, schema: Dict = None, tree: Dict = None, filepath: str = None):
-        if not self._is_initialized:
-            super().__init__(schema=schema, tree=tree, file_path=filepath, core=CORE)
+from bsp.builders.builder import BSPBuilder
 
 
 class BuildPrompter:
     """Front-End user interaction controller for high-level BioBuilder API."""
-    builder_instance: Union[Builder, BiosimulatorBuilder] = None
+    builder_instance: Union[Builder, BSPBuilder] = None
     connect_all: bool = True
 
     @classmethod
@@ -59,13 +48,13 @@ class BuildPrompter:
         return input_kwargs
 
     def add_single_process(self,
-                           builder: Union[Builder, BiosimulatorBuilder] = None,
+                           builder: Union[Builder, BSPBuilder] = None,
                            process_type: str = None,
-                           config: _BaseClass = None,
+                           config=None,
                            builder_node_name: str = None) -> None:
         """Get prompted through the steps of adding a single process to the bigraph via the builder."""
         if self.builder_instance is None:
-            self.builder_instance = builder or BiosimulatorBuilder()
+            self.builder_instance = builder or BSPBuilder()
 
         if not process_type:
             process_type = input(
@@ -95,8 +84,8 @@ class BuildPrompter:
 
     def add_processes(self,
                       num: int,
-                      builder: Union[Builder, BiosimulatorBuilder] = None,
-                      config: _BaseClass = None,
+                      builder: Union[Builder, BSPBuilder] = None,
+                      config=None,
                       write_doc: bool = False) -> None:
         """Get prompted for adding `num` processes to the bigraph and visualize the composite.
 

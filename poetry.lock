@@ -248,6 +248,20 @@ html5lib = ["html5lib"]
 lxml = ["lxml"]
 
 [[package]]
+name = "bigraph-builder"
+version = "0.0.4"
+description = ""
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "bigraph-builder-0.0.4.tar.gz", hash = "sha256:15801fb147e221cec09d9042af877281921d09bf69120f4103a6bdd10843f5e0"},
+]
+
+[package.dependencies]
+bigraph-viz = "*"
+process-bigraph = "*"
+
+[[package]]
 name = "bigraph-schema"
 version = "0.0.49"
 description = "A serializable type schema for compositional systems biology"
@@ -263,6 +277,21 @@ numpy = "*"
 parsimonious = "*"
 pint = "*"
 pytest = "*"
+
+[[package]]
+name = "bigraph-viz"
+version = "0.0.35"
+description = "A graphviz-based plotting tool for compositional bigraph schema"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "bigraph-viz-0.0.35.tar.gz", hash = "sha256:ce23459aaccd9650c6ae5457209a29b16d362cdbf64289d89269d4297c7e6cab"},
+]
+
+[package.dependencies]
+bigraph-schema = "*"
+graphviz = "*"
+numpy = "*"
 
 [[package]]
 name = "bleach"
@@ -1091,6 +1120,22 @@ gitdb = ">=4.0.1,<5"
 [package.extras]
 doc = ["sphinx (>=7.1.2,<7.2)", "sphinx-autodoc-typehints", "sphinx_rtd_theme"]
 test = ["coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mock", "mypy", "pre-commit", "pytest (>=7.3.1)", "pytest-cov", "pytest-instafail", "pytest-mock", "pytest-sugar", "typing-extensions"]
+
+[[package]]
+name = "graphviz"
+version = "0.20.3"
+description = "Simple Python interface for Graphviz"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "graphviz-0.20.3-py3-none-any.whl", hash = "sha256:81f848f2904515d8cd359cc611faba817598d2feaac4027b266aa3eda7b3dde5"},
+    {file = "graphviz-0.20.3.zip", hash = "sha256:09d6bc81e6a9fa392e7ba52135a9d49f1ed62526f96499325930e87ca1b5925d"},
+]
+
+[package.extras]
+dev = ["flake8", "pep8-naming", "tox (>=3)", "twine", "wheel"]
+docs = ["sphinx (>=5,<7)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
+test = ["coverage", "pytest (>=7,<8.1)", "pytest-cov", "pytest-mock (>=3)"]
 
 [[package]]
 name = "h11"
@@ -5081,4 +5126,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "f7532e0f58338467b489d75596bdbfc768774a45c48c1da0bd8f76faf368850f"
+content-hash = "21cc7b0e13aac81d2c4ac3a2acd54309967f2e42c5b0e7fceaf125b3524e7de2"
