@@ -68,9 +68,9 @@ qiskit-ibm-runtime = "*"
 pyscf = "^2.7.0"
 
 
-
 [tool.poetry.group.builder.dependencies]
 bigraph-builder = "^0.0.4"
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
