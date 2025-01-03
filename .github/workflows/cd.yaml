@@ -1,0 +1,46 @@
+name: Continuous Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  CD:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "export PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+          source $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Extract project version
+        run: |
+          VERSION=$(poetry run python -c "import toml; print(toml.load('pyproject.toml')['tool']['poetry']['version'])")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      # - name: Create new github tags
+      #   run: |
+      #     git tag -m "Version v${{ env.VERSION }}" "v${{ env.VERSION }}"
+      #     git push --tags
+
+      - name: Publish new version on PyPI
+        run: |
+          poetry build
+          sudo rm -rf bsp/__pycache__
+          sudo rm -rf tests/__pycache__
+          poetry publish --username __token__ --password ${{ secrets.ADMIN_PYPI_TOKEN }}
+
+      - name: Notify Deployment
+        run: echo "Version ${{ env.VERSION }} as been published on PyPI with release ${{ github.ref }}"

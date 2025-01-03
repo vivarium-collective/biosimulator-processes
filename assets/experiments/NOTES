@@ -1,0 +1,8 @@
+Fe  0.0   0.0   0.0
+Fe  2.5   0.0   0.0
+O   1.25  0.5   0.0   # Bridging oxygen
+O   1.25 -0.5   0.0   # Bridging oxygen
+N   0.5   1.5   0.0   # Histidine ligand
+C  -0.5  -1.5   0.0   # Glutamate ligand
+C   3.0   1.0   0.0   # Aspartate ligand
+O   3.5   1.5   0.0   # Carboxyl group of Aspartate
