@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "biosimulator-processes"
-version = "0.3.2"  # latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
+version = "0.3.3"  # latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
@@ -35,13 +35,19 @@ bigraph-builder = {version = "^0.0.4", optional = true}
 
 
 [tool.poetry.extras]
+cobra = ["cobra", "imageio"]
+amici = ["amici"]
+copasi = ["copasi-basico"]
+tellurium = ["tellurium", "libroadrunner"]
+smoldyn = ["smoldyn"]
+pymem3dg = ["pymem3dg"]
 builder = ["bigraph-builder"]
 dev = ["pytest", "mypy", "flake8", "pip-autoremove"]
-fba = ["imageio", "cobra"]
 notebook = ["jupyterlab", "ipykernel"]
-ode = ["amici", "copasi-basico", "tellurium", "libroadrunner"]
-spatial = ["smoldyn", "pymem3dg"]  # "readdy"]
 quantum = ["qiskit", "qiskit-ibm-runtime", "qiskit-nature", "pyscf"]
+# ode = ["amici", "copasi-basico", "tellurium", "libroadrunner"]
+# spatial = ["smoldyn", "pymem3dg"]  # "readdy"]
+# readdy = ["readdy"]
 
 
 [tool.pytest.ini_options]
