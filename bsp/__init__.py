@@ -26,7 +26,7 @@ PROCESS_IMPLEMENTATIONS = [
     ('fba', 'bundles.dfba.FBA')
 ]
 
-VERBOSE_REGISTRATION = True
+VERBOSE_REGISTRATION = False
 
 
 # process/implementation registrar
