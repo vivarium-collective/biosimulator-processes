@@ -1,14 +1,14 @@
 import warnings
-from basico import *
-from process_bigraph import Process
 import logging
 import os
 from pathlib import Path
 
+import numpy as np
 import cobra
+from basico import *
 from cobra.io import read_sbml_model
 from process_bigraph import Process, Composite
-import numpy as np
+from process_bigraph import Process
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)

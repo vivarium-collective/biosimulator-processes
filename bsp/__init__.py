@@ -8,11 +8,11 @@ from bsp.registration import Registrar
 # -- step and process implementation references for registration --
 
 STEP_IMPLEMENTATIONS = [
-    ('output-generator', 'steps.main_steps.OutputGenerator'),
-    ('time-course-output-generator', 'steps.main_steps.TimeCourseOutputGenerator'),
-    ('smoldyn_step', 'steps.main_steps.SmoldynStep'),
-    ('simularium_smoldyn_step', 'steps.main_steps.SimulariumSmoldynStep'),
-    ('mongo-emitter', 'steps.main_steps.MongoDatabaseEmitter'),
+    # ('output-generator', 'steps.main_steps.OutputGenerator'),
+    # ('time-course-output-generator', 'steps.main_steps.TimeCourseOutputGenerator'),
+    # ('smoldyn_step', 'steps.main_steps.SmoldynStep', ['smoldyn']),
+    # ('simularium_smoldyn_step', 'steps.main_steps.SimulariumSmoldynStep', ['smoldyn', 'simulariumio']),
+    ('mongo-emitter', 'steps.main_steps.MongoDatabaseEmitter', ["pymongo"]),
 ]
 
 PROCESS_IMPLEMENTATIONS = [
@@ -22,8 +22,8 @@ PROCESS_IMPLEMENTATIONS = [
     # ('utc-amici', 'processes.amici_process.UtcAmici'),
     # ('utc-copasi', 'processes.copasi_process.UtcCopasi'),
     # ('utc-tellurium', 'processes.tellurium_process.UtcTellurium'),
-    ('ode', 'bundles.dfba.ODECopasi'),
-    ('fba', 'bundles.dfba.FBA')
+    ('ode', 'bundles.dfba.ODECopasi', ["copasi-basico"]),
+    ('fba', 'bundles.dfba.FBA', ["cobra", "imageio"])
 ]
 
 VERBOSE_REGISTRATION = False

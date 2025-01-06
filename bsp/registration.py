@@ -14,10 +14,15 @@ class ImplementationRegistry:
     primary: bool
 
 
+class SimulatorDependency(str):
+    pass
+
+
 class Registrar(object):
     registries: List[ImplementationRegistry]
     core: ProcessTypes
     registered_addresses: List[str]
+    implementation_dependencies: Dict[str, List[SimulatorDependency]]
 
     def __init__(self, core: ProcessTypes = None):
         self.core = core or ProcessTypes()
@@ -32,6 +37,7 @@ class Registrar(object):
         self.set_primary(default_reg.id)
         self.core.type_registry = self.core.types()
         self.initial_registration_complete = False
+        self.implementation_dependencies = {}
 
     @property
     def registered_addresses(self) -> List[str]:
@@ -82,8 +88,10 @@ class Registrar(object):
             if attempt_install:
                 dynamic_simulator_install(simulators=[library])
 
-    def register_initial_modules(self, items_to_register: List[Tuple[str, str]], package: str = "bsp", verbose=False, attempt_install=False) -> None:
+    def register_initial_modules(self, items_to_register: List[Tuple[str, str, List[str]]], package: str = "bsp", verbose=False, attempt_install=False) -> None:
         if not self.initial_registration_complete:
-            for process_name, path in items_to_register:
+            for process_name, path, dependencies in items_to_register:
                 self.register_module(process_name=process_name, path=path, package=package, verbose=verbose, attempt_install=attempt_install)
+                process_deps = [SimulatorDependency(dep) for dep in dependencies]
+                self.implementation_dependencies[process_name] = process_deps
             self.initial_registration_complete = True
