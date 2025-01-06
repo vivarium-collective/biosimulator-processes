@@ -1,4 +1,5 @@
 import logging
+import os
 from tempfile import mkdtemp
 from typing import *
 from logging import Logger
@@ -11,49 +12,44 @@ from pymongo import ASCENDING
 from bsp.data_model.bigraph import time_course_node_spec
 from bsp.compatibility import COMPATIBLE_UTC_SIMULATORS
 from bsp.io import normalize_smoldyn_output_path_in_root, get_sbml_species_mapping
-from bsp.utils.base_utils import handle_exception, handle_sbml_exception
+from bsp.utils.base_utils import handle_exception, handle_sbml_exception, dynamic_simulator_import
 
 # logging TODO: implement this.
 logger: Logger = logging.getLogger("compose.worker.data_generator.log")
 
-AMICI_ENABLED = True
-COPASI_ENABLED = True
-PYSCES_ENABLED = True
-TELLURIUM_ENABLED = True
-SMOLDYN_ENABLED = True
-READDY_ENABLED = True
-
-try:
-    from amici import SbmlImporter, import_model_module, Model, runAmiciSimulation
-except ImportError as e:
-    AMICI_ENABLED = False
-    logger.warning(str(e))
-try:
-    from basico import *
-except ImportError as e:
-    COPASI_ENABLED = False
-    logger.warning(str(e))
-try:
-    import tellurium as te
-except ImportError as e:
-    TELLURIUM_ENABLED = False
-    logger.warning(str(e))
-try:
-    from smoldyn import Simulation
-    from smoldyn._smoldyn import MolecState
-except ImportError as e:
-    SMOLDYN_ENABLED = False
-    logger.warning(str(e))
-try:
-    import readdy
-except ImportError as e:
-    READDY_ENABLED = False
-    logger.warning(str(e))
-try:
-    import pysces
-except ImportError as e:
-    PYSCES_ENABLED = False
-    logger.warning(str(e))
+# AMICI_ENABLED = True
+# COPASI_ENABLED = True
+# PYSCES_ENABLED = True
+# TELLURIUM_ENABLED = True
+# SMOLDYN_ENABLED = True
+# READDY_ENABLED = True
+# try:
+#     from amici import SbmlImporter, import_model_module, Model, runAmiciSimulation
+# except ImportError as e:
+#     AMICI_ENABLED = False
+#     # logger.warning(str(e))
+# try:
+#     from basico import *
+# except ImportError as e:
+#     COPASI_ENABLED = False
+#     # logger.warning(str(e))
+# try:
+#     import tellurium as te
+# except ImportError as e:
+#     TELLURIUM_ENABLED = False
+#     # logger.warning(str(e))
+# try:
+#     from smoldyn import Simulation
+#     from smoldyn._smoldyn import MolecState
+# except ImportError as e:
+#     SMOLDYN_ENABLED = False
+#     # logger.warning(str(e))
+#
+# try:
+#     import pysces
+# except ImportError as e:
+#     PYSCES_ENABLED = False
+#     # logger.warning(str(e))
 
 HISTORY_INDEXES = [
     'data.time',
@@ -167,53 +163,61 @@ def run_readdy(
         unit_system_config: Dict[str, str] = None
 ) -> Dict[str, str]:
     output = {}
-    if READDY_ENABLED:
-        # establish reaction network system
-        unit_system = unit_system_config or {"length_unit": "micrometer", "time_unit": "second"}
-        system = readdy.ReactionDiffusionSystem(
-            box_size=box_size,
-            unit_system=unit_system
-        )
 
-        # add species via spec
-        species_names = []
-        for config in species_config:
-            species_name = config["name"]
-            species_difc = config["diffusion_constant"]
-            species_names.append(species_name)
-            system.add_species(species_name, diffusion_constant=float(species_difc))
+    # attempt module install (dynamic)
+    readdy = dynamic_simulator_import('readdy')
 
-        # add reactions via spec
-        for config in reactions_config:
-            reaction_scheme = config["scheme"]
-            reaction_rate = config["rate"]
-            system.reactions.add(reaction_scheme, rate=float(reaction_rate))
-
-        # configure simulation outputs
-        simulation = system.simulation(kernel="CPU")
-        simulation.output_file = "out.h5"
-        simulation.reaction_handler = "UncontrolledApproximation"
-
-        # set initial particle state and configure observations
-        for config in particles_config:
-            particle_name = config["name"]
-            particle_positions = config["initial_positions"]
-            if not isinstance(particle_positions, np.ndarray):
-                particle_positions = np.array(particle_positions)
-            simulation.add_particles(particle_name, particle_positions)
-        simulation.observe.number_of_particles(
-            stride=1,
-            types=list(set(species_names))
-        )
-
-        # run simulation for given time parameters
-        n_steps = int(float(duration) / dt)
-        simulation.run(n_steps=n_steps, timestep=dt)
-        output = {"results_file": simulation.output_file}
-    else:
+    # if module error, return error
+    if readdy.module is None:
         error = handle_exception("Run Readdy")
         logger.error(error)
-        output = {'error': error}
+        return {'error': error}
+    else:
+        readdy = readdy.module
+
+    # establish reaction network system
+    unit_system = unit_system_config or {"length_unit": "micrometer", "time_unit": "second"}
+    system = readdy.ReactionDiffusionSystem(
+        box_size=box_size,
+        unit_system=unit_system
+    )
+
+    # add species via spec
+    species_names = []
+    for config in species_config:
+        species_name = config["name"]
+        species_difc = config["diffusion_constant"]
+        species_names.append(species_name)
+        system.add_species(species_name, diffusion_constant=float(species_difc))
+
+    # add reactions via spec
+    for config in reactions_config:
+        reaction_scheme = config["scheme"]
+        reaction_rate = config["rate"]
+        system.reactions.add(reaction_scheme, rate=float(reaction_rate))
+
+    # configure simulation outputs
+    simulation = system.simulation(kernel="CPU")
+    simulation.output_file = "out.h5"
+    simulation.reaction_handler = "UncontrolledApproximation"
+
+    # set initial particle state and configure observations
+    for config in particles_config:
+        particle_name = config["name"]
+        particle_positions = config["initial_positions"]
+        if not isinstance(particle_positions, np.ndarray):
+            particle_positions = np.array(particle_positions)
+        simulation.add_particles(particle_name, particle_positions)
+
+    simulation.observe.number_of_particles(
+        stride=1,
+        types=list(set(species_names))
+    )
+
+    # run simulation for given time parameters
+    n_steps = int(float(duration) / dt)
+    simulation.run(n_steps=n_steps, timestep=dt)
+    output = {"results_file": simulation.output_file}
 
     return output
 
@@ -235,6 +239,17 @@ def run_smoldyn(model_fp: str, duration: int, dt: float = None) -> Dict[str, Uni
         If it startswith that, then assume a return of the output txt file, if not: then assume a return from ram.
     """
     # search for output_files in model_fp TODO: optimize this
+    # attempt module install (dynamic)
+    output_data = {}
+
+    smoldyn = dynamic_simulator_import('smoldyn')
+    if smoldyn.module is None:
+        error = handle_exception("Run Smoldyn")
+        logger.error(error)
+        return {'error': error}
+    else:
+        smoldyn = smoldyn.module
+
     use_file_output = False
     with open(model_fp, 'r') as f:
         model_content = [line.strip() for line in f.readlines()]
@@ -243,8 +258,7 @@ def run_smoldyn(model_fp: str, duration: int, dt: float = None) -> Dict[str, Uni
                 use_file_output = True
         f.close()
 
-    output_data = {}
-    simulation = Simulation.fromFile(model_fp)
+    simulation = smoldyn.Simulation.fromFile(model_fp)
     try:
         # case: there is no declaration of output_files in the smoldyn config file, or it is commented out
         if not use_file_output:
@@ -299,6 +313,14 @@ def run_smoldyn(model_fp: str, duration: int, dt: float = None) -> Dict[str, Uni
 
 
 def run_sbml_pysces(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str, Union[List[float], str]]:
+    pysces = dynamic_simulator_import('pysces')
+    if pysces.module is None:
+        error = handle_exception("Run pysces")
+        logger.error(error)
+        return {'error': error}
+    else:
+        pysces = pysces.module
+
     # model compilation
     sbml_filename = sbml_fp.split('/')[-1]
     psc_filename = sbml_filename + '.psc'
@@ -324,6 +346,14 @@ def run_sbml_pysces(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str,
 
 
 def run_sbml_tellurium(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str, Union[List[float], str]]:
+    te = dynamic_simulator_import('tellurium')
+    if te.module is None:
+        error = handle_exception("Run tellurium")
+        logger.error(error)
+        return {'error': error}
+    else:
+        te = te.module
+
     result = None
     try:
         simulator = te.loadSBMLModel(sbml_fp)
@@ -349,14 +379,22 @@ def run_sbml_tellurium(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[s
 
 
 def run_sbml_copasi(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str, Union[List[float], str]]:
+    basico = dynamic_simulator_import('basico')
+    if basico.module is None:
+        error = handle_exception("Run basico")
+        logger.error(error)
+        return {'error': error}
+    else:
+        basico = basico.module
+
     try:
         t = np.linspace(start, dur, steps + 1)
-        model = load_model(sbml_fp)
-        specs = get_species(model=model).index.tolist()
+        model = basico.load_model(sbml_fp)
+        specs = basico.get_species(model=model).index.tolist()
         for spec in specs:
             if spec == "EmptySet" or "EmptySet" in spec:
                 specs.remove(spec)
-        tc = run_time_course(model=model, update_model=True, values=t)
+        tc = basico.run_time_course(model=model, update_model=True, values=t)
         data = {spec: tc[spec].values.tolist() for spec in specs}
         return data
     except:
@@ -366,11 +404,19 @@ def run_sbml_copasi(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str,
 
 
 def run_sbml_amici(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str, Union[List[float], str]]:
+    amici = dynamic_simulator_import('amici')
+    if amici.module is None:
+        error = handle_exception("Run amici")
+        logger.error(error)
+        return {'error': error}
+    else:
+        amici = amici.module
+
     try:
         sbml_reader = libsbml.SBMLReader()
         sbml_doc = sbml_reader.readSBML(sbml_fp)
         sbml_model_object = sbml_doc.getModel()
-        sbml_importer = SbmlImporter(sbml_fp)
+        sbml_importer = amici.SbmlImporter(sbml_fp)
         model_id = sbml_fp.split('/')[-1].replace('.xml', '')
         model_output_dir = mkdtemp()
         sbml_importer.sbml2amici(
@@ -382,8 +428,8 @@ def run_sbml_amici(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str, 
             constant_parameters=None
         )
         # model_output_dir = model_id  # mkdtemp()
-        model_module = import_model_module(model_id, model_output_dir)
-        amici_model_object: Model = model_module.getModel()
+        model_module = amici.import_model_module(model_id, model_output_dir)
+        amici_model_object = model_module.getModel()
         floating_species_list = list(amici_model_object.getStateIds())
         floating_species_initial = list(amici_model_object.getInitialStates())
         sbml_species_ids = [spec.getName() for spec in sbml_model_object.getListOfSpecies()]
@@ -396,7 +442,7 @@ def run_sbml_amici(sbml_fp: str, start: int, dur: int, steps: int) -> Dict[str, 
         amici_model_object.setInitialStates(set_values)
         sbml_species_mapping = get_sbml_species_mapping(sbml_fp)
         method = amici_model_object.getSolver()
-        result_data = runAmiciSimulation(solver=method, model=amici_model_object)
+        result_data = amici.runAmiciSimulation(solver=method, model=amici_model_object)
         results = {}
         floating_results = dict(zip(
             sbml_species_ids,
