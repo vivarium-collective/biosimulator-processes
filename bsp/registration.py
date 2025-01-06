@@ -4,6 +4,8 @@ from typing import *
 
 from process_bigraph import ProcessTypes
 
+from bsp.utils.base_utils import dynamic_simulator_install
+
 
 @dataclasses.dataclass
 class ImplementationRegistry:
@@ -65,7 +67,7 @@ class Registrar(object):
         if verbose:
             print(f"Successfully registered {implementation} to address: {address}")
 
-    def register_module(self, process_name: str, path: str, package: str = "bsp", verbose=False) -> None:
+    def register_module(self, process_name: str, path: str, package: str = "bsp", verbose=False, attempt_install=False) -> None:
         library, module_name, class_name = path.rsplit('.', 3)
         try:
             # library = 'steps' if 'process' not in path else 'processes'
@@ -77,9 +79,11 @@ class Registrar(object):
         except Exception as e:
             if verbose:
                 print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
+            if attempt_install:
+                dynamic_simulator_install(simulators=[library])
 
-    def register_initial_modules(self, items_to_register: List[Tuple[str, str]], package: str = "bsp", verbose=False) -> None:
+    def register_initial_modules(self, items_to_register: List[Tuple[str, str]], package: str = "bsp", verbose=False, attempt_install=False) -> None:
         if not self.initial_registration_complete:
             for process_name, path in items_to_register:
-                self.register_module(process_name, path, package, verbose)
+                self.register_module(process_name=process_name, path=path, package=package, verbose=verbose, attempt_install=attempt_install)
             self.initial_registration_complete = True

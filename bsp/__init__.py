@@ -27,6 +27,7 @@ PROCESS_IMPLEMENTATIONS = [
 ]
 
 VERBOSE_REGISTRATION = False
+ATTEMPT_INSTALL = False
 
 
 # process/implementation registrar
@@ -50,7 +51,8 @@ items_to_register = STEP_IMPLEMENTATIONS + PROCESS_IMPLEMENTATIONS
 
 app_registrar.register_initial_modules(
     items_to_register=items_to_register,
-    verbose=VERBOSE_REGISTRATION
+    verbose=VERBOSE_REGISTRATION,
+    attempt_install=ATTEMPT_INSTALL
 )
 
 
