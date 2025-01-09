@@ -19,6 +19,7 @@ pyyaml = "^6.0.2"
 python-dotenv = "^1.0.1"
 requests = "^2.32.3"
 h5py = "^3.12.1"
+python-libsbml = "*"
 cobra = {version = "^0.29.1", optional = true}
 imageio = {version = "^2.36.1", optional = true}
 copasi-basico = {version = "^0.82", optional = true}
