@@ -50,7 +50,10 @@ class ODECopasi(Process):
             name: 'float' for name in self.species_names
         }
         return {
-            'species_concentrations': concentrations_type,
+            # 'species_concentrations': concentrations_type,
+            'species_counts': {
+                name: 'float' for name in self.species_names
+            },
             'time': 'float'
         }
 
@@ -70,8 +73,11 @@ class ODECopasi(Process):
         }
 
     def update(self, inputs, interval):
-        for cat_id, value in inputs['species_concentrations'].items():
-            set_type = 'concentration'
+        # spec_data_k = inputs['species_concentrations']
+        spec_data_k = inputs['species_counts']
+        for cat_id, value in spec_data_k.items():
+            # set_type = 'concentration'
+            set_type = "count"
             species_config = {
                 'name': cat_id,
                 'model': self.model,

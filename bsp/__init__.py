@@ -22,8 +22,9 @@ PROCESS_IMPLEMENTATIONS = [
     # ('utc-amici', 'processes.amici_process.UtcAmici'),
     # ('utc-copasi', 'processes.copasi_process.UtcCopasi'),
     # ('utc-tellurium', 'processes.tellurium_process.UtcTellurium'),
-    ('ode', 'bundles.dfba.ODECopasi', ["copasi-basico"]),
-    ('fba', 'bundles.dfba.FBA', ["cobra", "imageio"])
+    ('smoldyn-process', 'processes.smoldyn_process.SmoldynProcess', ["smoldyn"]),
+    ('copasi-process', 'bundles.dfba.ODECopasi', ["copasi-basico"]),
+    ('cobra-process', 'bundles.dfba.FBA', ["cobra", "imageio"])
 ]
 
 VERBOSE_REGISTRATION = False

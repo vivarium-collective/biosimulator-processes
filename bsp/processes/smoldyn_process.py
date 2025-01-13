@@ -205,8 +205,6 @@ class SmoldynProcess(Process):
             for spec_name in self.species_names
         }
 
-        print(f'INITAL: {initial_species_counts}')
-
         return {
             'species_counts': initial_species_counts,
             'molecules': {

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "biosimulator-processes"
-version = "0.3.7"  # latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
+version = "0.3.8"  # latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
