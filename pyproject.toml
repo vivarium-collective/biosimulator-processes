@@ -7,10 +7,6 @@ description = "Core implementations of process-bigraph.composite.Process alignin
 authors = [{name = "Alex Patrie", email = "alexanderpatrie@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.10,<4"
-packages = [
-    {include = "bsp"},
-    {include = "tests"}
-]
 dependencies = [
     "process-bigraph>=0.0.23",
     "pip-autoremove",
@@ -45,3 +41,9 @@ build-backend = "poetry.core.masonry.api"
 testpaths = ["tests"]
 addopts = "--ignore=setup.py"
 python_files = "*.py"
+
+[tool.poetry]
+packages = [
+    {include = "bsp"},
+    {include = "tests"}
+]
