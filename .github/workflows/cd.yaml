@@ -21,6 +21,10 @@ jobs:
           echo "export PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
           source $GITHUB_ENV
 
+      - name: Install Toml
+        run: |
+          poetry run pip install toml
+
       - name: Extract project version
         run: |
           VERSION=$(poetry run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
