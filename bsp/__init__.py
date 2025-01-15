@@ -6,7 +6,7 @@ from bsp.registration import Registrar
 from bsp.implementations import INITIAL_MODULES
 
 
-VERBOSE_REGISTRATION = True
+VERBOSE_REGISTRATION = False
 ATTEMPT_INSTALL = False
 
 
