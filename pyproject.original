@@ -1,0 +1,70 @@
+[tool.poetry]
+name = "biosimulator-processes"
+version = "0.3.9"  # LATEST: latest stable is 0.3.8; LEGACY: latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
+description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
+authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
+readme = "README.md"
+packages = [
+    {include = "bsp"},
+    {include = "tests"}
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+process-bigraph = "^0.0.23"  # "0.0.22"  # TODO: this needs to be fixed
+pip-autoremove = "*"
+seaborn = "^0.13.2"
+ipython = "^8.31.0"
+toml = "^0.10.2"
+pydantic = "^2.10.4"
+pyyaml = "^6.0.2"
+python-dotenv = "^1.0.1"
+requests = "^2.32.3"
+h5py = "^3.12.1"
+python-libsbml = "*"
+qiskit = {version = "^1.3.1", optional = true, extras = ["visualization"]}
+qiskit-nature = {version = "*", optional = true}
+qiskit-ibm-runtime = {version = "*", optional = true}
+pyscf = {version = "^2.7.0", optional = true}
+bigraph-builder = {version = "^0.0.4", optional = true}
+cobra = {version = "^0.29.1", optional = true}
+imageio = {version = "^2.36.1", optional = true}
+copasi-basico = {version = "^0.82", optional = true}
+amici = {version = "^0.30.0", optional = true}
+tellurium = {version = "2.2.10", optional = true}
+libroadrunner = {version = "^2.7.0", optional = true}
+smoldyn = {version = "^2.73", optional = true}
+pymem3dg = {version = "*", optional = true}
+# readdy = {version = "*", optional = true}
+simulariumio = {version = "^1.11.0", optional = true}
+
+
+[tool.poetry.extras]
+# -- individual simulators --
+cobra = ["cobra", "imageio"]
+amici = ["amici"]
+copasi = ["copasi-basico"]
+tellurium = ["tellurium", "libroadrunner"]
+smoldyn = ["smoldyn"]
+pymem3dg = ["pymem3dg"]
+builder = ["bigraph-builder"]
+# readdy = ["readdy"]
+
+# -- bundles --
+dev = ["pytest", "mypy", "flake8", "pip-autoremove"]
+quantum = ["qiskit", "qiskit-ibm-runtime", "qiskit-nature", "pyscf"]
+# notebook = ["jupyterlab", "ipykernel"]
+# ode = ["amici", "copasi-basico", "tellurium", "libroadrunner"]
+# spatial = ["smoldyn", "pymem3dg"]  # "readdy"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--ignore=setup.py"
+python_files = "*.py"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
