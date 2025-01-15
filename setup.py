@@ -4,7 +4,7 @@ VERSION = "0.3.9"
 
 setup(
     name="biosimulator-processes",
-    version="0.3.9",
+    version=VERSION,
     description="Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools.",
     author="Alex Patrie",
     author_email="alexanderpatrie@gmail.com",
