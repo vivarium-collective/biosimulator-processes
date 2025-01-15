@@ -3,80 +3,53 @@ Type schema definitions relating to process implementations within this applicat
 """
 
 
-from dataclasses import dataclass, asdict
-from typing import Union, Optional, Any, Dict
+__all__ = [
+    'Bounds',
+    'PositiveFloat',
+    'SedModel',
+    'SedModelChanges',
+    'SbmlCobra',
+    'TimeCourseConfig'
+]
 
-from bsp.data_model.base import BaseClass
+
+# create new types
+def apply_non_negative(schema, current, update, core):
+    new_value = current + update
+    return max(0, new_value)
+
+
+def check_sbml(state, schema, core):
+    import cobra
+    # Do something to check that the value is a valid SBML file
+    valid = cobra.io.sbml.validate_sbml_model(state)  # TODO -- this requires XML
+    # valid = cobra.io.load_json_model(value)
+    if valid:
+        return True
+    else:
+        return False
+
 
 # -- sed-specific type schemas --
 
+PositiveFloat = {
+    '_type': 'positive_float',
+    '_inherit': 'float',
+    '_apply': apply_non_negative
+}
 
-@dataclass
-class FieldSchema(BaseClass):
-    _type: str  # one of the bigraph schema types
-    _default: Optional[Any] = None
-    # TODO: add more attributes here!
+Bounds = {
+    'lower': 'maybe[float]',
+    'upper': 'maybe[float]'
+}
 
-    @property
-    def value(self):
-        return self._type if self._default is None else self.to_dict()
+SbmlCobra = {
+    '_inherit': 'string',
+    # '_check': check_sbml,
+    '_apply': 'set',
+}
 
-
-@dataclass
-class SEDModelType(BaseClass):
-    model_id: FieldSchema = FieldSchema(_type="string")
-    model_source: FieldSchema = FieldSchema(_type="string")
-    model_language: FieldSchema = FieldSchema(_type="string", _default="sbml")
-    model_name: FieldSchema = FieldSchema(_type="string", _default="composite_process_model")
-    model_units: FieldSchema = FieldSchema(_type="tree[string]")
-    model_changes: FieldSchema = FieldSchema(_type="tree[string]")
-
-    def to_dict(self):
-        return {
-            field_name: field_spec.value
-            for field_name, field_spec in vars(self).items()
-        }
-
-
-@dataclass
-class TimeCourseConfigType(BaseClass):
-    model: SEDModelType = SEDModelType()
-    time_config: FieldSchema = FieldSchema(_type="tree[string]")
-    species_context: FieldSchema = FieldSchema(_type="string", _default="concentrations")
-    working_dir: FieldSchema = FieldSchema(_type="string")
-
-
-# MODEL_TYPE = {
-#     'model_id': 'string',
-#     'model_source': 'string',  # TODO: add antimony support here.
-#     'model_language': {
-#         '_type': 'string',
-#         '_default': 'sbml'
-#     },
-#     'model_name': {
-#         '_type': 'string',
-#         '_default': 'composite_process_model'
-#     },
-#     'model_units': 'tree[string]',
-#     'model_changes': 'tree[string]',
-#     # 'model_changes': {
-#     #     'species_changes': 'maybe[tree[string]]',
-#     #     'global_parameter_changes': 'maybe[tree[string]]',
-#     #     'reaction_changes': 'maybe[tree[string]]'
-#     # },
-#     # 'model_units': 'maybe[tree[string]]'}
-# }
-# UTC_CONFIG_TYPE = {
-#     'model': MODEL_TYPE,  # referenced in registry as 'sed_model'
-#     'time_config': 'tree[string]',
-#     'species_context': {
-#         '_default': 'concentrations',
-#         '_type': 'string'
-#     },
-#     'working_dir': 'string'
-# }
-
-BASICO_MODEL_CHANGES_TYPE = {
+SedModelChanges = {
     'species_changes': {
         'species_name': {
             'unit': 'maybe[string]',
@@ -104,3 +77,27 @@ BASICO_MODEL_CHANGES_TYPE = {
         }
     }
 }
+
+SedModel = {
+    'model_id': 'string',
+    'model_source': 'string',
+    'model_language': {
+        '_default': 'string',
+        '_type': 'string'
+    },
+    'model_name': 'string',
+    'model_units': 'tree[string]',
+    'model_changes': SedModelChanges  # 'tree[string]'
+}
+
+TimeCourseConfig = {
+    'model': SedModel,
+    'time_config': 'tree[string]',  # ie: {start, stop, steps}
+    'species_context': {
+        '_default': 'concentrations',
+        '_type': 'string'
+    },
+    'working_dir': 'string'
+}
+
+

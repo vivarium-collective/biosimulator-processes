@@ -4,6 +4,9 @@ Dynamic FBA simulation
 
 Process for a pluggable dFBA simulation.
 """
+import logging
+import os
+from pathlib import Path
 
 import numpy as np
 import warnings
@@ -12,52 +15,17 @@ import cobra
 from cobra.io import load_model
 from process_bigraph import Process, Composite
 
-from biosimulators_processes import CORE
+from bsp.data_model.schemas import SedModel
 from bsp.viz.plot import plot_time_series, plot_species_distributions_to_gif
 
 
 # Suppress warnings
+logger = logging.getLogger('cobra')
+logger.setLevel(logging.ERROR)
+warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="cobra.util.solver")
 warnings.filterwarnings("ignore", category=FutureWarning, module="cobra.medium.boundary_types")
 
-
-# create new types
-def apply_non_negative(schema, current, update, core):
-    new_value = current + update
-    return max(0, new_value)
-
-
-def check_sbml(state, schema, core):
-    # Do something to check that the value is a valid SBML file
-    valid = cobra.io.sbml.validate_sbml_model(state)  # TODO -- this requires XML
-    # valid = cobra.io.load_json_model(value)
-    if valid:
-        return True
-    else:
-        return False
-
-
-positive_float = {
-    '_type': 'positive_float',
-    '_inherit': 'float',
-    '_apply': apply_non_negative
-}
-CORE.register('positive_float', positive_float)
-
-bounds_type = {
-    'lower': 'maybe[float]',
-    'upper': 'maybe[float]'
-}
-CORE.register_process('bounds', bounds_type)
-
-sbml_type = {
-    '_inherit': 'string',
-    '_check': check_sbml,
-    '_apply': 'set',
-}
-
-# register new types
-CORE.type_registry.register('sbml', sbml_type)
 
 # TODO -- can set lower and upper bounds by config instead of hardcoding
 MODEL_FOR_TESTING = load_model('textbook')
@@ -67,14 +35,99 @@ MODEL_FOR_TESTING = load_model('textbook')
 
 
 class CobraProcess(Process):
-
+    """FBA component of the dfba hybrid using COBRA."""
     config_schema = {
-        'model_file': 'sbml',
+        'model': SedModel,
+        'objective': {
+            'domain': 'string',  # either protein or mrna
+            'name': 'string',  # specific to the model: i.e., LacI
+            'scaling_factor': 'float'
+        }
     }
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
-        self.model = read_sbml_model(self.config['model_file'])
+
+        # create model
+        model_file = self.config['model']['model_source']
+        data_dir = Path(os.path.dirname(model_file))
+        path = data_dir / model_file.split('/')[-1]
+        self.model = load_model(str(path.resolve()))  # read_sbml_model(str(path.resolve()))
+
+        # parse objective
+        self.objective_domain = self.config['objective']['domain']
+        self.objective_name = self.config['objective']['name']
+        self.scaling_factor = self.config['objective'].get('scaling_factor', 10)
+
+        # set objectives
+        self.model.objective = {
+            self.model.reactions.get_by_id(reaction.id): np.random.random()  # TODO: make this more realistic
+            for reaction in self.model.reactions
+        }
+
+        # set even bounds
+        for reaction in self.model.reactions:
+            rand_bound = np.random.random()
+            self.model.reactions.get_by_id(reaction.id).lower_bound = -rand_bound  # TODO: What to do here?
+            self.model.reactions.get_by_id(reaction.id).upper_bound = rand_bound
+
+    def initial_state(self):
+        initial_fluxes = {}
+        initial_solution = self.model.optimize()
+        if initial_solution.status == 'optimal':
+            initial_fluxes = {
+                reaction.name: reaction.flux
+                for reaction in self.model.reactions
+            }
+
+        return {'fluxes': initial_fluxes}
+
+    def inputs(self):
+        return {'reaction_fluxes': 'tree[float]'}
+
+    def outputs(self):
+        return {'fluxes': 'tree[float]'}
+
+    def update(self, state, interval):
+        for reaction_name, reaction_flux in state['reaction_fluxes'].items():
+            for reaction in self.model.reactions:
+                if reaction.name == reaction_name:
+                    # 1. reset objective weights according to reaction fluxes directly
+                    self.model.objective = {
+                        self.model.reactions.get_by_id(reaction.id): reaction_flux
+                    }
+
+                    # 2. set lower bound with scaling factor and reaction fluxes
+                    self.model.reactions.get_by_id(reaction.id).lower_bound = -self.scaling_factor * abs(reaction_flux)  # / (5 + abs(reaction_flux))
+
+        # 3. solve for fluxes
+        output_state = {}
+        solution = self.model.optimize()
+        if solution.status == "optimal":
+            data = dict(zip(
+                list(state['reaction_fluxes'].keys()),
+                list(solution.fluxes.to_dict().values())
+            ))
+            output_state['fluxes'] = data
+
+            # TODO: do we want to instead scale by input flux?
+            # for reaction in self.model.reactions:
+            #     flux = solution.fluxes[reaction.id]
+            #     for reaction_name, reaction_flux in state['reaction_fluxes'].items():
+            #         if reaction.name == reaction_name:
+            #             fluxes[reaction.name] = flux * reaction_flux
+
+        return output_state
+
+
+class SedCobraProcess(Process):
+    config_schema = {
+        'model': SedModel
+    }
+
+    def __init__(self, config=None, core=None):
+        super().__init__(config, core)
+        self.model = load_model(self.config['model']['model_source'])
         self.reactions = self.model.reactions
         self.metabolites = self.model.metabolites
         self.objective = self.model.objective.to_json()['expression']['args'][0]['args'][1]['name']  # TODO -- fix this in cobra
@@ -126,7 +179,6 @@ class CobraProcess(Process):
             },
             'status': 'string',
         }
-
 
     def update(self, inputs, interval):
         # set reaction bounds
@@ -243,7 +295,7 @@ class DynamicFBA(Process):
 
 
 # register the process
-CORE.register_process('DynamicFBA', DynamicFBA)
+# CORE.register_process('DynamicFBA', DynamicFBA)
 
 
 # Helper functions to get specs and states
@@ -370,15 +422,14 @@ def run_dfba_spatial(
         total_time=60,
         n_bins=(3, 3),  # TODO -- why can't do (5, 10)??
         mol_ids=None,
+        CORE=None
 ):
-
     if mol_ids is None:
         mol_ids = ['glucose', 'acetate', 'biomass']
     composite_state = get_spatial_dfba_state(
         n_bins=n_bins,
         mol_ids=mol_ids,
     )
-
     # make the composite
     print('Making the composite...')
     sim = Composite({
@@ -414,8 +465,6 @@ def run_dfba_spatial(
         title='',
         skip_frames=1
     )
-
-
 
 
 
