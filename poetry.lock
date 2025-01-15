@@ -117,10 +117,10 @@ files = [
 name = "asttokens"
 version = "3.0.0"
 description = "Annotate AST trees with source code positions"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "asttokens-3.0.0-py3-none-any.whl", hash = "sha256:e3078351a059199dd5138cb1c706e6430c05eff2ff136af5eb4790f9d28932e2"},
     {file = "asttokens-3.0.0.tar.gz", hash = "sha256:0dcd8baa8d62b0c1d118b399b2ddba3c4aff271d0d7a9e0d4c1681c79035bbc7"},
@@ -202,7 +202,7 @@ description = "Foreign Function Interface for Python calling C code."
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(implementation_name == \"pypy\" or platform_python_implementation != \"PyPy\") and (extra == \"tellurium\" or platform_python_implementation != \"PyPy\") and (implementation_name == \"pypy\" or extra == \"quantum\") and (extra == \"tellurium\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(platform_python_implementation != \"PyPy\" or implementation_name == \"pypy\") and (platform_python_implementation != \"PyPy\" or extra == \"tellurium\") and (extra == \"quantum\" or extra == \"tellurium\") and (python_version <= \"3.11\" or python_version >= \"3.12\") and (extra == \"quantum\" or implementation_name == \"pypy\")"
 files = [
     {file = "cffi-1.17.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:df8b1c11f177bc2313ec4b2d46baec87a5f3e71fc8b45dab2ee7cae86d9aba14"},
     {file = "cffi-1.17.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:8f2cdc858323644ab277e9bb925ad72ae0e67f69e804f4898c070998d50b1a67"},
@@ -760,10 +760,10 @@ files = [
 name = "decorator"
 version = "5.1.1"
 description = "Decorators for Humans"
-optional = true
+optional = false
 python-versions = ">=3.5"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
     {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
@@ -858,10 +858,10 @@ test = ["pytest (>=6)"]
 name = "executing"
 version = "2.1.0"
 description = "Get the currently executing AST node of a frame, and other information"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "executing-2.1.0-py2.py3-none-any.whl", hash = "sha256:8d63781349375b5ebccc3142f4b30350c0cd9c79f921cde38be2be4637e98eaf"},
     {file = "executing-2.1.0.tar.gz", hash = "sha256:8ea27ddd260da8150fa5a708269c4a10e76161e2496ec3e587da9e3c0fe4b9ab"},
@@ -1334,10 +1334,10 @@ test = ["flaky", "ipyparallel", "pre-commit", "pytest (>=7.0)", "pytest-asyncio 
 name = "ipython"
 version = "8.31.0"
 description = "IPython: Productive Interactive Computing"
-optional = true
+optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "ipython-8.31.0-py3-none-any.whl", hash = "sha256:46ec58f8d3d076a61d128fe517a51eb730e3aaf0c184ea8c17d16e366660c6a6"},
     {file = "ipython-8.31.0.tar.gz", hash = "sha256:b6a2274606bec6166405ff05e54932ed6e5cfecaca1fc05f2cacde7bb074d70b"},
@@ -1374,10 +1374,10 @@ test-extra = ["curio", "ipython[test]", "matplotlib (!=3.2.0)", "nbformat", "num
 name = "jedi"
 version = "0.19.2"
 description = "An autocompletion tool for Python that can be used for text editors."
-optional = true
+optional = false
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "jedi-0.19.2-py2.py3-none-any.whl", hash = "sha256:a8ef22bde8490f57fe5c7681a3c83cb58874daf72b4784de3cce5b6ef6edb5b9"},
     {file = "jedi-0.19.2.tar.gz", hash = "sha256:4770dc3de41bde3966b02eb84fbcf557fb33cce26ad23da12c742fb50ecb11f0"},
@@ -1898,10 +1898,10 @@ dev = ["meson-python (>=0.13.1,<0.17.0)", "pybind11 (>=2.13.2,!=2.13.3)", "setup
 name = "matplotlib-inline"
 version = "0.1.7"
 description = "Inline Matplotlib backend for Jupyter"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "matplotlib_inline-0.1.7-py3-none-any.whl", hash = "sha256:df192d39a4ff8f21b1895d72e6a13f5fcc5099f00fa84384e0ea28c2cc0653ca"},
     {file = "matplotlib_inline-0.1.7.tar.gz", hash = "sha256:8423b23ec666be3d16e16b60bdd8ac4e86e840ebd1dd11a30b9f117f2fa0ab90"},
@@ -1930,7 +1930,7 @@ description = "Python library for arbitrary-precision floating-point arithmetic"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "(extra == \"cobra\" or extra == \"amici\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(extra == \"quantum\" or extra == \"cobra\" or extra == \"amici\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
 files = [
     {file = "mpmath-1.3.0-py3-none-any.whl", hash = "sha256:a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"},
     {file = "mpmath-1.3.0.tar.gz", hash = "sha256:7a28eb2a9774d00c7bc92411c19a89209d5da7c4c9a9e227be8330a23a25b91f"},
@@ -2205,10 +2205,10 @@ files = [
 name = "pandas"
 version = "2.2.3"
 description = "Powerful data structures for data analysis, time series, and statistics"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "(extra == \"cobra\" or extra == \"copasi\" or extra == \"amici\" or extra == \"tellurium\" or extra == \"pymem3dg\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "pandas-2.2.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:1948ddde24197a0f7add2bdc4ca83bf2b1ef84a1bc8ccffd95eda17fd836ecb5"},
     {file = "pandas-2.2.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:381175499d3802cde0eabbaf6324cce0c4f5d52ca6f8c377c29ad442f50f6348"},
@@ -2309,10 +2309,10 @@ regex = ">=2022.3.15"
 name = "parso"
 version = "0.8.4"
 description = "A Python Parser"
-optional = true
+optional = false
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "parso-0.8.4-py2.py3-none-any.whl", hash = "sha256:a418670a20291dacd2dddc80c377c5c3791378ee1e8d12bffc35420643d43f18"},
     {file = "parso-0.8.4.tar.gz", hash = "sha256:eb3a7b58240fb99099a345571deecc0f9540ea5f4dd2fe14c2a99d6b281ab92d"},
@@ -2339,10 +2339,10 @@ files = [
 name = "pexpect"
 version = "4.9.0"
 description = "Pexpect allows easy control of interactive console applications."
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "(sys_platform != \"win32\" and sys_platform != \"emscripten\") and extra == \"tellurium\" and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and (sys_platform != \"win32\" and sys_platform != \"emscripten\")"
 files = [
     {file = "pexpect-4.9.0-py2.py3-none-any.whl", hash = "sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523"},
     {file = "pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f"},
@@ -2489,6 +2489,36 @@ uncertainties = ["uncertainties (>=3.1.6)"]
 xarray = ["xarray"]
 
 [[package]]
+name = "pip"
+version = "24.3.1"
+description = "The PyPA recommended tool for installing Python packages."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"dev\""
+files = [
+    {file = "pip-24.3.1-py3-none-any.whl", hash = "sha256:3790624780082365f47549d032f3770eeb2b1e8bd1f7b2e02dace1afa361b4ed"},
+    {file = "pip-24.3.1.tar.gz", hash = "sha256:ebcb60557f2aefabc2e0f918751cd24ea0d56d8ec5445fe1807f1d2109660b99"},
+]
+
+[[package]]
+name = "pip-autoremove"
+version = "0.10.0"
+description = "Remove a package and its unused dependencies"
+optional = false
+python-versions = "*"
+groups = ["main"]
+markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"dev\""
+files = [
+    {file = "pip-autoremove-0.10.0.tar.gz", hash = "sha256:1328c6f6ef54b1ea51dd4dd78199d7f8b27c2344e9517fbb4f89edf3bfbb32ba"},
+    {file = "pip_autoremove-0.10.0-py2.py3-none-any.whl", hash = "sha256:093c7d9d73c66c191cbaac159bf32a0b2e7cdbc108f1935dacb5d5e09bee9eca"},
+]
+
+[package.dependencies]
+pip = "*"
+setuptools = "*"
+
+[[package]]
 name = "platformdirs"
 version = "4.3.6"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
@@ -2621,14 +2651,14 @@ numpy = "*"
 
 [[package]]
 name = "process-bigraph"
-version = "0.0.22"
+version = "0.0.23"
 description = ""
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
-    {file = "process-bigraph-0.0.22.tar.gz", hash = "sha256:f059e596dd726edb7b6978162fb3044d1c3b5dc0bd2b9a4da0d745240a105a4d"},
+    {file = "process-bigraph-0.0.23.tar.gz", hash = "sha256:a1af484a401d029487f7716c8a1172db0e7b2500f2db94a5ca3ee91db8711542"},
 ]
 
 [package.dependencies]
@@ -2643,10 +2673,10 @@ pytest = ">=6.2.5"
 name = "prompt-toolkit"
 version = "3.0.48"
 description = "Library for building powerful interactive command lines in Python"
-optional = true
+optional = false
 python-versions = ">=3.7.0"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "prompt_toolkit-3.0.48-py3-none-any.whl", hash = "sha256:f49a827f90062e411f1ce1f854f2aedb3c23353244f8108b89283587397ac10e"},
     {file = "prompt_toolkit-3.0.48.tar.gz", hash = "sha256:d6623ab0477a80df74e646bdbc93621143f5caf104206aa29294d53de1a03d90"},
@@ -2662,7 +2692,7 @@ description = "Cross-platform lib for process and system monitoring in Python."
 optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 groups = ["main"]
-markers = "(extra == \"tellurium\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(extra == \"quantum\" or extra == \"tellurium\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
 files = [
     {file = "psutil-6.1.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:9ccc4316f24409159897799b83004cb1e24f9819b0dcf9c0b68bdcb6cefee6a8"},
     {file = "psutil-6.1.1-cp27-cp27m-manylinux2010_i686.whl", hash = "sha256:ca9609c77ea3b8481ab005da74ed894035936223422dc591d6772b147421f777"},
@@ -2691,10 +2721,10 @@ test = ["pytest", "pytest-xdist", "setuptools"]
 name = "ptyprocess"
 version = "0.7.0"
 description = "Run a subprocess in a pseudo terminal"
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "(sys_platform != \"win32\" and sys_platform != \"emscripten\") and extra == \"tellurium\" and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and (sys_platform != \"win32\" and sys_platform != \"emscripten\")"
 files = [
     {file = "ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35"},
     {file = "ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"},
@@ -2704,10 +2734,10 @@ files = [
 name = "pure-eval"
 version = "0.2.3"
 description = "Safely evaluate AST nodes without side effects"
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "pure_eval-0.2.3-py3-none-any.whl", hash = "sha256:1db8e35b67b3d218d818ae653e27f06c3aa420901fa7b081ca98cbedc874e0d0"},
     {file = "pure_eval-0.2.3.tar.gz", hash = "sha256:5f4e983f40564c576c7c8635ae88db5956bb2229d7e9237d03b3c0b0190eaf42"},
@@ -2779,7 +2809,7 @@ description = "C parser in Python"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(implementation_name == \"pypy\" or platform_python_implementation != \"PyPy\") and (extra == \"tellurium\" or platform_python_implementation != \"PyPy\") and (implementation_name == \"pypy\" or extra == \"quantum\") and (extra == \"tellurium\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(platform_python_implementation != \"PyPy\" or implementation_name == \"pypy\") and (platform_python_implementation != \"PyPy\" or extra == \"tellurium\") and (extra == \"quantum\" or extra == \"tellurium\") and (python_version <= \"3.11\" or python_version >= \"3.12\") and (extra == \"quantum\" or implementation_name == \"pypy\")"
 files = [
     {file = "pycparser-2.22-py3-none-any.whl", hash = "sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc"},
     {file = "pycparser-2.22.tar.gz", hash = "sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6"},
@@ -2946,10 +2976,10 @@ tests = ["chardet", "parameterized", "pytest", "pytest-cov", "pytest-xdist[psuti
 name = "pygments"
 version = "2.19.1"
 description = "Pygments is a syntax highlighting package written in Python."
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(extra == \"cobra\" or extra == \"tellurium\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "pygments-2.19.1-py3-none-any.whl", hash = "sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c"},
     {file = "pygments-2.19.1.tar.gz", hash = "sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f"},
@@ -3548,10 +3578,10 @@ files = [
 name = "pytz"
 version = "2024.2"
 description = "World timezone definitions, modern and historical"
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "(extra == \"cobra\" or extra == \"copasi\" or extra == \"amici\" or extra == \"tellurium\" or extra == \"pymem3dg\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "pytz-2024.2-py2.py3-none-any.whl", hash = "sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725"},
     {file = "pytz-2024.2.tar.gz", hash = "sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a"},
@@ -4201,7 +4231,7 @@ description = "Fundamental algorithms for scientific computing in Python"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "(extra == \"copasi\" or extra == \"tellurium\" or extra == \"pymem3dg\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(extra == \"quantum\" or extra == \"copasi\" or extra == \"tellurium\" or extra == \"pymem3dg\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
 files = [
     {file = "scipy-1.15.1-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:c64ded12dcab08afff9e805a67ff4480f5e69993310e093434b10e85dc9d43e1"},
     {file = "scipy-1.15.1-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:5b190b935e7db569960b48840e5bef71dc513314cc4e79a1b7d14664f57fd4ff"},
@@ -4257,10 +4287,10 @@ test = ["Cython", "array-api-strict (>=2.0,<2.1.1)", "asv", "gmpy2", "hypothesis
 name = "seaborn"
 version = "0.13.2"
 description = "Statistical data visualization"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(extra == \"pymem3dg\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "seaborn-0.13.2-py3-none-any.whl", hash = "sha256:636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987"},
     {file = "seaborn-0.13.2.tar.gz", hash = "sha256:93e60a40988f4d65e9f4885df477e2fdaff6b73a9ded434c1ab356dd57eefff7"},
@@ -4280,10 +4310,10 @@ stats = ["scipy (>=1.7)", "statsmodels (>=0.12)"]
 name = "setuptools"
 version = "75.8.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "(extra == \"amici\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(extra == \"dev\" or extra == \"quantum\" or extra == \"amici\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
 files = [
     {file = "setuptools-75.8.0-py3-none-any.whl", hash = "sha256:e3982f444617239225d675215d51f6ba05f845d4eec313da4418fdbb56fb27e3"},
     {file = "setuptools-75.8.0.tar.gz", hash = "sha256:c5afc8f407c626b8313a86e10311dd3f661c6cd9c09d4bf8c15c0e11f9f2b0e6"},
@@ -4320,6 +4350,36 @@ tomli = {version = ">=1", markers = "python_version < \"3.11\""}
 docs = ["entangled-cli (>=2.0,<3.0)", "mkdocs", "mkdocs-entangled-plugin", "mkdocs-material", "mkdocstrings[python]", "pygments"]
 rich = ["rich"]
 test = ["build", "pytest", "rich", "typing-extensions", "wheel"]
+
+[[package]]
+name = "simulariumio"
+version = "1.11.0"
+description = "Python package that converts simulation outputs to the format consumed by the Simularium viewer website"
+optional = true
+python-versions = ">=3.8"
+groups = ["main"]
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
+files = [
+    {file = "simulariumio-1.11.0-py3-none-any.whl", hash = "sha256:a23026e8ad650d88478094cfa293562320844ba87246562a5e2a8325e1718ee4"},
+    {file = "simulariumio-1.11.0.tar.gz", hash = "sha256:4f58c25ec633a4f260e78e4ed5c1d89fa12468cf3f3ee2061fe039c83f23c894"},
+]
+
+[package.dependencies]
+numpy = ">=1.19.0"
+pandas = ">=1.1.2"
+pint = ">=0.17"
+
+[package.extras]
+benchmark = ["awscli (>=1.20)", "quilt3"]
+cellpack = ["cellpack (==1.0.3)"]
+dev = ["ipython"]
+docs = ["Sphinx (>=4.0.0)", "docutils (>=0.18,<0.19)", "furo (>=2022.4.7)", "m2r2 (>=0.2.7)", "numpydoc", "sphinx-copybutton"]
+lint = ["black (>=22.3.0)", "check-manifest (>=0.48)", "flake8 (>=3.8.3)", "flake8-debugger (>=3.2.1)", "flake8-typing-imports (>=1.9.0)", "isort (>=5.7.0)", "mypy (>=0.790)", "pre-commit (>=2.20.0)"]
+mcell = ["scipy (>=1.5.2)"]
+md = ["MDAnalysis (>=2.0.0)", "MDAnalysisTests (>=2.0.0)"]
+physicell = ["scipy (>=1.5.2)"]
+test = ["coverage (>=5.1)", "nbmake", "pytest (>=5.4.3)", "pytest-cov (>=2.9.0)", "pytest-raises (>=0.11)"]
+tutorial = ["MDAnalysis (>=2.0.0)", "MDAnalysisTests (>=2.0.0)", "jupyter", "scipy (>=1.5.2)"]
 
 [[package]]
 name = "six"
@@ -4443,10 +4503,10 @@ files = [
 name = "stack-data"
 version = "0.6.3"
 description = "Extract data from python stack frames and tracebacks for informative displays"
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "stack_data-0.6.3-py3-none-any.whl", hash = "sha256:d5558e0c25a4cb0853cddad3d77da9891a08cb85dd9f9f91b9f8cd66e511e695"},
     {file = "stack_data-0.6.3.tar.gz", hash = "sha256:836a778de4fec4dcd1dcd89ed8abff8a221f58308462e1c4aa2a3cf30148f0b9"},
@@ -4590,7 +4650,7 @@ description = "Computer algebra system (CAS) in Python"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(extra == \"cobra\" or extra == \"amici\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "(extra == \"quantum\" or extra == \"cobra\" or extra == \"amici\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
 files = [
     {file = "sympy-1.13.3-py3-none-any.whl", hash = "sha256:54612cf55a62755ee71824ce692986f23c88ffa77207b30c1368eda4a7060f73"},
     {file = "sympy-1.13.3.tar.gz", hash = "sha256:b27fd2c6530e0ab39e275fc9b683895367e51d5da91baa8d3d64db2565fec4d9"},
@@ -4765,10 +4825,10 @@ files = [
 name = "traitlets"
 version = "5.14.3"
 description = "Traitlets Python configuration system"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "traitlets-5.14.3-py3-none-any.whl", hash = "sha256:b74e89e397b1ed28cc831db7aea759ba6640cb3de13090ca145426688ff1ac4f"},
     {file = "traitlets-5.14.3.tar.gz", hash = "sha256:9ed0579d3502c94b4b3732ac120375cda96f923114522847de4b3bb98b96b6b7"},
@@ -4795,10 +4855,10 @@ files = [
 name = "tzdata"
 version = "2024.2"
 description = "Provider of IANA time zone data"
-optional = true
+optional = false
 python-versions = ">=2"
 groups = ["main"]
-markers = "(extra == \"cobra\" or extra == \"copasi\" or extra == \"amici\" or extra == \"tellurium\" or extra == \"pymem3dg\" or extra == \"quantum\") and (python_version <= \"3.11\" or python_version >= \"3.12\")"
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "tzdata-2024.2-py2.py3-none-any.whl", hash = "sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd"},
     {file = "tzdata-2024.2.tar.gz", hash = "sha256:7d85cc416e9382e69095b7bdf4afd9e3880418a2413feec7069d533d6b4e31cc"},
@@ -4827,10 +4887,10 @@ zstd = ["zstandard (>=0.18.0)"]
 name = "wcwidth"
 version = "0.2.13"
 description = "Measures the displayed width of unicode strings in a terminal"
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "(python_version <= \"3.11\" or python_version >= \"3.12\") and extra == \"tellurium\""
+markers = "python_version <= \"3.11\" or python_version >= \"3.12\""
 files = [
     {file = "wcwidth-0.2.13-py2.py3-none-any.whl", hash = "sha256:3da69048e4540d84af32131829ff948f1e022c1c6bdb8d6102117aac784f6859"},
     {file = "wcwidth-0.2.13.tar.gz", hash = "sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"},
@@ -4886,7 +4946,7 @@ amici = ["amici"]
 builder = ["bigraph-builder"]
 cobra = ["cobra", "imageio"]
 copasi = ["copasi-basico"]
-dev = []
+dev = ["pip-autoremove"]
 pymem3dg = ["pymem3dg"]
 quantum = ["pyscf", "qiskit", "qiskit-ibm-runtime", "qiskit-nature"]
 smoldyn = ["smoldyn"]
@@ -4895,4 +4955,4 @@ tellurium = ["libroadrunner", "tellurium"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "290b2d345b5a25f555ec2430c0f6551e137e0b2a09bd458849d2ddebfb3c3b71"
+content-hash = "80468f21e508028c5d0d7444bf6b0274cf55d49ee5b581d365fe6e3058df9e7f"

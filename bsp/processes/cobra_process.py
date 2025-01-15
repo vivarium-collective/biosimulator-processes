@@ -15,7 +15,7 @@ import cobra
 from cobra.io import load_model
 from process_bigraph import Process, Composite
 
-from bsp.data_model.schemas import SedModel
+from bsp.data_model.schemas import SedModel, SedTimeCourseConfig
 from bsp.viz.plot import plot_time_series, plot_species_distributions_to_gif
 
 
@@ -120,10 +120,10 @@ class CobraProcess(Process):
         return output_state
 
 
+# -- fully-spec'd Sed-compliant copasi process --
+
 class SedCobraProcess(Process):
-    config_schema = {
-        'model': SedModel
-    }
+    config_schema = SedTimeCourseConfig
 
     def __init__(self, config=None, core=None):
         super().__init__(config, core)

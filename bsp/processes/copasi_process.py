@@ -18,7 +18,7 @@ from basico import (
 )
 from process_bigraph import Process
 
-from bsp.data_model.schemas import TimeCourseConfigType, SEDModelType
+from bsp.data_model.schemas import SedTimeCourseConfig, SedModel
 from bsp.utils.helpers import fetch_biomodel
 from bsp.processes.sed_process import SedUTCProcess
 
@@ -26,8 +26,7 @@ from bsp.processes.sed_process import SedUTCProcess
 class CopasiProcess(Process):
     """ODE component of the dfba hybrid using COPASI(basico). TODO: Generalize this to use any ode sim."""
     config_schema = {
-        'model': SEDModelType().to_dict(),
-        # 'model_file': 'string'
+        'model': SedModel
     }
 
     def __init__(self, config=None, core=None):
@@ -122,8 +121,10 @@ class CopasiProcess(Process):
         return results
 
 
+# -- fully-spec'd Sed-compliant copasi process --
+
 class SedCopasiProcess(SedUTCProcess):
-    config_schema = TimeCourseConfigType().to_dict()
+    config_schema = SedTimeCourseConfig
 
     def __init__(self,
                  config: Dict = None,

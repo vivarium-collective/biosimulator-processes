@@ -49,6 +49,13 @@ class Simulator(BaseClass):
     deps: List[InstallationDependency]
 
 
+@dataclass
+class Implementation(BaseClass):
+    address: str
+    location: str
+    dependencies: List[str]
+
+
 # -- emitter type schemas --
 
 DB_CONFIG_TYPE = {

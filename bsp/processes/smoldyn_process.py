@@ -53,7 +53,7 @@ from typing import *
 from uuid import uuid4
 from process_bigraph import Process, Composite, pf, pp
 
-from bsp.data_model.schemas import SEDModelType
+from bsp.data_model.schemas import SedModel
 
 try:
     import smoldyn as sm
@@ -68,7 +68,7 @@ except:
 
 class SmoldynProcess(Process):
     config_schema = {
-        'model': SEDModelType().to_dict(),
+        'model': SedModel,
         'animate': {
             '_type': 'boolean',
             '_default': False
@@ -364,7 +364,7 @@ class SmoldynIOProcess(Process):
         output_dest: tmp output dir (str)
     """
     config_schema = {
-        'model': SEDModelType().to_dict(),
+        'model': SedModel,
         # 'duration': 'integer',  # duration should instead be inferred from Composite
         'output_dest': 'string',
         'animate': {

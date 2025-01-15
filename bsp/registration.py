@@ -5,6 +5,7 @@ from typing import *
 from process_bigraph import ProcessTypes
 
 from bsp.utils.base_utils import dynamic_simulator_install
+from bsp.implementations import Implementation
 
 
 @dataclasses.dataclass
@@ -73,7 +74,7 @@ class Registrar(object):
         if verbose:
             print(f"Successfully registered {implementation} to address: {address}")
 
-    def register_module(self, process_name: str, path: str, package: str = "bsp", verbose=False, attempt_install=False) -> None:
+    def __register_module(self, process_name: str, path: str, package: str = "bsp", verbose=False, attempt_install=False) -> None:
         library, module_name, class_name = path.rsplit('.', 3)
         try:
             # library = 'steps' if 'process' not in path else 'processes'
@@ -88,10 +89,39 @@ class Registrar(object):
             if attempt_install:
                 dynamic_simulator_install(simulators=[library])
 
-    def register_initial_modules(self, items_to_register: List[Tuple[str, str, List[str]]], package: str = "bsp", verbose=False, attempt_install=False) -> None:
+    def __register_initial_modules(self, items_to_register: List[Tuple[str, str, List[str]]], package: str = "bsp", verbose=False, attempt_install=False) -> None:
         if not self.initial_registration_complete:
             for process_name, path, dependencies in items_to_register:
-                self.register_module(process_name=process_name, path=path, package=package, verbose=verbose, attempt_install=attempt_install)
+                self.__register_module(process_name=process_name, path=path, package=package, verbose=verbose, attempt_install=attempt_install)
                 process_deps = [SimulatorDependency(dep) for dep in dependencies]
                 self.implementation_dependencies[process_name] = process_deps
+            self.initial_registration_complete = True
+
+    def register_module(self, implementation: Implementation, verbose=False, attempt_install=False) -> None:
+        library, module_name, class_name = implementation.location.rsplit('.', 3)
+        try:
+            # library = 'steps' if 'process' not in path else 'processes'
+            import_statement = f'bsp.{library}.{module_name}'
+            module = __import__(
+                 import_statement, fromlist=[class_name])
+            bigraph_class = getattr(module, class_name)
+            self.core.process_registry.register(implementation.address, bigraph_class)
+        except Exception as e:
+            if verbose:
+                print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
+            if attempt_install:
+                dynamic_simulator_install(simulators=[library])
+
+    def register_initial_modules(
+            self,
+            items_to_register: List[Implementation],
+            package: str = "bsp",
+            verbose=False,
+            attempt_install=False
+    ) -> None:
+        if not self.initial_registration_complete:
+            for implementation in items_to_register:
+                self.register_module(implementation=implementation, verbose=verbose, attempt_install=attempt_install)
+                process_deps = [SimulatorDependency(dep) for dep in implementation.dependencies]
+                self.implementation_dependencies[implementation.address] = process_deps
             self.initial_registration_complete = True

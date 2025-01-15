@@ -9,7 +9,7 @@ __all__ = [
     'SedModel',
     'SedModelChanges',
     'SbmlCobra',
-    'TimeCourseConfig'
+    'SedTimeCourseConfig'
 ]
 
 
@@ -90,7 +90,7 @@ SedModel = {
     'model_changes': SedModelChanges  # 'tree[string]'
 }
 
-TimeCourseConfig = {
+SedTimeCourseConfig = {
     'model': SedModel,
     'time_config': 'tree[string]',  # ie: {start, stop, steps}
     'species_context': {
