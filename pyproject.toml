@@ -2,13 +2,13 @@
 
 [project]
 name = "biosimulator-processes"
-version = "0.3.10"  # LATEST: latest stable is 0.3.8; LEGACY: latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
+version = "0.3.11"  # LATEST: latest stable is 0.3.8; LEGACY: latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = [{name = "Alex Patrie", email = "alexanderpatrie@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
-    "process-bigraph>=0.0.23",
+    "process-bigraph",
     "pip-autoremove",
     "seaborn>=0.13.2",
     "ipython>=8.31.0",
@@ -47,3 +47,6 @@ packages = [
     {include = "bsp"},
     {include = "tests"}
 ]
+
+
+
