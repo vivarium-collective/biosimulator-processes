@@ -202,7 +202,7 @@ def parse_parameters(parameters: dg.Parameters):
     return param_data
 
 
-def parse_ply(file_path: os.PathLike[str]) -> Tuple[np.ndarray[np.unsignedinteger], np.ndarray[np.floating]]:
+def parse_ply(file_path: os.PathLike[str]) -> Tuple[np.ndarray, np.ndarray]:
     with open(file_path, 'r') as file:
         lines = file.readlines()
     vertex_matrix = []
