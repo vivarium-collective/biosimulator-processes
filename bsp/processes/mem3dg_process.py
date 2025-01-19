@@ -3,11 +3,13 @@ Membrane process using forward euler gradient descent integration.
 """
 
 import inspect
+import os
 from functools import partial
 from pathlib import Path
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Tuple
 import tempfile as tmp
 
+import numpy as np
 import pymem3dg as dg
 import pymem3dg.boilerplate as dgb
 from netCDF4 import Dataset
@@ -57,7 +59,7 @@ class MembraneProcess(Process):
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
 
         # create geometry from model file
-        self.initial_geometry = dg.Geometry(self.config["mesh_file"])
+        self.initial_faces, self.initial_vertices = parse_ply(self.config["mesh_file"])
 
         # set the surface area tension model. TODO: perhaps dynamically unpack?
         self.tension_model = partial(
@@ -85,21 +87,34 @@ class MembraneProcess(Process):
 
     def initial_state(self):
         # TODO: get initial parameters, return type??
+        initial_geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
         pass
 
     def inputs(self):
         return {
-            "parameters": "tree[float]"
+            "geometry": {
+                "faces": "list[list[float]]",
+                "vertices": "list[list[float]]",
+            },
+            "parameters": "tree[float]",
+            "velocities": "tree[float]"
         }
 
     def outputs(self):
         return {
-            "vertices": "list[list[float, float, float]]",  # (vx, vy, vz) for v in resulting vertices
-            "faces": "list[list[float, float, float]]",
-            "parameters": "tree[float]"
+            "geometry": {
+                "faces": "list[list[float]]",
+                "vertices": "list[list[float]]",
+            },
+            "parameters": "tree[float]",
+            "velocities": "tree[float]"
         }
 
     def update(self, state, interval):
+        previous_faces = np.array(state.get("geometry").get("faces"), dtype=np.int32)
+        previous_vertices = np.array(state.get("geometry").get("vertices"), dtype=np.float64)
+        geometry_k = dg.Geometry(previous_faces, previous_vertices)
+
         # take in parameters k and set them
         parameters_k = dg.Parameters()
         param_spec = state.get("parameters")
@@ -117,7 +132,7 @@ class MembraneProcess(Process):
 
         # mk temp dir to parse kth outputs
         system = dg.System(
-            geometry=self.geometry,
+            geometry=geometry_k,
             parameters=parameters_k
         )
 
@@ -163,10 +178,65 @@ class MembraneProcess(Process):
                 param_data[param_attr_name] = attr_props
 
         return {
-            "vertices": vertices_k,
-            "faces": faces_k,
-            "parameters": param_data
+            "geometry": {
+                "vertices": vertices_k,
+                "faces": faces_k,
+            },
+            "parameters": param_data,
+            "velocities": velocities_k
         }
+
+
+class Matrix(np.array):
+    def __new__(cls, *args, **kwargs):
+        return np.asarray(cls.__new__(cls, *args, **kwargs))
+
+
+class Faces(Matrix):
+    pass
+
+
+class Vertices(Matrix):
+    pass
+
+
+def parse_ply(file_path: os.PathLike[str]) -> Tuple[Faces, Vertices]:
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    vertex_matrix = []
+    face_matrix = []
+    vertex_count = 0
+    face_count = 0
+    in_vertex_section = False
+    in_face_section = False
+    for line in lines:
+        line = line.strip()
+        if line.startswith("element vertex"):
+            vertex_count = int(line.split()[-1])
+        elif line.startswith("element face"):
+            face_count = int(line.split()[-1])
+        elif line == "end_header":
+            in_vertex_section = True
+            continue
+
+        # vertices
+        if in_vertex_section:
+            if len(vertex_matrix) < vertex_count:
+                vertex_matrix.append(list(map(float, line.split())))
+                if len(vertex_matrix) == vertex_count:
+                    in_vertex_section = False
+                    in_face_section = True
+            continue
+
+        # faces
+        if in_face_section:
+            if len(face_matrix) < face_count:
+                parts = list(map(int, line.split()))
+                face_matrix.append(parts[1:])  # Skip the first number (vertex count)
+                if len(face_matrix) == face_count:
+                    break
+
+    return Faces(face_matrix), Vertices(vertex_matrix)
 
 
 def extract_data(
