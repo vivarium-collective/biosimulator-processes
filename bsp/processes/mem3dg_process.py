@@ -14,7 +14,9 @@ import numpy as np
 import pymem3dg as dg
 import pymem3dg.boilerplate as dgb
 from netCDF4 import Dataset
-from process_bigraph import Process, ProcessTypes
+from process_bigraph import Process, ProcessTypes, Composite, pp
+
+from bsp.utils.base_utils import new_document
 
 
 class MembraneProcess(Process):
@@ -147,7 +149,7 @@ class MembraneProcess(Process):
             system=system_k,
             characteristicTimeStep=self.characteristic_time_step,
             savePeriod=self.save_period,
-            totalTime=interval,  # self.total_time,
+            totalTime=1,  # interval?
             tolerance=self.tolerance,
             outputDirectory=str(output_dir)
         )
@@ -337,6 +339,9 @@ def save_mesh_to_ply(vertices, faces, output_path):
 
 
 def test_membrane_process():
+    from bsp import app_registrar
+
+    # define config and port vals
     test_config = {
         'mesh_file': '/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/tests/fixtures/sample_meshes/oblate.ply',
         'tension_model': {
@@ -357,5 +362,40 @@ def test_membrane_process():
         'tolerance': 1e-11,
         'characteristic_time_step': 2
     }
+
+    port_schema = {
+        "geometry": {
+            "faces": ["faces_store"],
+            "vertices": ["vertices_store"],
+        },
+        "parameters": ["parameters_store"],
+        "velocities": ["velocities_store"]
+    }
+
+    # register process
+    app_registrar.register_process("membrane-process", MembraneProcess, verbose=True)
+
+    # create spec
+    document = new_document(
+        name='membrane',
+        address='membrane-process',
+        _type='process',
+        config=test_config,
+        inputs=port_schema,
+        outputs=port_schema,
+        add_emitter=True
+    )
+
+    # configure and run composite
+    sim = Composite(
+        config={'state': document},
+        core=app_registrar.core
+    )
+    total_time = 10000
+    sim.run(total_time)
+
+    # get results
+    data = sim.gather_results()
+    pp(data)
 
 

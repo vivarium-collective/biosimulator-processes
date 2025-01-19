@@ -60,3 +60,23 @@ def dynamic_simulator_install(simulators: list[str], verbose: bool = True):
             subprocess.check_call([sys.executable, "-m", "pip", "install", sim])
             print(f"{sim} installed successfully.") if verbose else None
 
+
+def new_document(name, address, _type, config, inputs, outputs, add_emitter=True):
+    doc = {
+        name: {
+            "address": f"local:{address}",
+            "_type": _type,
+            "config": config,
+            "inputs": inputs,
+            "outputs": outputs,
+        }
+    }
+
+    if add_emitter:
+        doc["emitter"] = {
+            "address": f"local:ram-emitter",
+            "_type": "step",
+            "inputs": inputs
+        }
+
+    return doc
