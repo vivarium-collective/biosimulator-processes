@@ -5,7 +5,7 @@ Membrane process using forward euler gradient descent integration.
 import inspect
 from functools import partial
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Union, List
 import tempfile as tmp
 
 import pymem3dg as dg
@@ -57,7 +57,7 @@ class MembraneProcess(Process):
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
 
         # create geometry from model file
-        self.geometry = dg.Geometry(self.config["mesh_file"])
+        self.initial_geometry = dg.Geometry(self.config["mesh_file"])
 
         # set the surface area tension model. TODO: perhaps dynamically unpack?
         self.tension_model = partial(
@@ -138,26 +138,14 @@ class MembraneProcess(Process):
         success = fe.integrate()
         data = Dataset(str(output_dir / "traj.nc"), 'r')
 
-        # get faces (do we need this?)
-        face_data = vertex_data = data.groups['Trajectory'].variables['topology'][:]
-        faces = []
-        for f_t in face_data:
-            faces_t = [
-                [f_t[i], f_t[i + 1], f_t[i + 2]] for i in range(0, len(f_t), 3)
-            ]
-            faces.append(faces_t)
-        faces_k = faces[-1]
+        # get velocities
+        velocities_k = extract_data(dataset=data, data_name="velocities")
 
-        # this will be divisible by 3 and thus is a time indexed flat list of tuples(xyz) for each vertex in the mesh
-        vertex_data = data.groups['Trajectory'].variables['coordinates'][:]
-        vertices = []
-        for v_t in vertex_data:
-            vertices_t = [
-                [v_t[i], v_t[i + 1], v_t[i + 2]] for i in range(0, len(v_t), 3)
-            ]
-            vertices.append(vertices_t)
-        vertices_k = vertices[-1]
-        # vertices_k = [vertex_data[-1][::3], vertex_data[-1][1::3], vertex_data[-1][2::3]]
+        # get faces (do we need this?)
+        faces_k = extract_data(dataset=data, data_name="topology")
+
+        # get vertices
+        vertices_k = extract_data(dataset=data, data_name="coordinates")
 
         # parse parameters for iteration
         param_data = {}
@@ -169,7 +157,6 @@ class MembraneProcess(Process):
                 for inner_name in dir(attr):
                     if not inner_name.startswith("__"):
                         inner_attr = getattr(attr, inner_name)
-                        excluded = ["function", "built-in"]
                         if not callable(inner_attr) or not inspect.isbuiltin(inner_attr):
                             attr_props[inner_name] = inner_attr
 
@@ -180,6 +167,21 @@ class MembraneProcess(Process):
             "faces": faces_k,
             "parameters": param_data
         }
+
+
+def extract_data(
+        dataset: Dataset,
+        data_name: str,
+        return_last: bool = True
+) -> List[Union[List[float], List[List[float]]]]:
+    traj_data = dataset.groups['Trajectory'].variables[data_name][:]
+    outputs = []
+    for data_t in outputs:
+        outputs_t = [
+            [data_t[i], data_t[i + 1], data_t[i + 2]] for i in range(0, len(data_t), 3)
+        ]
+        outputs.append(outputs_t)
+    return outputs[-1] if return_last else outputs
 
 
 def generate_faces(width, height):
@@ -249,6 +251,16 @@ def save_mesh_to_ply(vertices, faces, output_path):
             ply_file.write(f"{face_str}\n")
 
 
+# get vertices this will be divisible by 3 and thus is a time indexed flat list of tuples(xyz) for each vertex in the mesh
+# vertex_data = data.groups['Trajectory'].variables['coordinates'][:]
+# vertices = []
+# for v_t in vertex_data:
+#     vertices_t = [
+#         [v_t[i], v_t[i + 1], v_t[i + 2]] for i in range(0, len(v_t), 3)
+#     ]
+#     vertices.append(vertices_t)
+# vertices_k = vertices[-1]
+# vertices_k = [vertex_data[-1][::3], vertex_data[-1][1::3], vertex_data[-1][2::3]]
 
 
 
