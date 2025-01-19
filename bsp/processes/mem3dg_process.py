@@ -1,3 +1,4 @@
+import inspect
 from functools import partial
 from pathlib import Path
 from typing import Dict, Union
@@ -36,7 +37,6 @@ class MembraneProcess(Process):
             'strength': 'float'  # what units is this in??
         },
         'parameters': 'tree[float]',
-        'total_time': 'integer',
         'save_period': 'integer',
         'tolerance': 'float',
         'characteristic_time_step': 'integer'
@@ -46,7 +46,8 @@ class MembraneProcess(Process):
         super().__init__(config, core)
 
         # get simulation params
-        self.total_time = self.config.get("total_time", 10000)
+        # that should be given to the composite?:
+        # self.total_time = self.config.get("total_time", 10000)
         self.save_period = self.config.get("save_period", 100)
         self.tolerance = self.config.get("tolerance", 1e-11)
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
@@ -61,12 +62,22 @@ class MembraneProcess(Process):
             preferredArea=self.config["tension_model"]["preferredArea"],
         )
 
+        # set the osmotic volume model
         self.osmotic_model = partial(
             dgb.preferredVolumeOsmoticPressureModel,
             preferredVolume=self.config["osmotic_model"]["preferredVolume"],
             reservoirVolume=self.config["osmotic_model"]["reservoirVolume"],
             strength=self.config["osmotic_model"]["strength"],
         )
+
+        # set initial params
+        self.initial_parameters = dg.Parameters()
+        init_param_spec = self.config.get("parameters")
+        if init_param_spec:
+            for attribute_name, attribute_spec in init_param_spec.items():  # ie: adsorption, aggregiation, bending, etc
+                attribute = getattr(self.initial_parameters, attribute_name)
+                for name, value in attribute_spec.items():
+                    setattr(attribute, name, value)
 
     def initial_state(self):
         # TODO: get initial parameters, return type??
@@ -77,24 +88,32 @@ class MembraneProcess(Process):
             "parameters": "tree[float]"
         }
 
+    def outputs(self):
+        return {
+            "vertices": "list[tuple[float, float, float]]",  # (vx, vy, vz) for v in resulting vertices
+            "parameters": "tree[float]"
+        }
+
     def update(self, state, interval):
-        # take in parameters (initial state should do this)
-        parameters = dg.Parameters()
+        # take in parameters k and set them
+        parameters_k = dg.Parameters()
         param_spec = state.get("parameters")
         if param_spec:
             for attribute_name, attribute_spec in param_spec.items():  # ie: adsorption, aggregiation, bending, etc
-                attribute = getattr(parameters, attribute_name)
+                attribute = getattr(parameters_k, attribute_name)
                 for name, value in attribute_spec.items():
                     setattr(attribute, name, value)
+        else:
+            parameters_k = self.initial_parameters
 
         # instantiate the params with the class pressure models
-        parameters.tension.form = self.tension_model
-        parameters.osmotic.form = self.osmotic_model
+        parameters_k.tension.form = self.tension_model
+        parameters_k.osmotic.form = self.osmotic_model
 
         # mk temp dir to parse kth outputs
         system = dg.System(
             geometry=self.geometry,
-            parameters=parameters
+            parameters=parameters_k
         )
 
         # set up solver
@@ -103,7 +122,7 @@ class MembraneProcess(Process):
             system=system,
             characteristicTimeStep=self.characteristic_time_step,
             savePeriod=self.save_period,
-            totalTime=self.total_time,
+            totalTime=interval,  # self.total_time,
             tolerance=self.tolerance,
             outputDirectory=str(output_dir)
         )
@@ -113,9 +132,34 @@ class MembraneProcess(Process):
         # run solver and extract data
         success = fe.integrate()
         data = Dataset(str(output_dir / "traj.nc"), 'r')
-        results = data.groups['Trajectory'].variables['coordinates'][:]
+        vertex_data = data.groups['Trajectory'].variables['coordinates'][:]  # x will be divisible by 3 and thus is a time indexed flat list of tuples(xyz) for each vertex in the mesh
 
-        # return results
+        # create array of tuples with vertex data
+        vertices = []
+        for v_t in vertex_data:
+            vertices_t = [(v_t[i], v_t[i+1], v_t[i+2]) for i in range(0, len(v_t), 3)]
+            vertices.append(vertices_t)
+
+        # parse parameters for iteration
+        param_data = {}
+        for param_attr_name in dir(parameters_k):
+            if not param_attr_name.startswith("__"):
+                param_data[param_attr_name] = {}
+                attr = getattr(parameters_k, param_attr_name)
+                attr_props = {}
+                for inner_name in dir(attr):
+                    if not inner_name.startswith("__"):
+                        inner_attr = getattr(attr, inner_name)
+                        excluded = ["function", "built-in"]
+                        if not callable(inner_attr) or not inspect.isbuiltin(inner_attr):
+                            attr_props[inner_name] = inner_attr
+
+                param_data[param_attr_name] = attr_props
+
+        return {
+            "vertices": vertices,
+            "parameters": param_data
+        }
 
 
 
