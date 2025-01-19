@@ -1,3 +1,7 @@
+"""
+Membrane process using forward euler gradient descent integration.
+"""
+
 import inspect
 from functools import partial
 from pathlib import Path
@@ -48,7 +52,7 @@ class MembraneProcess(Process):
         # get simulation params
         # that should be given to the composite?:
         # self.total_time = self.config.get("total_time", 10000)
-        self.save_period = self.config.get("save_period", 100)
+        self.save_period = self.config.get("save_period", 100)  # interval at which sim state is saved to disk/recorded
         self.tolerance = self.config.get("tolerance", 1e-11)
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
 
@@ -90,7 +94,8 @@ class MembraneProcess(Process):
 
     def outputs(self):
         return {
-            "vertices": "list[tuple[float, float, float]]",  # (vx, vy, vz) for v in resulting vertices
+            "vertices": "list[list[float, float, float]]",  # (vx, vy, vz) for v in resulting vertices
+            "faces": "list[list[float, float, float]]",
             "parameters": "tree[float]"
         }
 
@@ -132,13 +137,27 @@ class MembraneProcess(Process):
         # run solver and extract data
         success = fe.integrate()
         data = Dataset(str(output_dir / "traj.nc"), 'r')
-        vertex_data = data.groups['Trajectory'].variables['coordinates'][:]  # x will be divisible by 3 and thus is a time indexed flat list of tuples(xyz) for each vertex in the mesh
 
-        # create array of tuples with vertex data
+        # get faces (do we need this?)
+        face_data = vertex_data = data.groups['Trajectory'].variables['topology'][:]
+        faces = []
+        for f_t in face_data:
+            faces_t = [
+                [f_t[i], f_t[i + 1], f_t[i + 2]] for i in range(0, len(f_t), 3)
+            ]
+            faces.append(faces_t)
+        faces_k = faces[-1]
+
+        # this will be divisible by 3 and thus is a time indexed flat list of tuples(xyz) for each vertex in the mesh
+        vertex_data = data.groups['Trajectory'].variables['coordinates'][:]
         vertices = []
         for v_t in vertex_data:
-            vertices_t = [(v_t[i], v_t[i+1], v_t[i+2]) for i in range(0, len(v_t), 3)]
+            vertices_t = [
+                [v_t[i], v_t[i + 1], v_t[i + 2]] for i in range(0, len(v_t), 3)
+            ]
             vertices.append(vertices_t)
+        vertices_k = vertices[-1]
+        # vertices_k = [vertex_data[-1][::3], vertex_data[-1][1::3], vertex_data[-1][2::3]]
 
         # parse parameters for iteration
         param_data = {}
@@ -157,13 +176,77 @@ class MembraneProcess(Process):
                 param_data[param_attr_name] = attr_props
 
         return {
-            "vertices": vertices,
+            "vertices": vertices_k,
+            "faces": faces_k,
             "parameters": param_data
         }
 
 
+def generate_faces(width, height):
+    """
+    Generate face data for a grid mesh.
+    Each face is represented as a list of vertex indices.
+
+    Parameters:
+        width (int): Number of vertices along the grid width.
+        height (int): Number of vertices along the grid height.
+
+    Returns:
+        list of list: Each inner list represents a triangular face.
+    """
+
+    faces = []
+    for i in range(height - 1):
+        for j in range(width - 1):
+            # Vertex indices of the current grid cell (as a quad)
+            v0 = i * width + j
+            v1 = v0 + 1
+            v2 = v0 + width
+            v3 = v2 + 1
+
+            # Split the quad into two triangles
+            faces.append([v0, v1, v2])  # Triangle 1
+            faces.append([v1, v3, v2])  # Triangle 2
+    return faces
 
 
+def save_mesh_to_ply(vertices, faces, output_path):
+    """
+    Save vertex and face data to a PLY file.
+
+    Parameters:
+        vertices (list of tuples): List of (x, y, z) coordinates for vertices.
+        faces (list of lists): List of faces, each represented by a list of vertex indices.
+        output_path (str): Path to save the .ply file.
+    """
+    num_vertices = len(vertices)
+    num_faces = len(faces)
+
+    # PLY header
+    header = f"""ply
+    format ascii 1.0
+    element vertex {num_vertices}
+    property float x
+    property float y
+    property float z
+    element face {num_faces}
+    property list uint8 int32 vertex_indices
+    end_header
+    """
+
+    # Write the PLY file
+    with open(output_path, 'w') as ply_file:
+        # Write header
+        ply_file.write(header)
+
+        # Write vertex data
+        for x, y, z in vertices:
+            ply_file.write(f"{x} {y} {z}\n")
+
+        # Write face data
+        for face in faces:
+            face_str = f"{len(face)} " + " ".join(map(str, face))
+            ply_file.write(f"{face_str}\n")
 
 
 
