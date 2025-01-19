@@ -4746,4 +4746,4 @@ tellurium = ["libroadrunner", "tellurium"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "75b7c8d8266967494c9bb1c0e500d089ded429e44fe74950f266b48db4c3eea7"
+content-hash = "b0df6ffa2c17f1a7bc5cef47decd0a63a51564054fb635292d57317e765a8206"
