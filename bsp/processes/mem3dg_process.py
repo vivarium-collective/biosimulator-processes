@@ -17,13 +17,9 @@ from netCDF4 import Dataset
 from process_bigraph import Process, ProcessTypes
 
 
-# pymem3dg.boilerplate.preferredAreaSurfaceTensionModel¶
-# preferredVolumeOsmoticPressureModel
-
-
 class MembraneProcess(Process):
     """
-    Membrane process consisting of preferredAreaTension and preferredVolumeOsmoticPressure models (expand and contract)
+    Membrane process consisting of preferredAreaSurfaceTension and preferredVolumeOsmoticPressure models (expand and contract)
 
     :config mesh_file: input .ply file TODO: generalize this
     :config tension_model:
@@ -339,5 +335,27 @@ def save_mesh_to_ply(vertices, faces, output_path):
 # vertices_k = vertices[-1]
 # vertices_k = [vertex_data[-1][::3], vertex_data[-1][1::3], vertex_data[-1][2::3]]
 
+
+def test_membrane_process():
+    test_config = {
+        'mesh_file': '/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/tests/fixtures/sample_meshes/oblate.ply',
+        'tension_model': {
+            'modulus': 0.1,
+            'preferredArea': 12.4866
+        },
+        'osmotic_model': {
+            'preferredVolume': 0.7 * np.pi * 4 / 3,
+            'reservoirVolume': 0,
+            'strength': 0.02
+        },
+        'parameters': {
+            'bending': {
+                'Kbc': 8.22e-5
+            }
+        },
+        'save_period': 100,
+        'tolerance': 1e-11,
+        'characteristic_time_step': 2
+    }
 
 
