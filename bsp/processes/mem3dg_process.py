@@ -4,6 +4,7 @@ Membrane process using forward euler gradient descent integration.
 
 import inspect
 import os
+import shutil
 from functools import partial
 from pathlib import Path
 from typing import Dict, Union, List, Tuple
@@ -13,7 +14,6 @@ import numpy as np
 import pymem3dg as dg
 import pymem3dg.boilerplate as dgb
 from netCDF4 import Dataset
-from numpy._typing import _64Bit
 from process_bigraph import Process, ProcessTypes
 
 
@@ -53,16 +53,16 @@ class MembraneProcess(Process):
         super().__init__(config, core)
 
         # get simulation params
-        # that should be given to the composite?:
-        # self.total_time = self.config.get("total_time", 10000)
         self.save_period = self.config.get("save_period", 100)  # interval at which sim state is saved to disk/recorded
         self.tolerance = self.config.get("tolerance", 1e-11)
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
+        # that should be given to the composite?:
+        # self.total_time = self.config.get("total_time", 10000)
 
         # create geometry from model file
         self.initial_faces, self.initial_vertices = parse_ply(self.config["mesh_file"])
 
-        # set the surface area tension model. TODO: perhaps dynamically unpack?
+        # set the surface area tension model
         self.tension_model = partial(
             dgb.preferredAreaSurfaceTensionModel,
             modulus=self.config["tension_model"]["modulus"],
@@ -143,6 +143,7 @@ class MembraneProcess(Process):
             geometry=geometry_k,
             parameters=parameters_k
         )
+        system_k.initialize()
 
         # set up solver
         output_dir = Path(tmp.mkdtemp())
@@ -159,7 +160,8 @@ class MembraneProcess(Process):
 
         # run solver and extract data
         success = fe.integrate()
-        data = Dataset(str(output_dir / "traj.nc"), 'r')
+        output_path = str(output_dir / "traj.nc")
+        data = Dataset(output_path, 'r')
 
         # get velocities
         velocities_k = extract_data(dataset=data, data_name="velocities")
@@ -172,6 +174,9 @@ class MembraneProcess(Process):
 
         # parse parameters for iteration
         param_data_k = parse_parameters(parameters=parameters_k)
+
+        # clean up temporary files
+        shutil.rmtree(str(output_dir))
 
         return {
             "geometry": {
