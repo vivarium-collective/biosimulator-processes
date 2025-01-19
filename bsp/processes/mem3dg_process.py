@@ -13,6 +13,7 @@ import numpy as np
 import pymem3dg as dg
 import pymem3dg.boilerplate as dgb
 from netCDF4 import Dataset
+from numpy._typing import _64Bit
 from process_bigraph import Process, ProcessTypes
 
 
@@ -87,8 +88,15 @@ class MembraneProcess(Process):
 
     def initial_state(self):
         # TODO: get initial parameters, return type??
-        initial_geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
-        pass
+        initial_parameters = parse_parameters(self.initial_parameters)
+        return {
+            "geometry": {
+                "faces": self.initial_faces,
+                "vertices": self.initial_vertices,
+            },
+            "parameters": initial_parameters,
+            "velocities": [[] for _ in self.initial_vertices]
+        }
 
     def inputs(self):
         return {
@@ -97,7 +105,7 @@ class MembraneProcess(Process):
                 "vertices": "list[list[float]]",
             },
             "parameters": "tree[float]",
-            "velocities": "tree[float]"
+            "velocities": "list[list[float]]"
         }
 
     def outputs(self):
@@ -107,12 +115,14 @@ class MembraneProcess(Process):
                 "vertices": "list[list[float]]",
             },
             "parameters": "tree[float]",
-            "velocities": "tree[float]"
+            "velocities": "list[list[float]]"
         }
 
     def update(self, state, interval):
-        previous_faces = np.array(state.get("geometry").get("faces"), dtype=np.int32)
-        previous_vertices = np.array(state.get("geometry").get("vertices"), dtype=np.float64)
+        # take in previous geometry for k
+        previous_geometry = state.get("geometry")
+        previous_faces = np.array(previous_geometry["faces"], dtype=np.uint32)
+        previous_vertices = np.array(previous_geometry["vertices"], dtype=np.float64)
         geometry_k = dg.Geometry(previous_faces, previous_vertices)
 
         # take in parameters k and set them
@@ -123,15 +133,13 @@ class MembraneProcess(Process):
                 attribute = getattr(parameters_k, attribute_name)
                 for name, value in attribute_spec.items():
                     setattr(attribute, name, value)
-        else:
-            parameters_k = self.initial_parameters
 
         # instantiate the params with the class pressure models
         parameters_k.tension.form = self.tension_model
         parameters_k.osmotic.form = self.osmotic_model
 
         # mk temp dir to parse kth outputs
-        system = dg.System(
+        system_k = dg.System(
             geometry=geometry_k,
             parameters=parameters_k
         )
@@ -139,7 +147,7 @@ class MembraneProcess(Process):
         # set up solver
         output_dir = Path(tmp.mkdtemp())
         fe = dg.Euler(
-            system=system,
+            system=system_k,
             characteristicTimeStep=self.characteristic_time_step,
             savePeriod=self.save_period,
             totalTime=interval,  # self.total_time,
@@ -163,44 +171,38 @@ class MembraneProcess(Process):
         vertices_k = extract_data(dataset=data, data_name="coordinates")
 
         # parse parameters for iteration
-        param_data = {}
-        for param_attr_name in dir(parameters_k):
-            if not param_attr_name.startswith("__"):
-                param_data[param_attr_name] = {}
-                attr = getattr(parameters_k, param_attr_name)
-                attr_props = {}
-                for inner_name in dir(attr):
-                    if not inner_name.startswith("__"):
-                        inner_attr = getattr(attr, inner_name)
-                        if not callable(inner_attr) or not inspect.isbuiltin(inner_attr):
-                            attr_props[inner_name] = inner_attr
-
-                param_data[param_attr_name] = attr_props
+        param_data_k = parse_parameters(parameters=parameters_k)
 
         return {
             "geometry": {
                 "vertices": vertices_k,
                 "faces": faces_k,
             },
-            "parameters": param_data,
+            "parameters": param_data_k,
             "velocities": velocities_k
         }
 
 
-class Matrix(np.array):
-    def __new__(cls, *args, **kwargs):
-        return np.asarray(cls.__new__(cls, *args, **kwargs))
+def parse_parameters(parameters: dg.Parameters):
+    # parse parameters for iteration
+    param_data = {}
+    for param_attr_name in dir(parameters):
+        if not param_attr_name.startswith("__"):
+            param_data[param_attr_name] = {}
+            attr = getattr(parameters, param_attr_name)
+            attr_props = {}
+            for inner_name in dir(attr):
+                if not inner_name.startswith("__"):
+                    inner_attr = getattr(attr, inner_name)
+                    if not callable(inner_attr) or not inspect.isbuiltin(inner_attr):
+                        attr_props[inner_name] = inner_attr
+
+            param_data[param_attr_name] = attr_props
+
+    return param_data
 
 
-class Faces(Matrix):
-    pass
-
-
-class Vertices(Matrix):
-    pass
-
-
-def parse_ply(file_path: os.PathLike[str]) -> Tuple[Faces, Vertices]:
+def parse_ply(file_path: os.PathLike[str]) -> Tuple[np.ndarray[np.unsignedinteger], np.ndarray[np.floating]]:
     with open(file_path, 'r') as file:
         lines = file.readlines()
     vertex_matrix = []
@@ -236,7 +238,7 @@ def parse_ply(file_path: os.PathLike[str]) -> Tuple[Faces, Vertices]:
                 if len(face_matrix) == face_count:
                     break
 
-    return Faces(face_matrix), Vertices(vertex_matrix)
+    return np.array(face_matrix, dtype=np.uint64), np.array(vertex_matrix, dtype=np.float64)
 
 
 def extract_data(
