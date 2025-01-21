@@ -25,7 +25,7 @@ class SimpleMembraneProcess(Process):
         'mesh_file': 'string',
         'geometry': {
             'type': 'string',  # if used, ie; 'icosphere'
-            'params': 'tree[float]'  # params required for aforementioned shape type
+            'params': 'tree'  # params required for aforementioned shape type
         },
         # 'tension_model': 'tree[float]',
         # 'osmotic_model': 'tree[float]',
