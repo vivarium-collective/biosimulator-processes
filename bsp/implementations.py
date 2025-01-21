@@ -43,6 +43,12 @@ MEM3DG_PROCESSES = [
         location='processes.mem3dg_process.MembraneProcess',
         dependencies=["conda-forge::pymem3dg"]
 
+    ),
+    Implementation(
+        address='simple-membrane-process',
+        location='processes.mem3dg_process.SimpleMembraneProcess',
+        dependencies=["conda-forge::pymem3dg"]
+
     )
 ]
 

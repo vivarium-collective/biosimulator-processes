@@ -1,9 +1,11 @@
 # use a more specific tag instead of latest for reproducibility
-FROM ubuntu:22.04
+FROM condaforge/miniforge3:latest
 
-ENV DEBIAN_FRONTEND=noninteractive
+# ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
+
+EXPOSE 8888
 
 # env deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -35,37 +37,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget  
 
 # copy and make dirs
-COPY biosimulators_processes /app/biosimulator_processes
+COPY bsp /app/biosimulator_processes
 # COPY composer-notebooks /app/notebooks
 
 # copy files
-COPY ./pyproject.toml ./poetry.lock ./README.md ./data ./scripts/trust-notebooks.sh /app/
-COPY assets/scripts/enter-lab.sh /usr/local/bin/enter-lab.sh
-# COPY ./scripts/xvfb-startup.sh /xvfb-startup.sh
+COPY ./pyproject.toml ./poetry.lock ./README.md ./data ./assets/scripts/trust-notebooks.sh ./assets/scripts/enter-lab.sh /app/
 
 # poetry deps
-RUN python3.10 -m pip install --upgrade pip \
-    && python3.10 -m pip install poetry \
-    && poetry config virtualenvs.in-project true \
-    && poetry env use 3.10 \
-    && poetry install
+RUN conda create -n bsp python=3.10 -y \
+    && conda install -n bsp poetry -y \
+    && conda run -n bsp pip install -e . \
+    && chmod +x /app/trust-notebooks.sh \
+    && chmod +x /app/enter-lab.sh
 
-# download and build Smoldyn
-RUN . /app/.venv/bin/activate \
-    && wget https://www.smoldyn.org/smoldyn-2.73.tgz \
-    && tar -xzf smoldyn-2.73.tgz \
-    && cd smoldyn-2.73 \
-    && cd build \
-    && cmake .. -DENABLE_PYTHON=ON -DPYTHON_EXECUTABLE=$(which python3.10) \
-    && make \
-    && make install \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean \
-    && apt-get autoclean
 
 ENV PLOTTING_ENGINE=matplotlib \
     PYTHONWARNINGS="ignore:The 'warn' parameter of use():UserWarning:tellurium.tellurium,ignore:Matplotlib is currently using agg:UserWarning:tellurium.plotting.engine_mpl"
 
+ENTRYPOINT ["/app/enter-lab.sh"]
 # TODO: Use a more specific tag instead of latest for reproducibility
 # FROM ubuntu:22.04
 #
