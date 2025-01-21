@@ -54,7 +54,7 @@ class SimpleMembraneProcess(Process):
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
         self.total_time = self.config.get("total_time", 100)
         # that should be given to the composite?:
-        # self.total_time = self.config.get("total_time", 10000)
+        self.total_time = self.config.get("total_time", 1000)
 
         # parse input of either mesh file or geometry spec
         mesh_file = self.config.get("mesh_file")
@@ -66,6 +66,8 @@ class SimpleMembraneProcess(Process):
             shape = self.config['geometry']['type']
             mesh_constructor = getattr(dg, f'get{shape.replace(shape[0], shape[0].upper())}')
             self.initial_faces, self.initial_vertices = mesh_constructor(**self.config['geometry']['params'])
+
+        self.initial_geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
 
         # set the surface area tension model
         self.tension_model = partial(
@@ -95,21 +97,27 @@ class SimpleMembraneProcess(Process):
         self.initial_parameters.osmotic.form = self.osmotic_model
 
         # TODO: would this be helpful to represent an evolving system?
-        self.system = partial(
-            dg.System,
+        # self.system = partial(
+        #     dg.System,
+        #     parameters=self.initial_parameters,
+        # )
+        self.system = dg.System(
+            geometry=self.initial_geometry,
             parameters=self.initial_parameters,
         )
+        self.system.initialize()  # should we do this after updating it dynamically?
 
         self.velocities_type = 'list'  # np.array
 
         # TODO: is this okay for both ports?
         self.port_schema = {
+            'velocities': 'list',
+            "geometry": 'tree',
+            'previous_geometry': 'tree'
             # "geometry": {
             #     "faces": "list[list[integer]]",
             #     "vertices": "list[list[float]]",
             # },
-            'velocities': 'list[list[float]]',
-            "geometry": 'tree',
             # "parameters": "tree[float]",
             # "velocities": "list[list[float]]"
         }
@@ -125,7 +133,8 @@ class SimpleMembraneProcess(Process):
         return {
             "geometry": initial_geometry,
             # "parameters": initial_parameters,
-            "velocities": np.array(initial_velocities) if self.velocities_type == 'array' else initial_velocities
+            "velocities": np.array(initial_velocities) if self.velocities_type == 'array' else initial_velocities,
+            'previous_geometry': initial_geometry
         }
 
     def inputs(self):
@@ -135,23 +144,24 @@ class SimpleMembraneProcess(Process):
         return self.port_schema
 
     def update(self, state, interval):
+
         # take in previous geometry for k
         previous_geometry = state.get("geometry")
         input_faces = previous_geometry["faces"]
         input_vertices = previous_geometry["vertices"]
         previous_faces = np.array(input_faces, dtype=np.uint32) if isinstance(input_faces, list) else input_faces
         previous_vertices = np.array(input_vertices, dtype=np.float64) if isinstance(input_vertices, list) else input_vertices
-        geometry_k = dg.Geometry(previous_faces, previous_vertices)
+        # geometry_k = dg.Geometry(previous_faces, previous_vertices)
 
-        system_k = self.system(geometry=geometry_k)
-        system_k.initialize()
+        # system_k = self.system(geometry=self.initial_geometry)
+        # system_k.initialize()
 
         # set up solver
         output_dir = Path(tmp.mkdtemp())
         fe = dg.Euler(
-            system=system_k,
+            system=self.system,  # system_k,
             characteristicTimeStep=self.characteristic_time_step,
-            savePeriod=1,
+            savePeriod=self.save_period,
             totalTime=interval,  # interval?
             tolerance=self.tolerance,
             outputDirectory=str(output_dir)
@@ -165,19 +175,19 @@ class SimpleMembraneProcess(Process):
         data = Dataset(output_path, 'r')
 
         # get velocities
-        velocities_k = extract_data(dataset=data, data_name="velocities", return_last=False)
+        velocities_k = extract_data(dataset=data, data_name="velocities", return_last=True)
 
         # get faces (do we need this?)
-        faces_k = extract_data(dataset=data, data_name="topology", return_last=False)
+        faces_k = extract_data(dataset=data, data_name="topology", return_last=True)
 
         # get vertices
-        vertices_k = extract_data(dataset=data, data_name="coordinates", return_last=False)
+        vertices_k = extract_data(dataset=data, data_name="coordinates", return_last=True)
 
         # parse parameters for iteration
         # param_data_k = parse_parameters(parameters=parameters_k)
 
         # clean up temporary files
-        shutil.rmtree(str(output_dir))
+        # shutil.rmtree(str(output_dir))
 
         geometry_out = {
             "vertices": vertices_k,
@@ -187,5 +197,9 @@ class SimpleMembraneProcess(Process):
         return {
             "geometry": geometry_out,
             # "parameters": param_data_k,
-            "velocities": velocities_k
+            "velocities": velocities_k,
+            'previous_geometry': {
+                "faces": previous_faces,
+                "vertices": previous_vertices
+            }
         }
