@@ -61,10 +61,10 @@ def dynamic_simulator_install(simulators: list[str], verbose: bool = True):
             print(f"{sim} installed successfully.") if verbose else None
 
 
-def new_document(name, address, _type, config, inputs, outputs, add_emitter=True):
+def new_document(name, address, _type, config, inputs, outputs, local_implementations=True, add_emitter=True):
     doc = {
         name: {
-            "address": f"local:{address}",
+            "address": f"local:{address}" if local_implementations else address,
             "_type": _type,
             "config": config,
             "inputs": inputs,

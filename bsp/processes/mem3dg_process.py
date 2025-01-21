@@ -32,19 +32,22 @@ class MembraneProcess(Process):
     """
     config_schema = {
         'mesh_file': 'string',
-        'tension_model': {
-            'modulus': 'float',
-            'preferredArea': 'float'
-        },
-        'osmotic_model': {
-            'preferredVolume': 'float',
-            'reservoirVolume': 'float',
-            'strength': 'float'  # what units is this in??
-        },
-        'parameters': 'tree[float]',
+        'tension_model': 'tree[any]',
+        'osmotic_model': 'tree[any]',
+        # 'tension_model': {
+        #     'modulus': 'float',
+        #     'preferredArea': 'float'
+        # },
+        # 'osmotic_model': {
+        #     'preferredVolume': 'float',
+        #     'reservoirVolume': 'float',
+        #     'strength': 'float'  # what units is this in??
+        # },
+        'parameters': 'tree[any]',
         'save_period': 'integer',
         'tolerance': 'float',
-        'characteristic_time_step': 'integer'
+        'characteristic_time_step': 'integer',
+        'total_time': 'integer'
     }
 
     def __init__(self, config: Dict[str, Union[Dict[str, float], str]] = None, core: ProcessTypes = None):
@@ -54,6 +57,7 @@ class MembraneProcess(Process):
         self.save_period = self.config.get("save_period", 100)  # interval at which sim state is saved to disk/recorded
         self.tolerance = self.config.get("tolerance", 1e-11)
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
+        self.total_time = self.config.get("total_time", 100)
         # that should be given to the composite?:
         # self.total_time = self.config.get("total_time", 10000)
 
@@ -75,6 +79,14 @@ class MembraneProcess(Process):
             strength=self.config["osmotic_model"]["strength"],
         )
 
+        self.fe = partial(
+            dg.Euler,
+            characteristicTimeStep=self.characteristic_time_step,
+            totalTime=self.total_time,
+            tolerance=self.tolerance,
+
+        )
+
         # set initial params
         self.initial_parameters = dg.Parameters()
         init_param_spec = self.config.get("parameters")
@@ -86,34 +98,38 @@ class MembraneProcess(Process):
 
     def initial_state(self):
         # TODO: get initial parameters, return type??
-        initial_parameters = parse_parameters(self.initial_parameters)
+        # initial_parameters = parse_parameters(self.initial_parameters)
         return {
             "geometry": {
                 "faces": self.initial_faces,
                 "vertices": self.initial_vertices,
             },
-            "parameters": initial_parameters,
+            # "parameters": initial_parameters,
             "velocities": [[] for _ in self.initial_vertices]
         }
 
     def inputs(self):
         return {
-            "geometry": {
-                "faces": "list[list[float]]",
-                "vertices": "list[list[float]]",
-            },
-            "parameters": "tree[float]",
-            "velocities": "list[list[float]]"
+            "geometry": 'tree[float]',
+            # "geometry": {
+            #     "faces": "list[list[float]]",
+            #     "vertices": "list[list[float]]",
+            # },
+            # "parameters": "tree[float]",
+            # "velocities": "list[list[float]]"
+            'velocities': 'any'
         }
 
     def outputs(self):
         return {
-            "geometry": {
-                "faces": "list[list[float]]",
-                "vertices": "list[list[float]]",
-            },
-            "parameters": "tree[float]",
-            "velocities": "list[list[float]]"
+            "geometry": 'tree[float]',
+            # "geometry": {
+            #     "faces": "list[list[float]]",
+            #     "vertices": "list[list[float]]",
+            # },
+            # "parameters": "tree[float]",
+            # "velocities": "list[list[float]]"
+            'velocities': 'any'
         }
 
     def update(self, state, interval):
@@ -124,22 +140,25 @@ class MembraneProcess(Process):
         geometry_k = dg.Geometry(previous_faces, previous_vertices)
 
         # take in parameters k and set them
-        parameters_k = dg.Parameters()
-        param_spec = state.get("parameters")
-        if param_spec:
-            for attribute_name, attribute_spec in param_spec.items():  # ie: adsorption, aggregiation, bending, etc
-                attribute = getattr(parameters_k, attribute_name)
-                for name, value in attribute_spec.items():
-                    setattr(attribute, name, value)
+        # parameters_k = dg.Parameters()
+        # param_spec = state.get("parameters")
+        # if param_spec:
+        #     for attribute_name, attribute_spec in param_spec.items():  # ie: adsorption, aggregiation, bending, etc
+        #         attribute = getattr(parameters_k, attribute_name)
+        #         for name, value in attribute_spec.items():
+        #             setattr(attribute, name, value)
 
         # instantiate the params with the class pressure models
-        parameters_k.tension.form = self.tension_model
-        parameters_k.osmotic.form = self.osmotic_model
+        # parameters_k.tension.form = self.tension_model
+        # parameters_k.osmotic.form = self.osmotic_model
+        self.initial_parameters.tension.form = self.tension_model
+        self.initial_parameters.osmotic.form = self.osmotic_model
 
         # mk temp dir to parse kth outputs
         system_k = dg.System(
             geometry=geometry_k,
-            parameters=parameters_k
+            parameters=self.initial_parameters,
+            # parameters = parameters_k
         )
         system_k.initialize()
 
@@ -157,31 +176,33 @@ class MembraneProcess(Process):
         fe.ifOutputTrajFile = True
 
         # run solver and extract data
-        success = fe.integrate()
+        success = fe.integrate()  # or should this be fe.step(interval)?
         output_path = str(output_dir / "traj.nc")
         data = Dataset(output_path, 'r')
 
         # get velocities
-        velocities_k = extract_data(dataset=data, data_name="velocities")
+        velocities_k = extract_data(dataset=data, data_name="velocities", return_last=False)
 
         # get faces (do we need this?)
-        faces_k = extract_data(dataset=data, data_name="topology")
+        faces_k = extract_data(dataset=data, data_name="topology", return_last=False)
 
         # get vertices
-        vertices_k = extract_data(dataset=data, data_name="coordinates")
+        vertices_k = extract_data(dataset=data, data_name="coordinates", return_last=False)
 
         # parse parameters for iteration
-        param_data_k = parse_parameters(parameters=parameters_k)
+        # param_data_k = parse_parameters(parameters=parameters_k)
 
         # clean up temporary files
         shutil.rmtree(str(output_dir))
 
+        geometry_out = {
+            "vertices": vertices_k,
+            "faces": faces_k,
+        }
+
         return {
-            "geometry": {
-                "vertices": vertices_k,
-                "faces": faces_k,
-            },
-            "parameters": param_data_k,
+            "geometry": geometry_out,
+            # "parameters": param_data_k,
             "velocities": velocities_k
         }
 
@@ -249,9 +270,10 @@ def extract_data(
         data_name: str,
         return_last: bool = True
 ) -> List[Union[List[float], List[List[float]]]]:
-    traj_data = dataset.groups['Trajectory'].variables[data_name][:]
+    data = dataset.groups['Trajectory'].variables[data_name][:]
+    traj_data = data.tolist() if isinstance(data, np.ndarray) else data
     outputs = []
-    for data_t in outputs:
+    for data_t in traj_data:
         outputs_t = [
             [data_t[i], data_t[i + 1], data_t[i + 2]] for i in range(0, len(data_t), 3)
         ]

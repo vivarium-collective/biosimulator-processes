@@ -36,6 +36,17 @@ COPASI_PROCESSES = [
     )
 ]
 
+
+MEM3DG_PROCESSES = [
+    Implementation(
+        address='membrane-process',
+        location='processes.mem3dg_process.MembraneProcess',
+        dependencies=["conda-forge::pymem3dg"]
+
+    )
+]
+
+
 SMOLDYN_PROCESSES = [
     Implementation(
         address='smoldyn-process',
@@ -58,7 +69,7 @@ TELLURIUM_PROCESSES = [
     )
 ]
 
-PROCESS_IMPLEMENTATIONS = COBRA_PROCESSES + COPASI_PROCESSES + SMOLDYN_PROCESSES + TELLURIUM_PROCESSES
+PROCESS_IMPLEMENTATIONS = COBRA_PROCESSES + COPASI_PROCESSES + MEM3DG_PROCESSES + SMOLDYN_PROCESSES + TELLURIUM_PROCESSES
 
 
 STEP_IMPLEMENTATIONS = [
