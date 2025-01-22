@@ -5,7 +5,7 @@ from typing import *
 from process_bigraph import ProcessTypes
 
 from bsp.utils.base_utils import dynamic_simulator_install
-from bsp.implementations import Implementation
+from bsp.data_model.base import Implementation, Type
 
 
 @dataclasses.dataclass

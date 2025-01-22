@@ -1,10 +1,29 @@
 import inspect
 import os
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Dict
 
 import numpy as np
 import pymem3dg as dg
 from h5py import Dataset
+
+
+def calculate_preferred_area(osmotic_params: Dict, convert_to_micro: bool = False) -> float:
+    V_preferred = osmotic_params["preferred_volume"]
+    # Convert volume to μm³ (1 L = 1e15 μm³)
+    V_preferred = V_preferred * 1e15 if convert_to_micro else V_preferred  # Convert liters to μm³
+    r_preferred = (3 * V_preferred / (4 * np.pi)) ** (1/3)
+    A_preferred = 4 * np.pi * r_preferred**2
+
+    return A_preferred
+
+
+def new_parameters(param_spec: Dict):
+    parameters = dg.Parameters()
+    for attribute_name, attribute_spec in param_spec.items():  # ie: adsorption, aggregation, bending, etc
+        attribute = getattr(parameters, attribute_name)
+        for name, value in attribute_spec.items():
+            setattr(attribute, name, value)
+    return parameters
 
 
 def parse_parameters(parameters: dg.Parameters):

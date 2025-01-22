@@ -3,8 +3,9 @@ Base data model relating to utils, files, protocols, etc.
 """
 
 
-from dataclasses import dataclass, asdict, Field
-from typing import List
+from dataclasses import dataclass, asdict, Field, field
+from types import FunctionType
+from typing import List, Dict, Union
 
 from pydantic import ConfigDict, BaseModel as _BaseModel
 
@@ -56,11 +57,8 @@ class Implementation(BaseClass):
     dependencies: List[str]
 
 
-# -- emitter type schemas --
+@dataclass
+class Type(BaseClass):
+    address: str
+    schema: Dict[str, Union[str, FunctionType]]
 
-DB_CONFIG_TYPE = {
-    'connection_uri': 'string',
-    'experiment_id': 'maybe[string]',
-    'emit_limit': 'integer',
-    'database': 'maybe[string]',
-}

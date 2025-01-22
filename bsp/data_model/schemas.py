@@ -1,18 +1,27 @@
 """
 Type schema definitions relating to process implementations within this application.
+
+The type name suffix is used to denote its function. Currently there are two suffixes:
+
+- ...Type -> this relates to the schema for input and output port data only
+- ...Config -> this relates to the schema for configuration data only (constructor)
 """
 
 
 __all__ = [
-    'Bounds',
-    'PositiveFloat',
+    'BoundsType',
+    'PositiveFloatType',
+    'ExternalForcesType',
+    'ProteinDensityType',
     'GeometryType',
-    'OsmoticModelType',
-    'SedModel',
-    'SedModelChanges',
-    'SbmlCobra',
-    'SedTimeCourseConfig',
-    'TensionModelType',
+    'VelocitiesType',
+    'OsmoticParametersType',
+    'OsmoticModelConfig',
+    'SBMLFileCobraConfig',
+    'SBMLModelChangesConfig',
+    'SBMLModelConfig',
+    'TimeCourseConfig',
+    'TensionModelConfig'
 ]
 
 
@@ -33,35 +42,78 @@ def check_sbml(state, schema, core):
         return False
 
 
-# -- sed-specific type schemas --
+def check_mesh_file(state, schema, core):
+    # TODO: check the state for .ply extension in filepath within config
+    pass
 
-PositiveFloat = {
+
+# -- types: that is, schemas related to input and output port data, not configs
+
+PositiveFloatType = {
     '_type': 'positive_float',
     '_inherit': 'float',
     '_apply': apply_non_negative
 }
 
-Bounds = {
+BoundsType = {
     'lower': 'maybe[float]',
     'upper': 'maybe[float]'
 }
 
-GeometryParams = {
+ExternalForcesType = {
+    '_inherit': 'list'
+}
+
+GeometryType = {
     "faces": 'list',  # "list[list[integer]]",
     "vertices": 'list'  # "list[list[float]]",
 }
 
+OsmoticParametersType = {
+    'preferred_volume': 'float',
+    'current_volume': 'maybe[float]',
+    'strength': 'float',
+    'reservoir_volume': 'float'  # represents the environment outside the membrane, which can exchange solutes or exert osmotic pressure on the system
+}
 
-GeometryType = GeometryParams
+ProteinDensityType = {
+    '_inherit': 'list'
+}
+
+VelocitiesType = {
+    '_inherit': 'list'
+}
 
 
-SbmlCobra = {
+# -- configs: that is, schemas related to config_schema specs only --
+
+DatabaseConfig = {
+    'connection_uri': 'string',
+    'experiment_id': 'maybe[string]',
+    'emit_limit': 'integer',
+    'database': 'maybe[string]',
+}
+
+GeometryConfig = {
+    'type': 'string',  # if used, ie; 'icosphere'
+    'parameters': 'tree'  # params required for aforementioned shape type
+}
+
+MeshFileConfig = {
+    '_inherit': 'string',
+    '_check': check_mesh_file
+}
+
+# TODO: fully implement this with all attributes
+ParametersConfig = 'tree'
+
+SBMLFileCobraConfig = {
     '_inherit': 'string',
     # '_check': check_sbml,
     '_apply': 'set',
 }
 
-SedModelChanges = {
+SBMLModelChangesConfig = {
     'species_changes': {
         'species_name': {
             'unit': 'maybe[string]',
@@ -90,7 +142,7 @@ SedModelChanges = {
     }
 }
 
-SedModel = {
+SBMLModelConfig = {
     'model_id': 'string',
     'model_source': 'string',
     'model_language': {
@@ -99,11 +151,11 @@ SedModel = {
     },
     'model_name': 'string',
     'model_units': 'tree[string]',
-    'model_changes': SedModelChanges  # 'tree[string]'
+    'model_changes': SBMLModelChangesConfig  # 'tree[string]'
 }
 
-SedTimeCourseConfig = {
-    'model': SedModel,
+TimeCourseConfig = {
+    'model': SBMLModelConfig,
     'time_config': 'tree[string]',  # ie: {start, stop, steps}
     'species_context': {
         '_default': 'concentrations',
@@ -112,18 +164,16 @@ SedTimeCourseConfig = {
     'working_dir': 'string'
 }
 
-TensionModelType = {
+TensionModelConfig = {
     'modulus': 'float',
     'preferredArea': 'float'
 }
 
-OsmoticModelType = {
+OsmoticModelConfig = {
     'preferredVolume': 'float',
     'reservoirVolume': 'float',
     'strength': 'float'  # what units is this in??
 }
 
-VelocitiesType = {
-    '_inherit': 'list'
-}
+
 
