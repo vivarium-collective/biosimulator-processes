@@ -6,13 +6,13 @@ Type schema definitions relating to process implementations within this applicat
 __all__ = [
     'Bounds',
     'PositiveFloat',
-    'GeometryConfig',
-    'OsmoticModelConfig',
+    'GeometryType',
+    'OsmoticModelType',
     'SedModel',
     'SedModelChanges',
     'SbmlCobra',
     'SedTimeCourseConfig',
-    'TensionModelConfig',
+    'TensionModelType',
 ]
 
 
@@ -50,6 +50,10 @@ GeometryParams = {
     "faces": 'list',  # "list[list[integer]]",
     "vertices": 'list'  # "list[list[float]]",
 }
+
+
+GeometryType = GeometryParams
+
 
 SbmlCobra = {
     '_inherit': 'string',
@@ -108,14 +112,18 @@ SedTimeCourseConfig = {
     'working_dir': 'string'
 }
 
-TensionModelParams = {
+TensionModelType = {
     'modulus': 'float',
     'preferredArea': 'float'
 }
 
-OsmoticModelParams = {
+OsmoticModelType = {
     'preferredVolume': 'float',
     'reservoirVolume': 'float',
     'strength': 'float'  # what units is this in??
+}
+
+VelocitiesType = {
+    '_inherit': 'list'
 }
 

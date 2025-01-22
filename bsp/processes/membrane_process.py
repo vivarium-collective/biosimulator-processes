@@ -101,7 +101,7 @@ class MembraneProcess(Process):
 
     def inputs(self):
         return {
-            'geometry': 'GeometryParams',  # faces: {[[]]}, vertices: [[]]}
+            'geometry': 'GeometryType',  # faces: {[[]]}, vertices: [[]]}
             'species_concentrations': 'tree[float]',  # like {'species_concentrations': {'osmotic': {}, etc}}
             'fluxes': 'tree[float]',
             'growth_coefficient': 'float',
@@ -114,8 +114,8 @@ class MembraneProcess(Process):
 
     def outputs(self):
         return {
-            'geometry': 'GeometryParams',
-            'velocities': 'list'
+            'geometry': 'GeometryType',
+            'velocities': 'VelocitiesType',
         }
 
     def update(self, state, interval):

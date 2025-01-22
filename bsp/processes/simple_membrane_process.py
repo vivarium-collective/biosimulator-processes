@@ -48,11 +48,10 @@ class SimpleMembraneProcess(Process):
     def __init__(self, config: Dict[str, Union[Dict[str, float], str]] = None, core: ProcessTypes = None):
         super().__init__(config, core)
         # get simulation params
-        self.save_period = self.config.get("save_period", 100)  # interval at which sim state is saved to disk/recorded
+        # self.save_period = self.config.get("save_period", 100)  # interval at which sim state is saved to disk/recorded
         self.tolerance = self.config.get("tolerance", 1e-11)
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
         self.total_time = self.config.get("total_time", 100)
-        # that should be given to the composite?:
         self.total_time = self.config.get("total_time", 1000)
 
         # parse input of either mesh file or geometry spec
@@ -66,94 +65,89 @@ class SimpleMembraneProcess(Process):
             mesh_constructor = getattr(dg, f'get{shape.replace(shape[0], shape[0].upper())}')
             self.initial_faces, self.initial_vertices = mesh_constructor(**self.config['geometry']['params'])
 
-        self.initial_geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
-
-        # set the surface area tension model
-        self.tension_model = partial(
-            dgb.preferredAreaSurfaceTensionModel,
-            modulus=self.config["tension_model"]["modulus"],
-            preferredArea=self.config["tension_model"]["preferredArea"],
-        )
-
-        # set the osmotic volume model
-        # dfba vals here in update
-        self.osmotic_model = partial(
-            dgb.preferredVolumeOsmoticPressureModel,
-            preferredVolume=self.config["osmotic_model"]["preferredVolume"],  # make input port here if value has changed (fba)
-            reservoirVolume=self.config["osmotic_model"]["reservoirVolume"],  # output port
-            strength=self.config["osmotic_model"]["strength"],
-        )
+        self.default_osmotic_strength = self.config["osmotic_model"]["strength"]
 
         # set initial params
-        self.initial_parameters = dg.Parameters()
+        self.parameters = dg.Parameters()
         init_param_spec = self.config.get("parameters")
         if init_param_spec:
             for attribute_name, attribute_spec in init_param_spec.items():  # ie: adsorption, aggregation, bending, etc
-                attribute = getattr(self.initial_parameters, attribute_name)
+                attribute = getattr(self.parameters, attribute_name)
                 for name, value in attribute_spec.items():
                     setattr(attribute, name, value)
 
-        self.initial_parameters.tension.form = self.tension_model
-        self.initial_parameters.osmotic.form = self.osmotic_model
-
-        # TODO: would this be helpful to represent an evolving system?
-        # self.system = partial(
-        #     dg.System,
-        #     parameters=self.initial_parameters,
-        # )
-        self.system = partial(
-            dg.System,
-            # geometry=self.initial_geometry,
-            parameters=self.initial_parameters,
-        )
-        # self.system.initialize()  # should we do this after updating it dynamically?
-
-        self.velocities_type = 'list'  # np.array
-
-        # TODO: register and create geometry type
-        self.port_schema = {
-            'velocities': 'list',
-            "geometry": 'tree'
-            # "geometry": {
-            #     "faces": "list[list[integer]]",
-            #     "vertices": "list[list[float]]",
-            # },
-            # "parameters": "tree[float]",
-            # "velocities": "list[list[float]]"
-        }
+        self._velocities_type = 'list'  # np.array
 
     def initial_state(self):
         # TODO: get initial parameters, return type??
-        # initial_parameters = parse_parameters(self.initial_parameters)
         initial_geometry = {
                 "faces": self.initial_faces.tolist(),
                 "vertices": self.initial_vertices.tolist(),
         }
-        initial_velocities = [[0.0] for _ in self.initial_vertices]
+        initial_velocities = [[0.0, 0.0, 0.0] for _ in self.initial_vertices]
         return {
             "geometry": initial_geometry,
-            # "parameters": initial_parameters,
-            "velocities": np.array(initial_velocities) if self.velocities_type == 'array' else initial_velocities
+            "velocities": np.array(initial_velocities) if self._velocities_type == 'array' else initial_velocities
         }
 
     def inputs(self):
-        return self.port_schema
+        """
+        strength: how strongly the system resists deviations from the preferred volume. It is a measure of the system's elasticity or compliance in response to osmotic pressure changes.
+        """
+        return {
+            # 'geometry': 'GeometryType',
+            'geometry': {
+                'faces': 'tree',
+                'vertices': 'tree'
+            },
+            'protein_densities': 'array',
+            'velocities': 'array',
+            'preferred_volume': 'float',
+        }
 
     def outputs(self):
-        return self.port_schema
+        return {
+            # 'geometry': 'GeometryType',
+            'geometry': {
+                'faces': 'tree',
+                'vertices': 'tree'
+            },
+            'protein_densities': 'array',
+            'velocities': 'array',
+            'reservoir_volume': 'float'
+        }
 
     def update(self, state, interval):
-
         # take in previous geometry for k
         previous_geometry = state.get("geometry")
         input_faces = previous_geometry["faces"]
         input_vertices = previous_geometry["vertices"]
         previous_faces = np.array(input_faces, dtype=np.uint32) if isinstance(input_faces, list) else input_faces
         previous_vertices = np.array(input_vertices, dtype=np.float64) if isinstance(input_vertices, list) else input_vertices
-        # geometry_k = dg.Geometry(previous_faces, previous_vertices)
+        geometry_k = dg.Geometry(previous_faces, previous_vertices)
 
-        system_k = self.system(geometry=self.initial_geometry)
+        # set the surface area tension model
+        tension_model_k = partial(
+            dgb.preferredAreaSurfaceTensionModel,
+            modulus=self.config["tension_model"]["modulus"],
+            preferredArea=self.config["tension_model"]["preferredArea"],
+        )
+
+        # set the osmotic volume model  # dfba vals here in update
+        osmotic_model_k = partial(
+            dgb.preferredVolumeOsmoticPressureModel,
+            preferredVolume=self.config["osmotic_model"]["preferredVolume"],  # make input port here if value has changed (fba)
+            reservoirVolume=self.config["osmotic_model"]["reservoirVolume"],  # output port
+            strength=self.config["osmotic_model"]["strength"],
+        )
+
+        self.parameters.tension.form = tension_model_k
+        self.parameters.osmotic.form = osmotic_model_k
+
+        system_k = dg.System(geometry=self.initial_geometry)  # perhaps set velocities here?
         system_k.initialize()
+
+
 
         # set up solver
         output_dir_k = Path(tmp.mkdtemp())
