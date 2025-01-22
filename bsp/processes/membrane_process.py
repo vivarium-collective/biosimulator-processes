@@ -21,141 +21,150 @@ from bsp.utils.membrane_utils import extract_data, parse_ply
 
 
 class MembraneProcess(Process):
-    """
-    Membrane process consisting of preferredAreaSurfaceTension and preferredVolumeOsmoticPressure models (expand and contract)
-
-    :config mesh_file: input .ply file TODO: generalize this
-    :config tension_model:
-    :config osmotic_model:
-    :config parameters: dict[str, float]: {**dir(pymem3dg.Parameters()}: 'adsorption', 'aggregation', 'bending', 'boundary', 'damping', 'dirichlet', 'dpd',
-        entropy', 'external', 'osmotic', 'point', 'protein', 'proteinMobility', 'selfAvoidance', 'spring', 'temperature', 'tension', 'variation'.
-
-    """
     config_schema = {
         'mesh_file': 'string',
-        'tension_model': 'tree[float]',
-        'osmotic_model': 'tree[float]',
-        # 'tension_model': {
-        #     'modulus': 'float',
-        #     'preferredArea': 'float'
-        # },
-        # 'osmotic_model': {
-        #     'preferredVolume': 'float',
-        #     'reservoirVolume': 'float',
-        #     'strength': 'float'  # what units is this in??
-        # },
-        'parameters': 'tree[any]',
+        'geometry': {
+            'type': 'string',  # if used, ie; 'icosphere'
+            'params': 'tree'  # params required for aforementioned shape type
+        },
+        'tension_model': {
+            'modulus': 'float',
+            'preferredArea': 'float'
+        },
+        'osmotic_model': {
+            'preferredVolume': 'float',
+            'reservoirVolume': 'float',
+            'strength': 'float'  # what units is this in??
+        },
+        'parameters': 'tree',
         'save_period': 'integer',
         'tolerance': 'float',
         'characteristic_time_step': 'integer',
-        'total_time': 'integer'
+        'total_time': 'integer',
+        'growth_coefficient': 'integer',  # growth to volume coeff ?
     }
 
     def __init__(self, config: Dict[str, Union[Dict[str, float], str]] = None, core: ProcessTypes = None):
         super().__init__(config, core)
-
         # get simulation params
         self.save_period = self.config.get("save_period", 100)  # interval at which sim state is saved to disk/recorded
         self.tolerance = self.config.get("tolerance", 1e-11)
         self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
         self.total_time = self.config.get("total_time", 100)
         # that should be given to the composite?:
-        # self.total_time = self.config.get("total_time", 10000)
+        self.total_time = self.config.get("total_time", 1000)
+        self.default_growth_coefficient = self.config.get("growth_coefficient", 100)
 
-        # create geometry from model file
-        self.initial_faces, self.initial_vertices = parse_ply(self.config["mesh_file"])
+        # parse input of either mesh file or geometry spec
+        mesh_file = self.config.get("mesh_file")
+        geometry = self.config.get("geometry")
+        if mesh_file:
+            self.initial_faces, self.initial_vertices = parse_ply(mesh_file)
+        else:
+            shape = self.config['geometry']['type']
+            mesh_constructor = getattr(dg, f'get{shape.replace(shape[0], shape[0].upper())}')
+            self.initial_faces, self.initial_vertices = mesh_constructor(**self.config['geometry']['params'])
 
-        # set the surface area tension model
-        self.tension_model = partial(
-            dgb.preferredAreaSurfaceTensionModel,
-            modulus=self.config["tension_model"]["modulus"],
-            preferredArea=self.config["tension_model"]["preferredArea"],
-        )
-
-        # set the osmotic volume model
-        self.osmotic_model = partial(
-            dgb.preferredVolumeOsmoticPressureModel,
-            preferredVolume=self.config["osmotic_model"]["preferredVolume"],
-            reservoirVolume=self.config["osmotic_model"]["reservoirVolume"],
-            strength=self.config["osmotic_model"]["strength"],
-        )
-
-        # set initial params
-        self.initial_parameters = dg.Parameters()
+        # set parameters TODO: should this be dynamic?
+        self.parameters = dg.Parameters()
         init_param_spec = self.config.get("parameters")
         if init_param_spec:
-            for attribute_name, attribute_spec in init_param_spec.items():  # ie: adsorption, aggregiation, bending, etc
-                attribute = getattr(self.initial_parameters, attribute_name)
+            for attribute_name, attribute_spec in init_param_spec.items():  # ie: adsorption, aggregation, bending, etc
+                attribute = getattr(self.parameters, attribute_name)
                 for name, value in attribute_spec.items():
                     setattr(attribute, name, value)
 
-        self.initial_parameters.tension.form = self.tension_model
-        self.initial_parameters.osmotic.form = self.osmotic_model
-
-        # TODO: would this be helpful to represent an evolving system?
-        self.system = partial(
-            dg.System,
-            parameters=self.initial_parameters,
-        )
-
-        self.velocities_type = 'list'  # np.array
-
-        # TODO: is this okay for both ports?
-        self.port_schema = {
-            "geometry": {
-                "faces": "list[list[integer]]",
-                "vertices": "list[list[float]]",
-            },
-            'velocities': 'list[list[float]]',
-            # "geometry": 'map[map[list[float]]]',
-            # "parameters": "tree[float]",
-            # "velocities": "list[list[float]]"
-        }
-
-        self.faces_type = np.array(self.initial_faces)
-        self.vertices_type = np.array(self.initial_vertices)
+        self.default_preferred_volume = self.config["osmotic_model"]["preferredVolume"],  # make input port here if value has changed (fba)
+        self.default_reservoir_volume = self.config["osmotic_model"]["reservoirVolume"],  # output port
+        self.default_osmotic_strength = self.config["osmotic_model"]["strength"]
 
     def initial_state(self):
-        # TODO: get initial parameters, return type??
-        # initial_parameters = parse_parameters(self.initial_parameters)
         initial_geometry = {
-                "faces": self.initial_faces.tolist(),
-                "vertices": self.initial_vertices.tolist(),
+            "faces": self.initial_faces.tolist(),
+            "vertices": self.initial_vertices.tolist(),
         }
         initial_velocities = [[0.0] for _ in self.initial_vertices]
         return {
             "geometry": initial_geometry,
-            # "parameters": initial_parameters,
-            "velocities": np.array(initial_velocities) if self.velocities_type == 'array' else initial_velocities
+            "velocities": initial_velocities,
         }
 
     def inputs(self):
-        return self.port_schema
+        return {
+            'geometry': 'GeometryParams',  # faces: {[[]]}, vertices: [[]]}
+            'species_concentrations': 'tree[float]',  # like {'species_concentrations': {'osmotic': {}, etc}}
+            'fluxes': 'tree[float]',
+            'growth_coefficient': 'float',
+            # 'preferred_volume': 'float',  # param for osmotic pressure model
+            # 'current_volume': 'float',  # param for osmotic pressure model
+            # 'tension_model': 'TensionModelParams',  # todo: can we parse this from the previous two fields?
+            # 'species_concentrations': 'tree[float]',  # particularly, preferred volume
+            # 'fluxes': 'tree[float]',  # parsing preferred volume from dfba outputs?
+        }
 
     def outputs(self):
-        return self.port_schema
+        return {
+            'geometry': 'GeometryParams',
+            'velocities': 'list'
+        }
 
     def update(self, state, interval):
-        # take in previous geometry for k
+        # parse kth-1 geometry output
         previous_geometry = state.get("geometry")
         input_faces = previous_geometry["faces"]
         input_vertices = previous_geometry["vertices"]
-        previous_faces = np.array(input_faces, dtype=np.uint32) if isinstance(input_faces, list) else input_faces
-        previous_vertices = np.array(input_vertices, dtype=np.float64) if isinstance(input_vertices, list) else input_vertices
+        previous_faces = np.array(input_faces) if isinstance(input_faces, list) else input_faces
+        previous_vertices = np.array(input_vertices) if isinstance(input_vertices, list) else input_vertices
+
+        # instantiate new geometry for k
         geometry_k = dg.Geometry(previous_faces, previous_vertices)
 
-        # take in parameters k and set them
-        # parameters_k = dg.Parameters()
-        # param_spec = state.get("parameters")
-        # if param_spec:
-        #     for attribute_name, attribute_spec in param_spec.items():  # ie: adsorption, aggregiation, bending, etc
-        #         attribute = getattr(parameters_k, attribute_name)
-        #         for name, value in attribute_spec.items():
-        #             setattr(attribute, name, value)
+        # calculate current volume from kth inputs
+        input_fluxes = state.get("fluxes")
+        input_osmotic_species_concentrations = state.get("species_concentrations").get('osmotic')
+        total_osmotic_concentration = sum(input_osmotic_species_concentrations.values())
+        n_solutes = sum(input_fluxes[reaction] for reaction in input_fluxes if "transport" in reaction)
+        volume_k = n_solutes / total_osmotic_concentration
+
+        # calculate preferred volume
+        # nutrient_concentration = 0.5
+        # Km = 0.3  # Michaelis constant
+        # k_base = 1000  # Baseline coefficient
+        # growth_to_volume_coeff = k_base * (1 + nutrient_concentration / (Km + nutrient_concentration))
+        input_growth_coeff = state.get("growth_coefficient", self.default_growth_coefficient)
+        growth_flux = input_fluxes.get("biomass_reaction", 0)
+        growth_volume = input_growth_coeff * growth_flux
+        osmotic_volume = volume_k  # TODO: this assumes the osmotic contribution directly determines the volume of the cell at equilibrium
+        preferred_volume_k = volume_k + osmotic_volume * 1e12 + growth_volume  # converts to L TODO: how should we handle units?
+        osmotic_strength_k = state.get("osmotic_strength", self.default_osmotic_strength)
+
+        # set osmotic model callback
+        osmotic_model_k = partial(
+            dgb.preferredVolumeOsmoticPressureModel,
+            preferredVolume=preferred_volume_k,  # make input port here if value has changed (fba)
+            volume=volume_k,  # output port
+            strength=osmotic_strength_k,
+        )
+
+        # calculate area and preferred area from volume params
+        radius_k = (3 * volume_k / (4 * np.pi)) ** (1/3)
+        area_k = 4 * np.pi * radius_k**2
+        preferred_radius_k = (3 * preferred_volume_k / (4 * np.pi)) ** (1 / 3)
+        preferred_area_k = 4 * np.pi * preferred_radius_k ** 2
+
+        # set tension model callback
+        tension_model_k = partial(
+            dgb.preferredAreaSurfaceTensionModel,
+            area=area_k,
+            modulus=self.config["tension_model"]["modulus"],
+            preferredArea=preferred_area_k,
+        )
 
         # instantiate the params with the class pressure models
-        # parameters_k.tension.form = self.tension_model
-        # parameters_k.osmotic.form = self.osmotic_model
+        param_config = state.get("parameters", self.config["parameters"])
+        parameters_k = new_parameters(param_spec=param_config)
+        parameters_k.tension.form = tension_model_k
+        parameters_k.osmotic.form = osmotic_model_k
 
         # mk temp dir to parse kth outputs
         # system_k = dg.System(
@@ -211,19 +220,19 @@ class MembraneProcess(Process):
         }
 
 
-# get vertices this will be divisible by 3 and thus is a time indexed flat list of tuples(xyz) for each vertex in the mesh
-# vertex_data = data.groups['Trajectory'].variables['coordinates'][:]
-# vertices = []
-# for v_t in vertex_data:
-#     vertices_t = [
-#         [v_t[i], v_t[i + 1], v_t[i + 2]] for i in range(0, len(v_t), 3)
-#     ]
-#     vertices.append(vertices_t)
-# vertices_k = vertices[-1]
-# vertices_k = [vertex_data[-1][::3], vertex_data[-1][1::3], vertex_data[-1][2::3]]
+def new_parameters(param_spec: Dict) -> dg.Parameters:
+    parameters = dg.Parameters()
+    if param_spec:
+        for attribute_name, attribute_spec in param_spec.items():  # ie: adsorption, aggregation, bending, etc
+            attribute = getattr(parameters, attribute_name)
+            for name, value in attribute_spec.items():
+                setattr(attribute, name, value)
+
+    return parameters
 
 
 def test_membrane_process():
+    # get vertices this will be divisible by 3 and thus is a time indexed flat list of tuples(xyz) for each vertex in the mesh
     from bsp import app_registrar
 
     # define config and port vals
