@@ -3,19 +3,11 @@ Type schema definitions relating to process implementations within this applicat
 
 The type name suffix is used to denote its function. Currently there are two suffixes:
 
-- ...Type -> this relates to the schema for input and output port data only
 - ...Config -> this relates to the schema for configuration data only (constructor)
 """
 
 
 __all__ = [
-    'BoundsType',
-    'PositiveFloatType',
-    'ExternalForcesType',
-    'ProteinDensityType',
-    'GeometryType',
-    'VelocitiesType',
-    'OsmoticParametersType',
     'OsmoticModelConfig',
     'SBMLFileCobraConfig',
     'SBMLModelChangesConfig',
@@ -25,60 +17,9 @@ __all__ = [
 ]
 
 
-# create new types
-def apply_non_negative(schema, current, update, core):
-    new_value = current + update
-    return max(0, new_value)
-
-
-def check_sbml(state, schema, core):
-    import cobra
-    # Do something to check that the value is a valid SBML file
-    valid = cobra.io.sbml.validate_sbml_model(state)  # TODO -- this requires XML
-    # valid = cobra.io.load_json_model(value)
-    if valid:
-        return True
-    else:
-        return False
-
-
 def check_mesh_file(state, schema, core):
     # TODO: check the state for .ply extension in filepath within config
     pass
-
-
-# -- types: that is, schemas related to input and output port data, not configs
-
-PositiveFloatType = {
-    '_type': 'positive_float',
-    '_inherit': 'float',
-    '_apply': apply_non_negative
-}
-
-BoundsType = {
-    'lower': 'maybe[float]',
-    'upper': 'maybe[float]'
-}
-
-ExternalForcesType = {
-    '_inherit': 'list'
-}
-
-GeometryType = {
-    "faces": 'list',  # "list[list[integer]]",
-    "vertices": 'list'  # "list[list[float]]",
-}
-
-OsmoticParametersType = {
-    'preferred_volume': 'float',
-    'volume': 'maybe[float]',  # current (actual) volume by which a potential is created when compared to preferred volume
-    'strength': 'float',
-    'reservoir_volume': 'float'  # represents the environment outside the membrane, which can exchange solutes or exert osmotic pressure on the system
-}
-
-ProteinDensityType = 'list[float]'
-
-VelocitiesType = 'list[float]'
 
 
 # -- configs: that is, schemas related to config_schema specs only --

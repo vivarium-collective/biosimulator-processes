@@ -1,5 +1,6 @@
 import dataclasses
 import os
+from types import ModuleType
 from typing import *
 
 from process_bigraph import ProcessTypes
@@ -102,3 +103,13 @@ class Registrar(object):
                 process_deps = [SimulatorDependency(dep) for dep in implementation.dependencies]
                 self.implementation_dependencies[implementation.address] = process_deps
             self.initial_registration_complete = True
+
+    def register_type_module(self, module: ModuleType, verbose=False) -> None:
+        for schema_name in module.__all__:
+            schema = getattr(module, schema_name)
+            self.register_type(schema_name, schema)
+            print(f'Registered module {schema_name}') if verbose else None
+
+    def register_initial_types(self, config: ModuleType, types: ModuleType):
+        for module in [config, types]:
+            self.register_type_module(module)

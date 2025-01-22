@@ -1,7 +1,4 @@
-import importlib
-from typing import *
-
-from bsp.data_model import schemas
+from bsp.schemas import config, types
 from bsp.registration import Registrar
 from bsp.implementations import INITIAL_MODULES
 
@@ -13,12 +10,8 @@ ATTEMPT_INSTALL = False
 # project-scoped process/implementation registrar
 app_registrar = Registrar()
 
-
 #  register types:
-for schema_name in schemas.__all__:
-    schema = getattr(schemas, schema_name)
-    app_registrar.register_type(schema_name, schema)
-
+app_registrar.register_initial_types(config, types)
 
 # register implementations of steps and processes:
 app_registrar.register_initial_modules(
