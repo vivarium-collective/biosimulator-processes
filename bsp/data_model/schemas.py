@@ -71,18 +71,14 @@ GeometryType = {
 
 OsmoticParametersType = {
     'preferred_volume': 'float',
-    'current_volume': 'maybe[float]',
+    'volume': 'maybe[float]',  # current (actual) volume by which a potential is created when compared to preferred volume
     'strength': 'float',
     'reservoir_volume': 'float'  # represents the environment outside the membrane, which can exchange solutes or exert osmotic pressure on the system
 }
 
-ProteinDensityType = {
-    '_inherit': 'list'
-}
+ProteinDensityType = 'list[float]'
 
-VelocitiesType = {
-    '_inherit': 'list'
-}
+VelocitiesType = 'list[float]'
 
 
 # -- configs: that is, schemas related to config_schema specs only --
@@ -170,8 +166,9 @@ TensionModelConfig = {
 }
 
 OsmoticModelConfig = {
-    'preferredVolume': 'float',
-    'reservoirVolume': 'float',
+    'volume': 'float',
+    'preferred_volume': 'float',
+    'reservoir_volume': 'float',
     'strength': 'float'  # what units is this in??
 }
 

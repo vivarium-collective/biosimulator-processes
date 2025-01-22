@@ -53,6 +53,8 @@ class SimpleMembraneProcess(Process):
             self.initial_faces, self.initial_vertices = mesh_constructor(**geometry['parameters'])
 
         self.param_spec = self.config.get("parameters")
+        self.osmotic_model_spec = self.config.get("osmotic_model")
+        self.tension_model_spec = self.config.get("tension_model")
 
         # TODO: should this be dynamic?
         # self.default_osmotic_strength = self.config["osmotic_model"]["strength"]
@@ -66,15 +68,32 @@ class SimpleMembraneProcess(Process):
         #             setattr(attribute, name, value)
 
     def initial_state(self):
-        # TODO: get initial parameters, return type??
         initial_geometry = {
                 "faces": self.initial_faces.tolist(),
                 "vertices": self.initial_vertices.tolist(),
         }
-        initial_velocities = [[0.0, 0.0, 0.0] for _ in self.initial_vertices]
+
+        initial_velocities = []
+        initial_protein_density = []
+        for vertex in self.initial_vertices:
+            # set empty velocities TODO: can this work?
+            for _ in range(3):
+                initial_velocities.append(0.0)
+            # set constant protein density TODO: make this more dynamic.
+            initial_protein_density.append(1.)
+
+        initial_osmotic_params = {
+            "preferred_volume": self.osmotic_model_spec["preferred_volume"],
+            "volume": self.osmotic_model_spec["volume"],
+            "strength": self.osmotic_model_spec["strength"],
+            "reservoir_volume": self.osmotic_model_spec["reservoir_volume"]
+        }
+
         return {
             "geometry": initial_geometry,
-            "velocities": initial_velocities
+            "velocities": initial_velocities,
+            "external_force": [],
+            "osmotic_parameters": initial_osmotic_params
         }
 
     def inputs(self):
@@ -90,7 +109,7 @@ class SimpleMembraneProcess(Process):
             'external_force': 'ExternalForceType',
             'osmotic_parameters': 'OsmoticParametersType'
             # 'preferred_volume': 'float',
-            # 'current_volume': 'float',
+            # 'volume': 'float',
             # 'osmotic_strength': 'float',
         }
 
@@ -102,7 +121,7 @@ class SimpleMembraneProcess(Process):
             'external_force': 'ExternalForceType',
             'osmotic_parameters': 'OsmoticParametersType'
             # 'preferred_volume': 'float',
-            # 'current_volume': 'float',
+            # 'volume': 'float',
             # 'osmotic_strength': 'float',
         }
 
@@ -122,7 +141,7 @@ class SimpleMembraneProcess(Process):
             preferredVolume=osmotic_params_k["preferred_volume"],  # make input port here if value has changed (fba)
             reservoirVolume=osmotic_params_k["reservoir_volume"],  # output port
             strength=osmotic_params_k["strength"],
-            volume=osmotic_params_k["current_volume"]  # TODO: should we add this?
+            volume=osmotic_params_k["volume"]  # TODO: should we add this?
         )
 
         # set the surface area tension model
@@ -150,7 +169,7 @@ class SimpleMembraneProcess(Process):
         system_k.initialize()
 
         # set up solver and parse time params
-        output_dir_k = Path(tmp.mkdtemp())
+        output_dir_k = Path(tmp.mkdtemp(dir='membrane_process'))
         # interval_step = self.characteristic_time_step * self.save_period
         # total_time_k = (interval + 1) * interval_step
         fe = dg.Euler(
@@ -169,7 +188,7 @@ class SimpleMembraneProcess(Process):
         output_path_k = str(output_dir_k / "traj.nc")
         data = Dataset(output_path_k, 'r')
 
-        # get velocities
+        # get velocities: shape is (t, n_vertices * 3) where t is the number of recorded time points
         velocities_k = extract_last_data(dataset=data, data_name="velocities")
 
         # get faces (do we need this?)
@@ -178,22 +197,22 @@ class SimpleMembraneProcess(Process):
         # get vertices
         vertices_k = extract_last_data(dataset=data, data_name="coordinates")
 
+        # get protein density: shape is (t, n_vertices) so a scalar for each vertex rather than a tuple
         protein_density_k = extract_last_data(dataset=data, data_name="proteindensity")
+
+        # get external forces TODO: do we need this?
         external_force_k = extract_last_data(dataset=data, data_name="externalForce")
 
-        # parse parameters for iteration
-        # param_data_k = parse_parameters(parameters=parameters_k)
-
         # clean up temporary files
-        # shutil.rmtree(str(output_dir_k))
+        shutil.rmtree(str(output_dir_k))
 
-        geometry_out = {
+        geometry_outputs = {
             "vertices": vertices_k,
             "faces": faces_k,
         }
 
         return {
-            "geometry": geometry_out,
+            "geometry": geometry_outputs,
             "protein_density": protein_density_k,
             "external_force": external_force_k,
             "velocities": velocities_k,

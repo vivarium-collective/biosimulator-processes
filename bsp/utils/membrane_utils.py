@@ -107,6 +107,7 @@ def extract_last_data(
 ) -> List[Union[List[float], List[List[float]]]]:
     traj_data = dataset.groups['Trajectory'].variables[data_name][:]
     traj_data = traj_data.tolist()
+
     return traj_data[-1]
 
 
