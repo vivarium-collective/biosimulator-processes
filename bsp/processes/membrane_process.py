@@ -78,6 +78,16 @@ class MembraneProcess(Process):
         self.default_reservoir_volume = self.config["osmotic_model"]["reservoirVolume"],  # output port
         self.default_osmotic_strength = self.config["osmotic_model"]["strength"]
 
+        self.solver_factory = partial(
+            dg.Euler,
+            characteristicTimeStep=self.characteristic_time_step,
+            totalTime=self.total_time,  # interval?
+            tolerance=self.tolerance
+            # system=system_k,
+            # savePeriod=interval,
+            # outputDirectory=str(output_dir)
+        )
+
     def initial_state(self):
         initial_geometry = {
             "faces": self.initial_faces.tolist(),
@@ -166,30 +176,42 @@ class MembraneProcess(Process):
         parameters_k.tension.form = tension_model_k
         parameters_k.osmotic.form = osmotic_model_k
 
-        # mk temp dir to parse kth outputs
-        # system_k = dg.System(
-        #     geometry=geometry_k,
-        #     parameters=self.initial_parameters,
-        #     # parameters = parameters_k
-        # )
-        system_k = self.system(geometry=geometry_k)
+        # set up system from parsed geometry and parameters for kth
+        system_k = dg.System(
+            geometry=geometry_k,
+            parameters=parameters_k
+        )
         system_k.initialize()
 
-        # set up solver
+        # mk temp dir to save and parse kth output io
         output_dir = Path(tmp.mkdtemp())
-        fe = dg.Euler(
+
+        # set up solver
+        # time_points = np.arange(start=interval - 1, stop=(total_time + characteristic_step), step=characteristic_step
+        # system=system_k,
+        # savePeriod=interval,
+        # outputDirectory=str(output_dir)
+        # fe = dg.Euler(
+        #     system=system_k,
+        #     characteristicTimeStep=self.characteristic_time_step,
+        #     savePeriod=interval,
+        #     totalTime=1,  # interval?
+        #     tolerance=self.tolerance,
+        #     outputDirectory=str(output_dir)
+        # )
+        # fe.ifPrintToConsole = True
+        # fe.ifOutputTrajFile = True
+
+        fe_k = self.solver_factory(
             system=system_k,
-            characteristicTimeStep=self.characteristic_time_step,
-            savePeriod=self.save_period,
-            totalTime=1,  # interval?
-            tolerance=self.tolerance,
+            savePeriod=interval,
             outputDirectory=str(output_dir)
         )
-        fe.ifPrintToConsole = True
-        fe.ifOutputTrajFile = True
+        fe_k.ifPrintToConsole = True
+        fe_k.ifOutputTrajFile = True
 
         # run solver and extract data
-        success = fe.integrate()  # or should this be fe.step(interval)?
+        success = fe_k.integrate()  # or should this be fe.step(interval)?
         output_path = str(output_dir / "traj.nc")
         data = Dataset(output_path, 'r')
 
