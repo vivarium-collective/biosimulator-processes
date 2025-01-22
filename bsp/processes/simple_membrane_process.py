@@ -16,7 +16,7 @@ import pymem3dg.boilerplate as dgb
 from netCDF4 import Dataset
 from process_bigraph import Process, ProcessTypes
 
-from bsp.utils.membrane_utils import extract_data, parse_ply, calculate_preferred_area, new_parameters
+from bsp.utils.membrane_utils import extract_data, parse_ply, calculate_preferred_area, new_parameters, extract_last_data
 
 
 class SimpleMembraneProcess(Process):
@@ -168,15 +168,18 @@ class SimpleMembraneProcess(Process):
         success = fe.integrate()  # or should this be fe.step(interval)?
         output_path_k = str(output_dir_k / "traj.nc")
         data = Dataset(output_path_k, 'r')
-        variables['proteindensity'][:][0].shape, variables['velocities'][:][0].shape, variables['externalForce'][:]
+
         # get velocities
-        velocities_k = extract_data(dataset=data, data_name="velocities", return_last=True)
+        velocities_k = extract_last_data(dataset=data, data_name="velocities")
 
         # get faces (do we need this?)
-        faces_k = extract_data(dataset=data, data_name="topology", return_last=True)
+        faces_k = extract_last_data(dataset=data, data_name="topology")
 
         # get vertices
-        vertices_k = extract_data(dataset=data, data_name="coordinates", return_last=True)
+        vertices_k = extract_last_data(dataset=data, data_name="coordinates")
+
+        protein_density_k = extract_last_data(dataset=data, data_name="proteindensity")
+        external_force_k = extract_last_data(dataset=data, data_name="externalForce")
 
         # parse parameters for iteration
         # param_data_k = parse_parameters(parameters=parameters_k)
@@ -191,6 +194,8 @@ class SimpleMembraneProcess(Process):
 
         return {
             "geometry": geometry_out,
-            # "parameters": param_data_k,
-            "velocities": velocities_k
+            "protein_density": protein_density_k,
+            "external_force": external_force_k,
+            "velocities": velocities_k,
+            "osmotic_parameters": osmotic_params_k
         }

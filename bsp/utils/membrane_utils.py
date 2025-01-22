@@ -101,6 +101,15 @@ def extract_data(
     return outputs[-1] if return_last else outputs
 
 
+def extract_last_data(
+        dataset: Dataset,
+        data_name: str
+) -> List[Union[List[float], List[List[float]]]]:
+    traj_data = dataset.groups['Trajectory'].variables[data_name][:]
+    traj_data = traj_data.tolist()
+    return traj_data[-1]
+
+
 def generate_faces(width, height):
     """
     Generate face data for a grid mesh.
