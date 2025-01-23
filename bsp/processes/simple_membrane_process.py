@@ -101,7 +101,8 @@ class SimpleMembraneProcess(Process):
             'velocities': 'VelocitiesType',  # 'list',
             'volume': 'float',
             'preferred_volume': 'float',
-            'reservoir_volume': 'float'
+            'reservoir_volume': 'float',
+            'osmotic_strength': 'float',
         }
 
     def outputs(self):
@@ -111,7 +112,7 @@ class SimpleMembraneProcess(Process):
             'velocities': 'VelocitiesType',
             'volume': 'float',
             'surface_area': 'float',
-            'mechanical_forces': 'MechanicalForcesType'
+            'net_forces': 'MechanicalForcesType'
         }
 
     def update(self, state, interval):
@@ -124,14 +125,16 @@ class SimpleMembraneProcess(Process):
         previous_geometry = dg.Geometry(previous_faces, previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
-        previous_osmotic_params = state["osmotic_parameters"]
-        previous_preferred_volume = previous_osmotic_params["preferred_volume"]
+        previous_preferred_volume = state["preferred_volume"]  # TODO: should this be constant/static?
+        previous_volume = state["volume"]
+        previous_res_volume = state["reservoir_volume"]
+        osmotic_strength_k = state.get("osmotic_strength", self.osmotic_model_spec["strength"])
         osmotic_model_k = partial(
             dgb.preferredVolumeOsmoticPressureModel,
             preferredVolume=previous_preferred_volume,  # make input port here if value has changed (fba)
-            reservoirVolume=previous_osmotic_params["reservoir_volume"],  # output port
-            strength=previous_osmotic_params["strength"],
-            volume=previous_osmotic_params["volume"]  # output port
+            reservoirVolume=previous_res_volume,  # output port
+            strength=osmotic_strength_k,
+            volume=previous_volume  # output port
         )
 
         # set the surface area tension model
