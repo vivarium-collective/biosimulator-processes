@@ -54,6 +54,7 @@ class SimpleMembraneProcess(Process):
 
         # get parameters, osmotic, and tension params from config
         self.param_spec = self.config.get("parameters")
+        self.parameters = new_parameters(self.param_spec)
         self.osmotic_model_spec = self.config.get("osmotic_model")
         self.tension_model_spec = self.config.get("tension_model")
 
@@ -136,55 +137,43 @@ class SimpleMembraneProcess(Process):
         volume_k = state["volume"]
         reservoir_volume_k = state["reservoir_volume"]
         osmotic_strength_k = state.get("osmotic_strength", self.osmotic_model_spec["strength"])
-        # osmotic_model_k = partial(
-        #     dgb.preferredVolumeOsmoticPressureModel,
-        #     preferredVolume=preferred_volume,  # make input port here if value has changed (fba)
-        #     reservoirVolume=res_volume,  # output port
-        #     strength=osmotic_strength_k,
-        #     volume=previous_volume  # output port
-        # )
-        osmotic_model_k = dgb.preferredVolumeOsmoticPressureModel(
-            preferredVolume=preferred_volume_k,
-            reservoirVolume=reservoir_volume_k,
+        osmotic_model_k = partial(
+            dgb.preferredVolumeOsmoticPressureModel,
+            preferredVolume=preferred_volume_k,  # make input port here if value has changed (fba)
+            reservoirVolume=reservoir_volume_k,  # output port
             strength=osmotic_strength_k,
-            volume=volume_k,
+            # volume=volume_k  # output port
         )
 
         # set the surface area tension model
         preferred_area_k = calculate_preferred_area(v_preferred=preferred_volume_k)
-        # tension_model_k = partial(
-        #     dgb.preferredAreaSurfaceTensionModel,
-        #     modulus=self.tension_modulus,
-        #     preferredArea=preferred_area_k,
-        #     area=state['surface_area'],
-        # )
         area_k = state["surface_area"]
-        tension_model_k = dgb.preferredAreaSurfaceTensionModel(
+        tension_model_k = partial(
+            dgb.preferredAreaSurfaceTensionModel,
             modulus=self.tension_modulus,
             preferredArea=preferred_area_k,
-            area=area_k
+            # area=area_k,
         )
 
-        # instantiate kth params
-        parameters_k = new_parameters(self.param_spec)
-        parameters_k.tension.form = tension_model_k
-        parameters_k.osmotic.form = osmotic_model_k
+        # update the tension and osmotic params
+        self.parameters.tension.form = tension_model_k
+        self.parameters.osmotic.form = osmotic_model_k
 
         # instantiate and initialize kth system using Geometry, proteinDensity, velocity, and parameters
-        previous_protein_density = np.array(state["protein_density"])
-        previous_velocities = np.array(state["velocities"])
+        protein_density_k = np.array(state["protein_density"])
+        velocities_k = np.array(state["velocities"])
 
         # we parameterize the kth system with the stateful geometry that has been updated with the latest vertex coordinates
         system_k = dg.System(
             geometry=self.geometry,
-            proteinDensity=previous_protein_density,
-            velocity=previous_velocities,
-            parameters=parameters_k
+            proteinDensity=protein_density_k,
+            velocity=velocities_k,
+            parameters=self.parameters
         )
         system_k.initialize()
 
         # set up solver and parse time params
-        output_dir_k = Path(tmp.mkdtemp(dir='membrane_process'))
+        output_dir_k = Path(tmp.mkdtemp())
         integrator_k = dg.Euler(
             system=system_k,
             characteristicTimeStep=self.characteristic_time_step,
@@ -233,8 +222,8 @@ class SimpleMembraneProcess(Process):
             'protein_density': output_protein_density,
             'velocities': output_velocities,
             'volume': output_volume,
-            'preferred_volume': preferred_volume,
-            'reservoir_volume': res_volume,
+            'preferred_volume': preferred_volume_k,
+            'reservoir_volume': reservoir_volume_k,
             'surface_area': output_surface_area,
             'net_forces': output_force_vectors
         }
