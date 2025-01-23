@@ -37,7 +37,7 @@ class SimpleMembraneProcess(Process):
         # set simulation params
         self.save_period = self.config.get("save_period", 1)  # interval at which sim state is saved to disk/recorded
         self.tolerance = self.config.get("tolerance", 1e-11)
-        self.characteristic_time_step = self.config.get("characteristic_time_step", 1e-8)
+        self.characteristic_time_step = self.config.get("characteristic_time_step", 1)
         self.tension_modulus = self.config["tension_model"].get("modulus", 0.1)
 
         # parse input of either mesh file or geometry spec
