@@ -57,8 +57,10 @@ class SimpleMembraneProcess(Process):
         self.osmotic_model_spec = self.config.get("osmotic_model")
         self.tension_model_spec = self.config.get("tension_model")
 
+        self.geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
+
         # preload this integrator and set it in the update to keep the model stateful TODO: should we do this?
-        self.fe = partial(
+        self._integrator = partial(
             dg.Euler,
             characteristicTimeStep=self.characteristic_time_step,
             savePeriod=self.save_period,
@@ -110,8 +112,8 @@ class SimpleMembraneProcess(Process):
             'volume': 'float',
             'preferred_volume': 'float',
             'reservoir_volume': 'float',
-            'osmotic_strength': 'float',
             'surface_area': 'float',
+            'osmotic_strength': 'float',
         }
 
     def outputs(self):
@@ -131,7 +133,8 @@ class SimpleMembraneProcess(Process):
         input_vertices = input_geometry["vertices"]
         previous_faces = np.array(input_faces) if isinstance(input_faces, list) else input_faces
         previous_vertices = np.array(input_vertices) if isinstance(input_vertices, list) else input_vertices
-        previous_geometry = dg.Geometry(previous_faces, previous_vertices)
+        # previous_geometry = dg.Geometry(previous_faces, previous_vertices)
+        self.geometry.setInputVertexPositions(previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
         previous_preferred_volume = state["preferred_volume"]  # TODO: should this be constant/static?
@@ -163,8 +166,10 @@ class SimpleMembraneProcess(Process):
         # instantiate and initialize kth system using Geometry, proteinDensity, velocity, and parameters
         previous_protein_density = np.array(state["protein_density"])
         previous_velocities = np.array(state["velocities"])
+
+        # we parameterize the kth system with the stateful geometry that has been updated with the latest vertex coordinates
         system_k = dg.System(
-            geometry=previous_geometry,
+            geometry=self.geometry,
             proteinDensity=previous_protein_density,
             velocity=previous_velocities,
             parameters=parameters_k
@@ -173,33 +178,23 @@ class SimpleMembraneProcess(Process):
 
         # set up solver and parse time params
         output_dir_k = Path(tmp.mkdtemp(dir='membrane_process'))
-        self.integrator = self.fe(
+        integrator_k = dg.Euler(
             system=system_k,
-            totalTime=interval,
+            characteristicTimeStep=self.characteristic_time_step,
+            savePeriod=self.save_period,
+            totalTime=1,  # is this what we want: atomic time step or should this be related to the interval? Isn't dt always 1 anyway in this context?
+            tolerance=self.tolerance,
             outputDirectory=str(output_dir_k)
         )
-        integrator_k = self.integrator
         integrator_k.ifPrintToConsole = True
         integrator_k.ifOutputTrajFile = True
 
-        # run integrator
-        success = integrator_k.integrate()
+        # run integration
+        success = integrator_k.integrate()  # or should this be integrator_k.step(interval)?
 
-        # integrator_k = dg.Euler(
-        #     system=system_k,
-        #     characteristicTimeStep=self.characteristic_time_step,
-        #     savePeriod=self.save_period,
-        #     totalTime=interval,
-        #     tolerance=self.tolerance,
-        #     outputDirectory=str(output_dir_k)
-        # )
-        # integrator_k.ifPrintToConsole = True
-        # integrator_k.ifOutputTrajFile = True
-        # # run integration
-        # success = integrator_k.integrate()  # or should this be integrator_k.step(interval)?
-
-        output_path_k = str(output_dir_k / "traj.nc")
-        data = Dataset(output_path_k, 'r')
+        # uncomment and implement below for IO style update
+        # output_path_k = str(output_dir_k / "traj.nc")
+        # data = Dataset(output_path_k, 'r')
 
         # get kth protein densities from kth system
         output_protein_density = system_k.getProteinDensity().tolist()
