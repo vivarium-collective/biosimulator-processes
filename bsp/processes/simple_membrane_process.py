@@ -41,16 +41,22 @@ class SimpleMembraneProcess(Process):
         self.tension_modulus = self.config["tension_model"].get("modulus", 0.1)
 
         # parse input of either mesh file or geometry spec
+        initial_faces = None
+        initial_vertices = None
+
         mesh_file = self.config.get("mesh_file")
         if mesh_file:
-            self.initial_geometry = dg.Geometry(mesh_file)
-            self.initial_faces = self.initial_geometry.getFaceMatrix()
-            self.initial_vertices = self.initial_geometry.getVertexMatrix()
+            geometry = dg.Geometry(mesh_file)
+            initial_faces = geometry.getFaceMatrix()
+            initial_vertices = geometry.getVertexMatrix()
         else:
             geometry = self.config.get("geometry")
             shape = geometry['type']
             mesh_constructor = getattr(dg, f'get{shape.replace(shape[0], shape[0].upper())}')
-            self.initial_faces, self.initial_vertices = mesh_constructor(**geometry['parameters'])
+            initial_faces, initial_vertices = mesh_constructor(**geometry['parameters'])
+
+        # this geometry is initially parameterized by the geometry spec, but remains stateful as it mutates during update calls
+        self.geometry = dg.Geometry(initial_faces, initial_vertices)
 
         # get parameters, osmotic, and tension params from config
         self.param_spec = self.config.get("parameters")
@@ -58,15 +64,12 @@ class SimpleMembraneProcess(Process):
         self.osmotic_model_spec = self.config.get("osmotic_model")
         self.tension_model_spec = self.config.get("tension_model")
 
-        # this geometry is initially parameterized by the geometry spec, but remains stateful as it mutates during update calls
-        self.geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
-
     def initial_state(self):
         initial_face_matrix = self.geometry.getFaceMatrix().tolist()
-        initial_vertices = self.geometry.getVertexMatrix().tolist()
+        initial_vertices = self.geometry.getVertexMatrix()
         initial_geometry = {
             "faces": initial_face_matrix,
-            "vertices": initial_vertices,
+            "vertices": initial_vertices.tolist(),
         }
 
         # set initial velocities to an array of the correct shape to 0.0, 0.0, 0.0 TODO: should this be different?
@@ -126,12 +129,7 @@ class SimpleMembraneProcess(Process):
 
     def update(self, state, interval):
         # parameterize kth geometry from k-1th outputs
-        input_geometry = state.get("geometry")
-        input_faces = input_geometry["faces"]
-        input_vertices = input_geometry["vertices"]
-        previous_faces = np.array(input_faces) if isinstance(input_faces, list) else input_faces
-        previous_vertices = np.array(input_vertices) if isinstance(input_vertices, list) else input_vertices
-        # previous_geometry = dg.Geometry(previous_faces, previous_vertices)
+        previous_vertices = self.geometry.getVertexMatrix()
         self.geometry.setInputVertexPositions(previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
