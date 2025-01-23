@@ -10,7 +10,7 @@ The type name suffix is used to denote its function. Currently there are two suf
 __all__ = [
     'BoundsType',
     'PositiveFloatType',
-    'ExternalForcesType',
+    'MechanicalForcesType',
     'ProteinDensityType',
     'GeometryType',
     'VelocitiesType',

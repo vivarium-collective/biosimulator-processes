@@ -75,28 +75,26 @@ class SimpleMembraneProcess(Process):
             "vertices": self.initial_vertices.tolist(),
         }
 
-        initial_velocities = []
-        initial_protein_density = []
-        for vertex in self.initial_vertices:
-            # set empty velocities TODO: can this work?
-            for _ in range(3):
-                initial_velocities.append(0.0)
-            # set constant protein density TODO: make this more dynamic.
-            initial_protein_density.append(1.)
+        # set initial velocities to an array of the correct shape to 0.0, 0.0, 0.0 TODO: should this be different?
+        initial_velocities = np.zeros(self.initial_vertices.shape).tolist()
 
-        initial_osmotic_params = {
-            "preferred_volume": self.osmotic_model_spec["preferred_volume"],
-            "volume": self.osmotic_model_spec["volume"],
-            "strength": self.osmotic_model_spec["strength"],
-            "reservoir_volume": self.osmotic_model_spec["reservoir_volume"]
-        }
+        # set initial protein density (gradient) to constant (1.) for all vertices
+        initial_protein_density = np.ones(self.initial_vertices.shape[0]).tolist()
+
+        # set initial volume and surface area from config
+        initial_volume = self.osmotic_model_spec["volume"]
+        initial_surface_area = self.geometry.getSurfaceArea()
+
+        # similarly set no forces as initial output
+        initial_net_forces = np.zeros(self.initial_vertices.shape).tolist()
 
         return {
             "geometry": initial_geometry,
             "velocities": initial_velocities,
-            "external_force": [],
-            "osmotic_parameters": initial_osmotic_params,
-            "protein_density": initial_protein_density
+            "protein_density": initial_protein_density,
+            "volume": initial_volume,
+            "surface_area": initial_surface_area,
+            "net_forces": initial_net_forces,
         }
 
     def inputs(self):
