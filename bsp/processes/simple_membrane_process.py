@@ -57,17 +57,8 @@ class SimpleMembraneProcess(Process):
         self.osmotic_model_spec = self.config.get("osmotic_model")
         self.tension_model_spec = self.config.get("tension_model")
 
+        # this geometry is initially parameterized by the geometry spec, but remains stateful as it mutates during update calls
         self.geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
-
-        # preload this integrator and set it in the update to keep the model stateful TODO: should we do this?
-        self._integrator = partial(
-            dg.Euler,
-            characteristicTimeStep=self.characteristic_time_step,
-            savePeriod=self.save_period,
-            tolerance=self.tolerance,
-        )  # fill in system, totaltime(interval), and output directory at update
-
-        self.integrator = None
 
     def initial_state(self):
         initial_geometry = {
