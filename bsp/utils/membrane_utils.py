@@ -7,6 +7,17 @@ import pymem3dg as dg
 from h5py import Dataset
 
 
+def reflect_forces(particles, vertex_matrix, force_vectors, time_step):
+    for particle in particles:
+        # Find nearest vertex
+        distances = np.linalg.norm(vertex_matrix - particle.position, axis=1)
+        nearest_vertex_idx = np.argmin(distances)
+
+        # Reflect force onto the particle
+        force = -force_vectors[nearest_vertex_idx]  # Reaction force
+        particle.velocity += force * time_step / particle.mass
+
+
 def calculate_preferred_area(v_preferred: float, convert_to_micro: bool = False) -> float:
     V_preferred = v_preferred
     # Convert volume to μm³ (1 L = 1e15 μm³)

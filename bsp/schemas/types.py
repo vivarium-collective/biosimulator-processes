@@ -38,8 +38,10 @@ BoundsType = {
     'upper': 'maybe[float]'
 }
 
-ExternalForcesType = {
-    '_inherit': 'list'
+ForcesType = 'list[list[float]]'
+
+MechanicalForcesType = {
+    '_inherit': ForcesType
 }
 
 GeometryType = {

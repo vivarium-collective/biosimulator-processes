@@ -106,22 +106,22 @@ class SimpleMembraneProcess(Process):
 
     def outputs(self):
         return {
-            'geometry': 'GeometryType',  # 'tree',
-            'protein_density': 'ProteinDensityType',  # 'list',
-            'velocities': 'VelocitiesType',  # 'list',
-            'external_force': 'ExternalForceType',  # 'list',
-            'osmotic_parameters': 'OsmoticParametersType',
-            'surface_tension_parameters': 'SurfaceTensionParametersType'
+            'geometry': 'GeometryType',
+            'protein_density': 'ProteinDensityType',
+            'velocities': 'VelocitiesType',
+            'volume': 'float',
+            'surface_area': 'float',
+            'mechanical_forces': 'MechanicalForcesType'
         }
 
     def update(self, state, interval):
         # parameterize kth geometry from k-1th outputs
-        previous_geometry = state.get("geometry")
-        input_faces = previous_geometry["faces"]
-        input_vertices = previous_geometry["vertices"]
+        input_geometry = state.get("geometry")
+        input_faces = input_geometry["faces"]
+        input_vertices = input_geometry["vertices"]
         previous_faces = np.array(input_faces) if isinstance(input_faces, list) else input_faces
         previous_vertices = np.array(input_vertices) if isinstance(input_vertices, list) else input_vertices
-        geometry_k = dg.Geometry(previous_faces, previous_vertices)
+        previous_geometry = dg.Geometry(previous_faces, previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
         previous_osmotic_params = state["osmotic_parameters"]
@@ -135,11 +135,11 @@ class SimpleMembraneProcess(Process):
         )
 
         # set the surface area tension model
-        preferred_area = calculate_preferred_area(v_preferred=previous_preferred_volume)
+        previous_preferred_area = calculate_preferred_area(v_preferred=previous_preferred_volume)
         tension_model_k = partial(
             dgb.preferredAreaSurfaceTensionModel,
             modulus=self.tension_modulus,
-            preferredArea=preferred_area,
+            preferredArea=previous_preferred_area,
             area=state['surface_tension_parameters']['area'],
         )
 
@@ -152,7 +152,7 @@ class SimpleMembraneProcess(Process):
         previous_protein_density = np.array(state["protein_density"])
         previous_velocities = np.array(state["velocities"])
         system_k = dg.System(
-            geometry=geometry_k,
+            geometry=previous_geometry,
             proteinDensity=previous_protein_density,
             velocity=previous_velocities,
             parameters=parameters_k
@@ -161,9 +161,7 @@ class SimpleMembraneProcess(Process):
 
         # set up solver and parse time params
         output_dir_k = Path(tmp.mkdtemp(dir='membrane_process'))
-        # interval_step = self.characteristic_time_step * self.save_period
-        # total_time_k = (interval + 1) * interval_step
-        fe = dg.Euler(
+        integrator_k = dg.Euler(
             system=system_k,
             characteristicTimeStep=self.characteristic_time_step,
             savePeriod=self.save_period,
@@ -171,48 +169,56 @@ class SimpleMembraneProcess(Process):
             tolerance=self.tolerance,
             outputDirectory=str(output_dir_k)
         )
-        fe.ifPrintToConsole = True
-        fe.ifOutputTrajFile = True
+        integrator_k.ifPrintToConsole = True
+        integrator_k.ifOutputTrajFile = True
+        # interval_step = self.characteristic_time_step * self.save_period
+        # total_time_k = (interval + 1) * interval_step
 
         # # run solver and extract data
-        success = fe.integrate()  # or should this be fe.step(interval)?
+        success = integrator_k.integrate()  # or should this be integrator_k.step(interval)?
         output_path_k = str(output_dir_k / "traj.nc")
         data = Dataset(output_path_k, 'r')
 
-        # get velocities: shape is (t, n_vertices * 3) where t is the number of recorded time points
-        velocities_k = extract_last_data(dataset=data, data_name="velocities")
+        # get kth protein densities from kth system
+        output_protein_density = system_k.getProteinDensity().tolist()
 
-        # get faces (do we need this?)
-        # faces_k = extract_last_data(dataset=data, data_name="topology")
-        faces_k = geometry_k.getFaceMatrix()
+        # get kth velocities from kth system
+        output_velocities = system_k.getVelocity().tolist()
 
-        # get vertices
-        # vertices_k = extract_last_data(dataset=data, data_name="coordinates")
-        vertices_k = geometry_k.getVertexMatrix().tolist()
+        # verify geometry instance by getting it from the system (in case it has mutated). TODO: is this needed?
+        geo = system_k.getGeometry()
+        output_geometry = {
+            "faces": geo.getFaceMatrix().tolist(),
+            "vertices": geo.getVertexMatrix().tolist(),
+        }
 
-        # get protein density: shape is (t, n_vertices) so a scalar for each vertex rather than a tuple
-        protein_density_k = extract_last_data(dataset=data, data_name="proteindensity")
+        # get kth volume and surface area from output geometry
+        vol_variation_vectors = geo.getVertexVolumeVariationVectors()  # TODO: this is not yet used
+        output_volume = geo.getVolume()
+        output_surface_area = geo.getSurfaceArea()
 
-        # get external forces TODO: do we need this?
-        external_force_k = extract_last_data(dataset=data, data_name="externalForce")
+        # get kth mechanical force vectors (that is, the net sum of x, y, and z vectors for each vertex)
+        forces_k = system_k.getForces()
+        output_force_vectors = forces_k.getMechanicalForceVec().tolist()
 
         # clean up temporary files
         shutil.rmtree(str(output_dir_k))
 
-        geometry_outputs = {
-            "vertices": vertices_k,
-            "faces": faces_k,
-        }
-
         return {
-            "geometry": geometry_outputs,
-            "protein_density": protein_density_k,
-            "external_force": external_force_k,
-            "velocities": velocities_k,
-            "osmotic_parameters": osmotic_params_k
+            'geometry': output_geometry,
+            'protein_density': output_protein_density,
+            'velocities': output_velocities,
+            'volume': output_volume,
+            'surface_area': output_surface_area,
+            'net_forces': output_force_vectors
         }
 
 
+# velocities_k = extract_last_data(dataset=data, data_name="velocities")
+# faces_k = geometry_k.getFaceMatrix().tolist()
+# vertices_k = geometry_k.getVertexMatrix().tolist()
+# protein_density_k = extract_last_data(dataset=data, data_name="proteindensity")
+# external_force_k = extract_last_data(dataset=data, data_name="externalForce")
 # class SimpleMembraneProcess(Process):
 #     config_schema = {
 #         'mesh_file': 'MeshFileConfig',
