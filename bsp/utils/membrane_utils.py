@@ -7,8 +7,8 @@ import pymem3dg as dg
 from h5py import Dataset
 
 
-def calculate_preferred_area(osmotic_params: Dict, convert_to_micro: bool = False) -> float:
-    V_preferred = osmotic_params["preferred_volume"]
+def calculate_preferred_area(v_preferred: float, convert_to_micro: bool = False) -> float:
+    V_preferred = v_preferred
     # Convert volume to μm³ (1 L = 1e15 μm³)
     V_preferred = V_preferred * 1e15 if convert_to_micro else V_preferred  # Convert liters to μm³
     r_preferred = (3 * V_preferred / (4 * np.pi)) ** (1/3)

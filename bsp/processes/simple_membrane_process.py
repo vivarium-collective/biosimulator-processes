@@ -45,21 +45,24 @@ class SimpleMembraneProcess(Process):
         # parse input of either mesh file or geometry spec
         mesh_file = self.config.get("mesh_file")
         if mesh_file:
-            self.initial_faces, self.initial_vertices = parse_ply(mesh_file)
+            self.initial_geometry = dg.Geometry(mesh_file)
+            self.initial_faces = self.initial_geometry.getFaceMatrix()
+            self.initial_vertices = self.initial_geometry.getVertexMatrix()
         else:
             geometry = self.config.get("geometry")
             shape = geometry['type']
             mesh_constructor = getattr(dg, f'get{shape.replace(shape[0], shape[0].upper())}')
             self.initial_faces, self.initial_vertices = mesh_constructor(**geometry['parameters'])
 
+        # get parameters, osmotic, and tension params from config
         self.param_spec = self.config.get("parameters")
         self.osmotic_model_spec = self.config.get("osmotic_model")
         self.tension_model_spec = self.config.get("tension_model")
 
     def initial_state(self):
         initial_geometry = {
-                "faces": self.initial_faces.tolist(),
-                "vertices": self.initial_vertices.tolist(),
+            "faces": self.initial_faces.tolist(),
+            "vertices": self.initial_vertices.tolist(),
         }
 
         initial_velocities = []
@@ -93,26 +96,22 @@ class SimpleMembraneProcess(Process):
         - The tension model is parameterized by inference into the osmotic model. The modulus is static.
         """
         return {
-            'geometry': 'tree',
-            'protein_density': 'list',
-            'velocities': 'list',
-            'external_force': 'list',
-            'osmotic_parameters': 'tree'
-            # 'preferred_volume': 'float',
-            # 'volume': 'float',
-            # 'osmotic_strength': 'float',
+            'geometry': 'GeometryType',  # 'tree',
+            'protein_density': 'ProteinDensityType',  # 'list',
+            'velocities': 'VelocitiesType',  # 'list',
+            'external_force': 'ExternalForceType',  # 'list',
+            'osmotic_parameters': 'OsmoticParametersType',  # take in osmotic_parameters.preferred_volume from dFBA node
+            'surface_tension_parameters': 'SurfaceTensionParametersType',
         }
 
     def outputs(self):
         return {
-            'geometry': 'tree',
-            'protein_density': 'list',
-            'velocities': 'list',
-            'external_force': 'list',
-            'osmotic_parameters': 'tree'
-            # 'preferred_volume': 'float',
-            # 'volume': 'float',
-            # 'osmotic_strength': 'float',
+            'geometry': 'GeometryType',  # 'tree',
+            'protein_density': 'ProteinDensityType',  # 'list',
+            'velocities': 'VelocitiesType',  # 'list',
+            'external_force': 'ExternalForceType',  # 'list',
+            'osmotic_parameters': 'OsmoticParametersType',
+            'surface_tension_parameters': 'SurfaceTensionParametersType'
         }
 
     def update(self, state, interval):
@@ -125,21 +124,23 @@ class SimpleMembraneProcess(Process):
         geometry_k = dg.Geometry(previous_faces, previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
-        osmotic_params_k = state["osmotic_parameters"]
+        previous_osmotic_params = state["osmotic_parameters"]
+        previous_preferred_volume = previous_osmotic_params["preferred_volume"]
         osmotic_model_k = partial(
             dgb.preferredVolumeOsmoticPressureModel,
-            preferredVolume=osmotic_params_k["preferred_volume"],  # make input port here if value has changed (fba)
-            reservoirVolume=osmotic_params_k["reservoir_volume"],  # output port
-            strength=osmotic_params_k["strength"],
-            volume=osmotic_params_k["volume"]  # TODO: should we add this?
+            preferredVolume=previous_preferred_volume,  # make input port here if value has changed (fba)
+            reservoirVolume=previous_osmotic_params["reservoir_volume"],  # output port
+            strength=previous_osmotic_params["strength"],
+            volume=previous_osmotic_params["volume"]  # output port
         )
 
         # set the surface area tension model
-        preferred_area = calculate_preferred_area(osmotic_params=osmotic_params_k)
+        preferred_area = calculate_preferred_area(v_preferred=previous_preferred_volume)
         tension_model_k = partial(
             dgb.preferredAreaSurfaceTensionModel,
             modulus=self.tension_modulus,
             preferredArea=preferred_area,
+            area=state['surface_tension_parameters']['area'],
         )
 
         # instantiate kth params
@@ -182,10 +183,12 @@ class SimpleMembraneProcess(Process):
         velocities_k = extract_last_data(dataset=data, data_name="velocities")
 
         # get faces (do we need this?)
-        faces_k = extract_last_data(dataset=data, data_name="topology")
+        # faces_k = extract_last_data(dataset=data, data_name="topology")
+        faces_k = geometry_k.getFaceMatrix()
 
         # get vertices
-        vertices_k = extract_last_data(dataset=data, data_name="coordinates")
+        # vertices_k = extract_last_data(dataset=data, data_name="coordinates")
+        vertices_k = geometry_k.getVertexMatrix().tolist()
 
         # get protein density: shape is (t, n_vertices) so a scalar for each vertex rather than a tuple
         protein_density_k = extract_last_data(dataset=data, data_name="proteindensity")

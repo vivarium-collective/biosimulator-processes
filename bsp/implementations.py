@@ -38,17 +38,15 @@ COPASI_PROCESSES = [
 
 
 MEM3DG_PROCESSES = [
-    Implementation(
-        address='membrane-process',
-        location='processes.membrane_process.MembraneProcess',
-        dependencies=["conda-forge::pymem3dg"]
-
-    ),
+    # Implementation(
+    #     address='membrane-process',
+    #     location='processes.membrane_process.MembraneProcess',
+    #     dependencies=["conda-forge::pymem3dg"]
+    # ),
     Implementation(
         address='simple-membrane-process',
         location='processes.simple_membrane_process.SimpleMembraneProcess',
         dependencies=["conda-forge::pymem3dg"]
-
     )
 ]
 

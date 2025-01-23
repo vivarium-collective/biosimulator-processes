@@ -14,7 +14,8 @@ __all__ = [
     'ProteinDensityType',
     'GeometryType',
     'VelocitiesType',
-    'OsmoticParametersType'
+    'OsmoticParametersType',
+    'SurfaceTensionParametersType'
 ]
 
 
@@ -51,6 +52,12 @@ OsmoticParametersType = {
     'volume': 'maybe[float]',  # current (actual) volume by which a potential is created when compared to preferred volume
     'strength': 'float',
     'reservoir_volume': 'float'  # represents the environment outside the membrane, which can exchange solutes or exert osmotic pressure on the system
+}
+
+SurfaceTensionParametersType = {
+    'area': 'float',  # use Geometry.getArea() for this value
+    'modulus': 'float',  # static value (in constructor?)
+    'preferred_area': 'float'
 }
 
 ProteinDensityType = 'list[float]'
