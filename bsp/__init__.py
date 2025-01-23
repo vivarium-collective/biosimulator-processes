@@ -10,8 +10,14 @@ ATTEMPT_INSTALL = False
 # project-scoped process/implementation registrar
 app_registrar = Registrar()
 
+
 #  register types:
-app_registrar.register_initial_types(config, types)
+app_registrar.register_initial_types(
+    config=config,
+    types=types,
+    verbose=VERBOSE_REGISTRATION
+)
+
 
 # register implementations of steps and processes:
 app_registrar.register_initial_modules(

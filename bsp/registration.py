@@ -110,6 +110,6 @@ class Registrar(object):
             self.register_type(schema_name, schema)
             print(f'Registered module {schema_name}') if verbose else None
 
-    def register_initial_types(self, config: ModuleType, types: ModuleType):
+    def register_initial_types(self, config: ModuleType, types: ModuleType, verbose=False) -> None:
         for module in [config, types]:
-            self.register_type_module(module)
+            self.register_type_module(module, verbose=verbose)

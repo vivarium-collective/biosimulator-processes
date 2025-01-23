@@ -8,6 +8,10 @@ The type name suffix is used to denote its function. Currently there are two suf
 
 
 __all__ = [
+    'DatabaseConfig',
+    'GeometryConfig',
+    'MeshFileConfig',
+    'ParametersConfig',
     'OsmoticModelConfig',
     'SBMLFileCobraConfig',
     'SBMLModelChangesConfig',
@@ -112,6 +116,4 @@ OsmoticModelConfig = {
     'reservoir_volume': 'float',
     'strength': 'float'  # what units is this in??
 }
-
-
 
