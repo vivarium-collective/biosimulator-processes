@@ -62,16 +62,18 @@ class SimpleMembraneProcess(Process):
         self.geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
 
     def initial_state(self):
+        initial_face_matrix = self.geometry.getFaceMatrix().tolist()
+        initial_vertices = self.geometry.getVertexMatrix().tolist()
         initial_geometry = {
-            "faces": self.initial_faces.tolist(),
-            "vertices": self.initial_vertices.tolist(),
+            "faces": initial_face_matrix,
+            "vertices": initial_vertices,
         }
 
         # set initial velocities to an array of the correct shape to 0.0, 0.0, 0.0 TODO: should this be different?
-        initial_velocities = np.zeros(self.initial_vertices.shape).tolist()
+        initial_velocities = np.zeros(initial_vertices.shape).tolist()
 
         # set initial protein density (gradient) to constant (1.) for all vertices
-        initial_protein_density = np.ones(self.initial_vertices.shape[0]).tolist()
+        initial_protein_density = np.ones(initial_vertices.shape[0]).tolist()
 
         # set initial volume and surface area from config
         initial_volume = self.osmotic_model_spec["volume"]
@@ -80,7 +82,7 @@ class SimpleMembraneProcess(Process):
         initial_surface_area = self.geometry.getSurfaceArea()
 
         # similarly set no forces as initial output
-        initial_net_forces = np.zeros(self.initial_vertices.shape).tolist()
+        initial_net_forces = np.zeros(initial_vertices.shape).tolist()
 
         return {
             "geometry": initial_geometry,
@@ -136,7 +138,7 @@ class SimpleMembraneProcess(Process):
         preferred_volume_k = state["preferred_volume"]  # TODO: should this be constant/static?
         volume_k = state["volume"]
         reservoir_volume_k = state["reservoir_volume"]
-        osmotic_strength_k = state.get("osmotic_strength", self.osmotic_model_spec["strength"])
+        osmotic_strength_k = self.osmotic_model_spec["strength"]
         osmotic_model_k = partial(
             dgb.preferredVolumeOsmoticPressureModel,
             preferredVolume=preferred_volume_k,  # make input port here if value has changed (fba)
@@ -199,16 +201,15 @@ class SimpleMembraneProcess(Process):
         output_velocities = system_k.getVelocity().tolist()
 
         # verify geometry instance by getting it from the system (in case it has mutated). TODO: is this needed?
-        geo = system_k.getGeometry()
         output_geometry = {
-            "faces": geo.getFaceMatrix().tolist(),
-            "vertices": geo.getVertexMatrix().tolist(),
+            "faces": self.geometry.getFaceMatrix().tolist(),
+            "vertices": self.geometry.getVertexMatrix().tolist(),
         }
 
         # get kth volume and surface area from output geometry
-        vol_variation_vectors = geo.getVertexVolumeVariationVectors()  # TODO: this is not yet used
-        output_volume = geo.getVolume()
-        output_surface_area = geo.getSurfaceArea()
+        vol_variation_vectors = self.geometry.getVertexVolumeVariationVectors()  # TODO: this is not yet used
+        output_volume = self.geometry.getVolume()
+        output_surface_area = self.geometry.getSurfaceArea()
 
         # get kth mechanical force vectors (that is, the net sum of x, y, and z vectors for each vertex)
         forces_k = system_k.getForces()
