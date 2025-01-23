@@ -74,6 +74,8 @@ class SimpleMembraneProcess(Process):
 
         # set initial volume and surface area from config
         initial_volume = self.osmotic_model_spec["volume"]
+        initial_preferred_volume = self.osmotic_model_spec["preferred_volume"]
+        initial_res_volume = self.osmotic_model_spec["reservoir_volume"]
         initial_surface_area = self.geometry.getSurfaceArea()
 
         # similarly set no forces as initial output
@@ -84,6 +86,8 @@ class SimpleMembraneProcess(Process):
             "velocities": initial_velocities,
             "protein_density": initial_protein_density,
             "volume": initial_volume,
+            "preferred_volume": initial_preferred_volume,
+            "reservoir_volume": initial_res_volume,
             "surface_area": initial_surface_area,
             "net_forces": initial_net_forces,
         }
@@ -111,6 +115,8 @@ class SimpleMembraneProcess(Process):
             'protein_density': 'ProteinDensityType',
             'velocities': 'VelocitiesType',
             'volume': 'float',
+            'preferred_volume': 'float',
+            'reservoir_volume': 'float',
             'surface_area': 'float',
             'net_forces': 'MechanicalForcesType'
         }
@@ -126,25 +132,37 @@ class SimpleMembraneProcess(Process):
         self.geometry.setInputVertexPositions(previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
-        previous_preferred_volume = state["preferred_volume"]  # TODO: should this be constant/static?
-        previous_volume = state["volume"]
-        previous_res_volume = state["reservoir_volume"]
+        preferred_volume_k = state["preferred_volume"]  # TODO: should this be constant/static?
+        volume_k = state["volume"]
+        reservoir_volume_k = state["reservoir_volume"]
         osmotic_strength_k = state.get("osmotic_strength", self.osmotic_model_spec["strength"])
-        osmotic_model_k = partial(
-            dgb.preferredVolumeOsmoticPressureModel,
-            preferredVolume=previous_preferred_volume,  # make input port here if value has changed (fba)
-            reservoirVolume=previous_res_volume,  # output port
+        # osmotic_model_k = partial(
+        #     dgb.preferredVolumeOsmoticPressureModel,
+        #     preferredVolume=preferred_volume,  # make input port here if value has changed (fba)
+        #     reservoirVolume=res_volume,  # output port
+        #     strength=osmotic_strength_k,
+        #     volume=previous_volume  # output port
+        # )
+        osmotic_model_k = dgb.preferredVolumeOsmoticPressureModel(
+            preferredVolume=preferred_volume_k,
+            reservoirVolume=reservoir_volume_k,
             strength=osmotic_strength_k,
-            volume=previous_volume  # output port
+            volume=volume_k,
         )
 
         # set the surface area tension model
-        preferred_area_k = calculate_preferred_area(v_preferred=previous_preferred_volume)
-        tension_model_k = partial(
-            dgb.preferredAreaSurfaceTensionModel,
+        preferred_area_k = calculate_preferred_area(v_preferred=preferred_volume_k)
+        # tension_model_k = partial(
+        #     dgb.preferredAreaSurfaceTensionModel,
+        #     modulus=self.tension_modulus,
+        #     preferredArea=preferred_area_k,
+        #     area=state['surface_area'],
+        # )
+        area_k = state["surface_area"]
+        tension_model_k = dgb.preferredAreaSurfaceTensionModel(
             modulus=self.tension_modulus,
             preferredArea=preferred_area_k,
-            area=state['surface_area'],
+            area=area_k
         )
 
         # instantiate kth params
@@ -215,6 +233,8 @@ class SimpleMembraneProcess(Process):
             'protein_density': output_protein_density,
             'velocities': output_velocities,
             'volume': output_volume,
+            'preferred_volume': preferred_volume,
+            'reservoir_volume': res_volume,
             'surface_area': output_surface_area,
             'net_forces': output_force_vectors
         }
