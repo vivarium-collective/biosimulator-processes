@@ -28,18 +28,16 @@ class SimpleMembraneProcess(Process):
         'parameters': 'ParametersConfig',
         'save_period': 'integer',
         'tolerance': 'float',
-        'characteristic_time_step': 'integer',
-        'total_time': 'integer'
+        'characteristic_time_step': 'integer'
     }
 
     def __init__(self, config: Dict[str, Union[Dict[str, float], str]] = None, core: ProcessTypes = None):
         super().__init__(config, core)
 
         # set simulation params
-        self.save_period = self.config.get("save_period", 100)  # interval at which sim state is saved to disk/recorded
+        self.save_period = self.config.get("save_period", 1)  # interval at which sim state is saved to disk/recorded
         self.tolerance = self.config.get("tolerance", 1e-11)
-        self.characteristic_time_step = self.config.get("characteristic_time_step", 2)
-        self.total_time = self.config.get("total_time", 1000)
+        self.characteristic_time_step = self.config.get("characteristic_time_step", 1e-8)
         self.tension_modulus = self.config["tension_model"].get("modulus", 0.1)
 
         # parse input of either mesh file or geometry spec
@@ -58,6 +56,16 @@ class SimpleMembraneProcess(Process):
         self.param_spec = self.config.get("parameters")
         self.osmotic_model_spec = self.config.get("osmotic_model")
         self.tension_model_spec = self.config.get("tension_model")
+
+        # preload this integrator and set it in the update to keep the model stateful TODO: should we do this?
+        self.fe = partial(
+            dg.Euler,
+            characteristicTimeStep=self.characteristic_time_step,
+            savePeriod=self.save_period,
+            tolerance=self.tolerance,
+        )  # fill in system, totaltime(interval), and output directory at update
+
+        self.integrator = None
 
     def initial_state(self):
         initial_geometry = {
@@ -165,21 +173,31 @@ class SimpleMembraneProcess(Process):
 
         # set up solver and parse time params
         output_dir_k = Path(tmp.mkdtemp(dir='membrane_process'))
-        integrator_k = dg.Euler(
+        self.integrator = self.fe(
             system=system_k,
-            characteristicTimeStep=self.characteristic_time_step,
-            savePeriod=self.save_period,
             totalTime=interval,
-            tolerance=self.tolerance,
             outputDirectory=str(output_dir_k)
         )
+        integrator_k = self.integrator
         integrator_k.ifPrintToConsole = True
         integrator_k.ifOutputTrajFile = True
-        # interval_step = self.characteristic_time_step * self.save_period
-        # total_time_k = (interval + 1) * interval_step
 
-        # # run solver and extract data
-        success = integrator_k.integrate()  # or should this be integrator_k.step(interval)?
+        # run integrator
+        success = integrator_k.integrate()
+
+        # integrator_k = dg.Euler(
+        #     system=system_k,
+        #     characteristicTimeStep=self.characteristic_time_step,
+        #     savePeriod=self.save_period,
+        #     totalTime=interval,
+        #     tolerance=self.tolerance,
+        #     outputDirectory=str(output_dir_k)
+        # )
+        # integrator_k.ifPrintToConsole = True
+        # integrator_k.ifOutputTrajFile = True
+        # # run integration
+        # success = integrator_k.integrate()  # or should this be integrator_k.step(interval)?
+
         output_path_k = str(output_dir_k / "traj.nc")
         data = Dataset(output_path_k, 'r')
 
