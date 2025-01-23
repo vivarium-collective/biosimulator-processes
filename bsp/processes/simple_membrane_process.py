@@ -103,6 +103,7 @@ class SimpleMembraneProcess(Process):
             'preferred_volume': 'float',
             'reservoir_volume': 'float',
             'osmotic_strength': 'float',
+            'surface_area': 'float',
         }
 
     def outputs(self):
@@ -138,12 +139,12 @@ class SimpleMembraneProcess(Process):
         )
 
         # set the surface area tension model
-        previous_preferred_area = calculate_preferred_area(v_preferred=previous_preferred_volume)
+        preferred_area_k = calculate_preferred_area(v_preferred=previous_preferred_volume)
         tension_model_k = partial(
             dgb.preferredAreaSurfaceTensionModel,
             modulus=self.tension_modulus,
-            preferredArea=previous_preferred_area,
-            area=state['surface_tension_parameters']['area'],
+            preferredArea=preferred_area_k,
+            area=state['surface_area'],
         )
 
         # instantiate kth params
