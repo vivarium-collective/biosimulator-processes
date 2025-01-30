@@ -141,35 +141,28 @@ class SimpleMembraneProcess(Process):
         }
 
     def update(self, state, interval):
-        print(f'Input duration: {state["duration"]} for iteration: {self.iterations}')
         # parameterize kth geometry from k-1th outputs
         previous_vertices = np.array(state["geometry"]["vertices"][:self.n_vertices])  # TODO: why is -1 in improper format?
         self.geometry.setInputVertexPositions(previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
         preferred_volume_k = state["preferred_volume"]  # TODO: should this be constant/static?
-        volume_k = state["volume"]
         reservoir_volume_k = state["reservoir_volume"]
         osmotic_strength_k = self.osmotic_model_spec["strength"]
         osmotic_model_k = partial(
             dgb.preferredVolumeOsmoticPressureModel,
-            # preferredVolume=self.geometry.getVolume(),
             preferredVolume=preferred_volume_k,  # make input port here if value has changed (fba)
-            # reservoirVolume=reservoir_volume_k,  # output port
+            reservoirVolume=reservoir_volume_k,  # output port
             strength=osmotic_strength_k,
-            # volume=volume_k  # output port
         )
 
         # set the surface area tension model
         preferred_area_k = calculate_preferred_area(v_preferred=preferred_volume_k)
-        area_k = state["surface_area"]
-        print(f'Preferred volume: {preferred_volume_k}, preferred area: {preferred_area_k}')
         tension_model_k = partial(
             dgb.preferredAreaSurfaceTensionModel,
             modulus=self.tension_modulus,
             # preferredArea=self.geometry.getSurfaceArea(),
             preferredArea=preferred_area_k,  # self.tension_model_spec["preferred_area"],
-            # area=area_k,
         )
 
         # update the tension and osmotic params
@@ -189,29 +182,38 @@ class SimpleMembraneProcess(Process):
         #     parameters=self.parameters,
         # )
         self.system.parameters = parameters
-        self.system.initialize(True)
+        # self.system.initialize(True)
+        self.system.updateConfigurations()
         # system_k.initialize()
 
         duration_k = interval + state['duration']# self.iterations + 1
 
         # set up solver and parse time params
         output_dir_k = Path(tmp.mkdtemp())
-        integrator_k = dg.Euler(
-            system=self.system,  # system_k,
-            characteristicTimeStep=self.characteristic_time_step,  # dt
-            savePeriod=interval,  #
-            totalTime=interval,  # is this what we want: atomic time step or should this be related to the interval? Isn't dt always 1 anyway in this context?
-            tolerance=self.tolerance,
-            outputDirectory=str(output_dir_k)
-        )
+        # integrator_k = dg.Euler(
+        #     system=self.system,  # system_k,
+        #     characteristicTimeStep=self.characteristic_time_step,  # dt
+        #     savePeriod=interval,  #
+        #     totalTime=interval,  # is this what we want: atomic time step or should this be related to the interval? Isn't dt always 1 anyway in this context?
+        #     tolerance=self.tolerance,
+        #     outputDirectory=str(output_dir_k)
+        # )
         # integrator_k = dg.VelocityVerlet(
-        #     system=system_k,
+        #     system=self.system,
         #     characteristicTimeStep=self.characteristic_time_step,
         #     totalTime=interval,
         #     savePeriod=interval,
         #     tolerance=self.tolerance,
         #     outputDirectory=str(output_dir_k)
         # )
+        integrator_k = dg.ConjugateGradient(
+            system=self.system,
+            characteristicTimeStep=self.characteristic_time_step,
+            totalTime=interval,
+            savePeriod=interval,
+            tolerance=self.tolerance,
+            outputDirectory=str(output_dir_k)
+        )
         integrator_k.ifPrintToConsole = self.console_output
         integrator_k.ifOutputTrajFile = True
 
