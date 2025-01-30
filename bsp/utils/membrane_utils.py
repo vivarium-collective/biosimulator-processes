@@ -1,10 +1,13 @@
 import inspect
 import os
+from pathlib import Path
 from typing import Tuple, Union, List, Dict
 
 import numpy as np
 import pymem3dg as dg
 from h5py import Dataset
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 def reflect_forces(particles, vertex_matrix, force_vectors, time_step):
@@ -31,8 +34,11 @@ def new_parameters(param_spec: Dict):
     parameters = dg.Parameters()
     for attribute_name, attribute_spec in param_spec.items():  # ie: adsorption, aggregation, bending, etc
         attribute = getattr(parameters, attribute_name)
-        for name, value in attribute_spec.items():
-            setattr(attribute, name, value)
+        if isinstance(attribute_spec, dict):
+            for name, value in attribute_spec.items():
+                setattr(attribute, name, value)
+        else:
+            setattr(parameters, attribute_name, attribute_spec)
     return parameters
 
 
@@ -186,3 +192,61 @@ def save_mesh_to_ply(vertices, faces, output_path):
         for face in faces:
             face_str = f"{len(face)} " + " ".join(map(str, face))
             ply_file.write(f"{face_str}\n")
+
+
+def get_vertex_coordinates(outputDir: Path) -> np.ndarray:
+    data = Dataset(str(outputDir / "traj.nc"), 'r')
+
+    # get data parameters
+    variables = data.groups['Trajectory'].variables
+
+    # get the coordinates from groups/trajectory.variables
+    return data.groups['Trajectory'].variables['coordinates'][:]
+
+
+def get_axis_vertices(x: np.ndarray, t) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    vertices_x = x[t][::3]
+    vertices_y = x[t][1::3]
+    vertices_z = x[t][2::3]
+    return vertices_x, vertices_y, vertices_z
+
+
+def format_vertices(x: np.ndarray, t: int, geo: dg.Geometry):
+    return np.reshape(x[t], geo.getVertexMatrix().shape)
+
+
+def get_animation(x: np.ndarray) -> animation.FuncAnimation:
+    # Create figure and 3D axis
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    n_steps = x.shape[0]
+    # Initialize scatter plot with empty data
+    scat = ax.scatter([], [], [])
+
+    vertices_x, vertices_y, vertices_z = get_axis_vertices(x, 0)
+
+    # Set axis limits (you may need to adjust based on your data)
+    ax.set_xlim(np.min(vertices_x), np.max(vertices_x))
+    ax.set_ylim(np.min(vertices_y), np.max(vertices_y))
+    ax.set_zlim(np.min(vertices_z), np.max(vertices_z))
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+
+    # Update function for animation
+    def update(frame):
+        ax.set_title(f"Time step: {frame}")
+
+        # Extract x, y, z coordinates for the current frame
+        xs = x[frame][::3]
+        ys = x[frame][1::3]
+        zs = x[frame][2::3]
+
+        # Update scatter plot
+        scat._offsets3d = (xs, ys, zs)  # Special way to update 3D scatter plots
+
+        return scat,
+
+    # Create animation
+    return animation.FuncAnimation(fig, update, frames=n_steps, interval=50)

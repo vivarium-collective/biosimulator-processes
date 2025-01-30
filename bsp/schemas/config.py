@@ -36,8 +36,8 @@ DatabaseConfig = {
 }
 
 GeometryConfig = {
-    'type': 'string',  # if used, ie; 'icosphere'
-    'parameters': 'tree'  # params required for aforementioned shape type
+    'type': 'string',  # add enum[..] if used, ie; 'icosphere'
+    'parameters': 'tree'  # TODO:  params required for aforementioned shape type
 }
 
 MeshFileConfig = {
