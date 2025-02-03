@@ -198,15 +198,7 @@ class SimpleMembraneProcess(Process):
         #     tolerance=self.tolerance,
         #     outputDirectory=str(output_dir_k)
         # )
-        # integrator_k = dg.VelocityVerlet(
-        #     system=self.system,
-        #     characteristicTimeStep=self.characteristic_time_step,
-        #     totalTime=interval,
-        #     savePeriod=interval,
-        #     tolerance=self.tolerance,
-        #     outputDirectory=str(output_dir_k)
-        # )
-        integrator_k = dg.ConjugateGradient(
+        integrator_k = dg.VelocityVerlet(
             system=self.system,
             characteristicTimeStep=self.characteristic_time_step,
             totalTime=interval,
@@ -214,6 +206,14 @@ class SimpleMembraneProcess(Process):
             tolerance=self.tolerance,
             outputDirectory=str(output_dir_k)
         )
+        # integrator_k = dg.ConjugateGradient(
+        #     system=self.system,
+        #     characteristicTimeStep=self.characteristic_time_step,
+        #     totalTime=interval,
+        #     savePeriod=interval,
+        #     tolerance=self.tolerance,
+        #     outputDirectory=str(output_dir_k)
+        # )
         integrator_k.ifPrintToConsole = self.console_output
         integrator_k.ifOutputTrajFile = True
 
