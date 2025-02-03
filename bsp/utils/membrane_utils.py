@@ -8,6 +8,7 @@ import pymem3dg as dg
 from h5py import Dataset
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from process_bigraph import Composite
 
 
 def reflect_forces(particles, vertex_matrix, force_vectors, time_step):
@@ -250,3 +251,16 @@ def get_animation(x: np.ndarray) -> animation.FuncAnimation:
 
     # Create animation
     return animation.FuncAnimation(fig, update, frames=n_steps, interval=50)
+
+
+def get_times(sim: Composite):
+    results = sim.gather_results()[('emitter',)]
+    return np.array([t for t in range(len(results))])
+
+
+def get_vertices(sim: Composite, time_index: int) -> np.ndarray:
+    results = sim.gather_results()[('emitter',)]
+    n_vertices = len(results[0]['geometry']['vertices'])
+    return np.array(results[time_index]['geometry']['vertices'][:n_vertices])
+
+
