@@ -3,7 +3,7 @@ from bsp.registration import Registrar
 from bsp.implementations import INITIAL_MODULES
 
 
-VERBOSE_REGISTRATION = False
+VERBOSE_REGISTRATION = True
 ATTEMPT_INSTALL = False
 
 

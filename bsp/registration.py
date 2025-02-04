@@ -84,6 +84,8 @@ class Registrar(object):
                  import_statement, fromlist=[class_name])
             bigraph_class = getattr(module, class_name)
             self.core.process_registry.register(implementation.address, bigraph_class)
+            if verbose:
+                print(f"Successfully registered {bigraph_class} to {implementation.address}")
         except Exception as e:
             if verbose:
                 print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")

@@ -46,17 +46,12 @@ MEM3DG_PROCESSES = [
     Implementation(
         address='simple-membrane-process',
         location='processes.simple_membrane_process.SimpleMembraneProcess',
-        dependencies=["conda-forge::pymem3dg"]
+        dependencies=["conda-forge::pymem3dg", "netCDF4"]
     )
 ]
 
 
 SMOLDYN_PROCESSES = [
-    Implementation(
-        address='smoldyn-process',
-        location='processes.smoldyn_process.SmoldynProcess',
-        dependencies=["smoldyn"]
-    ),
     Implementation(
         address='smoldyn-process',
         location='processes.smoldyn_process.SmoldynProcess',
@@ -88,4 +83,4 @@ STEP_IMPLEMENTATIONS = [
     # ('simularium_smoldyn_step', 'steps.main_steps.SimulariumSmoldynStep', ['smoldyn', 'simulariumio']),
 ]
 
-INITIAL_MODULES = PROCESS_IMPLEMENTATIONS + STEP_IMPLEMENTATIONS
+INITIAL_MODULES = PROCESS_IMPLEMENTATIONS

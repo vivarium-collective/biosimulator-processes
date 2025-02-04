@@ -38,7 +38,7 @@ class SedProcess(Process, ABC):
 
 class SedUTCProcess(SedProcess):
     config_schema = {
-        'model': 'sed_model',
+        'model': 'TimeCourseConfig',
         'species_context': {
             '_type': 'string',
             '_default': 'concentrations'

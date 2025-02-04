@@ -53,7 +53,7 @@ from typing import *
 from uuid import uuid4
 from process_bigraph import Process, Composite, pf, pp
 
-from bsp.data_model.schemas import SedModel
+from bsp.data_model.sed import SedModel
 
 try:
     import smoldyn as sm

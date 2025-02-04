@@ -18,7 +18,8 @@ from basico import (
 )
 from process_bigraph import Process
 
-from bsp.data_model.schemas import SedTimeCourseConfig, SedModel
+from bsp.data_model.sed import SedModel
+from bsp.schemas.config import TimeCourseConfig
 from bsp.utils.helpers import fetch_biomodel
 from bsp.processes.sed_process import SedUTCProcess
 
@@ -124,7 +125,7 @@ class CopasiProcess(Process):
 # -- fully-spec'd Sed-compliant copasi process --
 
 class SedCopasiProcess(SedUTCProcess):
-    config_schema = SedTimeCourseConfig
+    config_schema = TimeCourseConfig
 
     def __init__(self,
                  config: Dict = None,

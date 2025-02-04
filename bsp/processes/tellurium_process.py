@@ -7,7 +7,7 @@ import numpy as np
 import tellurium as te
 from process_bigraph import Process, Composite, pf, Step
 
-from bsp.data_model.schemas import SEDModelType
+from bsp.data_model.sed import SedModel as SEDModelType
 
 # from biosimulators_processes import CORE
 # from biosimulators_processes.processes.utc_process import SbmlUniformTimeCourse
