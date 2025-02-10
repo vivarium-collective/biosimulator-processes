@@ -190,14 +190,6 @@ class SimpleMembraneProcess(Process):
 
         # set up solver and parse time params
         output_dir_k = Path(tmp.mkdtemp())
-        # integrator_k = dg.Euler(
-        #     system=self.system,  # system_k,
-        #     characteristicTimeStep=self.characteristic_time_step,  # dt
-        #     savePeriod=interval,  #
-        #     totalTime=interval,  # is this what we want: atomic time step or should this be related to the interval? Isn't dt always 1 anyway in this context?
-        #     tolerance=self.tolerance,
-        #     outputDirectory=str(output_dir_k)
-        # )
         integrator_k = dg.VelocityVerlet(
             system=self.system,
             characteristicTimeStep=self.characteristic_time_step,
@@ -206,14 +198,6 @@ class SimpleMembraneProcess(Process):
             tolerance=self.tolerance,
             outputDirectory=str(output_dir_k)
         )
-        # integrator_k = dg.ConjugateGradient(
-        #     system=self.system,
-        #     characteristicTimeStep=self.characteristic_time_step,
-        #     totalTime=interval,
-        #     savePeriod=interval,
-        #     tolerance=self.tolerance,
-        #     outputDirectory=str(output_dir_k)
-        # )
         integrator_k.ifPrintToConsole = self.console_output
         integrator_k.ifOutputTrajFile = True
 
