@@ -249,6 +249,7 @@ class SimpleMembraneProcess(Process):
         shutil.rmtree(str(output_dir_k))
         print(f'Duration at interval {interval}: {interval}')
         self.iterations += 1
+
         return {
             'geometry': output_geometry,
             'protein_density': output_protein_density,
