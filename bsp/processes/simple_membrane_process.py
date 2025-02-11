@@ -96,6 +96,7 @@ class SimpleMembraneProcess(Process):
 
         # similarly set no forces as initial output
         initial_net_forces = np.zeros(initial_vertices.shape).tolist()
+        initial_notable_vertices = self.geometry.getNotableVertex()
 
         return {
             "geometry": initial_geometry,
@@ -106,7 +107,7 @@ class SimpleMembraneProcess(Process):
             "reservoir_volume": initial_res_volume,
             "surface_area": initial_surface_area,
             "net_forces": initial_net_forces,
-            "duration": 0.0
+            "notable_vertices": initial_notable_vertices
         }
 
     def inputs(self):
@@ -124,7 +125,6 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': 'float',
             'surface_area': 'float',
             'osmotic_strength': 'float',
-            'duration': 'integer'
         }
 
     def outputs(self):
@@ -137,7 +137,7 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': 'float',
             'surface_area': 'float',
             'net_forces': 'MechanicalForcesType',
-            'duration': 'integer',
+            'notable_vertices': 'integer',
         }
 
     def update(self, state, interval):
@@ -229,11 +229,13 @@ class SimpleMembraneProcess(Process):
         forces_k = self.system.getForces()
         output_force_vectors = forces_k.getMechanicalForceVec().tolist()
 
+        notable_vertices = self.geometry.getNotableVertex()
+
         # clean up temporary files
         shutil.rmtree(str(output_dir_k))
         print(f'Duration at interval {interval}: {interval}')
         self.iterations += 1
-
+        # TODO: refactor geometry to include not. vert.
         return {
             'geometry': output_geometry,
             'protein_density': output_protein_density,
@@ -243,5 +245,5 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': reservoir_volume_k,
             'surface_area': output_surface_area,
             'net_forces': output_force_vectors,
-            'duration': interval,
+            'notable_vertices': notable_vertices
         }
