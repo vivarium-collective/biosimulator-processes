@@ -137,7 +137,7 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': 'float',
             'surface_area': 'float',
             'net_forces': 'MechanicalForcesType',
-            'notable_vertices': 'integer',
+            'notable_vertices': 'list[boolean]',
         }
 
     def update(self, state, interval):
@@ -229,13 +229,12 @@ class SimpleMembraneProcess(Process):
         forces_k = self.system.getForces()
         output_force_vectors = forces_k.getMechanicalForceVec().tolist()
 
+        # kth notable vertices can be used to parameterize the dynamic difc setter in smoldyn for distance coeffs.
         notable_vertices = self.geometry.getNotableVertex()
 
         # clean up temporary files
         shutil.rmtree(str(output_dir_k))
-        print(f'Duration at interval {interval}: {interval}')
-        self.iterations += 1
-        # TODO: refactor geometry to include not. vert.
+
         return {
             'geometry': output_geometry,
             'protein_density': output_protein_density,

@@ -203,7 +203,8 @@ class SmoldynProcess(Process):
             'species_counts': species_counts_schema,
             'particles': 'ParticleType',
             'geometry': 'GeometryType',
-            'net_forces': 'MechanicalForcesType'
+            'net_forces': 'MechanicalForcesType',
+            'notable_vertices': 'list[boolean]'
         }
 
     def outputs(self):

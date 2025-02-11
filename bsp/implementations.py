@@ -60,15 +60,15 @@ SMOLDYN_PROCESSES = [
 ]
 
 
-TELLURIUM_PROCESSES = [
-    Implementation(
-        address='tellurium-process',
-        location='processes.tellurium_process.TelluriumProcess',
-        dependencies=["tellurium"]
-    )
-]
+# TELLURIUM_PROCESSES = [
+#     Implementation(
+#         address='tellurium-process',
+#         location='processes.tellurium_process.TelluriumProcess',
+#         dependencies=["tellurium"]
+#     )
+# ]
 
-PROCESS_IMPLEMENTATIONS = COBRA_PROCESSES + COPASI_PROCESSES + MEM3DG_PROCESSES + SMOLDYN_PROCESSES + TELLURIUM_PROCESSES
+PROCESS_IMPLEMENTATIONS = COBRA_PROCESSES + COPASI_PROCESSES + MEM3DG_PROCESSES + SMOLDYN_PROCESSES  # + TELLURIUM_PROCESSES
 
 
 STEP_IMPLEMENTATIONS = [
