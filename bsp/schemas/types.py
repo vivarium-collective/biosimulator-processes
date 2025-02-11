@@ -15,7 +15,8 @@ __all__ = [
     'GeometryType',
     'VelocitiesType',
     'OsmoticParametersType',
-    'SurfaceTensionParametersType'
+    'SurfaceTensionParametersType',
+    'ParticleType'
 ]
 
 
@@ -65,4 +66,10 @@ SurfaceTensionParametersType = {
 ProteinDensityType = 'list[float]'
 
 VelocitiesType = 'list[float]'
+
+ParticleType = {
+    'coordinates': 'list',
+    'species_id': 'string',
+    'state': 'integer'
+}
 

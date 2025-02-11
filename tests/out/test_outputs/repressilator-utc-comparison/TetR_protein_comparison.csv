@@ -1,5 +1,0 @@
-,copasi,amici,tellurium,ground_truth
-copasi,True,False,False,False
-amici,False,True,False,True
-tellurium,False,False,True,False
-ground_truth,False,True,False,True

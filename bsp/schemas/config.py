@@ -17,7 +17,8 @@ __all__ = [
     'SBMLModelChangesConfig',
     'SBMLModelConfig',
     'TimeCourseConfig',
-    'TensionModelConfig'
+    'TensionModelConfig',
+    'SedModelConfig'
 ]
 
 
@@ -81,6 +82,18 @@ SBMLModelChangesConfig = {
             'reaction_scheme': 'maybe[string]'   # <-- this is done like set_reaction(name = 'R1', scheme = 'S + E + F = ES')
         }
     }
+}
+
+SedModelConfig = {
+    'model_id': 'string',
+    'model_source': 'string',
+    'model_language': {
+        '_default': 'string',
+        '_type': 'string'
+    },
+    'model_name': 'string',
+    'model_units': 'tree',
+    'model_changes': 'tree'
 }
 
 SBMLModelConfig = {
