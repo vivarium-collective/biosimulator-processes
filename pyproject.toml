@@ -2,7 +2,7 @@
 
 [project]
 name = "biosimulator-processes"
-version = "0.3.14"  # LATEST: latest stable is 0.3.8; LEGACY: latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
+version = "0.3.15"  # LATEST: latest stable is 0.3.8; LEGACY: latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = [{name = "Alex Patrie", email = "alexanderpatrie@gmail.com"}]
 readme = "README.md"
@@ -25,7 +25,7 @@ dependencies = [
 # conda install -n bsp conda-forge::pymem3dg -y \
 #     && conda install -n bsp conda-forge::readdy -y
 
-
+# TODO: change this
 [project.optional-dependencies]
 amici = ["amici (>=0.30.0,<0.31.0)"]
 builder = ["bigraph-builder (>=0.0.4,<0.0.5)", "bigraph-viz (>=0.0.35,<0.0.36)"]
