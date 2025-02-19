@@ -1,15 +1,36 @@
 # BioSimulator Processes
 
-
-Core implementations of `process-bigraph.composite.Process()` aligning with BioSimulators simulation 
+Core implementations of `process-bigraph.composite.Process()` and `process-bigraph.composite.Step()` aligning with BioSimulators simulation 
 tools. A complete environment with version-controlled dependencies already installed is available as a Docker container on GHCR.
 
 
-## Installation
+## Installation:
+### A. Via the Python Package Index. You may download BioSimulator Processes with: 
 
-There are two primary methods of interaction with `biosimulator-processes`:
+         pip install biosimulator-processes
 
-### A container available on `ghcr`:
+We recommend using an environment/package manager [like Conda](https://conda.io/projects/conda/en/latest/index.html) if downloading from PyPI to 
+install the dependencies required for your use. Most of the direct UI content for this tooling will be in the form of
+a jupyter notebook. The installation for this notebook is provided below.
+
+
+## Simulator process set-up and installation
+This project implements the `process_bigraph.Process()` interface around several "low-level" simulator python APIs. The error-handling in `bsp` is set in such a way that if a particular simulator is not installed, 
+then the corresponding process implementation for it will not be loaded into memory. Consider the following list of "optional" dependencies, convering the entire range of available implementations:
+
+```python
+amici = ["amici (>=0.30.0,<0.31.0)"]
+builder = ["bigraph-builder (>=0.0.4,<0.0.5)", "bigraph-viz (>=0.0.35,<0.0.36)"]
+cobra = ["cobra (>=0.29.1,<0.30.0)", "imageio (>=2.36.1,<3.0.0)"]
+copasi = ["copasi-basico (>=0.82,<0.83)"]
+dev = ["pytest (>=8.3.4,<9.0.0)", "mypy (>=1.14.1,<2.0.0)", "flake8 (>=7.1.1,<8.0.0)", "pip-autoremove (>=0.10.0,<0.11.0)"]
+quantum = ["qiskit[visualization] (>=1.3.1,<2.0.0)", "qiskit-ibm-runtime (>=0.34.0,<0.35.0)", "qiskit-nature (>=0.7.2,<0.8.0)", "pyscf (>=2.8.0,<3.0.0)"]
+smoldyn = ["smoldyn (>=2.73,<3.0)", "simulariumio (>=1.11.0,<2.0.0)"]
+tellurium = ["tellurium (>=2.2.10,<3.0.0)", "libroadrunner (>=2.7.0,<3.0.0)"]
+membrane = ["pymem3dg"]
+```
+
+## Interaction via a container available on `ghcr`:
 
 
    1. Ensure that the Docker Daemon is running. Most users do this by opening the Docker Desktop application.
@@ -38,55 +59,11 @@ There are two primary methods of interaction with `biosimulator-processes`:
    
                ./scripts/run-docker.sh
 
-### The Python Package Index. You may download BioSimulator Processes with: 
-
-         pip install biosimulator-processes
-
-We recommend using an environment/package manager [like Conda](https://conda.io/projects/conda/en/latest/index.html) if downloading from PyPI to 
-install the dependencies required for your use. Most of the direct UI content for this tooling will be in the form of
-a jupyter notebook. The installation for this notebook is provided below.
-
-### Using `biosimulator_processes.smoldyn_process.SmoldynProcess()`: 
-
-#### Mac Users PLEASE NOTE: 
-
-##### **Amici**
-You most likely have to install/update `swig` with `brew`, among other possible requirements. Please refer to the
-[Amici Python Installation Documentation](https://amici.readthedocs.io/en/latest/python_installation.html) for 
-more information.
-
-##### **Smoldyn**
-Due to the multi-lingual nature of Smoldyn, which is primarily 
-developed in C++, the installation process for utilizing 
-the `SmoldynProcess` process implementation requires separate handling. This is particularly 
-relevant for macOS and Windows users, where setting up the Python bindings can be more complex.
-
-For your convienience, we have created an installation shell script that will install the correct distribution of 
-Smoldyn based on your Mac processor along with the codebase of this repo. To install Smoldyn and this repo on your 
-Mac, please adhere to the following instructions:
-
-1. Clone this repo from Github:
-
-        git clone https://github.com/biosimulators/biosimulator-processes.git
-
-2. Provide adminstrative access to the `scripts` directory within the cloned repo:
-
-        cd biosimulator-processes
-
-3. Look for the install-with-smoldyn-for-mac-<YOUR MAC PROCESSOR> shell script where <YOUR MAC PROCESSOR> corresponds 
-    to your machine's processor:
-
-        ls scripts | grep <YOUR MAC PROCESSOR>
-        chmod +x ./scripts/install-with-smoldyn-for-mac-<YOUR MAC PROCESSOR>
-
-4. Run the appropriate shell script (for example, using mac silicon):
-
-        scripts/install-with-smoldyn-for-mac-silicon.sh
 
 ### Quick Start Example:
 TODO: copy this from the prompter demo
 
 ### A NOTE FOR DEVELOPERS:
 This tooling implements version control for dynamically-created composite containers through
-`poetry`. The version control for content on the Python Package Index is performed by 
+`conda`. The version control for content on the Python Package Index is performed by 
 `setup.py`. Also, the PyTest configuration resides within `./pyproject.toml` at the root of this repository.
