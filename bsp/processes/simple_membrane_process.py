@@ -47,28 +47,31 @@ class SimpleMembraneProcess(Process):
 
         mesh_file = self.config.get("mesh_file")
         if mesh_file:
-            geometry = dg.Geometry(mesh_file)
-            initial_faces = geometry.getFaceMatrix()
-            initial_vertices = geometry.getVertexMatrix()
+            self.geometry = dg.Geometry(mesh_file)
+            self.initial_faces = self.geometry.getFaceMatrix()
+            self.initial_vertices = self.geometry.getVertexMatrix()
         else:
-            geometry = self.config.get("geometry")
-            shape = geometry['type']
+            geometry_config = self.config.get("geometry")
+            shape = geometry_config['type']
             mesh_constructor = getattr(dg, f'get{shape.replace(shape[0], shape[0].upper())}')
-            initial_faces, initial_vertices = mesh_constructor(**geometry['parameters'])
+            self.initial_faces, self.initial_vertices = mesh_constructor(**geometry_config['parameters'])
+            self.geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
 
         # this geometry is initially parameterized by the geometry spec, but remains stateful as it mutates during update calls
-        self.geometry = dg.Geometry(initial_faces, initial_vertices)
-        self.n_vertices = self.geometry.getVertexMatrix().shape[0]
+        # self.geometry = dg.Geometry(initial_faces, initial_vertices)
+        self.n_vertices = self.initial_vertices.shape[0]
 
         # get parameters, osmotic, and tension params from config
         self.param_spec = self.config.get("parameters")
         self.parameters = new_parameters(self.param_spec)
 
+        # instantiate system but do not initialize it (until initial state)
         self.system = dg.System(
             geometry=self.geometry,
             parameters=self.parameters,
         )
 
+        # parse pressure configs
         self.osmotic_model_spec = self.config.get("osmotic_model")
         self.tension_model_spec = self.config.get("tension_model")
         self.iterations = 0
@@ -96,7 +99,7 @@ class SimpleMembraneProcess(Process):
 
         # similarly set no forces as initial output
         initial_net_forces = np.zeros(initial_vertices.shape).tolist()
-        initial_notable_vertices = self.geometry.getNotableVertex()
+        # initial_notable_vertices = self.geometry.getNotableVertex()
 
         return {
             "geometry": initial_geometry,
@@ -107,7 +110,7 @@ class SimpleMembraneProcess(Process):
             "reservoir_volume": initial_res_volume,
             "surface_area": initial_surface_area,
             "net_forces": initial_net_forces,
-            "notable_vertices": initial_notable_vertices
+            # "notable_vertices": initial_notable_vertices
         }
 
     def inputs(self):
@@ -137,7 +140,7 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': 'float',
             'surface_area': 'float',
             'net_forces': 'MechanicalForcesType',
-            'notable_vertices': 'list[boolean]',
+            # 'notable_vertices': 'list[boolean]',
         }
 
     def update(self, state, interval):
@@ -230,7 +233,7 @@ class SimpleMembraneProcess(Process):
         output_force_vectors = forces_k.getMechanicalForceVec().tolist()
 
         # kth notable vertices can be used to parameterize the dynamic difc setter in smoldyn for distance coeffs.
-        notable_vertices = self.geometry.getNotableVertex()
+        # notable_vertices = self.geometry.getNotableVertex()
 
         # clean up temporary files
         shutil.rmtree(str(output_dir_k))
@@ -244,5 +247,5 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': reservoir_volume_k,
             'surface_area': output_surface_area,
             'net_forces': output_force_vectors,
-            'notable_vertices': notable_vertices
+            # 'notable_vertices': notable_vertices
         }
