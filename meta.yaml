@@ -1,0 +1,50 @@
+{% set name = "biosimulator-processes" %}
+{% set version = "0.3.18" %}
+{% set sha256 = "d27ed52caec152f74c7433b295c83e0abd6dbdc37121b50050528ffb7266f26f" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - cmake
+    - make
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - python
+    - pip
+  host:
+    - python
+    - pip
+    - numpy
+  run:
+    - python
+    - numpy
+    - scipy
+    - python-libsbml
+    - pymem3dg
+
+test:
+  imports:
+    - bsp
+  commands:
+    - python -c "import bsp"
+
+about:
+  home: https://github.com/vivarium-collective/biosimulator-processes
+  license: MIT
+  summary: "A high-level Python wrapper for biological simulators."
+  dev_url: https://github.com/vivarium-collective/biosimulator-processes
+
+extra:
+  recipe-maintainers:
+    - AlexPatrie
