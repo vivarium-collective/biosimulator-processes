@@ -1,4 +1,4 @@
-![PYPI Deployment](https://github.com/vivarium-collective/biosimulator-processes/actions/workflows/cd.yml/badge.svg)
+![PYPI Deployment](https://github.com/vivarium-collective/biosimulator-processes/actions/workflows/cd.yaml/badge.svg)
 
 # BioSimulator Processes
 
