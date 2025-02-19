@@ -54,6 +54,7 @@ class SimpleMembraneProcess(Process):
             geometry_config = self.config.get("geometry")
             shape = geometry_config['type']
             mesh_constructor = getattr(dg, f'get{shape.replace(shape[0], shape[0].upper())}')
+            print(f'Using mesh constructor: {mesh_constructor}')
             self.initial_faces, self.initial_vertices = mesh_constructor(**geometry_config['parameters'])
             self.geometry = dg.Geometry(self.initial_faces, self.initial_vertices)
 
@@ -99,7 +100,7 @@ class SimpleMembraneProcess(Process):
 
         # similarly set no forces as initial output
         initial_net_forces = np.zeros(initial_vertices.shape).tolist()
-        # initial_notable_vertices = self.geometry.getNotableVertex()
+        initial_notable_vertices = self.geometry.getNotableVertex()
 
         return {
             "geometry": initial_geometry,
@@ -110,7 +111,7 @@ class SimpleMembraneProcess(Process):
             "reservoir_volume": initial_res_volume,
             "surface_area": initial_surface_area,
             "net_forces": initial_net_forces,
-            # "notable_vertices": initial_notable_vertices
+            "notable_vertices": initial_notable_vertices
         }
 
     def inputs(self):
@@ -140,7 +141,7 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': 'float',
             'surface_area': 'float',
             'net_forces': 'MechanicalForcesType',
-            # 'notable_vertices': 'list[boolean]',
+            'notable_vertices': 'list[boolean]',
         }
 
     def update(self, state, interval):
@@ -233,7 +234,7 @@ class SimpleMembraneProcess(Process):
         output_force_vectors = forces_k.getMechanicalForceVec().tolist()
 
         # kth notable vertices can be used to parameterize the dynamic difc setter in smoldyn for distance coeffs.
-        # notable_vertices = self.geometry.getNotableVertex()
+        notable_vertices = self.geometry.getNotableVertex()
 
         # clean up temporary files
         shutil.rmtree(str(output_dir_k))
@@ -247,5 +248,5 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': reservoir_volume_k,
             'surface_area': output_surface_area,
             'net_forces': output_force_vectors,
-            # 'notable_vertices': notable_vertices
+            'notable_vertices': notable_vertices
         }
