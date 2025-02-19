@@ -1,3 +1,5 @@
+![PYPI Deployment](https://github.com/vivarium-collective/biosimulator-processes/actions/workflows/cd.yml/badge.svg)
+
 # BioSimulator Processes
 
 Core implementations of `process-bigraph.composite.Process()` and `process-bigraph.composite.Step()` aligning with BioSimulators simulation 
