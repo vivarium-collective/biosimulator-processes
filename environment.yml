@@ -15,3 +15,4 @@ dependencies:
       - copasi-basico
       - smoldyn
       - tellurium
+      - python-libsbml

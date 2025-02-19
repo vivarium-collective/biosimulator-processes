@@ -1,0 +1,143 @@
+{
+  "job_id": "composition-9c436329-cede-4680-9628-8483ee6a5528",
+  "last_updated": "2025-02-11 17:36:41.931444",
+  "status": "PENDING",
+  "simulators": [],
+  "duration": 10,
+  "spec": {
+    "membrane": {
+      "_type": "process",
+      "address": "local:simple-membrane-process",
+      "config": {
+        "characteristic_time_step": 1,
+        "geometry": {
+          "type": "icosphere",
+          "parameters": {
+            "radius": 1,
+            "subdivision": 2
+          }
+        },
+        "tension_model": {
+          "modulus": 0.1,
+          "preferred_area": 12.4866
+        },
+        "osmotic_model": {
+          "preferred_volume": 2.9306666666666668,
+          "reservoir_volume": 1,
+          "strength": 0.02,
+          "volume": 2.9
+        },
+        "parameters": {
+          "bending": {
+            "Kbc": 0.0000822
+          },
+          "damping": 0.05
+        },
+        "tolerance": 1e-11,
+        "console_output": false
+      },
+      "inputs": {
+        "geometry": [
+          "geometry_store"
+        ],
+        "velocities": [
+          "velocities_store"
+        ],
+        "protein_density": [
+          "protein_density_store"
+        ],
+        "volume": [
+          "volume_store"
+        ],
+        "preferred_volume": [
+          "preferred_volume_store"
+        ],
+        "reservoir_volume": [
+          "reservoir_volume_store"
+        ],
+        "surface_area": [
+          "surface_area_store"
+        ],
+        "osmotic_strength": [
+          "osmotic_strength_store"
+        ]
+      },
+      "outputs": {
+        "geometry": [
+          "geometry_store"
+        ],
+        "velocities": [
+          "velocities_store"
+        ],
+        "protein_density": [
+          "protein_density_store"
+        ],
+        "volume": [
+          "volume_store"
+        ],
+        "preferred_volume": [
+          "preferred_volume_store"
+        ],
+        "reservoir_volume": [
+          "reservoir_volume_store"
+        ],
+        "surface_area": [
+          "surface_area_store"
+        ],
+        "net_forces": [
+          "net_forces_store"
+        ],
+        "notable_vertices": [
+          "notable_vertices_store"
+        ]
+      }
+    },
+    "emitter": {
+      "_type": "step",
+      "address": "local:ram-emitter",
+      "config": {
+        "emit": {
+          "geometry": "GeometryType",
+          "velocities": "VelocitiesType",
+          "protein_density": "ProteinDensityType",
+          "volume": "float",
+          "preferred_volume": "float",
+          "reservoir_volume": "float",
+          "surface_area": "float",
+          "net_forces": "MechanicalForcesType",
+          "notable_vertices": "list[boolean]"
+        }
+      },
+      "inputs": {
+        "geometry": [
+          "geometry_store"
+        ],
+        "velocities": [
+          "velocities_store"
+        ],
+        "protein_density": [
+          "protein_density_store"
+        ],
+        "volume": [
+          "volume_store"
+        ],
+        "preferred_volume": [
+          "preferred_volume_store"
+        ],
+        "reservoir_volume": [
+          "reservoir_volume_store"
+        ],
+        "surface_area": [
+          "surface_area_store"
+        ],
+        "net_forces": [
+          "net_forces_store"
+        ],
+        "notable_vertices": [
+          "notable_vertices_store"
+        ]
+      }
+    }
+  },
+  "results": {}
+}
