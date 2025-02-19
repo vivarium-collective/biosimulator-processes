@@ -51,3 +51,4 @@ class TestMembraneProcess:
         print(f'Created the process:\n{process.initial_state()}')
         assert process is not None
         assert hasattr(process, "update")
+        result = process.update(process.initial_state(), 1)
