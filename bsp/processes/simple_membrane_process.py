@@ -86,7 +86,6 @@ class SimpleMembraneProcess(Process):
         }
 
         # set initial velocities to an array of the correct shape to 0.0, 0.0, 0.0 TODO: should this be different?
-        self.system.initialize(True)
         initial_velocities = self.system.getVelocity().tolist()  # np.zeros(initial_vertices.shape).tolist()
 
         # set initial protein density (gradient) to constant (1.) for all vertices
@@ -186,8 +185,8 @@ class SimpleMembraneProcess(Process):
         #     parameters=self.parameters,
         # )
         self.system.parameters = parameters
-        # self.system.initialize(True)
-        self.system.updateConfigurations()
+        self.system.initialize(True)
+        # self.system.updateConfigurations()
         # system_k.initialize()
 
         duration_k = interval + state['duration']# self.iterations + 1

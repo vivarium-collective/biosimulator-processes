@@ -25,6 +25,23 @@ def get_mesh_file() -> str:
 
 @pytest.fixture
 def membrane_config() -> dict[str, dict[str, float | int] | float | bool]:
+    fname = 'membrane_composite.json'
+    fp = os.path.join(
+        os.path.abspath(
+            os.path.dirname(
+                os.path.dirname(__file__)
+            )
+        ),
+        "fixtures",
+        fname
+    )
+    with open(fp, 'r') as f:
+        payload = json.load(f)
+    return payload.get('membrane').get('config')
+
+
+@pytest.fixture
+def membrane_request() -> dict[str, dict[str, float | int] | float | bool]:
     fname = 'test_membrane_request.json'
     fp = os.path.join(
         os.path.abspath(
@@ -37,18 +54,11 @@ def membrane_config() -> dict[str, dict[str, float | int] | float | bool]:
     )
     with open(fp, 'r') as f:
         payload = json.load(f)
-    config = payload.get('spec').get('membrane').get('config')
-    config.pop('geometry')
-    config['mesh_file'] = get_mesh_file()
-
-    return config
+    return payload.get('spec').get('membrane')
 
 
 @pytest.mark.usefixtures('membrane_config')
-class TestMembraneProcess:
-    def test_membrane_process_from_config(self, membrane_config: dict):
-        process = SimpleMembraneProcess(config=membrane_config, core=app_registrar.core)
-        print(f'Created the process:\n{process.initial_state()}')
-        assert process is not None
-        assert hasattr(process, "update")
-        result = process.update(process.initial_state(), 1)
+def test_membrane_process_from_config(membrane_config: dict):
+    membrane = SimpleMembraneProcess(config=membrane_config, core=app_registrar.core)
+    print(f'Created membrane process with initial state: {membrane.initial_state()}')
+

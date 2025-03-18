@@ -1,12 +1,19 @@
-# PEP 621-compliant pyproject (env manager agnostic)
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "Cython",
+    "numpy"
+]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "biosimulator-processes"
-version = "0.3.19"  # LATEST: latest stable is 0.3.8; LEGACY: latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
+version = "0.3.21"  # LATEST: latest stable is 0.3.8; LEGACY: latest stable pypi release: 0.1.2(biosimulator-processes) ... 0.2.5(as biosimulators-processes)
 description = "Core implementations of process-bigraph.composite.Process aligning with BioSimulators simulator tools."
 authors = [{name = "Alex Patrie", email = "alexanderpatrie@gmail.com"}]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.11"
 dependencies = [
     "process-bigraph",
     "pip-autoremove",
@@ -17,31 +24,48 @@ dependencies = [
     "python-dotenv",
     "requests",
     "h5py",
-    "python-libsbml"
+    "python-libsbml",
 ]
 
+[project.optional-dependencies]
+cobra = ["cobra>=0.29.1"]
+copasi = ["copasi-basico>=0.83"]
+dev = [
+    "mypy>=1.15.0",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.11.0",
+]
+docs = [
+    "nbsphinx>=0.9.7",
+    "sphinx>=8.1.3",
+    "sphinx-rtd-theme>=3.0.2",
+]
+membrane = ["pymem3dg>=0.0.7"]
+quantum = ["pyscf>=2.8.0", "qiskit-ibm-runtime>=0.37.0", "qiskit-nature>=0.7.2"]
+smoldyn = ["smoldyn>=2.73", "simulariumio>=1.12.0"]
+tellurium = ["tellurium>=2.2.10"]
+vcell = ["pyvcell>=0.0.1"]
 
-# also make sure to install readdy and pymem3dg:
-# conda install -n bsp conda-forge::pymem3dg -y \
-#     && conda install -n bsp conda-forge::readdy -y
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "nbsphinx>=0.9.7",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.11.0",
+    "sphinx>=8.1.3",
+    "sphinx-rtd-theme>=3.0.2",
+]
 
-# TODO: change this
-# [project.optional-dependencies]
-# amici = ["amici (>=0.30.0,<0.31.0)"]
-# builder = ["bigraph-builder (>=0.0.4,<0.0.5)", "bigraph-viz (>=0.0.35,<0.0.36)"]
-# cobra = ["cobra (>=0.29.1,<0.30.0)", "imageio (>=2.36.1,<3.0.0)"]
-# copasi = ["copasi-basico (>=0.82,<0.83)"]
-# dev = ["pytest (>=8.3.4,<9.0.0)", "mypy (>=1.14.1,<2.0.0)", "flake8 (>=7.1.1,<8.0.0)", "pip-autoremove (>=0.10.0,<0.11.0)"]
-# quantum = ["qiskit[visualization] (>=1.3.1,<2.0.0)", "qiskit-ibm-runtime (>=0.34.0,<0.35.0)", "qiskit-nature (>=0.7.2,<0.8.0)", "pyscf (>=2.8.0,<3.0.0)"]
-# smoldyn = ["smoldyn (>=2.73,<3.0)", "simulariumio (>=1.11.0,<2.0.0)"]
-# tellurium = ["tellurium (>=2.2.10,<3.0.0)", "libroadrunner (>=2.7.0,<3.0.0)"]
-# membrane = ["pymem3dg"]
-
-[tool.poetry]
+[tool.setuptools]
 packages = [
-    {include = "bsp"},
-    {include = "tests"}
+    "bsp",
+    "tests"
 ]
+
 
 
 
