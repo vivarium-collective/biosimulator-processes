@@ -1,0 +1,26 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - bsp_net
+
+  bsp:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        MODE: "server"
+    image: ghcr.io/vivarium-collective/bsp:0.0.1
+    container_name: bsp
+    networks:
+      - bsp_net
+    depends_on:
+      - mongodb
+
+networks:
+  bsp_net:
+    driver: bridge
