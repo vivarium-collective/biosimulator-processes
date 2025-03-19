@@ -6,7 +6,7 @@ from typing import Any, Mapping
 from dotenv import load_dotenv
 from vivarium import Vivarium
 from bsp import app_registrar
-from bsp.server.db import MongoConnector
+from bsp.server.db import MongoConnector, DatabaseConnector
 
 load_dotenv()
 
@@ -73,8 +73,8 @@ class JobProcessor(object):
 class JobDispatcher(object):
     processor: JobProcessor
 
-    def __init__(self, connection_uri: str, **params):
-        self.conn = MongoConnector(connection_uri=connection_uri, database_id="bsp")
+    def __init__(self, connection_uri: str | None = None, conn: MongoConnector | None = None, **params):
+        self.conn = conn or MongoConnector(connection_uri=connection_uri, database_id="bsp")
         if params:
             for k, v in params.items():
                 setattr(self, k, v)
