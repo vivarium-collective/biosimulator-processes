@@ -1,5 +1,8 @@
 FROM python:3.12-slim-bookworm
 
+ARG MODE=server
+ENV MODE=${MODE}
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ADD . /app
@@ -21,6 +24,9 @@ RUN rm -rf /app/.venv \
     && uv lock \
     && uv sync --all-extras
 
-CMD ["uv", "run", "server", "up"]
+RUN chmod +x /app/bsp/server/entrypoint.sh
 
+ENTRYPOINT ["/app/bsp/server/entrypoint.sh"]
+
+# CMD ["uv", "run", "server", "up"]
 # uv pip install -e ."[cobra,copasi,dev,docs,membrane,quantum,vcell]"
