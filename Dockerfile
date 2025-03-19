@@ -6,6 +6,21 @@ ADD . /app
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    g++ \
+    make \
+    cmake \
+    ninja-build \
+    libnetcdf-dev \
+    libhdf5-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV CC=gcc CXX=g++
+
 RUN rm -rf /app/.venv \
     && uv lock \
-    && uv sync --frozen --all-extras
+    && uv sync --all-extras
+
+CMD ["uv", "run", "server", "up"]
+
+# uv pip install -e ."[cobra,copasi,dev,docs,membrane,quantum,vcell]"

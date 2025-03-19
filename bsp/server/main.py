@@ -109,7 +109,3 @@ class JobDispatcher(object):
         """Runs both Change Streams and fallback polling."""
         await asyncio.gather(self.listen(), self.fallback())
 
-
-# if __name__ == '__main__':
-#     dispatch = JobDispatcher()
-#     asyncio.run(dispatch.run())
