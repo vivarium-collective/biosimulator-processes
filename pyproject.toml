@@ -48,6 +48,11 @@ membrane = ["pymem3dg>=0.0.7"]
 quantum = ["pyscf>=2.8.0", "qiskit-ibm-runtime>=0.37.0", "qiskit-nature>=0.7.2"]
 tellurium = ["tellurium>=2.2.10"]
 vcell = ["pyvcell>=0.0.1"]
+server = [
+    "fastapi>=0.115.11",
+    "pymongo>=4.11.3",
+    "python-dotenv>=1.0.1",
+]
 
 [dependency-groups]
 dev = [
