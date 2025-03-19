@@ -24,7 +24,7 @@ class DatabaseConnector(ABC):
     def __init__(
             self,
             connection_uri: str | None = None,
-            database_id: str | None = None,
+            database_id: str | None = "bsp",
             connector_id: str | None = None,
             local: bool = False,
             job_collection_id: str = _default_job_collection_id,
@@ -33,7 +33,7 @@ class DatabaseConnector(ABC):
         self.local = local
         self.client = self._get_client(connection_uri)
         self.db = self._get_database(self.database_id)
-        self.connector_id = connector_id
+        self.connector_id = connector_id or "unnamed_database_connector"
         self.connection_uri = connection_uri
         self._default_job_collection_id = job_collection_id
 

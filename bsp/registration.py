@@ -70,10 +70,12 @@ class Registrar(object):
         self.core.register_types({type_id: type_schema})
 
     def register_process(self, address: str, implementation: object, verbose=False) -> None:
-        type_registry = self.core
-        type_registry.process_registry.register(address, implementation)
-        if verbose:
-            print(f"Successfully registered {implementation} to address: {address}")
+        try:
+            type_registry = self.core
+            type_registry.process_registry.register(address, implementation)
+        except Exception as e:
+            if verbose:
+                print(f"Cannot register {implementation} to {address}. Error:\n**\n{e}\n**")
 
     def register_module(self, implementation: Implementation, verbose=False, attempt_install=False) -> None:
         library, module_name, class_name = implementation.location.rsplit('.', 3)
@@ -84,8 +86,6 @@ class Registrar(object):
                  import_statement, fromlist=[class_name])
             bigraph_class = getattr(module, class_name)
             self.core.process_registry.register(implementation.address, bigraph_class)
-            if verbose:
-                print(f"Successfully registered {bigraph_class} to {implementation.address}")
         except Exception as e:
             if verbose:
                 print(f"Cannot register {class_name}. Error:\n**\n{e}\n**")
@@ -107,10 +107,13 @@ class Registrar(object):
             self.initial_registration_complete = True
 
     def register_type_module(self, module: ModuleType, verbose=False) -> None:
-        for schema_name in module.__all__:
-            schema = getattr(module, schema_name)
-            self.register_type(schema_name, schema)
-            print(f'Registered module {schema_name}') if verbose else None
+        try:
+            for schema_name in module.__all__:
+                schema = getattr(module, schema_name)
+                self.register_type(schema_name, schema)
+        except Exception as e:
+            if verbose:
+                print(f"Cannot register {module}. Error:\n**\n{e}\n**")
 
     def register_initial_types(self, config: ModuleType, types: ModuleType, verbose=False) -> None:
         for module in [config, types]:
