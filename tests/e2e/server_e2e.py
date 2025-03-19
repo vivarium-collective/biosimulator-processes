@@ -13,7 +13,9 @@ def mock_db():
     mock_conn.get_jobs = AsyncMock(return_value=[])  # No initial jobs
     mock_conn.update_job = AsyncMock()
     mock_conn.write = AsyncMock()
-    mock_conn.db.watch = MagicMock()  # Mock Change Streams
+
+    mock_conn.db = MagicMock()
+    mock_conn.db.watch = MagicMock()
 
     return mock_conn
 
@@ -29,9 +31,9 @@ def test_request():
 
 
 @pytest.mark.asyncio
-@pytest.mark.usefixtures("mock_db")
-@pytest.mark.usefixtures("test_request")
+@pytest.mark.usefixtures("mock_db", "test_request")
 async def test_e2e_job_processing(mock_db, test_request):
+    print('Running e2e test with request', test_request)
     dispatcher = JobDispatcher(conn=mock_db)
     dispatcher.processor = JobProcessor()
 

@@ -96,7 +96,7 @@ class JobDispatcher(object):
     async def fallback(self, buffer: int = 5):
         wait_time = buffer
         while True:
-            jobs = self.conn.get_jobs()
+            jobs = await self.conn.get_jobs()
             if jobs:
                 await asyncio.gather(*[self.processor.process_job(job) for job in jobs])
                 wait_time = buffer

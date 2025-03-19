@@ -68,7 +68,7 @@ class DatabaseConnector(ABC):
         pass
 
     @abstractmethod
-    def get_jobs(self):
+    async def get_jobs(self):
         pass
 
     @abstractmethod
@@ -121,7 +121,11 @@ class MongoConnector(DatabaseConnector):
     def results_collection(self) -> Collection:
         return self.get_collection("results")
 
-    def get_jobs(self):
+    async def get_jobs(self):
+        return self.jobs
+
+    @property
+    def jobs(self):
         return [item for item in self.job_collection.find()]
 
     async def update_job(self, job_id: str, **updates) -> UpdateResult:

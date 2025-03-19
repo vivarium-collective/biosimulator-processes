@@ -28,7 +28,7 @@ def up():
 
 @app.command()
 def jobs():
-    jobs = dispatcher.conn.get_jobs()
+    jobs = dispatcher.conn.jobs
     typer.echo(f"Found {len(jobs)} jobs.")
     typer.echo(jobs)
 
