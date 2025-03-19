@@ -2,63 +2,46 @@ import json
 import os
 
 import pytest
+from process_bigraph import Process, ProcessTypes, pp
+from vivarium.vivarium import Vivarium
 
-from bsp.processes.simple_membrane_process import SimpleMembraneProcess
 from bsp import app_registrar
+from bsp.processes.simple_membrane_process import SimpleMembraneProcess
+
+from tests.fixtures.membrane import membrane_composite, membrane_request
 
 
-def get_mesh_file() -> str:
-    fname = 'oblate.ply'
-    fp = os.path.join(
-        os.path.abspath(
-            os.path.dirname(
-                os.path.dirname(__file__)
-            )
-        ),
-        "fixtures",
-        "sample_meshes",
-        fname
+CORE: ProcessTypes = app_registrar.core
+
+
+def validate_process(process: Process, validator_method: str = 'initial_state'):
+    method = getattr(process, validator_method)
+    assert len(method().keys()) > 0
+
+
+@pytest.mark.usefixtures('membrane_composite')
+def test_membrane_with_vivarium_interface(membrane_composite: dict):
+    spec = membrane_composite
+
+    viv = Vivarium(
+        processes=CORE.process_registry.registry,
+        types=CORE.types(),
+        core=CORE,
+        document={'state': spec}
     )
-    assert os.path.exists(fp)
-    return fp
+    # viv.add_process(
+    #     name='membrane',
+    #     process_id='simple-membrane-process',
+    #     config=spec.get('config'),
+    #     # inputs=spec.get('inputs'),
+    #     # outputs=spec.get('outputs')
+    # )
+    print(f'Vivarium:\n{viv}')
+    print(f'State: {viv.get_state().get("membrane")}')
+    viv.run(3)
+    results = viv.get_results()
+    print('Output Results:')
+    pp(results)
 
 
-@pytest.fixture
-def membrane_config() -> dict[str, dict[str, float | int] | float | bool]:
-    fname = 'membrane_composite.json'
-    fp = os.path.join(
-        os.path.abspath(
-            os.path.dirname(
-                os.path.dirname(__file__)
-            )
-        ),
-        "fixtures",
-        fname
-    )
-    with open(fp, 'r') as f:
-        payload = json.load(f)
-    return payload.get('membrane').get('config')
-
-
-@pytest.fixture
-def membrane_request() -> dict[str, dict[str, float | int] | float | bool]:
-    fname = 'test_membrane_request.json'
-    fp = os.path.join(
-        os.path.abspath(
-            os.path.dirname(
-                os.path.dirname(__file__)
-            )
-        ),
-        "fixtures",
-        fname
-    )
-    with open(fp, 'r') as f:
-        payload = json.load(f)
-    return payload.get('spec').get('membrane')
-
-
-@pytest.mark.usefixtures('membrane_config')
-def test_membrane_process_from_config(membrane_config: dict):
-    membrane = SimpleMembraneProcess(config=membrane_config, core=app_registrar.core)
-    print(f'Created membrane process with initial state: {membrane.initial_state()}')
 

@@ -7,7 +7,7 @@
             "geometry": {
                 "type": "icosphere",
                 "parameters": {
-                    "radius": 1.0,
+                    "radius": 1,
                     "subdivision": 2
                 }
             },
@@ -23,7 +23,7 @@
             },
             "parameters": {
                 "bending": {
-                    "Kbc": 8.22e-05
+                    "Kbc": 0.0000822
                 },
                 "damping": 0.05
             },
@@ -54,9 +54,6 @@
             ],
             "osmotic_strength": [
                 "osmotic_strength_store"
-            ],
-            "duration": [
-                "duration_store"
             ]
         },
         "outputs": {
@@ -83,9 +80,6 @@
             ],
             "net_forces": [
                 "net_forces_store"
-            ],
-            "duration": [
-                "duration_store"
             ]
         }
     },
@@ -101,7 +95,8 @@
                 "preferred_volume": "float",
                 "reservoir_volume": "float",
                 "surface_area": "float",
-                "net_forces": "MechanicalForcesType"
+                "net_forces": "MechanicalForcesType",
+                "notable_vertices": "list[boolean]"
             }
         },
         "inputs": {

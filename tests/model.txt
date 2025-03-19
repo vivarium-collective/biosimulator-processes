@@ -1,5 +1,0 @@
-This is a Smoldyn Model File
-
-contents
-
-end_file

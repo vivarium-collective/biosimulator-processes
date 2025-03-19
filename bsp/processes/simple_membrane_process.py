@@ -110,7 +110,7 @@ class SimpleMembraneProcess(Process):
             "reservoir_volume": initial_res_volume,
             "surface_area": initial_surface_area,
             "net_forces": initial_net_forces,
-            "notable_vertices": initial_notable_vertices
+            # "notable_vertices": initial_notable_vertices
         }
 
     def inputs(self):
@@ -140,7 +140,7 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': 'float',
             'surface_area': 'float',
             'net_forces': 'MechanicalForcesType',
-            'notable_vertices': 'list[boolean]',
+            # 'notable_vertices': 'any',
         }
 
     def update(self, state, interval):
@@ -188,8 +188,6 @@ class SimpleMembraneProcess(Process):
         self.system.initialize(True)
         # self.system.updateConfigurations()
         # system_k.initialize()
-
-        duration_k = interval + state['duration']# self.iterations + 1
 
         # set up solver and parse time params
         output_dir_k = Path(tmp.mkdtemp())
@@ -247,5 +245,5 @@ class SimpleMembraneProcess(Process):
             'reservoir_volume': reservoir_volume_k,
             'surface_area': output_surface_area,
             'net_forces': output_force_vectors,
-            'notable_vertices': notable_vertices
+            # 'notable_vertices': notable_vertices
         }

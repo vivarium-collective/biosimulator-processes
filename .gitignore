@@ -1,4 +1,5 @@
 buildImage.yaml
+*.lock
 .python-version
 *__pycache__/
 .idea/
