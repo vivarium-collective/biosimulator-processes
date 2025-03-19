@@ -10,19 +10,15 @@ ADD . /app
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    g++ \
-    make \
-    cmake \
-    ninja-build \
-    libnetcdf-dev \
-    libhdf5-dev \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV CC=gcc CXX=g++
+    libnetcdf-dev  \
+    libnetcdf-c++4-dev \
+    g++  \
+    cmake  \
+    ninja-build  \
+    git
 
 RUN uv lock \
-    && uv sync --frozen
+    && uv sync --frozen --extra server --extra dev --extra cobra --extra copasi --extra membrane
 
 RUN chmod +x /app/bsp/server/entrypoint.sh
 
