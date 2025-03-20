@@ -1,7 +1,9 @@
 services:
-  mongo:
+  mongodb:
     image: mongo:6.0
-    container_name: mongo
+    container_name: mongodb
+    networks:
+      - bsp_net
     ports:
       - "27017:27017"
     restart: always
@@ -14,10 +16,12 @@ services:
     image: mongo-express
     container_name: mongo-express
     restart: always
+    networks:
+      - bsp_net
     ports:
       - "8081:8081"
     environment:
-      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_SERVER: mongodb
 
   gateway:
     platform: linux/amd64
@@ -29,7 +33,7 @@ services:
     networks:
       - bsp_net
     depends_on:
-      - mongo-init
+      - mongodb
     command: |
       uv run python -c "import time; time.sleep(100)"
 
@@ -43,7 +47,7 @@ services:
     networks:
       - bsp_net
     depends_on:
-      - mongo-init
+      - mongodb
     command: |
       uv run python -c "from backend.singletons import stream_listener; stream_listener();"
 
