@@ -1,25 +1,51 @@
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
     ports:
       - "27017:27017"
-    networks:
-      - bsp_net
+    restart: always
+    command: [ "mongod", "--replSet", "rs0" ]  # Enable Replica Set
+    volumes:
+      - mongo_data:/data/db
+      - ./backend/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro  # Auto-init
 
-  bsp:
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+
+  gateway:
     platform: linux/amd64
     build:
       context: .
-      dockerfile: ./Dockerfile
-      args:
-        MODE: "server"
-    image: ghcr.io/vivarium-collective/bsp:0.0.1
-    container_name: bsp
+      dockerfile: docker/Server.Dockerfile
+    image: bsp-gate
+    container_name: gateway
     networks:
       - bsp_net
     depends_on:
-      - mongodb
+      - mongo-init
+    command: |
+      uv run python -c "import time; time.sleep(100)"
+
+  server:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: docker/Server.Dockerfile
+    image: bsp-serve
+    container_name: server
+    networks:
+      - bsp_net
+    depends_on:
+      - mongo-init
+    command: |
+      uv run python -c "from backend.singletons import stream_listener; stream_listener();"
 
 networks:
   bsp_net:

@@ -1,9 +1,9 @@
-import asyncio
-import datetime
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from bsp.server.db import MongoConnector
-from bsp.server.main import JobProcessor, JobDispatcher  # Import your classes
+from backend import MongoConnector
+from backend.dispatch import JobProcessor, JobDispatcher
+
+from tests.fixtures.membrane import membrane_request
 
 
 @pytest.fixture
@@ -20,24 +20,35 @@ def mock_db():
     return mock_conn
 
 
-@pytest.fixture
-def test_request():
-    return {
-        "job_id": "12345",
-        "status": "pending",
-        "spec": {"state": {"A": 1, "B": 2}},  # Fake simulation data
-        "duration": 5
-    }
-
-
 @pytest.mark.asyncio
-@pytest.mark.usefixtures("mock_db", "test_request")
-async def test_e2e_job_processing(mock_db, test_request):
-    print('Running e2e test with request', test_request)
+@pytest.mark.usefixtures("mock_db", "membrane_request")
+async def test_e2e_listener(mock_db, membrane_request):
+    print('Running e2e test with request', membrane_request)
+
     dispatcher = JobDispatcher(conn=mock_db)
     dispatcher.processor = JobProcessor()
 
-    mock_db.get_jobs.return_value = [test_request]
+    mock_stream = AsyncMock()
+    mock_stream.__enter__.return_value = mock_stream
+    mock_stream.__iter__.return_value = iter([
+        {"fullDocument": membrane_request}
+    ])
+    mock_db.db.watch.return_value = mock_stream
+
+    await dispatcher.listen()
+
+    mock_db.update_job.assert_any_call(job_id="test", status="IN_PROGRESS")
+    mock_db.write.assert_called_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("mock_db", "membrane_request")
+async def test_e2e_fallback(mock_db, membrane_request):
+    print('Running e2e test with request', membrane_request)
+    dispatcher = JobDispatcher(conn=mock_db)
+    dispatcher.processor = JobProcessor()
+
+    mock_db.get_jobs.return_value = [membrane_request]
 
     await dispatcher.fallback(buffer=1)
 
@@ -52,6 +63,5 @@ async def test_e2e_job_processing(mock_db, test_request):
 
     # ensure status update
     assert job_update_args["status"] == "COMPLETE"
-
     # ensure results (even if failed)
     assert "result" in job_update_args

@@ -54,6 +54,7 @@ server = [
     "fastapi>=0.115.11",
     "pymongo>=4.11.3",
     "python-dotenv>=1.0.1",
+    "uvicorn>=0.34.0",
 ]
 
 [dependency-groups]
@@ -72,11 +73,13 @@ dev = [
 [tool.setuptools]
 packages = [
     "bsp",
-    "tests"
+    "tests",
+    "backend"
 ]
 
 [project.scripts]
-server = "bsp.server.cli:app"
+gateway = "backend.cli:gateway_app"
+server = "backend.cli:server_app"
 
 [tool.ruff]
 target-version = "py39"

@@ -6,7 +6,7 @@ from typing import Any, Mapping
 from dotenv import load_dotenv
 from vivarium import Vivarium
 from bsp import app_registrar
-from bsp.server.db import MongoConnector, DatabaseConnector
+from backend.db import MongoConnector
 
 load_dotenv()
 
@@ -14,7 +14,10 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Mongo connection
-conn = MongoConnector(connection_uri=os.getenv("MONGO_URI"), database_id=os.getenv("DB_NAME"))
+conn = MongoConnector(
+    connection_uri=os.getenv("MONGO_URI"), 
+    database_id=os.getenv("DB_NAME")
+)
 core = app_registrar.core
 
 POLL_INTERVAL = 5  # Fallback polling interval (if change stream fails)

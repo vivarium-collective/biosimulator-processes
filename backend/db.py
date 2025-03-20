@@ -1,7 +1,4 @@
 from abc import abstractmethod, ABC
-from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
 from typing import *
 
 from pymongo import MongoClient
@@ -9,11 +6,11 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.results import UpdateResult
 
-from bsp.server.handlers import timestamp
+from backend.handlers import timestamp
 
 
 class DatabaseConnector(ABC):
-    database_id: str = 'bsp'
+    database_id: str
     local: bool
     client: Any
     db: Any
@@ -77,13 +74,14 @@ class DatabaseConnector(ABC):
 
 
 class MongoConnector(DatabaseConnector):
-    _default_connection_uri: str = "mongodb://0.0.0.0:27017/"
-
     def __init__(self,
                  connection_uri: str | None = None,
                  database_id: str | None = None,
                  connector_id: str | None = None,
-                 local: bool = False):
+                 local: bool = False,
+                 all_ports: bool = False):
+        host: str = "0.0.0.0" if all_ports else "mongodb"
+        self._default_connection_uri: str = f"mongodb://{host}:27017/?replicaSet=rs0"
         connection_uri = connection_uri or self._default_connection_uri
         super().__init__(connection_uri, database_id, connector_id, local)
 

@@ -5,7 +5,7 @@ ENV MODE=${MODE}
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-ADD . /app
+ADD .. /app
 
 WORKDIR /app
 
@@ -18,11 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git
 
 RUN uv lock \
-    && uv sync --frozen --extra server --extra dev --extra cobra --extra copasi --extra membrane
+    && uv sync --frozen --extra server --extra dev --extra membrane
 
-RUN chmod +x /app/bsp/server/entrypoint.sh
+# --extra cobra --extra copasi
+RUN chmod +x /app/server/scripts/entrypoint.sh
 
-ENTRYPOINT ["/app/bsp/server/entrypoint.sh"]
-
-# CMD ["uv", "run", "server", "up"]
-# uv pip install -e ."[cobra,copasi,dev,docs,membrane,quantum,vcell]"
+ENTRYPOINT ["/app/server/scripts/entrypoint.sh"]
