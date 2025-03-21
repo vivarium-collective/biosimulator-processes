@@ -17,7 +17,10 @@ import (
 // NOTE: this module can be run with:
 // make run-gateway
 
-var pythonSimulatorURL string = "http://python-simulator:5000/simulate" // Update with actual container/service name
+var runnerName string = "runner"
+var runnerPort int = 5000
+var runnerMethod string = "simulate"
+var runnerURL string = formatRunnerURL(runnerName, runnerPort, runnerMethod)
 var showKeysEscapeChar string = "%+v\n"
 
 func main() {
@@ -29,6 +32,7 @@ func main() {
 	// Graceful shutdown handling
 	ctxBg := context.Background()
 	router := http.NewServeMux()
+
 	router.HandleFunc("POST /simulate", simulateHandler)
 
 	server := &http.Server{
@@ -86,7 +90,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := http.NewRequest("POST", pythonSimulatorURL, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", runnerURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		http.Error(w, "Failed to create request to simulator", http.StatusInternalServerError)
 		return
@@ -119,6 +123,10 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+}
+
+func formatRunnerURL(name string, port int, method string) string {
+	return fmt.Sprintf("http://%v:%v/%v", name, port, method)
 }
 
 
