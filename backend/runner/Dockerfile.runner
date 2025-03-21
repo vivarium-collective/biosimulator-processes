@@ -19,5 +19,6 @@ RUN uv lock \
     && uv sync --frozen --extra server --extra dev --extra membrane
 
 # --extra cobra --extra copasi
-# TODO: slim this down to just a single module that stays alive and connected to ChangeStream in Mongo: listens for new jobs, processes, and emits change into stream back to Go server
 # CMD ["uv", "run", "server", "up"]
+
+CMD ["uvicorn", "backend.runner.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]

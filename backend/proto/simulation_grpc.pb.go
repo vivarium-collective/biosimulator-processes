@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SimulatorClient interface {
-	SubmitSimulation(ctx context.Context, in *SimulationRequest, opts ...grpc.CallOption) (*SimulationResponse, error)
+	SubmitSimulation(ctx context.Context, in *SimulationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SimulationResponse], error)
 }
 
 type simulatorClient struct {
@@ -37,21 +37,30 @@ func NewSimulatorClient(cc grpc.ClientConnInterface) SimulatorClient {
 	return &simulatorClient{cc}
 }
 
-func (c *simulatorClient) SubmitSimulation(ctx context.Context, in *SimulationRequest, opts ...grpc.CallOption) (*SimulationResponse, error) {
+func (c *simulatorClient) SubmitSimulation(ctx context.Context, in *SimulationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SimulationResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SimulationResponse)
-	err := c.cc.Invoke(ctx, Simulator_SubmitSimulation_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Simulator_ServiceDesc.Streams[0], Simulator_SubmitSimulation_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[SimulationRequest, SimulationResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Simulator_SubmitSimulationClient = grpc.ServerStreamingClient[SimulationResponse]
 
 // SimulatorServer is the server API for Simulator service.
 // All implementations must embed UnimplementedSimulatorServer
 // for forward compatibility.
 type SimulatorServer interface {
-	SubmitSimulation(context.Context, *SimulationRequest) (*SimulationResponse, error)
+	SubmitSimulation(*SimulationRequest, grpc.ServerStreamingServer[SimulationResponse]) error
 	mustEmbedUnimplementedSimulatorServer()
 }
 
@@ -62,8 +71,8 @@ type SimulatorServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSimulatorServer struct{}
 
-func (UnimplementedSimulatorServer) SubmitSimulation(context.Context, *SimulationRequest) (*SimulationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubmitSimulation not implemented")
+func (UnimplementedSimulatorServer) SubmitSimulation(*SimulationRequest, grpc.ServerStreamingServer[SimulationResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method SubmitSimulation not implemented")
 }
 func (UnimplementedSimulatorServer) mustEmbedUnimplementedSimulatorServer() {}
 func (UnimplementedSimulatorServer) testEmbeddedByValue()                   {}
@@ -86,23 +95,16 @@ func RegisterSimulatorServer(s grpc.ServiceRegistrar, srv SimulatorServer) {
 	s.RegisterService(&Simulator_ServiceDesc, srv)
 }
 
-func _Simulator_SubmitSimulation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SimulationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Simulator_SubmitSimulation_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SimulationRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(SimulatorServer).SubmitSimulation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Simulator_SubmitSimulation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SimulatorServer).SubmitSimulation(ctx, req.(*SimulationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(SimulatorServer).SubmitSimulation(m, &grpc.GenericServerStream[SimulationRequest, SimulationResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Simulator_SubmitSimulationServer = grpc.ServerStreamingServer[SimulationResponse]
 
 // Simulator_ServiceDesc is the grpc.ServiceDesc for Simulator service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -110,12 +112,13 @@ func _Simulator_SubmitSimulation_Handler(srv interface{}, ctx context.Context, d
 var Simulator_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "sim.Simulator",
 	HandlerType: (*SimulatorServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "SubmitSimulation",
-			Handler:    _Simulator_SubmitSimulation_Handler,
+			StreamName:    "SubmitSimulation",
+			Handler:       _Simulator_SubmitSimulation_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "simulation.proto",
 }

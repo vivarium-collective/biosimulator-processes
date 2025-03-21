@@ -5,7 +5,7 @@ package sim;
 option go_package = "github.com/vivarium-collective/biosimulator-processes/backend/proto;sim";
 
 service Simulator {
-  rpc SubmitSimulation (SimulationRequest) returns (SimulationResponse);
+  rpc SubmitSimulation (SimulationRequest) returns (stream SimulationResponse);
 }
 
 message SimulationRequest {

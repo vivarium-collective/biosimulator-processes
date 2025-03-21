@@ -1,66 +1,97 @@
 package main
 
 import (
-	"context"
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 
 	pb "github.com/vivarium-collective/biosimulator-processes/backend/proto"
-	"github.com/vivarium-collective/biosimulator-processes/backend/shared"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 )
 
+const fastapiURL = "http://python-simulator:5000/simulate" // adjust to service name
+
 type server struct {
-    pb.UnimplementedSimulatorServer
-    db *mongo.Collection
-}
-
-func (s *server) SubmitSimulation(ctx context.Context, req *pb.SimulationRequest) (*pb.SimulationResponse, error) {
-    var config map[string]interface{}
-    if err := json.Unmarshal([]byte(req.ConfigJson), &config); err != nil {
-        return nil, fmt.Errorf("invalid config: %w", err)
-    }
-
-    doc := shared.SimulationRequest{
-        JobID:       req.JobId,
-        LastUpdated: req.LastUpdated,
-        Duration:    int(req.Duration),
-        TimeStep:    req.TimeStep,
-        Spec:        config,
-        Status:      "submitted",
-    }
-
-    _, err := s.db.InsertOne(ctx, doc)
-    if err != nil {
-        return nil, err
-    }
-
-    fmt.Printf("✅ Job %s inserted into Mongo\n", req.JobId)
-    return &pb.SimulationResponse{Status: "submitted", JobId: req.JobId}, nil
+	pb.UnimplementedSimulatorServer
 }
 
 func main() {
-    // Connect to Mongo
-    mongoClient, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://mongodb:27017"))
-    if err != nil {
-        log.Fatal(err)
-    }
-    collection := mongoClient.Database("bio").Collection("jobs")
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 
-    lis, err := net.Listen("tcp", ":50051")
-    if err != nil {
-        log.Fatalf("failed to listen: %v", err)
-    }
+	grpcServer := grpc.NewServer()
+	pb.RegisterSimulatorServer(grpcServer, &server{})
 
-    grpcServer := grpc.NewServer()
-    pb.RegisterSimulatorServer(grpcServer, &server{db: collection})
-
-    log.Println("🚀 gRPC server listening on :50051")
-    if err := grpcServer.Serve(lis); err != nil {
-        log.Fatalf("failed to serve: %v", err)
-    }
+	log.Println("🚀 gRPC server listening on :50051")
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
+
+func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator_SubmitSimulationServer) error {
+	// Build request to FastAPI
+	payload := map[string]interface{}{
+		"job_id":       req.JobId,
+		"last_updated": req.LastUpdated,
+		"duration":     req.Duration,
+		"time_step":    req.TimeStep,
+		"spec":         json.RawMessage(req.ConfigJson),
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	httpReq, err := http.NewRequest("POST", fastapiURL, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return fmt.Errorf("error calling FastAPI: %w", err)
+	}
+	defer resp.Body.Close()
+
+	buf := make([]byte, 4096)
+	decoder := json.NewDecoder(resp.Body)
+
+	for {
+		// Decode each JSON object from the stream
+		var msg map[string]interface{}
+		if err := decoder.Decode(&msg); err != nil {
+			if err == io.EOF {
+				break
+			}
+			return fmt.Errorf("stream decode error: %w", err)
+		}
+
+		// Marshal back to JSON string to store in the response
+		resultBytes, _ := json.Marshal(msg)
+
+		res := &pb.SimulationResponse{
+			JobId:       req.JobId,
+			LastUpdated: req.LastUpdated,
+			Status:      "streaming",
+			ResultJson:  string(resultBytes),
+			Duration:    req.Duration,
+		}
+
+		if err := stream.Send(res); err != nil {
+			return fmt.Errorf("failed to stream result: %w", err)
+		}
+	}
+
+	return nil
+}
+
+

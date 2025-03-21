@@ -25,3 +25,20 @@
 	./scripts/go_init.sh server
 	```
 
+
+### **Configuring microservices for deployment**:
+This project uses docker to containerize the microservices. Consider the following setup instructions:
+
+**Building `./gateway` or `./server` (_Go_ microservices):**
+```docker
+# For example, gateway:
+RUN cd /app/gateway && go install
+```
+
+**Building `./runner` (_Python_ microservice):**
+```docker
+WORKDIR /app
+COPY ./backend/runner /app
+RUN uv sync --frozen --all-extras
+```
+
