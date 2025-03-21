@@ -12,27 +12,8 @@ import (
 	"os/signal"
 )
 
-// in go, you can define type aliases like:
-type PayloadBase map[string]interface{}
-
-// SimulationRequest represents the structure expected from the client
-type SimulationRequest struct {
-	JobID       string                 `json:"job_id"`
-	LastUpdated string                 `json:"last_updated"`
-	Duration    int                    `json:"duration"`
-	Config      map[string]interface{} `json:"config"`
-	TimeStep    float64                `json:"time_step"`
-}
-
-// SimulationResponse represents the structure of the response from the Python simulator
-type SimulationResponse struct {
-	Status   string      `json:"status"`
-	JobID    string      `json:"job_id"`
-	Result   interface{} `json:"result"` // Can be any type (list, dict, etc.)
-	Duration int         `json:"duration"`
-}
-
-var pythonSimulatorURL = "http://python-simulator:5000/simulate" // Update with actual container/service name
+var pythonSimulatorURL string = "http://python-simulator:5000/simulate" // Update with actual container/service name
+var showKeysEscapeChar string = "%+v\n"
 
 func main() {
 	const serverAddr = "0.0.0.0:8080" // API Gateway address
@@ -134,3 +115,5 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+
