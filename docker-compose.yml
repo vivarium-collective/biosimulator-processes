@@ -1,16 +1,49 @@
 services:
-  go-gateway:
-      build: ./go-gateway
-      ports:
-        - "8080:8080"
-      depends_on:
-        - python-simulator
+  # Gateway (Go)
+  gateway:
+    build: 
+      context: ./backend/gateway
+      dockerfile: Dockerfile.gateway
+    container_name: server 
+    image: bsp-gate
+    ports:
+      - "8080:8080"
+    networks:
+      - bsp_net
+    depends_on:
+      - server
+  
+  # Server/Proxy (Go)
+  server:
+    build: 
+      context: ./backend/server
+      dockerfile: Dockerfile.server
+    container_name: server 
+    image: bsp-serve
+    ports:
+      - "8080:8080"
+    networks:
+      - bsp_net
+    depends_on:
+      - runner
+      - mongodb
 
-  python-simulator:
-    build: ./python-simulator
+  # Single runner module actually running Vivarium Interface (Python). Uses Flask to get input data from Go server
+  runner:
+    build:
+      context: ./backend/runner
+      dockerfile: Dockerfile.runner 
+    container_name: runner 
+    image: bsp-run
     ports:
       - "5000:5000"
+    networks:
+      - bsp_net
+    depends_on: 
+      - mongodb 
+      - server 
 
+  # MongoDb with ChangeStreams enabled (used for communication between server and runner)
   mongodb:
     image: mongo:6.0
     container_name: mongodb
@@ -24,6 +57,7 @@ services:
       # - mongo_data:/data/db
       - ./backend/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro  # Auto-init
 
+  # Express.js handler for ChangeStream events/connection
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -34,34 +68,6 @@ services:
       - "8081:8081"
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
-
-  gateway:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: docker/Server.Dockerfile
-    image: bsp-gate
-    container_name: gateway
-    networks:
-      - bsp_net
-    depends_on:
-      - mongodb
-    command: |
-      uv run python -c "import time; time.sleep(100)"
-
-  server:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: docker/Server.Dockerfile
-    image: bsp-serve
-    container_name: server
-    networks:
-      - bsp_net
-    depends_on:
-      - mongodb
-    command: |
-      uv run python backend/listener.py
 
 networks:
   bsp_net:

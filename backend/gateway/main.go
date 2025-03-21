@@ -12,6 +12,9 @@ import (
 	"os/signal"
 )
 
+// in go, you can define type aliases like:
+type PayloadBase map[string]interface{}
+
 // SimulationRequest represents the structure expected from the client
 type SimulationRequest struct {
 	JobID       string                 `json:"job_id"`
