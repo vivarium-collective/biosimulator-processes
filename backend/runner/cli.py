@@ -7,7 +7,7 @@ import uvicorn
 from dotenv import load_dotenv
 
 # from s
-from backend.dispatch import JobDispatcher
+from backend.runner.dispatch import JobDispatcher
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

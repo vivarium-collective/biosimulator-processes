@@ -4,8 +4,8 @@ import time
 from flask import Flask, request, jsonify, Response
 
 from backend.runner.processor import JobProcessor
-from backend.data_model.requests import SimulationRequest
-from backend.data_model.responses import SimulationResponse
+from backend.runner.data_model.requests import SimulationRequest
+from backend.runner.data_model.responses import SimulationResponse
 
 
 app = Flask(__name__)

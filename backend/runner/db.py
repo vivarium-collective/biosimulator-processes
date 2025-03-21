@@ -6,7 +6,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.results import UpdateResult
 
-from backend.handlers import timestamp
+from backend.runner.handlers import timestamp
 
 
 class DatabaseConnector(ABC):

@@ -9,9 +9,9 @@ from vivarium import Vivarium
 
 from bsp import app_registrar
 
-from backend.db import MongoConnector
-from backend.data_model.responses import SimulationResponse
-from backend.handlers import timestamp
+from backend.runner.db import MongoConnector
+from backend.runner.handlers import timestamp
+from backend.runner.data_model.responses import SimulationResponse
 
 
 load_dotenv()

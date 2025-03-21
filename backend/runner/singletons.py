@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 
-from backend.db import MongoConnector
+from backend.runner.db import MongoConnector
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

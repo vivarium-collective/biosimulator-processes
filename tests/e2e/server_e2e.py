@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from backend import MongoConnector
-from backend.dispatch import JobProcessor, JobDispatcher
+from backend.runner.dispatch import JobProcessor, JobDispatcher
 
 from tests.fixtures.membrane import membrane_request
 

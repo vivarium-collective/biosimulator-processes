@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package sim;
+
+service Simulator {
+  rpc SubmitSimulation (SimulationRequest) returns (SimulationResponse);
+}
+
+message SimulationRequest {
+  string job_id = 1;
+  string last_updated = 2;
+  int32 duration = 3;
+  float time_step = 4;
+  string config_json = 5;
+}
+
+message SimulationResponse {
+  string job_id = 1;
+  string last_updated = 2;
+  string status = 3;
+  string result_json = 4;
+  int32 duration = 5;
+}

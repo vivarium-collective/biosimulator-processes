@@ -1,4 +1,4 @@
-from backend.singletons import mongo_conn
+from backend.runner.singletons import mongo_conn
 
 
 def stream_listener():
