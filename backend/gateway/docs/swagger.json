@@ -1,0 +1,130 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This API provides CPU and Memory usage information via REST and SSE",
+        "title": "System Metrics API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/cpu": {
+            "get": {
+                "description": "Returns CPU statistics in JSON format",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get CPU usage",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.CPUResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/events": {
+            "get": {
+                "description": "Returns real-time system metrics via Server-Sent Events (SSE)",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "summary": "Stream CPU and Memory data",
+                "responses": {
+                    "200": {
+                        "description": "SSE Stream started",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/items": {
+            "get": {
+                "description": "Retrieves an item with name and price",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get an item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Item Name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Item Price",
+                        "name": "price",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/memory": {
+            "get": {
+                "description": "Returns Memory statistics in JSON format",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Memory usage",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.MemoryResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.CPUResponse": {
+            "type": "object",
+            "properties": {
+                "idle": {
+                    "type": "number"
+                },
+                "system": {
+                    "type": "number"
+                },
+                "user": {
+                    "type": "number"
+                }
+            }
+        },
+        "main.MemoryResponse": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "integer"
+                },
+                "used": {
+                    "type": "integer"
+                },
+                "used_percent": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

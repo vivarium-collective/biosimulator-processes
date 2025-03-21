@@ -1,4 +1,16 @@
 services:
+  go-gateway:
+      build: ./go-gateway
+      ports:
+        - "8080:8080"
+      depends_on:
+        - python-simulator
+
+  python-simulator:
+    build: ./python-simulator
+    ports:
+      - "5000:5000"
+
   mongodb:
     image: mongo:6.0
     container_name: mongodb
@@ -9,7 +21,7 @@ services:
     restart: always
     command: [ "mongod", "--replSet", "rs0" ]  # Enable Replica Set
     volumes:
-      - mongo_data:/data/db
+      # - mongo_data:/data/db
       - ./backend/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro  # Auto-init
 
   mongo-express:
@@ -49,7 +61,7 @@ services:
     depends_on:
       - mongodb
     command: |
-      uv run python -c "from backend.singletons import stream_listener; stream_listener();"
+      uv run python backend/listener.py
 
 networks:
   bsp_net:

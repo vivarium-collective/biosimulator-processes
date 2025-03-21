@@ -1,0 +1,85 @@
+basePath: /
+definitions:
+  main.CPUResponse:
+    properties:
+      idle:
+        type: number
+      system:
+        type: number
+      user:
+        type: number
+    type: object
+  main.MemoryResponse:
+    properties:
+      total:
+        type: integer
+      used:
+        type: integer
+      used_percent:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This API provides CPU and Memory usage information via REST and SSE
+  title: System Metrics API
+  version: "1.0"
+paths:
+  /cpu:
+    get:
+      description: Returns CPU statistics in JSON format
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.CPUResponse'
+      summary: Get CPU usage
+  /events:
+    get:
+      description: Returns real-time system metrics via Server-Sent Events (SSE)
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE Stream started
+          schema:
+            type: string
+      summary: Stream CPU and Memory data
+  /items:
+    get:
+      description: Retrieves an item with name and price
+      parameters:
+      - description: Item Name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: Item Price
+        in: query
+        name: price
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get an item
+  /memory:
+    get:
+      description: Returns Memory statistics in JSON format
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MemoryResponse'
+      summary: Get Memory usage
+swagger: "2.0"
