@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/vivarium-collective/biosimulator-processes/backend/shared"
 )
 
 var pythonSimulatorURL string = "http://python-simulator:5000/simulate" // Update with actual container/service name
@@ -68,7 +70,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Decode incoming JSON payload
-	var simRequest SimulationRequest
+	var simRequest shared.SimulationRequest
 	if err := json.NewDecoder(r.Body).Decode(&simRequest); err != nil {
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return

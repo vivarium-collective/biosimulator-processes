@@ -12,5 +12,10 @@ if [ "$hosted_flag" == "--hosted" ]; then
         go mod init "$HOSTED_MODULE"
         go mod tidy
         echo "Successfully initialized Go module location: $MODULE_LOCATION as a hosted module: $HOSTED_MODULE"
+
+        if [ "$module_name" != "shared" ]; then
+            go mod edit -replace github.com/vivarium-collective/biosimulator-processes/backend/shared=../shared
+            go get github.com/vivarium-collective/biosimulator-processes/backend/shared
+        fi 
     )
 fi 
