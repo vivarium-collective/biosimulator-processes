@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Metrics</title>
+</head>
+<body>
+    <h1>Real-time System Metrics</h1>
+    <h2>Memory Usage:</h2>
+    <p>Total: <span id="mem-total">Waiting...</span> MB</p>
+    <p>Used: <span id="mem-used">Waiting...</span> MB</p>
+    <p>Usage: <span id="mem-percent">Waiting...</span>%</p>
+
+    <h2>CPU Usage:</h2>
+    <p>User: <span id="cpu-user">Waiting...</span>%</p>
+    <p>System: <span id="cpu-system">Waiting...</span>%</p>
+    <p>Idle: <span id="cpu-idle">Waiting...</span>%</p>
+
+    <script type="module">
+        import { VivariumService } from './service.js';
+
+        const service = new VivariumService();
+        service.listen();
+    </script>
+</body>
+</html>
