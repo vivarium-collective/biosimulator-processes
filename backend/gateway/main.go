@@ -14,6 +14,9 @@ import (
 	"github.com/vivarium-collective/biosimulator-processes/backend/shared"
 )
 
+// NOTE: this module can be run with:
+// make run-gateway
+
 var pythonSimulatorURL string = "http://python-simulator:5000/simulate" // Update with actual container/service name
 var showKeysEscapeChar string = "%+v\n"
 

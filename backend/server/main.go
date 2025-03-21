@@ -13,6 +13,9 @@ import (
 	"google.golang.org/grpc"
 )
 
+// NOTE: this module can be run with:
+// make run-server
+
 const fastapiURL = "http://python-simulator:5000/simulate" // adjust to service name
 
 type server struct {
