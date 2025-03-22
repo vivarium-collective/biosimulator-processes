@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/struct.proto";
+
 package sim;
 
 option go_package = "github.com/vivarium-collective/biosimulator-processes/backend/proto;sim";
@@ -10,16 +12,16 @@ service Simulator {
 
 message SimulationRequest {
   string job_id = 1;
-  string last_updated = 2;
+  string timestamp = 2;
   int32 duration = 3;
-  float time_step = 4;
-  string config_json = 5;
+  google.protobuf.Struct document = 4;
+  string status = 5;
 }
 
 message SimulationResponse {
   string job_id = 1;
-  string last_updated = 2;
-  string status = 3;
-  string result_json = 4;
-  int32 duration = 5;
+  string status = 2;
+  string timestamp = 3;
+  google.protobuf.Struct results = 4;
+  int32 interval_id = 5;
 }

@@ -1,15 +1,26 @@
 from dataclasses import dataclass, field, asdict 
-from typing import Any 
+from typing import Any, Optional 
+
+from backend.runner.data_model.base import Base
 
 
 @dataclass
-class SimulationResponse:
+class BaseSimulationResponse(Base):
     job_id: str
-    last_updated: str
     status: str
-    interval: float | int
-    results: dict[str, Any] = field(default_factory={})
+    timestamp: str 
 
-    @property
-    def serialized(self):
-        return asdict(self)
+
+@dataclass 
+class IntervalResponse(BaseSimulationResponse):
+    """
+    :param job_id: (`str`)
+    :param status: (`str`)
+    :param timestamp: (`str`)
+    :param interval_id: (`str`)
+    :param results: (`dict[str, Any]`)
+    """
+    results: dict[str, Any]
+    interval_id: int
+    
+

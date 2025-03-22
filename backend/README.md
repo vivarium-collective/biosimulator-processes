@@ -42,3 +42,7 @@ COPY ./backend/runner /app
 RUN uv sync --frozen --all-extras
 ```
 
+#### **_Why Go instead of Python?_**:
+This app offloads orchestration & stream management to a fast, memory-efficient binary.
+You can deploy & monitor the Go services independently from your Python models. More to come...
+
