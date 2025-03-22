@@ -1,46 +1,41 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
+	pb "github.com/vivarium-collective/biosimulator-processes/backend/proto"
 	"github.com/vivarium-collective/biosimulator-processes/backend/shared"
+	"google.golang.org/grpc"
 )
 
 // NOTE: this module can be run with:
 // make run-gateway
 
-var runnerName string = "runner"
-var runnerPort int = 5000
-var runnerMethod string = "simulate"
-var runnerURL string = formatRunnerURL(runnerName, runnerPort, runnerMethod)
-var showKeysEscapeChar string = "%+v\n"
+const grpcServerAddr = "server:50051" // 👈 must match Docker Compose service name
+const listenAddr = "0.0.0.0:8080"
 
 func main() {
-	const serverAddr = "0.0.0.0:8080" // API Gateway address
 	done := make(chan struct{})
 
-	fmt.Println("🚀 API Gateway running on", serverAddr)
+	fmt.Println("🚀 API Gateway running on", listenAddr)
 
-	// Graceful shutdown handling
 	ctxBg := context.Background()
 	router := http.NewServeMux()
-
 	router.HandleFunc("POST /simulate", simulateHandler)
 
 	server := &http.Server{
-		Addr:    serverAddr,
+		Addr:    listenAddr,
 		Handler: router,
 	}
 
-	// Handle graceful shutdown on SIGINT (Ctrl+C)
+	// Graceful shutdown
 	go func() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
@@ -53,80 +48,72 @@ func main() {
 		close(done)
 	}()
 
-	// Start the server
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server error: %v", err)
 	}
-
 	<-done
 }
 
-// simulateHandler forwards simulation requests to the Python simulator container
 func simulateHandler(w http.ResponseWriter, r *http.Request) {
-	// Setup SSE headers
+	// SSE setup
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	// Ensure the writer supports flushing
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
 		return
 	}
 
-	// Decode incoming JSON payload
+	// Parse the incoming HTTP JSON request
 	var simRequest shared.SimulationRequest
 	if err := json.NewDecoder(r.Body).Decode(&simRequest); err != nil {
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
-	// Marshal the request and send it to the Python simulator
-	requestBody, err := json.Marshal(simRequest)
+	// Set up gRPC connection to Go server
+	conn, err := grpc.Dial(grpcServerAddr, grpc.WithInsecure())
 	if err != nil {
-		http.Error(w, "Failed to marshal request", http.StatusInternalServerError)
+		http.Error(w, "Failed to connect to gRPC server", http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	client := pb.NewSimulatorClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	defer cancel()
+
+	req := &pb.SimulationRequest{
+		JobId:       simRequest.JobID,
+		LastUpdated: simRequest.LastUpdated,
+		Duration:    int32(simRequest.Duration),
+		TimeStep:    simRequest.TimeStep,
+		ConfigJson:  mustMarshalJSON(simRequest.Spec),
+	}
+
+	stream, err := client.SubmitSimulation(ctx, req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("gRPC call failed: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	req, err := http.NewRequest("POST", runnerURL, bytes.NewBuffer(requestBody))
-	if err != nil {
-		http.Error(w, "Failed to create request to simulator", http.StatusInternalServerError)
-		return
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{
-		Timeout: 0, // don't timeout, let the connection stream
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to reach simulator: %v", err), http.StatusBadGateway)
-		return
-	}
-	defer resp.Body.Close()
-
-	// Stream the response body directly to the client as SSE
-	buf := make([]byte, 4096)
 	for {
-		n, err := resp.Body.Read(buf)
-		if n > 0 {
-			// Wrap each chunk in SSE format
-			fmt.Fprintf(w, "data: %s\n\n", buf[:n])
-			flusher.Flush()
-		}
+		res, err := stream.Recv()
 		if err != nil {
-			if err != io.EOF {
-				log.Printf("Stream read error: %v", err)
-			}
 			break
 		}
+		fmt.Fprintf(w, "data: %s\n\n", res.ResultJson)
+		flusher.Flush()
 	}
 }
 
-func formatRunnerURL(name string, port int, method string) string {
-	return fmt.Sprintf("http://%v:%v/%v", name, port, method)
+func mustMarshalJSON(data interface{}) string {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("failed to marshal config_json: %v", err)
+	}
+	return string(bytes)
 }
-
-

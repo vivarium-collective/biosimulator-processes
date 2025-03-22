@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -13,17 +14,17 @@ import (
 	"google.golang.org/grpc"
 )
 
-// NOTE: this module can be run with:
-// make run-server
-
-const fastapiURL = "http://python-simulator:5000/simulate" // adjust to service name
+const (
+	fastapiURL = "http://runner:5000/simulate" // Match FastAPI Docker service name
+	port       = ":50051"
+)
 
 type server struct {
 	pb.UnimplementedSimulatorServer
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -31,14 +32,14 @@ func main() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterSimulatorServer(grpcServer, &server{})
 
-	log.Println("🚀 gRPC server listening on :50051")
+	log.Printf("🚀 gRPC server listening on %s\n", port)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
 
 func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator_SubmitSimulationServer) error {
-	// Build request to FastAPI
+	// Prepare request body for FastAPI
 	payload := map[string]interface{}{
 		"job_id":       req.JobId,
 		"last_updated": req.LastUpdated,
@@ -52,49 +53,44 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
+	// HTTP request to FastAPI
 	httpReq, err := http.NewRequest("POST", fastapiURL, bytes.NewBuffer(payloadBytes))
 	if err != nil {
-		return fmt.Errorf("failed to create HTTP request: %w", err)
+		return fmt.Errorf("failed to create FastAPI request: %w", err)
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(httpReq)
 	if err != nil {
-		return fmt.Errorf("error calling FastAPI: %w", err)
+		return fmt.Errorf("FastAPI request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
-	buf := make([]byte, 4096)
-	decoder := json.NewDecoder(resp.Body)
-
+	// Read streamed lines from FastAPI response
+	reader := bufio.NewReader(resp.Body)
 	for {
-		// Decode each JSON object from the stream
-		var msg map[string]interface{}
-		if err := decoder.Decode(&msg); err != nil {
+		line, err := reader.ReadBytes('\n')
+		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			return fmt.Errorf("stream decode error: %w", err)
+			return fmt.Errorf("error reading response stream: %w", err)
 		}
 
-		// Marshal back to JSON string to store in the response
-		resultBytes, _ := json.Marshal(msg)
-
+		// Create and stream gRPC response
 		res := &pb.SimulationResponse{
 			JobId:       req.JobId,
 			LastUpdated: req.LastUpdated,
 			Status:      "streaming",
-			ResultJson:  string(resultBytes),
+			ResultJson:  string(bytes.TrimSpace(line)),
 			Duration:    req.Duration,
 		}
 
 		if err := stream.Send(res); err != nil {
-			return fmt.Errorf("failed to stream result: %w", err)
+			return fmt.Errorf("failed to stream to client: %w", err)
 		}
 	}
 
 	return nil
 }
-
-
