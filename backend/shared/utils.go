@@ -1,7 +1,22 @@
 package shared
 
-func GetNested(spec StateDocument, keys ...string) (interface{}, bool) {
-	current := interface{}(spec)
+import (
+	"log"
+
+	"google.golang.org/protobuf/types/known/structpb"
+)
+
+
+func mustConvertToStructpb(data map[string]interface{}) *structpb.Struct {
+	s, err := structpb.NewStruct(data)
+	if err != nil {
+		log.Fatalf("structpb conversion failed: %v", err)
+	}
+	return s
+}
+
+func GetNested(document VivariumDocument, keys ...string) (interface{}, bool) {
+	current := interface{}(document)
 	for _, k := range keys {
 		m, ok := current.(map[string]interface{})
 		if !ok {

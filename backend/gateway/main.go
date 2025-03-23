@@ -88,10 +88,10 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 
 	req := &pb.SimulationRequest{
 		JobId:       simRequest.JobID,
-		LastUpdated: simRequest.LastUpdated,
+		Timestamp: simRequest.TimeStamp,
 		Duration:    int32(simRequest.Duration),
-		TimeStep:    simRequest.TimeStep,
-		ConfigJson:  mustMarshalJSON(simRequest.Spec),
+		Document:    simRequest.Document,
+		Status:		"PENDING:SUBMITTED",
 	}
 
 	stream, err := client.SubmitSimulation(ctx, req)
@@ -105,7 +105,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			break
 		}
-		fmt.Fprintf(w, "data: %s\n\n", res.ResultJson)
+		fmt.Fprintf(w, "data: %s\n\n", res.Results)
 		flusher.Flush()
 	}
 }
