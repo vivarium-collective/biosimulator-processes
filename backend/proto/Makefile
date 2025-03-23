@@ -4,7 +4,8 @@ PROTOC_GEN = protoc
 PROTO_FILES = simulation.proto
 GENERATED_FILES = simulation.pb.go simulation_grpc.pb.go
 
-all:
+.PHONY: proto
+proto:
 	$(PROTOC_GEN) \
 		--go_out=. \
 		--go_opt=paths=source_relative \

@@ -1,44 +1,60 @@
 CURRENT_DIR := $(shell pwd)
  
 GATEWAY_DIR := gateway
+PROTO_DIR := proto
 SERVER_DIR := server
 SHARED_DIR := shared
 AIRNAME := .air.toml
 
-.PHONY: all build clean start startGateway startServer startAll stop tidy tidyAll 
+.PHONY: all build clean dev start startGate startServe startAll stop tidy tidyAll 
 
 all:
 	make tidyAll
 
-# deploy: TODO RUN: make dev AND make build AND (remote deploy/push/merge?)
-# dev: TODO RUN: tidy expand this to run tidy AND go tests AND python ruff AND pytest 
+
+# -- DEVELOPING --#
+dev:
+	@# TODO RUN: tidy expand this to run tidy AND go tests AND python ruff AND pytest 
+	@make tidyAll && echo "Now running go tests..." && echo "Now running Python lint..." && echo "Now running python tests..."
+
+
+# -- LINTING -- #
 
 tidy:
 	@[ -n "$(d)" ] && cd "$(d)" && go mod tidy && echo "Go module $(d) is now tidy :)" || echo "Please provide a Go module dirpath to tidy with d=<GO MODULE DIRPATH>"
 
 tidyAll:
-	@make tidy d="$(SHARED_DIR)" && make tidy d="$(GATEWAY_DIR)" && make tidy d="$(SERVER_DIR)"
+	@make tidy d="$(SHARED_DIR)" && make tidy d="$(PROTO_DIR)" && make tidy d="$(GATEWAY_DIR)" && make tidy d="$(SERVER_DIR)" 
+
+
+# -- RUNNING -- #
 
 start:
 	make startAll
 
 startAll:
-	echo "Starting all..." && make startGateway & make startServer & wait
+	echo "Starting all..." && make startGate & make startServe & wait
 	
-startGateway:
+startGate:
 	echo "Starting $(GATEWAY_DIR)" && make tidy d="$(GATEWAY_DIR)" && cd "$(GATEWAY_DIR)" && air -c "$(AIRNAME)"  
 
-startServer:
+startServe:
 	echo "Starting $(SERVER_DIR)" && make tidy d="$(SERVER_DIR)" && cd "$(SERVER_DIR)" && air -c "$(AIRNAME)"
 
 stop:
 	@pkill air || echo "There are no air processes running."
 
-# TODO: use this in container builds
+
+# -- DEPLOYING -- #
+
 build:
-	go build -o bin/gateway ./"$(GATEWAY_DIR)"
-	go build -o bin/server ./"$(SERVER_DIR)"
-	go build -o bin/shared ./"$(SHARED_DIR)"
+	# TODO: use this in container builds
+	go build -o gateway/dev ./"$(GATEWAY_DIR)"
+	go build -o server/dev ./"$(SERVER_DIR)"
+	go build -o shared/dev ./"$(SHARED_DIR)"
+	go build -o proto/dev ./"$(PROTO_DIR)"
 
 clean:
-	rm -rf bin/
+	rm -rf dev/
+
+# deploy: TODO RUN: make dev AND make build AND (remote deploy/push/merge?)
