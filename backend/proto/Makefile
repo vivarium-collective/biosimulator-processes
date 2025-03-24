@@ -4,14 +4,17 @@ PROTOC_GEN = protoc
 PROTO_FILES = simulation.proto
 GENERATED_FILES = simulation.pb.go simulation_grpc.pb.go
 
+all: clean proto
+
 .PHONY: proto
 proto:
-	$(PROTOC_GEN) \
+	@$(PROTOC_GEN) \
 		--go_out=. \
 		--go_opt=paths=source_relative \
 		--go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative \
 		$(PROTO_FILES)
 
+.PHONY: clean
 clean:
-	rm -f $(GENERATED_FILES)
+	@rm -f $(GENERATED_FILES)

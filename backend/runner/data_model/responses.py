@@ -20,7 +20,8 @@ class IntervalResponse(BaseSimulationResponse):
     :param interval_id: (`str`)
     :param results: (`dict[str, Any]`)
     """
-    results: dict[str, Any]
+    results: Any
     interval_id: int
+    status: str = "RUNNING:STREAMING"
     
 

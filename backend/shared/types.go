@@ -4,26 +4,26 @@ package shared
 type PayloadBase map[string]interface{}
 
 // Request (client payload) types
-type VivariumDocument map[string]interface{}
+type VivariumState map[string]interface{}
 
 type SimulationRequest struct {
-	JobID     string           `json:"job_id"`
-	TimeStamp string           `json:"timestamp"`
-	Duration  int              `json:"duration"`
-	Document  VivariumDocument `json:"document"`
-	Status    string           `json:"status"`
+	JobID     string        `json:"job_id"`
+	TimeStamp string        `json:"timestamp"`
+	Duration  int           `json:"duration"`
+	State     VivariumState `json:"state"`
+	Status    string        `json:"status"`
 }
 
 func NewSimulationRequest(
 	jobId string,
 	timestamp string,
 	duration int,
-	document VivariumDocument) SimulationRequest {
+	state VivariumState) SimulationRequest {
 	return SimulationRequest{
 		JobID:     jobId,
 		TimeStamp: timestamp,
 		Duration:  duration,
-		Document:  document,
+		State:     state,
 		Status:    "PENDING:SUBMITTED",
 	}
 }

@@ -7,13 +7,13 @@ from backend.runner.data_model.base import Base
 @dataclass
 class SimulationRequest(Base):
     """
-    Data structure representing the full request made by the Client through (for example), React
+    Data structure representing the client request recieved by the python runner translated from the SimulationRequest gRPC message struct
     """
     job_id: str
     timestamp: str
     duration: int
-    document: dict[str, Any]
-    status: str = "PENDING"
+    state: dict[str, Any]
+    status: str = "PENDING:SUBMITTED"
 
     @property
     def serialized(self):

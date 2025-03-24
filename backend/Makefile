@@ -4,6 +4,7 @@ GATEWAY_DIR := gateway
 PROTO_DIR := proto
 SERVER_DIR := server
 SHARED_DIR := shared
+DOCS_DIR := "$(GATEWAY_DIR)"/docs
 AIRNAME := .air.toml
 
 
@@ -13,6 +14,10 @@ all:
 
 
 # -- DEVELOPING --#
+
+.PHONY: proto 
+proto:
+	@cd "$(PROTO_DIR)" && make && go mod tidy
 
 .PHONY: clean
 clear:
@@ -39,8 +44,7 @@ tidy-all:
 
 .PHONY: docs
 docs:
-	@cd "$(GATEWAY_DIR)" && swag init -q
-
+	@cd "$(GATEWAY_DIR)" && echo "Refreshing docs dir..." && rm -rf docs && mkdir docs && swag init -q --parseDependency --parseInternal && echo "Generated the following files: $(shell ls gateway/docs)"
 
 # -- RUNNING -- #
 

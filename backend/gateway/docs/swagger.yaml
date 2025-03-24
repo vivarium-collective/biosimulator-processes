@@ -1,4 +1,69 @@
+definitions:
+  sim.SimulationRequest:
+    properties:
+      duration:
+        type: integer
+      job_id:
+        type: string
+      state:
+        $ref: '#/definitions/structpb.Struct'
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  sim.SimulationResponse:
+    properties:
+      interval_id:
+        type: integer
+      job_id:
+        type: string
+      results:
+        $ref: '#/definitions/structpb.Struct'
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  structpb.Struct:
+    properties:
+      fields:
+        additionalProperties:
+          $ref: '#/definitions/structpb.Value'
+        description: Unordered map of dynamically typed values.
+        type: object
+    type: object
+  structpb.Value:
+    properties:
+      kind:
+        description: "The kind of value.\n\nTypes that are valid to be assigned to
+          Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /simulate:
+    post:
+      consumes:
+      - application/json
+      description: Accepts a simulation request and streams the results via SSE
+      parameters:
+      - description: Simulation Input
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/sim.SimulationRequest'
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sim.SimulationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Submit a simulation
 swagger: "2.0"

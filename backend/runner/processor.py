@@ -17,13 +17,13 @@ core: ProcessTypes = app_registrar.core
 
 class JobProcessor(object):
     @classmethod
-    def run_interval(cls, spec: dict) -> list[dict]:
+    def run_interval(cls, state: dict) -> dict:
         """Runs a vivarium simulation for an atomic interval index whose range spans a given job's duration"""
         viv = Vivarium(
             processes=core.process_registry.registry,
             types=core.types(),
             core=core,
-            document={'state': spec}
+            document={'state': state}
         )
         if 'emitter' not in viv.get_state().keys():
             viv.add_emitter()

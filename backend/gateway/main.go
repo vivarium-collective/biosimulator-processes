@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,20 +19,31 @@ import (
 	"google.golang.org/grpc"
 )
 
+// TODO: ensure that local mode is envoked which changes address paths if so
+
+var mode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
+var debug = flag.Bool("debug", false, "enable debug logging")
+
 const (
-	grpcServerAddr = "server:50051" // 👈 must match Docker Compose service name
-	listenAddr     = "0.0.0.0:8080"
+	grpcServerAddr      = "server:50051" // 👈 must match Docker Compose service name
+	grpcLocalServerAddr = "localhost:50051"
+	listenAddr          = "0.0.0.0:8080"
 )
 
+var _ shared.SimulationRequest
+
 func main() {
+	flag.Parse()
+
 	done := make(chan struct{})
 
 	fmt.Println("🚀 API Gateway running on", listenAddr)
+	fmt.Printf("Run Mode: %v\n, Debug: %v\n", *mode, *debug)
 
 	ctxBg := context.Background()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/simulate", simulateHandler).Methods("POST")
+	router.HandleFunc("/simulate", requestHandler).Methods("POST")
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
@@ -59,7 +71,16 @@ func main() {
 	<-done
 }
 
-func simulateHandler(w http.ResponseWriter, r *http.Request) {
+// requestHandler godoc
+// @Summary      Submit a simulation
+// @Description  Accepts a simulation request and streams the results via SSE
+// @Accept       json
+// @Produce      text/event-stream
+// @Param        request body pb.SimulationRequest true "Simulation Input"
+// @Success      200 {object} pb.SimulationResponse
+// @Failure      400 {string} string "Bad Request"
+// @Router       /simulate [post]
+func requestHandler(w http.ResponseWriter, r *http.Request) {
 	// SSE setup
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -95,7 +116,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		JobId:     simRequest.JobID,
 		Timestamp: simRequest.TimeStamp,
 		Duration:  int32(simRequest.Duration),
-		Document:  shared.ToStructpb(simRequest.Document),
+		State:     shared.ToStructpb(simRequest.State),
 		Status:    "PENDING:SUBMITTED",
 	}
 
@@ -114,36 +135,3 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 }
-
-// func main() {
-// 	done := make(chan struct{})
-//
-// 	fmt.Println("🚀 API Gateway running on", listenAddr)
-//
-// 	ctxBg := context.Background()
-// 	router := http.NewServeMux()
-// 	router.HandleFunc("POST /simulate", simulateHandler)
-//
-// 	server := &http.Server{
-// 		Addr:    listenAddr,
-// 		Handler: router,
-// 	}
-//
-// 	// Graceful shutdown
-// 	go func() {
-// 		sigint := make(chan os.Signal, 1)
-// 		signal.Notify(sigint, os.Interrupt)
-// 		<-sigint
-// 		fmt.Println("\nShutting down server...")
-//
-// 		if err := server.Shutdown(ctxBg); err != nil {
-// 			log.Fatalf("Server shutdown error: %v", err)
-// 		}
-// 		close(done)
-// 	}()
-//
-// 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-// 		log.Fatalf("HTTP server error: %v", err)
-// 	}
-// 	<-done
-// }

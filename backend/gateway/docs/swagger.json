@@ -3,5 +3,105 @@
     "info": {
         "contact": {}
     },
-    "paths": {}
+    "paths": {
+        "/simulate": {
+            "post": {
+                "description": "Accepts a simulation request and streams the results via SSE",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/event-stream"
+                ],
+                "summary": "Submit a simulation",
+                "parameters": [
+                    {
+                        "description": "Simulation Input",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sim.SimulationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sim.SimulationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "sim.SimulationRequest": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "type": "integer"
+                },
+                "job_id": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "sim.SimulationResponse": {
+            "type": "object",
+            "properties": {
+                "interval_id": {
+                    "type": "integer"
+                },
+                "job_id": {
+                    "type": "string"
+                },
+                "results": {
+                    "$ref": "#/definitions/structpb.Struct"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "structpb.Struct": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "description": "Unordered map of dynamically typed values.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/structpb.Value"
+                    }
+                }
+            }
+        },
+        "structpb.Value": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "The kind of value.\n\nTypes that are valid to be assigned to Kind:\n\n\t*Value_NullValue\n\t*Value_NumberValue\n\t*Value_StringValue\n\t*Value_BoolValue\n\t*Value_StructValue\n\t*Value_ListValue"
+                }
+            }
+        }
+    }
 }

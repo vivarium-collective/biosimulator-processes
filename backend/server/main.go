@@ -12,11 +12,13 @@ import (
 
 	pb "github.com/vivarium-collective/biosimulator-processes/backend/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 const (
-	fastapiURL = "http://runner:5000/simulate" // Match FastAPI Docker service name
-	port       = ":50051"
+	fastapiURL      = "http://runner:5000/simulate" // Match FastAPI Docker service name
+	fastapiLocalURL = "http://localhost:5000/simulate"
+	port            = ":50051"
 )
 
 type server struct {
@@ -41,11 +43,10 @@ func main() {
 func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator_SubmitSimulationServer) error {
 	// Prepare request body for FastAPI
 	payload := map[string]interface{}{
-		"job_id":       req.JobId,
-		"last_updated": req.LastUpdated,
-		"duration":     req.Duration,
-		"time_step":    req.TimeStep,
-		"spec":         json.RawMessage(req.ConfigJson),
+		"job_id":    req.JobId,
+		"timestamp": req.Timestamp,
+		"duration":  req.Duration,
+		"state":     req.State, // json.RawMessage(req.State),
 	}
 
 	payloadBytes, err := json.Marshal(payload)
@@ -54,7 +55,7 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 	}
 
 	// HTTP request to FastAPI
-	httpReq, err := http.NewRequest("POST", fastapiURL, bytes.NewBuffer(payloadBytes))
+	httpReq, err := http.NewRequest("POST", fastapiLocalURL, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return fmt.Errorf("failed to create FastAPI request: %w", err)
 	}
@@ -78,13 +79,24 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 			return fmt.Errorf("error reading response stream: %w", err)
 		}
 
+		// Unmarshal JSON line to a map
+		var jsonMap map[string]interface{}
+		if err := json.Unmarshal(bytes.TrimSpace(line), &jsonMap); err != nil {
+			return fmt.Errorf("error unmarshaling line to map: %w", err)
+		}
+
+		// Convert map to structpb.Struct
+		structVal, err := structpb.NewStruct(jsonMap)
+		if err != nil {
+			return fmt.Errorf("error converting map to structpb.Struct: %w", err)
+		}
+
 		// Create and stream gRPC response
 		res := &pb.SimulationResponse{
-			JobId:       req.JobId,
-			LastUpdated: req.LastUpdated,
-			Status:      "streaming",
-			ResultJson:  string(bytes.TrimSpace(line)),
-			Duration:    req.Duration,
+			JobId:     req.JobId,
+			Status:    "RUNNING:STREAMING",
+			Timestamp: req.Timestamp,
+			Results:   structVal,
 		}
 
 		if err := stream.Send(res); err != nil {

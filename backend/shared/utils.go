@@ -23,8 +23,8 @@ func ToStructpb(data map[string]interface{}) *structpb.Struct {
 	return s
 }
 
-func GetNested(document VivariumDocument, keys ...string) (interface{}, bool) {
-	current := interface{}(document)
+func GetNested(state VivariumState, keys ...string) (interface{}, bool) {
+	current := interface{}(state)
 	for _, k := range keys {
 		m, ok := current.(map[string]interface{})
 		if !ok {
