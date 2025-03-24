@@ -29,6 +29,7 @@ class JobProcessor(object):
             viv.add_emitter()
 
         viv.run(1)
-        return viv.get_results()
+        results = viv.get_results()
+        return results.pop() if isinstance(results, list) else results  # type: ignore
             
 
