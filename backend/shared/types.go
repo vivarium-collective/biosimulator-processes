@@ -7,39 +7,39 @@ type PayloadBase map[string]interface{}
 type VivariumDocument map[string]interface{}
 
 type SimulationRequest struct {
-	JobID       string        `json:"job_id"`
-	TimeStamp 	string        `json:"timestamp"`
-	Duration    int           `json:"duration"`
-	Document	VivariumDocument	`json:"document"`
-	Status      string       `json:"status"`
+	JobID     string           `json:"job_id"`
+	TimeStamp string           `json:"timestamp"`
+	Duration  int              `json:"duration"`
+	Document  VivariumDocument `json:"document"`
+	Status    string           `json:"status"`
 }
 
 func NewSimulationRequest(
-	jobId string, 
-	timestamp string, 
-	duration int, 
+	jobId string,
+	timestamp string,
+	duration int,
 	document VivariumDocument) SimulationRequest {
 	return SimulationRequest{
-		JobID: jobId,
+		JobID:     jobId,
 		TimeStamp: timestamp,
-		Duration: duration,
-		Document: document,
-		Status: "PENDING:SUBMITTED",
+		Duration:  duration,
+		Document:  document,
+		Status:    "PENDING:SUBMITTED",
 	}
 }
 
 // Response (server sent events) types
 type SimulationResponse struct {
-	JobID       string      `json:"job_id"`
-	Status      string      `json:"status"`
-	TimeStamp	string      `json:"timestamp"`
-	Results     interface{}	`json:"results"` 
+	JobID     string      `json:"job_id"`
+	Status    string      `json:"status"`
+	TimeStamp string      `json:"timestamp"`
+	Results   interface{} `json:"results"`
 }
 
 type IntervalResponse struct {
-	JobID       string      `json:"job_id"`
-	Status      string      `json:"status"`
-	TimeStamp	string      `json:"timestamp"`
-	Results     interface{} `json:"results"` 
-	IntervalID	int			`json:"interval_id"`
+	JobID      string      `json:"job_id"`
+	Status     string      `json:"status"`
+	TimeStamp  string      `json:"timestamp"`
+	Results    interface{} `json:"results"`
+	IntervalID int         `json:"interval_id"`
 }

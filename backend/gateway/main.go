@@ -84,11 +84,11 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	req := &pb.SimulationRequest{
-		JobId:       simRequest.JobID,
+		JobId:     simRequest.JobID,
 		Timestamp: simRequest.TimeStamp,
-		Duration:    int32(simRequest.Duration),
-		Document:    shared.ToStructpb(simRequest.Document),
-		Status:		"PENDING:SUBMITTED",
+		Duration:  int32(simRequest.Duration),
+		Document:  shared.ToStructpb(simRequest.Document),
+		Status:    "PENDING:SUBMITTED",
 	}
 
 	stream, err := client.SubmitSimulation(ctx, req)
@@ -106,5 +106,3 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 }
-
-

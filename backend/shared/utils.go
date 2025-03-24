@@ -15,7 +15,6 @@ func MarshalJSON(data interface{}) string {
 	return string(bytes)
 }
 
-
 func ToStructpb(data map[string]interface{}) *structpb.Struct {
 	s, err := structpb.NewStruct(data)
 	if err != nil {

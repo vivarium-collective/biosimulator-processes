@@ -21,7 +21,7 @@ dev:
 # -- LINTING -- #
 
 tidy:
-	@[ -n "$(d)" ] && cd "$(d)" && go mod tidy && echo "Go module $(d) is now tidy :)" || echo "Please provide a Go module dirpath to tidy with d=<GO MODULE DIRPATH>"
+	@[ -n "$(d)" ] && cd "$(d)" && go mod tidy && echo "Go module $(d) is now tidy :)" && gofmt -w . || echo "Please provide a Go module dirpath to tidy with d=<GO MODULE DIRPATH>"
 
 tidyAll:
 	@make tidy d="$(SHARED_DIR)" && make tidy d="$(PROTO_DIR)" && make tidy d="$(GATEWAY_DIR)" && make tidy d="$(SERVER_DIR)" 
