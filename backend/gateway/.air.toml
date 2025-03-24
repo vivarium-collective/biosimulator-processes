@@ -1,4 +1,4 @@
-root = "gateway"
+root = "."
 testdata_dir = ".test"
 tmp_dir = ".air"
 

@@ -46,10 +46,10 @@ run:
 startAll:
 	echo "Starting all..." && make tidyAll && make startGate & make startServe & wait
 	
-startgate:
+startGate:
 	echo "Starting $(GATEWAY_DIR)" && cd "$(GATEWAY_DIR)" && air -c "$(AIRNAME)"  
 
-startserve:
+startServe:
 	echo "Starting $(SERVER_DIR)" && cd "$(SERVER_DIR)" && air -c "$(AIRNAME)"
 
 stop:
