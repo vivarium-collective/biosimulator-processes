@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -14,6 +15,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/structpb"
 )
+
+var runMode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
 
 const (
 	fastapiURL      = "http://runner:5000/simulate" // Match FastAPI Docker service name
@@ -26,6 +29,8 @@ type server struct {
 }
 
 func main() {
+	flag.Parse()
+
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -55,7 +60,13 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 	}
 
 	// HTTP request to FastAPI
-	httpReq, err := http.NewRequest("POST", fastapiLocalURL, bytes.NewBuffer(payloadBytes))
+	var fastapiConn string
+	if *runMode == "local" {
+		fastapiConn = fastapiLocalURL
+	} else {
+		fastapiConn = fastapiURL
+	}
+	httpReq, err := http.NewRequest("POST", fastapiConn, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return fmt.Errorf("failed to create FastAPI request: %w", err)
 	}

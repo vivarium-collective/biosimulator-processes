@@ -21,8 +21,7 @@ import (
 
 // TODO: ensure that local mode is envoked which changes address paths if so
 
-var mode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
-var debug = flag.Bool("debug", false, "enable debug logging")
+var runMode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
 
 const (
 	grpcServerAddr      = "server:50051" // 👈 must match Docker Compose service name
@@ -38,7 +37,7 @@ func main() {
 	done := make(chan struct{})
 
 	fmt.Println("🚀 API Gateway running on", listenAddr)
-	fmt.Printf("Run Mode: %v\n, Debug: %v\n", *mode, *debug)
+	fmt.Printf("Run Mode: %v\n", *runMode)
 
 	ctxBg := context.Background()
 
@@ -101,7 +100,13 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set up gRPC connection to Go server
-	conn, err := grpc.Dial(grpcServerAddr, grpc.WithInsecure())
+	var grpcAddr string
+	if *runMode == "local" {
+		grpcAddr = grpcLocalServerAddr
+	} else {
+		grpcAddr = grpcServerAddr
+	}
+	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
 	if err != nil {
 		http.Error(w, "Failed to connect to gRPC server", http.StatusInternalServerError)
 		return

@@ -3,7 +3,7 @@ testdata_dir = ".test"
 tmp_dir = ".air"
 
 [build]
-  args_bin = []
+  args_bin = ["--mode=local"]
   bin = ".air/main"
   cmd = "go build -o .air/main ."
   delay = 1000
