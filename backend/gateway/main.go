@@ -1,9 +1,3 @@
-// @title           BioSimulations Gateway API
-// @version         1.0
-// @description     API for submitting simulations
-// @host            localhost:8080
-// @BasePath        /
-
 package main
 
 import (
@@ -24,10 +18,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-const grpcServerAddr = "server:50051" // 👈 must match Docker Compose service name
-const listenAddr = "0.0.0.0:8080"
-
-var _ shared.SimulationRequest
+const (
+	grpcServerAddr = "server:50051" // 👈 must match Docker Compose service name
+	listenAddr     = "0.0.0.0:8080"
+)
 
 func main() {
 	done := make(chan struct{})
@@ -64,39 +58,6 @@ func main() {
 	}
 	<-done
 }
-
-// func main() {
-// 	done := make(chan struct{})
-//
-// 	fmt.Println("🚀 API Gateway running on", listenAddr)
-//
-// 	ctxBg := context.Background()
-// 	router := http.NewServeMux()
-// 	router.HandleFunc("POST /simulate", simulateHandler)
-//
-// 	server := &http.Server{
-// 		Addr:    listenAddr,
-// 		Handler: router,
-// 	}
-//
-// 	// Graceful shutdown
-// 	go func() {
-// 		sigint := make(chan os.Signal, 1)
-// 		signal.Notify(sigint, os.Interrupt)
-// 		<-sigint
-// 		fmt.Println("\nShutting down server...")
-//
-// 		if err := server.Shutdown(ctxBg); err != nil {
-// 			log.Fatalf("Server shutdown error: %v", err)
-// 		}
-// 		close(done)
-// 	}()
-//
-// 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-// 		log.Fatalf("HTTP server error: %v", err)
-// 	}
-// 	<-done
-// }
 
 func simulateHandler(w http.ResponseWriter, r *http.Request) {
 	// SSE setup
@@ -153,3 +114,36 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 }
+
+// func main() {
+// 	done := make(chan struct{})
+//
+// 	fmt.Println("🚀 API Gateway running on", listenAddr)
+//
+// 	ctxBg := context.Background()
+// 	router := http.NewServeMux()
+// 	router.HandleFunc("POST /simulate", simulateHandler)
+//
+// 	server := &http.Server{
+// 		Addr:    listenAddr,
+// 		Handler: router,
+// 	}
+//
+// 	// Graceful shutdown
+// 	go func() {
+// 		sigint := make(chan os.Signal, 1)
+// 		signal.Notify(sigint, os.Interrupt)
+// 		<-sigint
+// 		fmt.Println("\nShutting down server...")
+//
+// 		if err := server.Shutdown(ctxBg); err != nil {
+// 			log.Fatalf("Server shutdown error: %v", err)
+// 		}
+// 		close(done)
+// 	}()
+//
+// 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+// 		log.Fatalf("HTTP server error: %v", err)
+// 	}
+// 	<-done
+// }

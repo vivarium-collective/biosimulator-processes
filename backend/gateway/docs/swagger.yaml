@@ -1,9 +1,4 @@
-basePath: /
-host: localhost:8080
 info:
   contact: {}
-  description: API for submitting simulations
-  title: BioSimulations Gateway API
-  version: "1.0"
 paths: {}
 swagger: "2.0"

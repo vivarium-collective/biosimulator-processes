@@ -9,10 +9,11 @@ AIRNAME := .air.toml
 
 .PHONY: all
 all:
-	make tidyAll
+	make tidy
 
 
 # -- DEVELOPING --#
+
 .PHONY: clean
 clear:
 	go clean -cache && uv cache prune
@@ -29,10 +30,11 @@ tidy:
 	&& go mod tidy \
 	&& echo "Go module $(m) is now tidy :)" \
 	&& gofmt -w . \
-	|| make tidyAll
+	&& echo "Go module $(m) is now formatted :)" \
+	|| make tidy-all
 
-.PHONY: tidyAll
-tidyAll:
+.PHONY: tidy-all
+tidy-all:
 	@make tidy m="$(SHARED_DIR)" && make tidy m="$(PROTO_DIR)" && make docs && make tidy m="$(GATEWAY_DIR)" && make tidy m="$(SERVER_DIR)" 
 
 .PHONY: docs
@@ -41,12 +43,13 @@ docs:
 
 
 # -- RUNNING -- #
+
 .PHONY: up
 up:
-	echo "Starting all..." && make tidy && make air m="$(GATEWAY_DIR)" & make air m="$(SERVER_DIR)" & wait
+	echo "Starting all..." && make tidy && make start-air m="$(GATEWAY_DIR)" & make start-air m="$(SERVER_DIR)" & wait
 
-.PHONY: air
-air:
+.PHONY: start-air
+start-air:
 	@[ -n "$(m)" ] && cd "$(m)" && air -c "$(AIRNAME)" || echo "You must pass a module directory"
 
 stop:
