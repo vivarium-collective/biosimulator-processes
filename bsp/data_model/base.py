@@ -5,7 +5,7 @@ Base data model relating to utils, files, protocols, etc.
 
 from dataclasses import dataclass, asdict, Field, field
 from types import FunctionType
-from typing import List, Dict, Union
+from typing import List, Dict, Optional, Union
 
 from pydantic import ConfigDict, BaseModel as _BaseModel
 
@@ -54,7 +54,7 @@ class Simulator(BaseClass):
 class Implementation(BaseClass):
     address: str
     location: str
-    dependencies: List[str]
+    dependencies: Optional[list[str]] = None
 
 
 @dataclass
