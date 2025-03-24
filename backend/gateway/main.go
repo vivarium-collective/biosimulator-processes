@@ -1,3 +1,5 @@
+// Gateway
+// 1. gene -> ecosike id (translate geneId to ecosikeId) (LLM)
 package main
 
 import (
@@ -13,31 +15,33 @@ import (
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
+
 	_ "github.com/vivarium-collective/biosimulator-processes/backend/gateway/docs"
 	pb "github.com/vivarium-collective/biosimulator-processes/backend/proto"
 	"github.com/vivarium-collective/biosimulator-processes/backend/shared"
 	"google.golang.org/grpc"
 )
 
-// TODO: ensure that local mode is envoked which changes address paths if so
-
-var runMode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
-
 const (
 	grpcServerAddr      = "server:50051" // 👈 must match Docker Compose service name
 	grpcLocalServerAddr = "localhost:50051"
-	listenAddr          = "0.0.0.0:8080"
+	listenPort          = "8080"
 )
 
-var _ shared.SimulationRequest
+var listenAddr = fmt.Sprintf("0.0.0.0:%s", listenPort)
+var localSwaggerUrl = fmt.Sprintf("http://localhost:%s/swagger/index.html", listenPort)
+var runMode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
+var _ shared.SimulationParams
 
 func main() {
 	flag.Parse()
 
 	done := make(chan struct{})
 
-	fmt.Println("🚀 API Gateway running on", listenAddr)
-	fmt.Printf("Run Mode: %v\n", *runMode)
+	fmt.Printf("🚀 API Gateway running on port: %s", listenPort)
+	if *runMode == "local" {
+		fmt.Printf("Swagger documentation is available at: %v", localSwaggerUrl)
+	}
 
 	ctxBg := context.Background()
 
@@ -75,7 +79,7 @@ func main() {
 // @Description  Accepts a simulation request and streams the results via SSE
 // @Accept       json
 // @Produce      text/event-stream
-// @Param        request body pb.SimulationRequest true "Simulation Input"
+// @Param        request body shared.SimulationParams true "Simulation Input"
 // @Success      200 {object} pb.SimulationResponse
 // @Failure      400 {string} string "Bad Request"
 // @Router       /simulate [post]
@@ -93,7 +97,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the incoming HTTP JSON request
-	var simRequest shared.SimulationRequest
+	var simRequest shared.SimulationParams
 	if err := json.NewDecoder(r.Body).Decode(&simRequest); err != nil {
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
@@ -117,11 +121,12 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
 
+	newJobID := shared.NewJobID("simulation")
 	req := &pb.SimulationRequest{
-		JobId:     simRequest.JobID,
+		JobId:     newJobID,
 		Timestamp: simRequest.TimeStamp,
 		Duration:  int32(simRequest.Duration),
-		State:     shared.ToStructpb(simRequest.State),
+		Document:  shared.ToStructpb(simRequest.Document),
 		Status:    "PENDING:SUBMITTED",
 	}
 

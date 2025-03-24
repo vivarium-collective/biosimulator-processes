@@ -32,7 +32,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sim.SimulationRequest"
+                            "$ref": "#/definitions/shared.SimulationParams"
                         }
                     }
                 ],
@@ -54,25 +54,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "sim.SimulationRequest": {
+        "shared.SimulationParams": {
             "type": "object",
             "properties": {
+                "document": {
+                    "$ref": "#/definitions/shared.VivariumDocument"
+                },
                 "duration": {
                     "type": "integer"
-                },
-                "job_id": {
-                    "type": "string"
-                },
-                "state": {
-                    "$ref": "#/definitions/structpb.Struct"
-                },
-                "status": {
-                    "type": "string"
                 },
                 "timestamp": {
                     "type": "string"
                 }
             }
+        },
+        "shared.VivariumDocument": {
+            "type": "object",
+            "additionalProperties": true
         },
         "sim.SimulationResponse": {
             "type": "object",

@@ -1,16 +1,15 @@
 definitions:
-  sim.SimulationRequest:
+  shared.SimulationParams:
     properties:
+      document:
+        $ref: '#/definitions/shared.VivariumDocument'
       duration:
         type: integer
-      job_id:
-        type: string
-      state:
-        $ref: '#/definitions/structpb.Struct'
-      status:
-        type: string
       timestamp:
         type: string
+    type: object
+  shared.VivariumDocument:
+    additionalProperties: true
     type: object
   sim.SimulationResponse:
     properties:
@@ -53,7 +52,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/sim.SimulationRequest'
+          $ref: '#/definitions/shared.SimulationParams'
       produces:
       - text/event-stream
       responses:

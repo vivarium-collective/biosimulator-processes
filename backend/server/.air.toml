@@ -20,7 +20,7 @@ tmp_dir = ".air"
   log = "build-errors.log"
   poll = false
   poll_interval = 0
-  pre_cmd = ["go mod tidy"]
+  pre_cmd = ["go work sync", "go mod tidy"]
   post_cmd = []
   rerun = false
   rerun_delay = 500
@@ -28,11 +28,7 @@ tmp_dir = ".air"
   stop_on_error = false
 
 [color]
-  app = ""
-  build = "yellow"
-  main = "magenta"
-  runner = "green"
-  watcher = "cyan"
+  main = "yellow"
 
 [log]
   main_only = false

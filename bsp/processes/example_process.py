@@ -17,7 +17,9 @@ class Tx(Process):
     
     def initial_state(self):
         return {
-            'mRNA': 100.0
+            'DNA': 10,
+            'mRNA': 100.0,
+            'dC': 0
         }
     
     def inputs(self):

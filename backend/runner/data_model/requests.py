@@ -12,7 +12,7 @@ class SimulationRequest(Base):
     job_id: str
     timestamp: str
     duration: int
-    state: dict[str, Any]
+    document: dict[str, Any]
     status: str = "PENDING:SUBMITTED"
 
     @property

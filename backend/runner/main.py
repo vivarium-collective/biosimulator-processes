@@ -1,5 +1,6 @@
 import json
 import asyncio
+import subprocess
 from concurrent.futures import ProcessPoolExecutor
 from typing import AsyncGenerator
 
@@ -34,7 +35,7 @@ executor = ProcessPoolExecutor(max_workers=4)
 def process_job(job: SimulationRequest, interval_id: int) -> str:
     """Runs one simulation step synchronously and returns JSON."""
     # Run one step (or one duration unit) of simulation
-    results = JobProcessor.run_interval(job.state)
+    results = JobProcessor.run_interval(job.document)
     response = IntervalResponse(
         job_id=job.job_id,
         status=job.status,
@@ -65,4 +66,18 @@ async def simulate(request: Request) -> StreamingResponse:
     return StreamingResponse(event_generator(), media_type="application/json")
 
 
-# CMD [gunicorn -w 4 -k uvicorn.workers.UvicornWorker backend.runner.main:app]
+def main():
+    try:
+        subprocess.run([
+            "gunicorn",
+            "-w", "4",
+            "-k", "uvicorn.workers.UvicornWorker",
+            "app"
+        ], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Gunicorn failed with exit code {e.returncode}")
+
+
+if __name__ == "__main__":
+    main()
+

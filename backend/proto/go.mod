@@ -2,8 +2,6 @@ module github.com/vivarium-collective/biosimulator-processes/backend/proto
 
 go 1.24.1
 
-replace github.com/vivarium-collective/biosimulator-processes/backend/shared => ../shared
-
 require (
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5
