@@ -1,13 +1,22 @@
 package shared
 
 import (
+	"encoding/json"
 	"log"
 
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+func MarshalJSON(data interface{}) string {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("failed to marshal config_json: %v", err)
+	}
+	return string(bytes)
+}
 
-func mustConvertToStructpb(data map[string]interface{}) *structpb.Struct {
+
+func ToStructpb(data map[string]interface{}) *structpb.Struct {
 	s, err := structpb.NewStruct(data)
 	if err != nil {
 		log.Fatalf("structpb conversion failed: %v", err)

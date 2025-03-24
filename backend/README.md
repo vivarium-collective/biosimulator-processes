@@ -1,5 +1,11 @@
 # `biosimulator-processes/backend`: Composition API Server
 
+### _This project uses `air` to manage runtimes for Go modules. Use `./Makefile` commands to run active dev._
+```bash
+make tidyAll
+make startAll
+```
+
 ### **_REMINDERS REGARDING GOLANG CONTENT_**:
 1. **Be sure to periodically run:** 
 	```bash

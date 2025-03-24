@@ -15,9 +15,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-// NOTE: this module can be run with:
-// make run-gateway
-
 const grpcServerAddr = "server:50051" // 👈 must match Docker Compose service name
 const listenAddr = "0.0.0.0:8080"
 
@@ -90,7 +87,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		JobId:       simRequest.JobID,
 		Timestamp: simRequest.TimeStamp,
 		Duration:    int32(simRequest.Duration),
-		Document:    simRequest.Document,
+		Document:    shared.ToStructpb(simRequest.Document),
 		Status:		"PENDING:SUBMITTED",
 	}
 
@@ -110,10 +107,4 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func mustMarshalJSON(data interface{}) string {
-	bytes, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("failed to marshal config_json: %v", err)
-	}
-	return string(bytes)
-}
+
