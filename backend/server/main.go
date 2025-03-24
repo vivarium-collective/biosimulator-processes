@@ -53,7 +53,7 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 		"job_id":    req.JobId,
 		"timestamp": req.Timestamp,
 		"duration":  req.Duration,
-		"document":     req.Document, // json.RawMessage(req.State),
+		"document":  req.Document, // json.RawMessage(req.State),
 	}
 
 	payloadBytes, err := json.Marshal(payload)
