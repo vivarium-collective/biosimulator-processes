@@ -13,12 +13,10 @@ all:
 
 
 # -- DEVELOPING --#
+
 dev:
 	@# TODO RUN: tidy expand this to run tidy AND go tests AND python ruff AND pytest 
 	@make tidyAll && echo "Now running go tests..." && echo "Now running Python lint..." && echo "Now running python tests..."
-
-
-# -- LINTING/FORMATTING -- #
 
 tidy:
 	@[ -n "$(d)" ] && cd "$(d)" && go mod tidy && echo "Go module $(d) is now tidy :)" && gofmt -w . || echo "Please provide a Go module dirpath to tidy with d=<GO MODULE DIRPATH>"
