@@ -20,6 +20,7 @@ biosimulators_processes/__pycache__
 .pytest_cache
 submit-biosimulators-container.sh
 tmp
+*.log
 .vagrant
 ._vagrant
 .THIS-IS-FOR-CONTAINER-DEV-ONLY
