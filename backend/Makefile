@@ -6,40 +6,50 @@ SERVER_DIR := server
 SHARED_DIR := shared
 AIRNAME := .air.toml
 
-.PHONY: all build clean dev docs start startGate startServe startAll stop tidy tidyAll tidyGate 
+
+.PHONY: all build clean clear dev docs start startGate startServe startAll stop tidy tidyAll tidyGate 
 
 all:
 	make tidyAll
 
 
 # -- DEVELOPING --#
+clear:
+	go clean -cache && uv cache prune
 
 dev:
 	@# TODO RUN: tidy expand this to run tidy AND go tests AND python ruff AND pytest 
 	@make tidyAll && echo "Now running go tests..." && echo "Now running Python lint..." && echo "Now running python tests..."
 
 tidy:
-	@[ -n "$(d)" ] && cd "$(d)" && go mod tidy && echo "Go module $(d) is now tidy :)" && gofmt -w . || echo "Please provide a Go module dirpath to tidy with d=<GO MODULE DIRPATH>"
+	@[ -n "$(m)" ] \
+	&& cd "$(m)" \
+	&& go mod tidy \
+	&& echo "Go module $(m) is now tidy :)" \
+	&& gofmt -w . \
+	|| echo "Please provide a Go module dirpath to tidy with d=<GO MODULE DIRPATH>"
 
 tidyAll:
-	@make tidy d="$(SHARED_DIR)" && make tidy d="$(PROTO_DIR)" && make docs && make tidy d="$(GATEWAY_DIR)" && make tidy d="$(SERVER_DIR)" 
+	@make tidy d="$(SHARED_DIR)" && make tidy m="$(PROTO_DIR)" && make docs && make tidy m="$(GATEWAY_DIR)" && make tidy m="$(SERVER_DIR)" 
 
 docs:
 	@cd "$(GATEWAY_DIR)" && swag init
 
 
 # -- RUNNING -- #
-
 start:
-	make startAll
+	@[ -n "$(m)" ] && cd "$(m)" && make run m="$(m)" || make startAll
+
+run:
+	@[ -n "$(m)" ] && cd "$(m)" && air -c "$(AIRNAME)"
 
 startAll:
 	echo "Starting all..." && make tidyAll && make startGate & make startServe & wait
 	
-startGate:
+startgate:
 	echo "Starting $(GATEWAY_DIR)" && cd "$(GATEWAY_DIR)" && air -c "$(AIRNAME)"  
 
-startServe:
+startserve:
 	echo "Starting $(SERVER_DIR)" && cd "$(SERVER_DIR)" && air -c "$(AIRNAME)"
 
 stop:

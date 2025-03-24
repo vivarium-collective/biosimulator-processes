@@ -1,13 +1,13 @@
-root = "."
-testdata_dir = "testdata"
-tmp_dir = "dev"
+root = "server"
+testdata_dir = ".test"
+tmp_dir = ".air"
 
 [build]
   args_bin = []
-  bin = "dev/main"
-  cmd = "go build -o dev/main ."
+  bin = ".air/main"
+  cmd = "go build -o .air/main ."
   delay = 1000
-  exclude_dir = ["assets", "dev", "vendor", "testdata"]
+  exclude_dir = ["assets", ".test", "vendor", ".air"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
@@ -20,8 +20,8 @@ tmp_dir = "dev"
   log = "build-errors.log"
   poll = false
   poll_interval = 0
+  pre_cmd = ["go mod tidy"]
   post_cmd = []
-  pre_cmd = []
   rerun = false
   rerun_delay = 500
   send_interrupt = false
