@@ -39,7 +39,7 @@ tidy-all:
 
 .PHONY: docs
 docs:
-	@cd "$(GATEWAY_DIR)" && swag init
+	@cd "$(GATEWAY_DIR)" && swag init -q
 
 
 # -- RUNNING -- #
@@ -52,7 +52,8 @@ up:
 start-air:
 	@[ -n "$(m)" ] && cd "$(m)" && air -c "$(AIRNAME)" || echo "You must pass a module directory"
 
-stop:
+.PHONY: stop-air
+stop-air:
 	@pkill air || echo "There are no air processes running."
 
 
