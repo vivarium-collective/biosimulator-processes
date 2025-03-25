@@ -152,4 +152,3 @@ func getFastapiURL(runMode *string) string {
 	}
 	return fmt.Sprintf("%s:%s", prefix, suffix)
 }
-

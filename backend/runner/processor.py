@@ -31,6 +31,7 @@ class JobProcessor(object):
 
         viv.run(1)
         results = viv.get_results()
+        print(f'Runner.Processor got result: ${results}')
         return results.pop() if isinstance(results, list) else results  # type: ignore
             
 

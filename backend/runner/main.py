@@ -70,7 +70,14 @@ def process_job(job: SimulationRequest, interval_id: int) -> str:
 async def simulate(request: Request) -> StreamingResponse:
     body = await request.json()
     payload = SimulationRequest(**body)
-    print("📥 Received:", payload)
+    print("Gateway Received:", payload)
+
+    async def event_generator():
+        for i in range(body.get("duration", 1)):
+            await asyncio.sleep(0.5)
+            yield f"processing data for: {{\"step\": {i}}}\n\n"
+            
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 # from fastapi import FastAPI, Request
 # from fastapi.responses import StreamingResponse
@@ -89,6 +96,13 @@ async def simulate(request: Request) -> StreamingResponse:
 #             yield f"data: {{\"step\": {i}}}\n\n"
 # 
 #     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+def format_message(msg, data):
+    BLUE = "\033[94m"
+    PURPLE = "\033[95m"
+    RESET = "\033[0m"
+
+    print(f"{BLUE}Gateway Received:\n{RESET} {PURPLE}{data}{RESET}\n")
 
 
 def spawn_workers():

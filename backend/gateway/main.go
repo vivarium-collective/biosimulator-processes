@@ -100,15 +100,6 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse the incoming HTTP JSON request
-	// var simRequest shared.SimulationParams
-	// if err := json.NewDecoder(r.Body).Decode(&simRequest); err != nil {
-	// 	http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
-	// 	return
-	// }
-	// printStructKeys(simRequest)
-	// fmt.Printf("\nRequest doc: %v\n", simRequest.Document)
-
 	// Set up gRPC connection to Go server
 	var grpcAddr string
 
@@ -131,6 +122,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 
 	durationStr := r.URL.Query().Get("duration")
 	if durationStr == "" {
+		// logs clientside in js console
 		http.Error(w, "Missing duration", http.StatusBadRequest)
 		return
 	}
@@ -140,6 +132,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: add this formally to the datamodel
 	var document map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&document); err != nil {
 		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
