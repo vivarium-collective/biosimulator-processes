@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -48,7 +47,8 @@ func main() {
 	ctxBg := context.Background()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/simulate", requestHandler).Methods("POST")
+	router.Use(corsMiddleware)
+	router.HandleFunc("/simulate", requestHandler).Methods("POST", "OPTIONS")
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
@@ -74,22 +74,6 @@ func main() {
 		log.Fatalf("HTTP server error: %v", err)
 	}
 	<-done
-}
-
-func printStructKeys(s interface{}) {
-	val := reflect.ValueOf(s)
-	typ := reflect.TypeOf(s)
-
-	// If it's a pointer, dereference it
-	if typ.Kind() == reflect.Ptr {
-		val = val.Elem()
-		typ = typ.Elem()
-	}
-
-	fmt.Println("\nStruct fields:")
-	for i := 0; i < val.NumField(); i++ {
-		fmt.Println("-", typ.Field(i).Name)
-	}
 }
 
 // requestHandler godoc
@@ -186,4 +170,19 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "data: %s\n\n", res.Results)
 		flusher.Flush()
 	}
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
