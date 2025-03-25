@@ -26,13 +26,11 @@ from backend.runner.data_model.responses import IntervalResponse
 from backend.runner.handlers import timestamp
 
 
+RUNNER_PORT = 5001
 
 app = FastAPI()
 
-# Use a process pool executor for CPU-bound simulations
 executor = ProcessPoolExecutor(max_workers=4)
-
-RUNNER_PORT = 5001
 
 
 def process_job(job: SimulationRequest, interval_id: int) -> str:
@@ -49,24 +47,48 @@ def process_job(job: SimulationRequest, interval_id: int) -> str:
     return json.dumps(response.serialized)
 
 
+# @app.post("/simulate")
+# async def simulate(request: Request) -> StreamingResponse:
+#     body = await request.json()
+#     payload = SimulationRequest(**body)
+#     print(f'Got a payload: {payload}')
+# 
+#     async def event_generator():
+#         loop = asyncio.get_running_loop()
+#         for interval in range(payload.duration):
+#             json_result = await loop.run_in_executor(
+#                 executor,
+#                 process_job,
+#                 payload,
+#                 interval
+#             )
+#             yield f"data: {json_result}\n\n"  # SSE format
+# 
+#     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 @app.post("/simulate")
 async def simulate(request: Request) -> StreamingResponse:
     body = await request.json()
     payload = SimulationRequest(**body)
-    print(f'Got a payload: {payload}')
+    print("📥 Received:", payload)
 
-    async def event_generator():
-        loop = asyncio.get_running_loop()
-        for interval in range(payload.duration):
-            json_result = await loop.run_in_executor(
-                executor,
-                process_job,
-                payload,
-                interval
-            )
-            yield f"data: {json_result}\n\n"  # SSE format
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+# from fastapi import FastAPI, Request
+# from fastapi.responses import StreamingResponse
+# import asyncio
+# 
+# app = FastAPI()
+# 
+# @app.post("/simulate")
+# async def simulate(request: Request):
+#     body = await request.json()
+#     print("🔥 Got request:", body)
+# 
+#     async def event_generator():
+#         for i in range(body.get("duration", 1)):
+#             await asyncio.sleep(0.5)
+#             yield f"data: {{\"step\": {i}}}\n\n"
+# 
+#     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 def spawn_workers():

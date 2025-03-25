@@ -15,6 +15,8 @@ import (
 
 	pb "github.com/vivarium-collective/biosimulator-processes/backend/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -26,8 +28,6 @@ const (
 
 var runMode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
 var fastapiPort = flag.Int("port", 5001, "port to which fastapi python runner and go server listen and communicate.")
-
-var fastapiURL string = getFastapiURL(runMode) // Matches FastAPI Docker service name
 
 type server struct {
 	pb.UnimplementedSimulatorServer
@@ -59,12 +59,18 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 		"document":  req.Document, // json.RawMessage(req.State),
 	}
 
+	jsonMap := req.Document.AsMap()
+	prettyDoc, _ := json.MarshalIndent(jsonMap, "", "  ")
+	fmt.Printf("📄 Document:\n%s\n", prettyDoc)
+
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
 	// HTTP request to FastAPI
+	var fastapiURL string = getFastapiURL(runMode) // Matches FastAPI Docker service name
+	fmt.Printf("Using url:\n%v", fastapiURL)
 	httpReq, err := http.NewRequest("POST", fastapiURL, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return fmt.Errorf("failed to create FastAPI request: %w", err)
@@ -109,6 +115,9 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 			Results:   structVal,
 		}
 
+		fmt.Print("The proto:\n")
+		debugProto(res)
+
 		if err := stream.Send(res); err != nil {
 			return fmt.Errorf("failed to stream to client: %w", err)
 		}
@@ -117,8 +126,21 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 	return nil
 }
 
+func debugProto(msg proto.Message) {
+	marshaler := protojson.MarshalOptions{
+		Multiline: true,
+		Indent:    "  ",
+	}
+	out, err := marshaler.Marshal(msg)
+	if err != nil {
+		fmt.Printf("Failed to marshal proto: %v\n", err)
+		return
+	}
+	fmt.Printf("🔍 Proto content:\n%s\n", string(out))
+}
+
 func getFastapiURL(runMode *string) string {
-	suffix := fmt.Sprintf("%v/simulate", &fastapiPort)
+	suffix := fmt.Sprintf("%d/simulate", *fastapiPort)
 	var prefix string
 	switch *runMode {
 	case "local":
@@ -127,7 +149,7 @@ func getFastapiURL(runMode *string) string {
 		prefix = containerPrefix
 	default:
 		prefix = localPrefix
-
 	}
-	return fmt.Sprintf("%v:%v", prefix, suffix)
+	return fmt.Sprintf("%s:%s", prefix, suffix)
 }
+

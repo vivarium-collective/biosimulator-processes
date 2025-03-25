@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -74,17 +76,35 @@ func main() {
 	<-done
 }
 
+func printStructKeys(s interface{}) {
+	val := reflect.ValueOf(s)
+	typ := reflect.TypeOf(s)
+
+	// If it's a pointer, dereference it
+	if typ.Kind() == reflect.Ptr {
+		val = val.Elem()
+		typ = typ.Elem()
+	}
+
+	fmt.Println("\nStruct fields:")
+	for i := 0; i < val.NumField(); i++ {
+		fmt.Println("-", typ.Field(i).Name)
+	}
+}
+
 // requestHandler godoc
 // @Summary      Submit a simulation
 // @Description  Accepts a simulation request and streams the results via SSE
 // @Accept       json
 // @Produce      text/event-stream
-// @Param        request body shared.SimulationParams true "Simulation Input"
+// @Param duration query int true "Simulation Duration"
+// @Param request body object true "Simulation Document"
 // @Success      200 {object} pb.SimulationResponse
 // @Failure      400 {string} string "Bad Request"
 // @Router       /simulate [post]
 func requestHandler(w http.ResponseWriter, r *http.Request) {
 	// SSE setup
+	// @Param        request body shared.SimulationParams true "Simulation Input"
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
@@ -97,19 +117,23 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the incoming HTTP JSON request
-	var simRequest shared.SimulationParams
-	if err := json.NewDecoder(r.Body).Decode(&simRequest); err != nil {
-		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
-		return
-	}
+	// var simRequest shared.SimulationParams
+	// if err := json.NewDecoder(r.Body).Decode(&simRequest); err != nil {
+	// 	http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+	// 	return
+	// }
+	// printStructKeys(simRequest)
+	// fmt.Printf("\nRequest doc: %v\n", simRequest.Document)
 
 	// Set up gRPC connection to Go server
 	var grpcAddr string
+
 	if *runMode == "local" {
 		grpcAddr = grpcLocalServerAddr
 	} else {
 		grpcAddr = grpcServerAddr
 	}
+	fmt.Printf("Using grpc addr: %v", grpcAddr)
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
 	if err != nil {
 		http.Error(w, "Failed to connect to gRPC server", http.StatusInternalServerError)
@@ -121,13 +145,30 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
 
+	durationStr := r.URL.Query().Get("duration")
+	if durationStr == "" {
+		http.Error(w, "Missing duration", http.StatusBadRequest)
+		return
+	}
+	duration, err := strconv.Atoi(durationStr)
+	if err != nil {
+		http.Error(w, "Invalid duration value", http.StatusBadRequest)
+		return
+	}
+
+	var document map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&document); err != nil {
+		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+		return
+	}
+
 	newJobID := shared.NewJobID("simulation")
 	timestamp := shared.TimeStamp()
 	req := &pb.SimulationRequest{
 		JobId:     newJobID,
 		Timestamp: timestamp,
-		Duration:  int32(simRequest.Duration),
-		Document:  shared.ToStructpb(simRequest.Document),
+		Duration:  int32(duration),
+		Document:  shared.ToStructpb(document), // shared.ToStructpb(simRequest.Document),
 		Status:    "PENDING:SUBMITTED",
 	}
 

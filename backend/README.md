@@ -1,10 +1,8 @@
 # `biosimulator-processes/backend`: Composition API Server
 
-### _This project uses `air` to manage runtimes for Go modules. Use `./Makefile` commands to run active dev._
-```bash
-make tidyAll
-make startAll
-```
+### _This project uses the following tooling_:
+- `air`: hot-reloads Go modules (`gateway` and `server`). Each of these mods has a corresponding `.air.toml` which configures this setup.
+- `tilt`: Emulates k8 deployment locally for all microservices and also provides hot reloads. This tooling is configured by the `Tiltfile` at `./backend`
 
 ### **_REMINDERS REGARDING GOLANG CONTENT_**:
 1. **Be sure to periodically run:** 

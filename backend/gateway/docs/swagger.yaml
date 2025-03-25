@@ -1,14 +1,4 @@
 definitions:
-  shared.SimulationParams:
-    properties:
-      document:
-        $ref: '#/definitions/shared.VivariumDocument'
-      duration:
-        type: integer
-    type: object
-  shared.VivariumDocument:
-    additionalProperties: true
-    type: object
   sim.SimulationResponse:
     properties:
       interval_id:
@@ -45,12 +35,17 @@ paths:
       - application/json
       description: Accepts a simulation request and streams the results via SSE
       parameters:
-      - description: Simulation Input
+      - description: Simulation Duration
+        in: query
+        name: duration
+        required: true
+        type: integer
+      - description: Simulation Document
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/shared.SimulationParams'
+          type: object
       produces:
       - text/event-stream
       responses:

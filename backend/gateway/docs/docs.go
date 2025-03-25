@@ -27,12 +27,19 @@ const docTemplate = `{
                 "summary": "Submit a simulation",
                 "parameters": [
                     {
-                        "description": "Simulation Input",
+                        "type": "integer",
+                        "description": "Simulation Duration",
+                        "name": "duration",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Simulation Document",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/shared.SimulationParams"
+                            "type": "object"
                         }
                     }
                 ],
@@ -54,21 +61,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "shared.SimulationParams": {
-            "type": "object",
-            "properties": {
-                "document": {
-                    "$ref": "#/definitions/shared.VivariumDocument"
-                },
-                "duration": {
-                    "type": "integer"
-                }
-            }
-        },
-        "shared.VivariumDocument": {
-            "type": "object",
-            "additionalProperties": true
-        },
         "sim.SimulationResponse": {
             "type": "object",
             "properties": {
