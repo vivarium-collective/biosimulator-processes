@@ -1,4 +1,11 @@
-const testDocument = {
+#!/usr/bin/env bash
+
+curl -X 'POST' \
+  'http://localhost:8080/simulate' \
+  -H 'accept: text/event-stream' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "document": {
     "state": {
         "global_time": "0.0",
         "Tx": {
@@ -60,52 +67,6 @@ const testDocument = {
         }
     },
     "composition": "(global_time:float|Tx:process[(DNA:float|mRNA:float),(DNA:float|mRNA:float|dC:float)]|DNA:float|mRNA:float|dC:float|emitter:step[(global_time:any|DNA:any|mRNA:any|dC:any),()])"
-}
-
-const simulate = async (onData) => {
-    const requestParams = {
-      timestamp: "2025-03-24T00:00:00Z",
-      duration: 11,
-      document: testDocument,
-    };
-  
-    const response = await fetch("http://localhost:8080/simulate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestParams),
-    });
-  
-    if (!response.ok) {
-      console.error("❌ Failed to connect:", await response.text());
-      return;
-    }
-  
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let buffer = "";
-  
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-  
-      buffer += decoder.decode(value, { stream: true });
-      const events = buffer.split("\n\n");
-      buffer = events.pop();
-  
-      for (const evt of events) {
-        if (evt.startsWith("data: ")) {
-          const json = evt.slice("data: ".length).trim();
-          onData(JSON.parse(json)); // <- your callback
-        }
-      }
-    }
-  };
-  
-
-simulate((data) => {
-    console.log("Streaming:", data);
-  }).then(() => {
-    console.log("✅ Stream finished");
-  });
-  
-  
+},
+  "duration": 11
+}'

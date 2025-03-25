@@ -5,8 +5,6 @@ definitions:
         $ref: '#/definitions/shared.VivariumDocument'
       duration:
         type: integer
-      timestamp:
-        type: string
     type: object
   shared.VivariumDocument:
     additionalProperties: true

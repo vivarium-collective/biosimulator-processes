@@ -18,13 +18,16 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-var runMode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
-
 const (
-	fastapiURL      = "http://runner:5000/simulate" // Match FastAPI Docker service name
-	fastapiLocalURL = "http://localhost:5000/simulate"
-	port            = ":50051"
+	localPrefix     string = "http://localhost"
+	containerPrefix string = "http://runner"
+	port                   = ":50051"
 )
+
+var runMode = flag.String("mode", "local", "mode in which to run the main module. One of: local or container") // one of: "local" or "container"
+var fastapiPort = flag.Int("port", 5001, "port to which fastapi python runner and go server listen and communicate.")
+
+var fastapiURL string = getFastapiURL(runMode) // Matches FastAPI Docker service name
 
 type server struct {
 	pb.UnimplementedSimulatorServer
@@ -62,13 +65,7 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 	}
 
 	// HTTP request to FastAPI
-	var fastapiConn string
-	if *runMode == "local" {
-		fastapiConn = fastapiLocalURL
-	} else {
-		fastapiConn = fastapiURL
-	}
-	httpReq, err := http.NewRequest("POST", fastapiConn, bytes.NewBuffer(payloadBytes))
+	httpReq, err := http.NewRequest("POST", fastapiURL, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return fmt.Errorf("failed to create FastAPI request: %w", err)
 	}
@@ -118,4 +115,19 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 	}
 
 	return nil
+}
+
+func getFastapiURL(runMode *string) string {
+	suffix := fmt.Sprintf("%v/simulate", &fastapiPort)
+	var prefix string
+	switch *runMode {
+	case "local":
+		prefix = localPrefix
+	case "container":
+		prefix = containerPrefix
+	default:
+		prefix = localPrefix
+
+	}
+	return fmt.Sprintf("%v:%v", prefix, suffix)
 }

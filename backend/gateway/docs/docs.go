@@ -62,9 +62,6 @@ const docTemplate = `{
                 },
                 "duration": {
                     "type": "integer"
-                },
-                "timestamp": {
-                    "type": "string"
                 }
             }
         },

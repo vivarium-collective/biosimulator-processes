@@ -6,9 +6,8 @@ type PayloadBase map[string]interface{}
 type VivariumDocument map[string]interface{}
 
 type SimulationParams struct {
-	TimeStamp string           `json:"timestamp"`
-	Duration  int              `json:"duration"`
-	Document  VivariumDocument `json:"document"`
+	Duration int              `json:"duration"`
+	Document VivariumDocument `json:"document"`
 }
 
 // Response (server sent events) types

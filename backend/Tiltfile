@@ -1,0 +1,28 @@
+# Tiltfile for local development
+
+# --- Gateway (Go with air) ---
+local_resource(
+    "gateway",
+    cmd="make startGateway",
+    deps=["gateway", "shared", "proto"],
+    env={"RUN_MODE": "local"},
+    allow_parallel=True
+)
+
+# --- Server (Go with air) ---
+local_resource(
+    "server",
+    cmd="make start m=server",
+    deps=["server", "shared", "proto"],
+    env={"RUN_MODE": "local"},
+    allow_parallel=True
+)
+
+# --- Runner (Python FastAPI with uvicorn) ---
+local_resource(
+    "runner",
+    cmd="uvicorn runner.main:app --reload --host 0.0.0.0 --port=5001",
+    deps=["runner"],
+    env={"RUN_MODE": "local"},
+    allow_parallel=True
+)

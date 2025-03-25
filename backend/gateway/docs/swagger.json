@@ -51,9 +51,6 @@
                 },
                 "duration": {
                     "type": "integer"
-                },
-                "timestamp": {
-                    "type": "string"
                 }
             }
         },

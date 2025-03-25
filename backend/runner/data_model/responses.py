@@ -12,7 +12,7 @@ class BaseSimulationResponse(Base):
 
 
 @dataclass 
-class IntervalResponse(BaseSimulationResponse):
+class IntervalResponse(Base):
     """
     :param job_id: (`str`)
     :param status: (`str`)
@@ -20,8 +20,11 @@ class IntervalResponse(BaseSimulationResponse):
     :param interval_id: (`str`)
     :param results: (`dict[str, Any]`)
     """
+    job_id: str
+    status: str
+    timestamp: str 
     results: Any
     interval_id: int
-    status: str = "RUNNING:STREAMING"
+    status: str
     
 

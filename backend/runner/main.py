@@ -6,6 +6,7 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
+import uvicorn
 
 # from backend.runner.processor import JobProcessor
 from backend.runner.data_model.requests import SimulationRequest
@@ -31,6 +32,8 @@ app = FastAPI()
 # Use a process pool executor for CPU-bound simulations
 executor = ProcessPoolExecutor(max_workers=4)
 
+RUNNER_PORT = 5001
+
 
 def process_job(job: SimulationRequest, interval_id: int) -> str:
     """Runs one simulation step synchronously and returns JSON."""
@@ -50,10 +53,10 @@ def process_job(job: SimulationRequest, interval_id: int) -> str:
 async def simulate(request: Request) -> StreamingResponse:
     body = await request.json()
     payload = SimulationRequest(**body)
+    print(f'Got a payload: {payload}')
 
-    async def event_generator() -> AsyncGenerator:
+    async def event_generator():
         loop = asyncio.get_running_loop()
-
         for interval in range(payload.duration):
             json_result = await loop.run_in_executor(
                 executor,
@@ -61,23 +64,23 @@ async def simulate(request: Request) -> StreamingResponse:
                 payload,
                 interval
             )
-            yield json_result + "\n"
+            yield f"data: {json_result}\n\n"  # SSE format
 
-    return StreamingResponse(event_generator(), media_type="application/json")
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
-def main():
+def spawn_workers():
     try:
         subprocess.run([
             "gunicorn",
             "-w", "4",
             "-k", "uvicorn.workers.UvicornWorker",
-            "app"
+            "main:app"
         ], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Gunicorn failed with exit code {e.returncode}")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=RUNNER_PORT)
 

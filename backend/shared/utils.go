@@ -4,10 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/structpb"
 )
+
+func TimeStamp() string {
+	return time.Now().Format(time.RFC3339)
+}
 
 func NewJobID(scope string) string {
 	id := uuid.New() // this generates a UUIDv4

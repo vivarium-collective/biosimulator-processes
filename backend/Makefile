@@ -30,11 +30,11 @@ tidy:
 
 .PHONY: sync
 sync:
-	@go work sync && echo "go.work is synchronized."
+	@echo ">> SYNC" && go work sync && echo "go.work is synchronized."
 
 .PHONY: docs
 docs:
-	@cd "$(GATEWAY_DIR)" && echo "Refreshing docs dir..." && rm -rf docs && mkdir docs && swag init -q --parseDependency --parseInternal && echo "Generated the following files: $(shell ls gateway/docs)"
+	@echo ">> DOCS" && cd "$(GATEWAY_DIR)" && echo "Refreshing docs dir..." && rm -rf docs && mkdir docs && swag init -q --parseDependency --parseInternal && echo "Generated the following files: $(shell ls gateway/docs)"
 
 .PHONY: purge
 purge:
@@ -46,12 +46,16 @@ mod:
 
 # -- RUNNING -- #
 .PHONY: start
-start:
-	@[ -n "$(m)" ] && cd "$(m)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
+start: sync tidy
+	@[ -n "$(m)" ] && echo ">> STARTING: $(m)" && cd "$(m)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
+
+.PHONY: startGateway
+startGateway: sync tidy docs
+	@echo ">> STARTING: $(GATEWAY_DIR)" && cd "$(GATEWAY_DIR)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
 
 .PHONY: up
 up: sync tidy docs
-	@make start m="$(GATEWAY_DIR)" & make start m="$(SERVER_DIR)"
+	@make start m="$(GATEWAY_DIR)" & make start m="$(SERVER_DIR)" & python /Users/alexanderpatrie/Desktop/repos/biosimulator-processes/backend/runner/main.py & wait
 
 .PHONY: down
 down:

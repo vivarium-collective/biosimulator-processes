@@ -122,9 +122,10 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	newJobID := shared.NewJobID("simulation")
+	timestamp := shared.TimeStamp()
 	req := &pb.SimulationRequest{
 		JobId:     newJobID,
-		Timestamp: simRequest.TimeStamp,
+		Timestamp: timestamp,
 		Duration:  int32(simRequest.Duration),
 		Document:  shared.ToStructpb(simRequest.Document),
 		Status:    "PENDING:SUBMITTED",
