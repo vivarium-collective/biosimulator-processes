@@ -1,10 +1,6 @@
-type SimulationDocument = {
-    state: Record<string, any>;
-    composition: string;
-};
+type SimulationDocument = Record<string, any>;
   
   type SimulationRequest = {
-    timestamp: string;
     duration: number;
     document: SimulationDocument;
 };
@@ -18,7 +14,7 @@ type SimulationDocument = {
 };
   
 const testDocument: SimulationDocument = {
-    state: {
+    "state": {
       global_time: "0.0",
       Tx: {
         inputs: {
@@ -60,16 +56,16 @@ const testDocument: SimulationDocument = {
         outputs: null
       }
     },
-    composition:
+    "composition":
       "(global_time:float|Tx:process[(DNA:float|mRNA:float),(DNA:float|mRNA:float|dC:float)]|DNA:float|mRNA:float|dC:float|emitter:step[(global_time:any|DNA:any|mRNA:any|dC:any),()])"
   };
   
 async function simulate(onData: (data: SimulationResponse) => void): Promise<void> {
     const requestParams: SimulationRequest = {
-      timestamp: new Date().toISOString(),
       duration: 5,
       document: testDocument
     };
+    console.log(`Running simulate with: ${JSON.stringify(requestParams)}`)
   
     const response = await fetch("http://localhost:8080/simulate", {
       method: "POST",
