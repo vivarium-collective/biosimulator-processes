@@ -26,26 +26,24 @@ class JobProcessor(object):
 
 class SimulationService(simulation_pb2_grpc.SimulatorServicer):
     def SubmitSimulation(self, request, context):
-        document = json.loads(request.document.ToJsonString())
-        viv = Vivarium(...)  # create from document
+        print(f"🧪 Received job: {request.job_id}")
+        document = json.loads(request.document.SerializeToString().decode("utf-8"))
+        viv = new_vivarium(document)
+
         for i in range(request.duration):
-            results = JobProcessor.run_interval(viv)
-            yield simulation_pb2.SimulationResponse(
+            result = JobProcessor.run_interval(viv)
+            response = simulation_pb2.SimulationResponse(
                 job_id=request.job_id,
                 timestamp=request.timestamp,
                 status=f"STREAMING:{i}",
-                results=to_struct(results),
                 interval_id=i,
+                results=to_struct(result),
             )
+            yield response
             time.sleep(0.5)
 
 
-def to_struct(d: dict) -> Struct:
-    struct = Struct()
-    struct.update(d)
-    return struct
-
-def get_core(source=None) -> ProcessTypes:   
+def get_core(source=None) -> ProcessTypes:
     return app_registrar.core if not source else source
 
 
@@ -55,14 +53,24 @@ def new_vivarium(document):
         processes=core.process_registry.registry,
         types=core.types(),
         core=core,
-        document=document
+        document=document,
     )
+
+
+def to_struct(d: dict) -> Struct:
+    struct = Struct()
+    struct.update(d)
+    return struct
 
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
     simulation_pb2_grpc.add_SimulatorServicer_to_server(SimulationService(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port("[::]:50051")
+    print("🚀 Python Runner gRPC server on :50051")
     server.start()
-    print("🚀 Python Worker running on :50051")
     server.wait_for_termination()
+
+
+if __name__ == "__main__":
+    serve()

@@ -2,7 +2,7 @@
 local_resource(
     "gateway",
     cmd="make gateway",
-    deps=["gateway", "shared", "proto"],
+    deps=["gateway", "proto"],
     env={"RUN_MODE": "local"},
     allow_parallel=True
 )
@@ -11,7 +11,7 @@ local_resource(
 local_resource(
     "server",
     cmd="make server",
-    deps=["server", "shared", "proto"],
+    deps=["server", "proto"],
     env={"RUN_MODE": "local"},
     allow_parallel=True
 )
@@ -19,7 +19,7 @@ local_resource(
 # --- Runner (Python FastAPI with uvicorn) ---
 local_resource(
     "runner",
-    cmd="uv run uvicorn runner.main:app --reload --host 0.0.0.0 --port=5001",
+    cmd="uv run python runner/main.py",
     deps=["runner"],
     env={"RUN_MODE": "local"},
     allow_parallel=True

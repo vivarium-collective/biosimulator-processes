@@ -8,6 +8,7 @@ option go_package = "github.com/vivarium-collective/biosimulator-processes/backe
 
 service Simulator {
   rpc SubmitSimulation(SimulationRequest) returns (stream SimulationResponse);
+  rpc SubmitJob(SimulationRequest) returns (JobAck);
 }
 
 message SimulationRequest {
@@ -24,3 +25,9 @@ message SimulationResponse {
   google.protobuf.Struct results = 4;
   int32 interval_id = 5;
 }
+
+message JobAck {
+  string job_id = 1;
+  string status = 2;
+}
+

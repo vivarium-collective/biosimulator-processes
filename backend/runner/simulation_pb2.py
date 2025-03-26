@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10simulation.proto\x12\x03sim\x1a\x1cgoogle/protobuf/struct.proto\"s\n\x11SimulationRequest\x12\x0e\n\x06job_id\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x10\n\x08\x64uration\x18\x03 \x01(\x05\x12)\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\x17.google.protobuf.Struct\"\x86\x01\n\x12SimulationResponse\x12\x0e\n\x06job_id\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x0e\n\x06status\x18\x03 \x01(\t\x12(\n\x07results\x18\x04 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x13\n\x0binterval_id\x18\x05 \x01(\x05\x32R\n\tSimulator\x12\x45\n\x10SubmitSimulation\x12\x16.sim.SimulationRequest\x1a\x17.sim.SimulationResponse0\x01\x42IZGgithub.com/vivarium-collective/biosimulator-processes/backend/proto;simb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10simulation.proto\x12\x03sim\x1a\x1cgoogle/protobuf/struct.proto\"s\n\x11SimulationRequest\x12\x0e\n\x06job_id\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x10\n\x08\x64uration\x18\x03 \x01(\x05\x12)\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\x17.google.protobuf.Struct\"\x86\x01\n\x12SimulationResponse\x12\x0e\n\x06job_id\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x0e\n\x06status\x18\x03 \x01(\t\x12(\n\x07results\x18\x04 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x13\n\x0binterval_id\x18\x05 \x01(\x05\"(\n\x06JobAck\x12\x0e\n\x06job_id\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t2\x84\x01\n\tSimulator\x12\x45\n\x10SubmitSimulation\x12\x16.sim.SimulationRequest\x1a\x17.sim.SimulationResponse0\x01\x12\x30\n\tSubmitJob\x12\x16.sim.SimulationRequest\x1a\x0b.sim.JobAckBIZGgithub.com/vivarium-collective/biosimulator-processes/backend/proto;simb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,6 +37,8 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_SIMULATIONREQUEST']._serialized_end=170
   _globals['_SIMULATIONRESPONSE']._serialized_start=173
   _globals['_SIMULATIONRESPONSE']._serialized_end=307
-  _globals['_SIMULATOR']._serialized_start=309
-  _globals['_SIMULATOR']._serialized_end=391
+  _globals['_JOBACK']._serialized_start=309
+  _globals['_JOBACK']._serialized_end=349
+  _globals['_SIMULATOR']._serialized_start=352
+  _globals['_SIMULATOR']._serialized_end=484
 # @@protoc_insertion_point(module_scope)

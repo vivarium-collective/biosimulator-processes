@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import runner.simulation_pb2 as simulation__pb2
+import backend.runner.simulation_pb2 as simulation__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -39,12 +39,23 @@ class SimulatorStub(object):
                 request_serializer=simulation__pb2.SimulationRequest.SerializeToString,
                 response_deserializer=simulation__pb2.SimulationResponse.FromString,
                 _registered_method=True)
+        self.SubmitJob = channel.unary_unary(
+                '/sim.Simulator/SubmitJob',
+                request_serializer=simulation__pb2.SimulationRequest.SerializeToString,
+                response_deserializer=simulation__pb2.JobAck.FromString,
+                _registered_method=True)
 
 
 class SimulatorServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SubmitSimulation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubmitJob(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -57,6 +68,11 @@ def add_SimulatorServicer_to_server(servicer, server):
                     servicer.SubmitSimulation,
                     request_deserializer=simulation__pb2.SimulationRequest.FromString,
                     response_serializer=simulation__pb2.SimulationResponse.SerializeToString,
+            ),
+            'SubmitJob': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubmitJob,
+                    request_deserializer=simulation__pb2.SimulationRequest.FromString,
+                    response_serializer=simulation__pb2.JobAck.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,6 +102,33 @@ class Simulator(object):
             '/sim.Simulator/SubmitSimulation',
             simulation__pb2.SimulationRequest.SerializeToString,
             simulation__pb2.SimulationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SubmitJob(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/sim.Simulator/SubmitJob',
+            simulation__pb2.SimulationRequest.SerializeToString,
+            simulation__pb2.JobAck.FromString,
             options,
             channel_credentials,
             insecure,

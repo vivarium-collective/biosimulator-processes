@@ -1,5 +1,4 @@
 // gateway/main.go
-
 package main
 
 import (
@@ -10,32 +9,23 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	pb "github.com/vivarium-collective/biosimulator-processes/backend/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/structpb"
 )
-
-type SimulationJob struct {
-	JobID     string
-	Timestamp string
-	Document  map[string]interface{}
-	Duration  int
-	ResultCh  chan string // for streaming results
-}
-
-var jobQueue = make(chan SimulationJob, 100)
 
 func main() {
 	http.HandleFunc("/simulate", simulateHandler)
-	fmt.Println("🚀 Gateway listening on :8080")
+	fmt.Println("🚀 Gateway on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func simulateHandler(w http.ResponseWriter, r *http.Request) {
-	// CORS + SSE headers
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	// Parse request body
 	var req struct {
 		Document map[string]interface{} `json:"document"`
 		Duration int                    `json:"duration"`
@@ -46,20 +36,36 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jobID := uuid.NewString()
-	resultCh := make(chan string)
-	job := SimulationJob{
-		JobID:     jobID,
+	document, _ := structpb.NewStruct(req.Document)
+	simReq := &pb.SimulationRequest{
+		JobId:     jobID,
 		Timestamp: time.Now().Format(time.RFC3339),
-		Document:  req.Document,
-		Duration:  req.Duration,
-		ResultCh:  resultCh,
+		Duration:  int32(req.Duration),
+		Document:  document,
 	}
-	jobQueue <- job
 
-	// Stream results
-	for msg := range resultCh {
-		fmt.Fprintf(w, "data: %s\n\n", msg)
-		flusher, _ := w.(http.Flusher)
+	conn, err := grpc.Dial("localhost:6000", grpc.WithInsecure()) // Connect to Orchestrator
+	if err != nil {
+		http.Error(w, "Failed to connect to orchestrator", http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	client := pb.NewSimulatorClient(conn)
+	stream, err := client.SubmitSimulation(r.Context(), simReq)
+	if err != nil {
+		http.Error(w, "Simulation failed", http.StatusInternalServerError)
+		return
+	}
+
+	flusher, _ := w.(http.Flusher)
+	for {
+		res, err := stream.Recv()
+		if err != nil {
+			break
+		}
+		out, _ := json.Marshal(res)
+		fmt.Fprintf(w, "data: %s\n\n", out)
 		flusher.Flush()
 	}
 }

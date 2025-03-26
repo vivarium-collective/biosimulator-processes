@@ -3,67 +3,60 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 
 	pb "github.com/vivarium-collective/biosimulator-processes/backend/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type SimulationJob struct {
-	JobID     string
-	Timestamp string
-	Document  map[string]interface{}
-	Duration  int
-	ResultCh  chan string 
+	Request  *pb.SimulationRequest
+	ResultCh chan *pb.SimulationResponse
 }
 
 var jobQueue = make(chan SimulationJob, 100)
 
-func main() {
-	fmt.Println("🚀 Orchestrator started")
-
-	// Start orchestrator in a goroutine so we can also expose a health check
-	startOrchestrator()
-
-	// Simple health check for debugging
-	// http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-	// 	w.WriteHeader(http.StatusOK)
-	// 	w.Write([]byte("ok"))
-	// })
-	// fmt.Println("Health check on :8081/healthz")
-	// http.ListenAndServe(":8081", nil)
+type server struct {
+	pb.UnimplementedSimulatorServer
 }
 
+func (s *server) SubmitJob(ctx context.Context, req *pb.SimulationRequest) (*pb.JobAck, error) {
+	resultCh := make(chan *pb.SimulationResponse)
+	job := SimulationJob{Request: req, ResultCh: resultCh}
+	jobQueue <- job
+	go streamToWorker(job)
+	return &pb.JobAck{JobId: req.JobId, Status: "QUEUED"}, nil
+}
 
-func startOrchestrator() {
-	for job := range jobQueue {
-		go handleJob(job)
+func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator_SubmitSimulationServer) error {
+	resultCh := make(chan *pb.SimulationResponse)
+	job := SimulationJob{Request: req, ResultCh: resultCh}
+	jobQueue <- job
+
+	for res := range resultCh {
+		if err := stream.Send(res); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func handleJob(job SimulationJob) {
+func streamToWorker(job SimulationJob) {
+	// gRPC to Python runner
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
-		log.Printf("gRPC dial failed: %v", err)
+		log.Printf("Worker gRPC dial failed: %v", err)
 		close(job.ResultCh)
 		return
 	}
 	defer conn.Close()
 
 	client := pb.NewSimulatorClient(conn)
-	req := &pb.SimulationRequest{
-		JobId:     job.JobID,
-		Timestamp: job.Timestamp,
-		Duration:  int32(job.Duration),
-		Document:  toStructpb(job.Document),
-	}
-
-	stream, err := client.SubmitSimulation(context.Background(), req)
+	stream, err := client.SubmitSimulation(context.Background(), job.Request)
 	if err != nil {
-		log.Printf("Simulation error: %v", err)
+		log.Printf("Worker simulation failed: %v", err)
 		close(job.ResultCh)
 		return
 	}
@@ -73,17 +66,18 @@ func handleJob(job SimulationJob) {
 		if err != nil {
 			break
 		}
-		json, _ := json.Marshal(res)
-		job.ResultCh <- string(json)
+		job.ResultCh <- res
 	}
 	close(job.ResultCh)
 }
 
-func toStructpb(data map[string]interface{}) *structpb.Struct {
-	fmt.Printf("Using data:\n%v\n", data)
-	s, err := structpb.NewStruct(data)
+func main() {
+	lis, err := net.Listen("tcp", ":6000") // Gateway talks to Orchestrator here
 	if err != nil {
-		log.Fatalf("structpb conversion failed: %v", err)
+		log.Fatalf("failed to listen: %v", err)
 	}
-	return s
+	s := grpc.NewServer()
+	pb.RegisterSimulatorServer(s, &server{})
+	fmt.Println("🚀 Orchestrator gRPC running on :6000")
+	log.Fatal(s.Serve(lis))
 }
