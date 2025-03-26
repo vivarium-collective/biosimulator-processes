@@ -21,3 +21,4 @@ local_resource(
     deps=["runner"],
     allow_parallel=True
 )
+

@@ -45,8 +45,8 @@ rungo: sync tidy
 	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
 
 .PHONY: go
-go: sync
-	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && go run main.go || echo "You must pass a module directory"
+go: sync tidy
+	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && air -c "$(AIRNAME)" || echo "You must pass a module directory"
 	
 
 .PHONY: gateway

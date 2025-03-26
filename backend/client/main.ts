@@ -165,17 +165,103 @@ function renderBox(data: IntervalResponse) {
   output.appendChild(box);
 }
 
-streamEvents('test', 11);
+// streamEvents('test', 11);
 
 
-// const service = new VivariumService();
-// try {
-//   await service.submitSimulation((data) => {
-//     console.log(`Getting data: ${data}`)
-//   });
-//   console.log(`Done!`);
-// } catch(err) {
-//   console.log(`Error: ${err}`)
-// }
+export async function testSimulationSSE() {
+  const requestBody = {
+    document: {
+      state: {
+        global_time: "0.0",
+        Tx: {
+          inputs: {
+            DNA: ["DNA"],
+            mRNA: ["mRNA"]
+          },
+          outputs: {
+            DNA: ["DNA"],
+            mRNA: ["mRNA"],
+            dC: ["dC"]
+          },
+          interval: 1.0,
+          address: "local:tx",
+          config: {
+            ktsc: "22.2",
+            kdeg: "-0.11",
+            k: "0.001"
+          }
+        },
+        DNA: "10",
+        mRNA: "100.0",
+        dC: "0",
+        emitter: {
+          address: "local:ram-emitter",
+          config: {
+            emit: {
+              global_time: "any",
+              DNA: "any",
+              mRNA: "any",
+              dC: "any"
+            }
+          },
+          inputs: {
+            global_time: ["global_time"],
+            DNA: ["DNA"],
+            mRNA: ["mRNA"],
+            dC: ["dC"]
+          },
+          outputs: null
+        }
+      },
+      composition:
+        "(global_time:float|Tx:process[(DNA:float|mRNA:float),(DNA:float|mRNA:float|dC:float)]|DNA:float|mRNA:float|dC:float|emitter:step[(global_time:any|DNA:any|mRNA:any|dC:any),()])"
+    },
+    duration: 5
+  };
+
+  const response = await fetch("http://localhost:8080/simulate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok || !response.body) {
+    console.error("❌ Simulation request failed");
+    return;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    const parts = buffer.split("\n\n");
+    buffer = parts.pop() || "";
+
+    for (const chunk of parts) {
+      if (chunk.startsWith("data: ")) {
+        const jsonStr = chunk.slice("data: ".length).trim();
+        try {
+          const data = JSON.parse(jsonStr);
+          console.log("📥 Interval Data:", data);
+        } catch (err) {
+          console.warn("⚠️ Could not parse chunk:", jsonStr);
+        }
+      }
+    }
+  }
+
+  console.log("✅ Stream finished");
+}
+
+testSimulationSSE();
+
 
   

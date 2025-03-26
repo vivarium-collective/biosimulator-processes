@@ -1,4 +1,3 @@
-// gateway/main.go
 package main
 
 import (
@@ -15,16 +14,28 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/simulate", simulateHandler)
+	http.HandleFunc("/simulate", simulateHandlerWithCORS)
 	fmt.Println("🚀 Gateway on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
+func simulateHandlerWithCORS(w http.ResponseWriter, r *http.Request) {
+	setCORSHeaders(w)
+
+	if r.Method == http.MethodOptions {
+		// Handle preflight CORS request
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	simulateHandler(w, r)
+}
+
 func simulateHandler(w http.ResponseWriter, r *http.Request) {
+	// These headers are also necessary for SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	var req struct {
 		Document map[string]interface{} `json:"document"`
@@ -44,7 +55,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		Document:  document,
 	}
 
-	conn, err := grpc.Dial("localhost:6000", grpc.WithInsecure()) // Connect to Orchestrator
+	conn, err := grpc.Dial("localhost:6000", grpc.WithInsecure())
 	if err != nil {
 		http.Error(w, "Failed to connect to orchestrator", http.StatusInternalServerError)
 		return
@@ -68,4 +79,10 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "data: %s\n\n", out)
 		flusher.Flush()
 	}
+}
+
+func setCORSHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
