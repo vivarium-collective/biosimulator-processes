@@ -1,96 +1,68 @@
-"""
-Purely python SSE implementation
-"""
-
-
-from dataclasses import dataclass
+# worker/main.py
+from concurrent import futures
+import grpc
+import time
 import json
-import asyncio
-import os
-import subprocess
-from concurrent.futures import ProcessPoolExecutor
-from typing import AsyncGenerator
+import simulation_pb2
+import simulation_pb2_grpc
+from google.protobuf.struct_pb2 import Struct
 
-import uvicorn
-from backend.runner.generate_example import EXAMPLE
+from process_bigraph import ProcessTypes
+from vivarium import Vivarium
 from bsp import app_registrar
-from vivarium.vivarium import Vivarium
-from process_bigraph import pp, ProcessTypes
-from fastapi import Body, FastAPI, Query, Request
-from fastapi.responses import StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-
-from backend.runner.data_model.base import Base, BaseModel
-from backend.runner.data_model.requests import SimulationRequest, RequestModel
-from backend.runner.data_model.responses import IntervalResponse, ResponseModel
-from backend.runner.processor import JobProcessor
-from backend.runner.handlers import timestamp
 
 
-load_dotenv()
+class JobProcessor(object):
+    @classmethod
+    def run_interval(cls, viv: Vivarium) -> dict:
+        """Runs a vivarium simulation for an atomic interval index whose range spans a given job's duration"""
+        if 'emitter' not in viv.get_state().keys():
+            viv.add_emitter()
 
-RUNNER_PORT = os.getenv('RUNNER_PORT', '8000')
-
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-core: ProcessTypes = app_registrar.core
+        viv.run(1)
+        results = viv.get_results()
+        return results.pop() if isinstance(results, list) else results  # type: ignore
 
 
-def process_interval(viv: Vivarium, job_id: str, interval_id: int):
-    """Runs one simulation step synchronously and returns JSON."""
-    # Run one step (or one duration unit) of simulation
-    results = JobProcessor.run_interval(viv)
-    print(f'Runner.Main >> interval response:\n{results}')
-    return IntervalResponse(
-        job_id=job_id,
-        status=f"STREAMING:{interval_id}",
-        timestamp=timestamp(),
-        results=results,
-        interval_id=interval_id,
-    )
+class SimulationService(simulation_pb2_grpc.SimulatorServicer):
+    def SubmitSimulation(self, request, context):
+        document = json.loads(request.document.ToJsonString())
+        viv = Vivarium(...)  # create from document
+        for i in range(request.duration):
+            results = JobProcessor.run_interval(viv)
+            yield simulation_pb2.SimulationResponse(
+                job_id=request.job_id,
+                timestamp=request.timestamp,
+                status=f"STREAMING:{i}",
+                results=to_struct(results),
+                interval_id=i,
+            )
+            time.sleep(0.5)
 
 
-async def interval_generator(job: SimulationRequest):
-    viv = Vivarium(
+def to_struct(d: dict) -> Struct:
+    struct = Struct()
+    struct.update(d)
+    return struct
+
+def get_core(source=None) -> ProcessTypes:   
+    return app_registrar.core if not source else source
+
+
+def new_vivarium(document):
+    core = get_core()
+    return Vivarium(
         processes=core.process_registry.registry,
         types=core.types(),
         core=core,
-        document=job.document
-    )
-    for i in range(job.duration):
-        result = process_interval(viv, job.job_id, i).serialized
-        interval_data = json.dumps(result)
-        # yield interval_data + "\n"
-        yield f"event: intervalResponse\ndata: {interval_data}\n\n"
-        await asyncio.sleep(0.5)
-
-
-@app.post("/simulate")
-async def perform(
-    document: dict = Body(..., example=EXAMPLE),
-    duration: int = Query(...),
-    job_id: str = Query(...),
-    _stream_type: str = Query(default="text/event-stream")
-):
-    job = SimulationRequest(job_id=job_id, timestamp=timestamp(), duration=duration, document=document)
-
-    return StreamingResponse(
-        interval_generator(job),
-        media_type=_stream_type,
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive"
-        }
+        document=document
     )
 
 
-if __name__ == "__main__":
-    uvicorn.run("app", host="0.0.0.0", port=eval(RUNNER_PORT), reload=True)
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
+    simulation_pb2_grpc.add_SimulatorServicer_to_server(SimulationService(), server)
+    server.add_insecure_port('[::]:50051')
+    server.start()
+    print("🚀 Python Worker running on :50051")
+    server.wait_for_termination()

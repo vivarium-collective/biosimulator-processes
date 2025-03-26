@@ -70,14 +70,24 @@ build:
 		go build -o "$$dir"/dev ./"$$dir"; \
 	done
 
-.PHONY: proto
-proto: protoClean
+.PHONY: protoGo
+protoGo:
 	@echo "Generating protos..." && cd $(PROTO_DIR) && $(PROTOC_GEN) \
 		--go_out=. \
 		--go_opt=paths=source_relative \
 		--go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative \
 		$(PROTO_FILES)
+
+.PHONY: protoPy
+protoPy:
+	python -m grpc_tools.protoc \
+		-I./proto \
+		--python_out=./runner \
+		--grpc_python_out=./runner \
+		--proto_path=./proto \
+		proto/simulation.proto
+
 
 .PHONY: protoClean
 protoClean:

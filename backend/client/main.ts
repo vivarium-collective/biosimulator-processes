@@ -24,7 +24,7 @@ export class VivariumService {
     const response = await fetch(payload.url, payload.init);
   
     if (!response.ok || !response.body) {
-      console.error("❌ Failed to connect:", await response.text());
+      console.error("Failed to connect:", await response.text());
       return;
     } else {
       console.log(`Successfully subscribed to a response body:\n${response.status}`)
