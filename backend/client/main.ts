@@ -6,6 +6,138 @@ enum Runtimes {
   Production = "compose.biosimulations"
 }
 
+const testDoc = {
+  "state": {
+      "membrane": {
+          "_type": "process",
+          "address": "local:simple-membrane-process",
+          "config": {
+              "characteristic_time_step": 1,
+              "geometry": {
+                  "type": "icosphere",
+                  "parameters": {
+                      "radius": 1,
+                      "subdivision": 2
+                  }
+              },
+              "tension_model": {
+                  "modulus": 0.1,
+                  "preferred_area": 12.4866
+              },
+              "osmotic_model": {
+                  "preferred_volume": 2.9306666666666668,
+                  "reservoir_volume": 1,
+                  "strength": 0.02,
+                  "volume": 2.9
+              },
+              "parameters": {
+                  "bending": {
+                      "Kbc": 0.0000822
+                  },
+                  "damping": 0.05
+              },
+              "tolerance": 1e-11,
+              "console_output": false
+          },
+          "inputs": {
+              "geometry": [
+                  "geometry_store"
+              ],
+              "velocities": [
+                  "velocities_store"
+              ],
+              "protein_density": [
+                  "protein_density_store"
+              ],
+              "volume": [
+                  "volume_store"
+              ],
+              "preferred_volume": [
+                  "preferred_volume_store"
+              ],
+              "reservoir_volume": [
+                  "reservoir_volume_store"
+              ],
+              "surface_area": [
+                  "surface_area_store"
+              ],
+              "osmotic_strength": [
+                  "osmotic_strength_store"
+              ]
+          },
+          "outputs": {
+              "geometry": [
+                  "geometry_store"
+              ],
+              "velocities": [
+                  "velocities_store"
+              ],
+              "protein_density": [
+                  "protein_density_store"
+              ],
+              "volume": [
+                  "volume_store"
+              ],
+              "preferred_volume": [
+                  "preferred_volume_store"
+              ],
+              "reservoir_volume": [
+                  "reservoir_volume_store"
+              ],
+              "surface_area": [
+                  "surface_area_store"
+              ],
+              "net_forces": [
+                  "net_forces_store"
+              ]
+          }
+      },
+      "emitter": {
+          "_type": "step",
+          "address": "local:ram-emitter",
+          "config": {
+              "emit": {
+                  "geometry": "GeometryType",
+                  "velocities": "VelocitiesType",
+                  "protein_density": "ProteinDensityType",
+                  "volume": "float",
+                  "preferred_volume": "float",
+                  "reservoir_volume": "float",
+                  "surface_area": "float",
+                  "net_forces": "MechanicalForcesType",
+                  "notable_vertices": "list[boolean]"
+              }
+          },
+          "inputs": {
+              "geometry": [
+                  "geometry_store"
+              ],
+              "velocities": [
+                  "velocities_store"
+              ],
+              "protein_density": [
+                  "protein_density_store"
+              ],
+              "volume": [
+                  "volume_store"
+              ],
+              "preferred_volume": [
+                  "preferred_volume_store"
+              ],
+              "reservoir_volume": [
+                  "reservoir_volume_store"
+              ],
+              "surface_area": [
+                  "surface_area_store"
+              ],
+              "net_forces": [
+                  "net_forces_store"
+              ]
+          }
+      }
+  }
+}
+
 
 
 export class VivariumService {
@@ -100,7 +232,7 @@ async function streamEvents(
   runtime: Runtimes.Local | Runtimes.Production = Runtimes.Local, 
   port: number = 8000
 ) {
-  const doc = getTestDocument();
+  const doc = testDoc;  // getTestDocument();
   const job_id = `simulation-${job_name}`;
 
   const url = new URL(`http://${runtime}:${port}/simulate`);
@@ -159,13 +291,21 @@ async function streamEvents(
 
 function renderBox(data: IntervalResponse) {
   const output = document.getElementById("output")!;
+  
+  const heading = document.createElement("h1");
+  heading.className = "event-heading";
+  heading.textContent = JSON.stringify(data.results.global_time);
+  output.appendChild(heading)
+  
   const box = document.createElement("div");
   box.className = "event-box";
-  box.textContent = JSON.stringify(data.results, null, 2);
+  const vertexData = data.results.geometry.vertices;
+  const intervalData = vertexData[vertexData.length - 1];
+  box.textContent = JSON.stringify(intervalData, null, 2);
   output.appendChild(box);
 }
 
-// streamEvents('test', 11);
+streamEvents('test', 11);
 
 
 export async function testSimulationSSE() {
@@ -261,7 +401,7 @@ export async function testSimulationSSE() {
   console.log("✅ Stream finished");
 }
 
-testSimulationSSE();
+// testSimulationSSE();
 
 
   

@@ -145,7 +145,7 @@ class SimpleMembraneProcess(Process):
 
     def update(self, state, interval):
         # parameterize kth geometry from k-1th outputs
-        previous_vertices = np.array(state["geometry"]["vertices"][:self.n_vertices])  # TODO: why is -1 in improper format?
+        previous_vertices = np.array(state["geometry"]["vertices"][:self.n_vertices])
         self.geometry.setInputVertexPositions(previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
