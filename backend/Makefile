@@ -44,6 +44,11 @@ purge:
 rungo: sync tidy
 	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
 
+.PHONY: go
+go: sync
+	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && go run main.go || echo "You must pass a module directory"
+	
+
 .PHONY: gateway
 gateway: 
 	@make rungo module=gateway
@@ -54,11 +59,11 @@ server:
 
 .PHONY: runner
 runner:
-	uv run uvicorn runner.main:app --reload --host 0.0.0.0 --port=5001
+	python runner/main.py
 
 .PHONY: up
-up: sync docs tidy 
-	@make start m="$(GATEWAY_DIR)" & make start m="$(SERVER_DIR)" & python /Users/alexanderpatrie/Desktop/repos/biosimulator-processes/backend/runner/main.py & wait
+up: sync 
+	@make tidy module=gateway && make tidy module=server && go run gateway/main.go & go run server/main.go & python runner/main.py & wait
 
 .PHONY: down
 down:

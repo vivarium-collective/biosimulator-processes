@@ -1,26 +1,23 @@
 # --- Gateway (Go with air) ---
 local_resource(
     "gateway",
-    cmd="make gateway",
+    cmd="make go module=gateway",
     deps=["gateway", "proto"],
-    env={"RUN_MODE": "local"},
     allow_parallel=True
 )
 
 # --- Server (Go with air) ---
 local_resource(
     "server",
-    cmd="make server",
+    cmd="make go module=server",
     deps=["server", "proto"],
-    env={"RUN_MODE": "local"},
     allow_parallel=True
 )
 
-# --- Runner (Python FastAPI with uvicorn) ---
+# --- Runner (Python) ---
 local_resource(
     "runner",
     cmd="uv run python runner/main.py",
     deps=["runner"],
-    env={"RUN_MODE": "local"},
     allow_parallel=True
 )
