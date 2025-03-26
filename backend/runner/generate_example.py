@@ -48,7 +48,7 @@ def from_doc(doc):
 import os
 
 def example():
-    fixturepath = '/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/backend/fixtures/document.json'
+    fixturepath = '/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/tests/requests/membrane_composite.json'
     with open(fixturepath, 'r') as f:
         return json.load(f)
 
