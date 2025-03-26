@@ -136,7 +136,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Document map[string]interface{} `json:"document"`
 	}
-	
+
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
 		return

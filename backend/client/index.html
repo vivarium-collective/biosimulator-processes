@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -11,4 +11,35 @@
     </div>
     <script type="module" src="/main.ts"></script>
   </body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Streaming JSON Events</title>
+  <style>
+    #output {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .event-box {
+      background: #f0f8ff;
+      border: 1px solid #ccc;
+      padding: 12px;
+      border-radius: 6px;
+      width: 250px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>Streamed Events</h2>
+  <div id="output"></div>
+  <script type="module" src="main.ts"></script>
+</body>
 </html>

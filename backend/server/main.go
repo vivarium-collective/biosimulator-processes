@@ -89,8 +89,10 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 	reader := bufio.NewReader(resp.Body)
 	for {
 		line, err := reader.ReadBytes('\n')
+		fmt.Printf("Line:\n%v\n", line)
 		if err != nil {
 			if err == io.EOF {
+				fmt.Print("There was an error")
 				break
 			}
 			return fmt.Errorf("error reading response stream: %w", err)
@@ -101,6 +103,7 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 		if err := json.Unmarshal(bytes.TrimSpace(line), &jsonMap); err != nil {
 			return fmt.Errorf("error unmarshaling line to map: %w", err)
 		}
+		fmt.Printf("JSON MAP:\n%v\n", jsonMap)
 
 		// Convert map to structpb.Struct
 		structVal, err := structpb.NewStruct(jsonMap)

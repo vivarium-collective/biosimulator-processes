@@ -16,35 +16,44 @@ def from_doc(doc):
     )
 
 
-v = Vivarium(
-    processes=core.process_registry.registry ,
-    types=core.types(),
-    core=core
-)
+# v = Vivarium(
+#     processes=core.process_registry.registry ,
+#     types=core.types(),
+#     core=core
+# )
+# 
+# v.add_process(
+#     name='Tx',
+#     process_id='tx',
+#     config={
+#         'ktsc': 22.2,
+#         'kdeg': -0.11,
+#         'k': 0.001
+#     },
+#     inputs={
+#         'DNA': ['DNA'],
+#         'mRNA': ['mRNA']
+#     },
+#     outputs={
+#         'DNA': ['DNA'],
+#         'mRNA': ['mRNA'],
+#         'dC': ['dC']
+#     }
+# )
 
-v.add_process(
-    name='Tx',
-    process_id='tx',
-    config={
-        'ktsc': 22.2,
-        'kdeg': -0.11,
-        'k': 0.001
-    },
-    inputs={
-        'DNA': ['DNA'],
-        'mRNA': ['mRNA']
-    },
-    outputs={
-        'DNA': ['DNA'],
-        'mRNA': ['mRNA'],
-        'dC': ['dC']
-    }
-)
-
-doc1 = v.make_document()
-v2 = from_doc(doc=doc1)
-v2.add_emitter()
+# doc1 = v.make_document()
+# v2 = from_doc(doc=doc1)
+# v2.add_emitter()
 
 import os
-with open('./example.json', 'w') as f:
-    json.dump(v2.make_document(), f, indent=4)
+
+def example():
+    fixturepath = '/Users/alexanderpatrie/Desktop/repos/biosimulator-processes/backend/fixtures/document.json'
+    with open(fixturepath, 'r') as f:
+        return json.load(f)
+
+EXAMPLE = example()
+
+# def write_example():
+#     with open('./example.json', 'w') as f:
+#         json.dump(v2.make_document(), f, indent=4)

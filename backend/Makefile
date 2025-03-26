@@ -15,46 +15,49 @@ AIRNAME := .air.toml
 .DEFAULT_GOAL := all
 
 
-.PHONY: all
-all: sync tidy
+.PHONY: tidyall
+tidyall:
+	@make sync
+	@for dir in $(GO_MODULES); do \
+		make tidy module="$$dir"; \
+	done
+
 
 .PHONY: tidy
 tidy:
-	@for dir in $(GO_MODULES); do \
-		cd "$$dir"; \
-		go mod tidy; \
-		go fmt ./...; \
-		echo "Tidied and formatted $$dir"; \
-		cd "$(CURRENT_DIR)"; \
-	done
+	@[ -n "$(module)" ] && cd "$(module)" && go mod tidy && go fmt ./... && echo "Tidied.";
 
 .PHONY: sync
 sync:
-	@echo ">> SYNC" && go work sync && echo "go.work is synchronized."
+	@go work sync && echo "go.work is synchronized."
 
 .PHONY: docs
 docs:
-	@echo ">> DOCS" && cd "$(GATEWAY_DIR)" && echo "Refreshing docs dir..." && rm -rf docs && mkdir docs && swag init -q --parseDependency --parseInternal && echo "Generated the following files: $(shell ls gateway/docs)"
+	@cd gateway && swag init -q --parseDependency --parseInternal
 
 .PHONY: purge
 purge:
 	go clean -cache && uv cache prune
 
-.PHONY: mod
-mod:
-	@[ -n "$(m)" ] && cd "$(m)" && go mod tidy && go fmt ./... && echo "Go module $(m) is now tidy :)"
-
 # -- RUNNING -- #
-.PHONY: start
-start: sync tidy
-	@[ -n "$(m)" ] && echo ">> STARTING: $(m)" && cd "$(m)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
+.PHONY: rungo
+rungo: sync tidy
+	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
 
-.PHONY: startGateway
-startGateway: sync tidy docs
-	@echo ">> STARTING: $(GATEWAY_DIR)" && cd "$(GATEWAY_DIR)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
+.PHONY: gateway
+gateway: 
+	@make rungo module=gateway
+
+.PHONY: server
+server:
+	@make rungo module=server
+
+.PHONY: runner
+runner:
+	uv run uvicorn runner.main:app --reload --host 0.0.0.0 --port=5001
 
 .PHONY: up
-up: sync tidy docs
+up: sync docs tidy 
 	@make start m="$(GATEWAY_DIR)" & make start m="$(SERVER_DIR)" & python /Users/alexanderpatrie/Desktop/repos/biosimulator-processes/backend/runner/main.py & wait
 
 .PHONY: down
@@ -80,3 +83,7 @@ proto: protoClean
 protoClean:
 	@echo "removing proto files..." && rm -f $(GENERATED_PROTO_FILES)
 # deploy: TODO RUN: make dev AND make build AND (remote deploy/push/merge?)
+
+.PHONY: client
+client:
+	@cd client && npx vite --open

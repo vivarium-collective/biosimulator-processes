@@ -1,8 +1,3 @@
-"""
-Purely python SSE implementation
-"""
-
-
 from dataclasses import dataclass
 import json
 import asyncio
@@ -12,7 +7,6 @@ from concurrent.futures import ProcessPoolExecutor
 from typing import AsyncGenerator
 
 import uvicorn
-from backend.runner.generate_example import EXAMPLE
 from bsp import app_registrar
 from vivarium.vivarium import Vivarium
 from process_bigraph import pp, ProcessTypes
@@ -30,7 +24,7 @@ from backend.runner.handlers import timestamp
 
 load_dotenv()
 
-RUNNER_PORT = os.getenv('RUNNER_PORT', '8000')
+RUNNER_PORT = os.getenv('RUNNER_PORT', '5001')
 
 app = FastAPI()
 app.add_middleware(
@@ -66,30 +60,38 @@ async def interval_generator(job: SimulationRequest):
         document=job.document
     )
     for i in range(job.duration):
-        result = process_interval(viv, job.job_id, i).serialized
-        interval_data = json.dumps(result)
-        # yield interval_data + "\n"
+        interval_data = json.dumps(
+            process_interval(viv, job.job_id, i).serialized
+        )
         yield f"event: intervalResponse\ndata: {interval_data}\n\n"
         await asyncio.sleep(0.5)
 
 
 @app.post("/simulate")
+async def simulate(request: Request) -> StreamingResponse:
+    body = await request.json()
+    job = SimulationRequest(**body)
+    # job = SimulationRequest(**body)
+    # pp(job.serialized)
+    # return StreamingResponse(interval_generator(job), media_type="text/event-stream")
+    resp = await perform(document=job.document, duration=job.duration, job_id=job.job_id)
+    return resp
+
+
+class Document(Base):
+    state: dict
+    composition: dict
+
+
+@app.post("/perform")
 async def perform(
-    document: dict = Body(..., example=EXAMPLE),
+    document: dict,
     duration: int = Query(...),
-    job_id: str = Query(...),
-    _stream_type: str = Query(default="text/event-stream")
+    job_id: str = Query(...)
 ):
     job = SimulationRequest(job_id=job_id, timestamp=timestamp(), duration=duration, document=document)
+    return StreamingResponse(interval_generator(job), media_type="text/event-stream")
 
-    return StreamingResponse(
-        interval_generator(job),
-        media_type=_stream_type,
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive"
-        }
-    )
 
 
 if __name__ == "__main__":

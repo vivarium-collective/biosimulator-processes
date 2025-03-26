@@ -1,9 +1,7 @@
-# Tiltfile for local development
-
 # --- Gateway (Go with air) ---
 local_resource(
     "gateway",
-    cmd="make startGateway",
+    cmd="make gateway",
     deps=["gateway", "shared", "proto"],
     env={"RUN_MODE": "local"},
     allow_parallel=True
@@ -12,7 +10,7 @@ local_resource(
 # --- Server (Go with air) ---
 local_resource(
     "server",
-    cmd="make start m=server",
+    cmd="make server",
     deps=["server", "shared", "proto"],
     env={"RUN_MODE": "local"},
     allow_parallel=True
