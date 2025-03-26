@@ -35,7 +35,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "Simulation Document",
-                        "name": "request",
+                        "name": "document",
                         "in": "body",
                         "required": true,
                         "schema": {

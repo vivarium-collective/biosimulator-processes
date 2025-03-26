@@ -42,7 +42,7 @@ paths:
         type: integer
       - description: Simulation Document
         in: body
-        name: request
+        name: document
         required: true
         schema:
           type: object

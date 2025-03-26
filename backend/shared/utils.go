@@ -28,6 +28,7 @@ func MarshalJSON(data interface{}) string {
 }
 
 func ToStructpb(data map[string]interface{}) *structpb.Struct {
+	fmt.Printf("Using data:\n%v\n", data)
 	s, err := structpb.NewStruct(data)
 	if err != nil {
 		log.Fatalf("structpb conversion failed: %v", err)

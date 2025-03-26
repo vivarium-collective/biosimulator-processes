@@ -1,7 +1,18 @@
 from dataclasses import dataclass, asdict
 from typing import Any, Optional
 
-from backend.runner.data_model.base import Base 
+from backend.runner.data_model.base import Base, BaseModel
+
+
+class RequestModel(BaseModel):
+    """
+    Data structure representing the client request recieved by the python runner translated from the SimulationRequest gRPC message struct
+    """
+    job_id: str
+    timestamp: str
+    duration: int
+    document: Any
+    status: str
 
 
 @dataclass

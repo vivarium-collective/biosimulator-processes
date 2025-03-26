@@ -82,7 +82,7 @@ func main() {
 // @Accept       json
 // @Produce      text/event-stream
 // @Param duration query int true "Simulation Duration"
-// @Param request body object true "Simulation Document"
+// @Param document body object true "Simulation Document"
 // @Success      200 {object} pb.SimulationResponse
 // @Failure      400 {string} string "Bad Request"
 // @Router       /simulate [post]
@@ -133,19 +133,23 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: add this formally to the datamodel
-	var document map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&document); err != nil {
+	var payload struct {
+		Document map[string]interface{} `json:"document"`
+	}
+	
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
 		return
 	}
 
+	// format proto
 	newJobID := shared.NewJobID("simulation")
 	timestamp := shared.TimeStamp()
 	req := &pb.SimulationRequest{
 		JobId:     newJobID,
 		Timestamp: timestamp,
 		Duration:  int32(duration),
-		Document:  shared.ToStructpb(document), // shared.ToStructpb(simRequest.Document),
+		Document:  shared.ToStructpb(payload.Document),
 		Status:    "PENDING:SUBMITTED",
 	}
 

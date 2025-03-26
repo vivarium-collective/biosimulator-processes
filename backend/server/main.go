@@ -79,6 +79,7 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 
 	client := &http.Client{}
 	resp, err := client.Do(httpReq)
+	fmt.Printf("Got response:\n%v\n", resp)
 	if err != nil {
 		return fmt.Errorf("FastAPI request failed: %w", err)
 	}
@@ -118,9 +119,10 @@ func (s *server) SubmitSimulation(req *pb.SimulationRequest, stream pb.Simulator
 		fmt.Print("The proto:\n")
 		debugProto(res)
 
-		if err := stream.Send(res); err != nil {
-			return fmt.Errorf("failed to stream to client: %w", err)
-		}
+		err = stream.Send(res)
+		// if err := stream.Send(res); err != nil {
+		// 	return fmt.Errorf("failed to stream to client: %w", err)
+		// }
 	}
 
 	return nil

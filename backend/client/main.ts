@@ -1,81 +1,26 @@
-type SimulationDocument = Record<string, any>;
+import { IntervalResponse, Payload, SimulationRequestParams, VivariumDocument } from "./datamodel";
+import { getTestRequest } from "./test";
+
+export class VivariumService {
+  public endpointRoot!: string
+  public localEndpointRoot = `http://localhost:8080`;
   
-  type SimulationRequest = {
-    duration: number;
-    document: SimulationDocument;
-};
-  
-  type SimulationResponse = {
-    job_id: string;
-    timestamp: string;
-    status: string;
-    results: Record<string, any>;
-    interval_id?: number;
-};
-  
-const testDocument: SimulationDocument = {
-    "state": {
-      global_time: "0.0",
-      Tx: {
-        inputs: {
-          DNA: ["DNA"],
-          mRNA: ["mRNA"]
-        },
-        outputs: {
-          DNA: ["DNA"],
-          mRNA: ["mRNA"],
-          dC: ["dC"]
-        },
-        interval: 1.0,
-        address: "local:tx",
-        config: {
-          ktsc: "22.2",
-          kdeg: "-0.11",
-          k: "0.001"
-        }
-      },
-      DNA: "10",
-      mRNA: "100.0",
-      dC: "0",
-      emitter: {
-        address: "local:ram-emitter",
-        config: {
-          emit: {
-            global_time: "any",
-            DNA: "any",
-            mRNA: "any",
-            dC: "any"
-          }
-        },
-        inputs: {
-          global_time: ["global_time"],
-          DNA: ["DNA"],
-          mRNA: ["mRNA"],
-          dC: ["dC"]
-        },
-        outputs: null
-      }
-    },
-    "composition":
-      "(global_time:float|Tx:process[(DNA:float|mRNA:float),(DNA:float|mRNA:float|dC:float)]|DNA:float|mRNA:float|dC:float|emitter:step[(global_time:any|DNA:any|mRNA:any|dC:any),()])"
-  };
-  
-async function simulate(onData: (data: SimulationResponse) => void): Promise<void> {
-    const requestParams: SimulationRequest = {
-      duration: 5,
-      document: testDocument
-    };
-    console.log(`Running simulate with: ${JSON.stringify(requestParams)}`)
-  
-    const response = await fetch("http://localhost:8080/simulate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestParams)
-    });
+  constructor(endpointRoot?: string) {
+    this.endpointRoot = endpointRoot ? endpointRoot : this.localEndpointRoot
+  }
+
+  public async submitSimulation(onData: (data: IntervalResponse) => void): Promise<void> {
+    const requestParams: SimulationRequestParams = getTestRequest();
+
+    const payload: Payload = this.formatPayload(requestParams);
+    console.log(`Processing payload init: ${JSON.stringify(payload.init)} to\n${payload.url}`)
+    const response = await fetch(payload.url, payload.init);
   
     if (!response.ok || !response.body) {
       console.error("❌ Failed to connect:", await response.text());
       return;
+    } else {
+      console.log(`Successfully subscribed to a response body:\n${response.status}`)
     }
   
     const reader = response.body.getReader();
@@ -89,8 +34,10 @@ async function simulate(onData: (data: SimulationResponse) => void): Promise<voi
       buffer += decoder.decode(value, { stream: true });
       const events = buffer.split("\n\n");
       buffer = events.pop() || "";
+      console.log(`Buffer: ${buffer}`)
   
       for (const evt of events) {
+        console.log(`Getting data event:\n${evt}`)
         if (evt.startsWith("data: ")) {
           const json = evt.slice("data: ".length).trim();
           try {
@@ -103,12 +50,51 @@ async function simulate(onData: (data: SimulationResponse) => void): Promise<voi
       }
     }
   }
-  
-simulate((data) => {
-    console.log("Running simulate")
-    const out = document.getElementById("output");
-    if (out) {
-      out.textContent += `\n📥 ${JSON.stringify(data, null, 2)}\n`;
+
+  public formatPayload(requestParams: SimulationRequestParams): Payload {
+    const url: string = this.getSimulationUrl();
+    const params = new URLSearchParams({ duration: requestParams.duration.toString() });
+    return {
+      url: `${url}?${params.toString()}`,
+      init: {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestParams)
+      }
     }
+  }
+
+  public static getRequestParams(duration: number, document: VivariumDocument): SimulationRequestParams {
+    return {
+      duration: duration,
+      document: document
+    }
+  }
+
+  public submitTestSimulation() {
+    this.submitSimulation((data) => {
+      console.log("Running simulate")
+      const out = document.getElementById("output");
+      if (out) {
+        out.textContent += `\n📥 ${JSON.stringify(data, null, 2)}\n`;
+      }
+    });
+  }
+
+  private getSimulationUrl(): string {
+    return `${this.endpointRoot}/simulate`
+  }
+
+}
+
+const service = new VivariumService();
+try {
+  await service.submitSimulation((data) => {
+    console.log(`Getting data: ${data}`)
   });
+  console.log(`Done!`);
+} catch(err) {
+  console.log(`Error: ${err}`)
+}
+
   
