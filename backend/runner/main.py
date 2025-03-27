@@ -6,6 +6,7 @@ import time
 import json
 from google.protobuf.struct_pb2 import Struct
 
+import hupper
 from process_bigraph import ProcessTypes
 from vivarium import Vivarium
 from backend.runner import runner_pb2, runner_pb2_grpc
@@ -47,11 +48,14 @@ def to_struct(d: dict) -> Struct:
 class SimulationRunner(runner_pb2_grpc.SimulationRunnerServicer):
     def RunSimulation(self, request_iterator, context):
         for job in request_iterator:
-            print(f"Python Runner: Received job {job.job_id}")
-            viv = new_vivarium(job.document)
+            print(f"Python Runner: Received job document: {type(job.document)}")
+            viv = new_vivarium(
+                json.loads(job.document)
+            )
 
             for i in range(job.duration):
                 result = JobProcessor.run_interval(viv)
+                print(f"Python Runner processing interval: {i}")
                 yield runner_pb2.SimulationResult(
                     job_id=job.job_id,
                     interval_id=i,
@@ -64,14 +68,16 @@ class SimulationRunner(runner_pb2_grpc.SimulationRunnerServicer):
             print(f"Python Runner: Completed job {job.job_id}")
 
 
-def serve():
+def main():
+    print("Initializing runner...")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     runner_pb2_grpc.add_SimulationRunnerServicer_to_server(SimulationRunner(), server)
     server.add_insecure_port('[::]:6000')
     print("Python Runner listening on :6000")
     server.start()
+    print('>> RUNNER: READY')
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    serve()
+    main()

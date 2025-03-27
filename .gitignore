@@ -44,3 +44,4 @@ venv/
 __pycache__/
 .air
 node_modules
+.NOTES

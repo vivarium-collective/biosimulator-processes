@@ -12,5 +12,8 @@
   "devDependencies": {
     "typescript": "^5.8.2",
     "vite": "^6.2.3"
+  },
+  "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1"
   }
 }

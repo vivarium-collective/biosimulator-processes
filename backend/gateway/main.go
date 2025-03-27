@@ -5,6 +5,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -29,6 +32,18 @@ func main() {
 	router.POST("/simulate", simulateHandler)
 
 	log.Println("REST Gateway listening on :8080")
+	log.Println(">> GATEWAY: READY")
+
+	// Wait for interrupt to gracefully shutdown
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-sigs
+		log.Printf("Received signal: %v, shutting down...", sig)
+		// gracefully close listeners, etc.
+		os.Exit(0)
+	}()
 	router.Run(":8080")
 }
 

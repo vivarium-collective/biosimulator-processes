@@ -28,8 +28,7 @@ local_resource(
 local_resource(
     "worker",
     cmd="cd worker && air -c .air.toml",
-    # cmd="cd worker && ./start.sh",
-    deps=["worker", "proto"],
+    deps=["worker", "proto", "runner"],
     allow_parallel=True
 )
 

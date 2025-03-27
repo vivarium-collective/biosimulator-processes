@@ -105,6 +105,8 @@ async def simulate(
     _buffer: float = Query(default=0.5)
 ) -> StreamingResponse:
     job = SimulationRequest(job_id=job_id, timestamp=timestamp(), duration=duration, document=document)
+
+    # TODO: secure this stream and stream it to a go channel that can be fetched from client with auth
     return StreamingResponse(
         interval_generator(job, _buffer),
         media_type="text/event-stream",

@@ -63,6 +63,9 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"google.golang.org/grpc"
 
@@ -104,7 +107,19 @@ func main() {
 		log.Fatalf("Failed to open Python runner stream: %v", err)
 	}
 
-	log.Println("Connected to Python simulation runner")
+	log.Println("Worker connected to Python simulation runner")
+	log.Println(">> WORKER: READY")
+
+	// Wait for interrupt to gracefully shutdown
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-sigs
+		log.Printf("Received signal: %v, shutting down...", sig)
+		// gracefully close listeners, etc.
+		os.Exit(0)
+	}()
 
 	for {
 		msg, err := dispatcherStream.Recv()

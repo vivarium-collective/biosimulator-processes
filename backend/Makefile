@@ -16,38 +16,34 @@ AIRNAME := .air.toml
 .DEFAULT_GOAL := all
 
 
-.PHONY: tidyall
-tidyall:
-	@make sync
-	@for dir in $(GO_MODULES); do \
-		make tidy module="$$dir"; \
-	done
-
-
-.PHONY: tidy
-tidy:
-	@[ -n "$(module)" ] && cd "$(module)" && go mod tidy && go fmt ./... && echo "Tidied.";
-
-.PHONY: sync
-sync:
-	@go work sync && echo "go.work is synchronized."
-
-.PHONY: docs
-docs:
-	@cd gateway && swag init -q --parseDependency --parseInternal
-
-.PHONY: purge
-purge:
-	go clean -cache && uv cache prune
-
-# -- RUNNING -- #
 .PHONY: go
 go:
 	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && go mod tidy && air -c "$(AIRNAME)" || echo "You must pass a module directory"
 
-.PHONY: start
-start: 
-	@make go module=gateway & make go module=dispatcher & python runner/main.py && make go module=worker
+.PHONY: gateway
+gateway:
+	@make go module=gateway
+
+.PHONY: dispatch
+dispatch:
+	@make go module=dispatcher
+
+.PHONY: worker
+worker:
+	@make go module=worker
+
+.PHONY: runner
+runner:
+	@cd runner && hupper -m main
+
+.PHONY: client
+client:
+	@cd client && npx vite --open
+
+# runs runner/gateway.py which is a FastAPI SSE server/gateway
+.PHONY: gate
+gate:
+	@uvicorn runner.gateway:app --reload --port 8000 --host 0.0.0.0
 
 .PHONY: down
 down:
@@ -87,10 +83,46 @@ protoClean:
 	@echo "removing proto files..." && rm -f $(GENERATED_PROTO_FILES)
 # deploy: TODO RUN: make dev AND make build AND (remote deploy/push/merge?)
 
-.PHONY: client
-client:
-	@cd client && npx vite --open
 
-.PHONY: gate
-gate:
-	@uvicorn runner.gateway:app --reload --port 8000 --host 0.0.0.0
+
+.PHONY: ports
+ports:
+	@echo "Checking port 8080..." && lsof -i:8080 || echo "Port 8080 is free"
+	@echo "Checking port 50051..." && lsof -i:50051 || echo "Port 50051 is free"
+	@echo "Checking port 6000..." && lsof -i:6000 || echo "Port 6000 is free"
+
+.PHONY: kill
+kill:
+	@kill -9 "$(pid)"
+
+.PHONY: killAll
+killAll:
+	@for port in 8080 50051 6000; do \
+		PID=$$(lsof -ti :$$port); \
+		if [ -n "$$PID" ]; then \
+			echo "Killing PID $$PID on port $$port"; \
+			kill -9 $$PID; \
+		else \
+			echo "No process found on port $$port"; \
+		fi; \
+	done
+
+.PHONY: tidyall
+tidyall:
+	@make sync
+	@for dir in $(GO_MODULES); do \
+		make tidy module="$$dir"; \
+	done
+
+
+.PHONY: tidy
+tidy:
+	@[ -n "$(module)" ] && cd "$(module)" && go mod tidy && go fmt ./... && echo "Tidied.";
+
+# .PHONY: docs
+# docs:
+# 	@cd gateway && swag init -q --parseDependency --parseInternal
+
+.PHONY: prune
+prune:
+	go clean -cache && uv cache prune
