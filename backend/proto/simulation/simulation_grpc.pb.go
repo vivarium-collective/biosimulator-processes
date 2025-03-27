@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Simulator_SubmitSimulation_FullMethodName = "/sim.Simulator/SubmitSimulation"
-	Simulator_SubmitJob_FullMethodName        = "/sim.Simulator/SubmitJob"
+	Simulator_WorkerStream_FullMethodName     = "/sim.Simulator/WorkerStream"
 )
 
 // SimulatorClient is the client API for Simulator service.
@@ -28,7 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SimulatorClient interface {
 	SubmitSimulation(ctx context.Context, in *SimulationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SimulationResponse], error)
-	SubmitJob(ctx context.Context, in *SimulationRequest, opts ...grpc.CallOption) (*JobAck, error)
+	WorkerStream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[WorkerMessage, WorkerMessage], error)
 }
 
 type simulatorClient struct {
@@ -58,22 +58,25 @@ func (c *simulatorClient) SubmitSimulation(ctx context.Context, in *SimulationRe
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Simulator_SubmitSimulationClient = grpc.ServerStreamingClient[SimulationResponse]
 
-func (c *simulatorClient) SubmitJob(ctx context.Context, in *SimulationRequest, opts ...grpc.CallOption) (*JobAck, error) {
+func (c *simulatorClient) WorkerStream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[WorkerMessage, WorkerMessage], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(JobAck)
-	err := c.cc.Invoke(ctx, Simulator_SubmitJob_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Simulator_ServiceDesc.Streams[1], Simulator_WorkerStream_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[WorkerMessage, WorkerMessage]{ClientStream: stream}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Simulator_WorkerStreamClient = grpc.BidiStreamingClient[WorkerMessage, WorkerMessage]
 
 // SimulatorServer is the server API for Simulator service.
 // All implementations must embed UnimplementedSimulatorServer
 // for forward compatibility.
 type SimulatorServer interface {
 	SubmitSimulation(*SimulationRequest, grpc.ServerStreamingServer[SimulationResponse]) error
-	SubmitJob(context.Context, *SimulationRequest) (*JobAck, error)
+	WorkerStream(grpc.BidiStreamingServer[WorkerMessage, WorkerMessage]) error
 	mustEmbedUnimplementedSimulatorServer()
 }
 
@@ -87,8 +90,8 @@ type UnimplementedSimulatorServer struct{}
 func (UnimplementedSimulatorServer) SubmitSimulation(*SimulationRequest, grpc.ServerStreamingServer[SimulationResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method SubmitSimulation not implemented")
 }
-func (UnimplementedSimulatorServer) SubmitJob(context.Context, *SimulationRequest) (*JobAck, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubmitJob not implemented")
+func (UnimplementedSimulatorServer) WorkerStream(grpc.BidiStreamingServer[WorkerMessage, WorkerMessage]) error {
+	return status.Errorf(codes.Unimplemented, "method WorkerStream not implemented")
 }
 func (UnimplementedSimulatorServer) mustEmbedUnimplementedSimulatorServer() {}
 func (UnimplementedSimulatorServer) testEmbeddedByValue()                   {}
@@ -122,23 +125,12 @@ func _Simulator_SubmitSimulation_Handler(srv interface{}, stream grpc.ServerStre
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Simulator_SubmitSimulationServer = grpc.ServerStreamingServer[SimulationResponse]
 
-func _Simulator_SubmitJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SimulationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SimulatorServer).SubmitJob(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Simulator_SubmitJob_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SimulatorServer).SubmitJob(ctx, req.(*SimulationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+func _Simulator_WorkerStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SimulatorServer).WorkerStream(&grpc.GenericServerStream[WorkerMessage, WorkerMessage]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Simulator_WorkerStreamServer = grpc.BidiStreamingServer[WorkerMessage, WorkerMessage]
 
 // Simulator_ServiceDesc is the grpc.ServiceDesc for Simulator service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -146,17 +138,18 @@ func _Simulator_SubmitJob_Handler(srv interface{}, ctx context.Context, dec func
 var Simulator_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "sim.Simulator",
 	HandlerType: (*SimulatorServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "SubmitJob",
-			Handler:    _Simulator_SubmitJob_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "SubmitSimulation",
 			Handler:       _Simulator_SubmitSimulation_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "WorkerStream",
+			Handler:       _Simulator_WorkerStream_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "simulation.proto",

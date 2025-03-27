@@ -292,18 +292,28 @@ async function streamEvents(
 function renderBox(data: IntervalResponse) {
   const output = document.getElementById("output")!;
   
+  // Create a container for the event
+  const container = document.createElement("div");
+  container.className = "event-container";
+
+  // Heading for the event
   const heading = document.createElement("h1");
   heading.className = "event-heading";
-  heading.textContent = JSON.stringify(data.results.global_time);
-  output.appendChild(heading)
-  
+  heading.textContent = `Time: ${data.interval_id}`;
+  container.appendChild(heading);
+
+  // Box with interval data
   const box = document.createElement("div");
   box.className = "event-box";
   const vertexData = data.results.geometry.vertices;
   const intervalData = vertexData[vertexData.length - 1];
   box.textContent = JSON.stringify(intervalData, null, 2);
-  output.appendChild(box);
+  container.appendChild(box);
+
+  // Append to output
+  output.appendChild(container);
 }
+
 
 streamEvents('test', 11);
 

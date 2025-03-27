@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package runner;
+
+option go_package = "github.com/vivarium-collective/biosimulator-processes/backend/proto/runner;runner";
+
+service SimulationRunner {
+  rpc RunSimulation(stream SimulationJob) returns (stream SimulationResult);
+}
+
+message SimulationJob {
+  string job_id = 1;
+  int32 duration = 2;
+  string document = 3;
+}
+
+message SimulationResult {
+  string job_id = 1;
+  int32 interval_id = 2;
+  string timestamp = 3;
+  string status = 4;
+  string results = 5;
+}

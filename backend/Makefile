@@ -77,21 +77,21 @@ build:
 
 .PHONY: protoGo
 protoGo:
-	@echo "Generating protos..." && cd $(PROTO_DIR) && $(PROTOC_GEN) \
+	@echo "Generating protos..." && cd $(PROTO_DIR)/"$(file)" && $(PROTOC_GEN) \
 		--go_out=. \
 		--go_opt=paths=source_relative \
 		--go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative \
-		$(PROTO_FILES)
+		"$(file)".proto
 
 .PHONY: protoPy
 protoPy:
 	python -m grpc_tools.protoc \
 		-I./proto \
-		--python_out=./runner \
-		--grpc_python_out=./runner \
+		--python_out=. \
+		--grpc_python_out=. \
 		--proto_path=./proto \
-		proto/simulation.proto
+		./proto/"$(file)"/"$(file)".proto
 
 
 .PHONY: protoClean
@@ -102,3 +102,7 @@ protoClean:
 .PHONY: client
 client:
 	@cd client && npx vite --open
+
+.PHONY: gate
+gate:
+	@uvicorn runner.gateway:app --reload --port 8000 --host 0.0.0.0

@@ -1,14 +1,15 @@
 # worker/main.py
 from concurrent import futures
+import sys
 import grpc
 import time
 import json
-import simulation_pb2
-import simulation_pb2_grpc
 from google.protobuf.struct_pb2 import Struct
 
 from process_bigraph import ProcessTypes
 from vivarium import Vivarium
+# from backend.runner import runner_pb2_grpc
+# from backend.runner.runner_pb2 import SimulationResult
 from bsp import app_registrar
 
 
@@ -22,25 +23,6 @@ class JobProcessor(object):
         viv.run(1)
         results = viv.get_results()
         return results.pop() if isinstance(results, list) else results  # type: ignore
-
-
-class SimulationService(simulation_pb2_grpc.SimulatorServicer):
-    def SubmitSimulation(self, request, context):
-        print(f"🧪 Received job: {request.job_id}")
-        document = json.loads(request.document.SerializeToString().decode("utf-8"))
-        viv = new_vivarium(document)
-
-        for i in range(request.duration):
-            result = JobProcessor.run_interval(viv)
-            response = simulation_pb2.SimulationResponse(
-                job_id=request.job_id,
-                timestamp=request.timestamp,
-                status=f"STREAMING:{i}",
-                interval_id=i,
-                results=to_struct(result),
-            )
-            yield response
-            time.sleep(0.5)
 
 
 def get_core(source=None) -> ProcessTypes:
@@ -63,11 +45,31 @@ def to_struct(d: dict) -> Struct:
     return struct
 
 
+class SimulationRunner(runner_pb2_grpc.SimulationRunnerServicer):
+    def RunSimulation(self, request_iterator, context):
+        for job in request_iterator:
+            print(f"Python Runner: Received job {job.job_id}")
+            viv = new_vivarium(job.document)
+
+            for i in range(job.duration):
+                result = JobProcessor.run_interval(viv)
+                yield SimulationResult(
+                    job_id=job.job_id,
+                    interval_id=i,
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    status="running",
+                    results=json.dumps(result),
+                )
+                time.sleep(1)  # simulate real time
+
+            print(f"Python Runner: Completed job {job.job_id}")
+
+
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
-    simulation_pb2_grpc.add_SimulatorServicer_to_server(SimulationService(), server)
-    server.add_insecure_port("[::]:50051")
-    print("🚀 Python Runner gRPC server on :50051")
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    runner_pb2_grpc.add_SimulationRunnerServicer_to_server(SimulationRunner(), server)
+    server.add_insecure_port('[::]:6000')
+    print("Python Runner listening on :6000")
     server.start()
     server.wait_for_termination()
 
