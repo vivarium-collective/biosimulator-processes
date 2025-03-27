@@ -226,7 +226,96 @@ public formatPayload(requestParams: SimulationRequestParams): Payload {
 
 }
 
-async function streamEvents(
+
+export async function c_onnectWebSocket(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const socket = new WebSocket("ws://localhost:8000/ws");
+
+    socket.onmessage = (event) => {
+      if (event.data.startsWith("connected:")) {
+        const clientId = event.data.split(":")[1];
+        console.log("✅ WebSocket connected with client_id:", clientId);
+        resolve(clientId);
+      }
+    };
+
+    socket.onerror = (err) => {
+      console.error("❌ WebSocket error", err);
+      reject(err);
+    };
+  });
+}
+
+export async function connectWebSocket(): Promise<{ clientId: string; socket: WebSocket }> {
+  return new Promise((resolve, reject) => {
+    const socket = new WebSocket("ws://localhost:8000/ws");
+
+    socket.onmessage = (event) => {
+      if (event.data.startsWith("connected:")) {
+        const clientId = event.data.split(":")[1];
+        console.log("✅ WebSocket connected with client_id:", clientId);
+        resolve({ clientId, socket });
+      }
+    };
+
+    socket.onerror = (err) => {
+      console.error("❌ WebSocket error", err);
+      reject(err);
+    };
+  });
+}
+
+
+export async function streamSocket(
+  job_name: string,
+  duration: number,
+  runtime: Runtimes.Local | Runtimes.Production = Runtimes.Local,
+  port: number = 8000,
+  method: string = "simulate"
+) {
+  const doc = testDoc;
+  const job_id = `simulation-${job_name}`;
+
+  const { clientId, socket } = await connectWebSocket();
+
+  socket.onmessage = (event) => {
+    try {
+      console.log(`Got a websocket message!`)
+      const parsed: IntervalResponse = JSON.parse(event.data);
+      console.log(`resp type: ${typeof parsed}`)
+      if (parsed.interval_id != undefined) {
+        renderBox(parsed);
+      } else {
+        console.log("📩 Other WebSocket message:", event.data);
+      }
+    } catch (err) {
+      console.warn("⚠️ Non-JSON WebSocket message:", event.data);
+    }
+  };
+
+  const url = new URL(`http://${runtime}:${port}/${method}`);
+  url.searchParams.set("job_id", job_id);
+  url.searchParams.set("duration", duration.toString());
+  url.searchParams.set("client_id", clientId);
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(doc),
+  });
+
+  if (!response.ok) {
+    console.error("❌ Simulation start failed:", await response.text());
+    return;
+  }
+
+  const { status } = await response.json();
+  console.log(`🚀 ${status}: ${job_id}`);
+}
+
+
+
+export async function streamEvents(
   job_name: string,
   duration: number,
   runtime: Runtimes.Local | Runtimes.Production = Runtimes.Local, 
@@ -235,10 +324,12 @@ async function streamEvents(
 ) {
   const doc = testDoc;  // getTestDocument();
   const job_id = `simulation-${job_name}`;
+  // const client_id = await connectWebSocket();
 
   const url = new URL(`http://${runtime}:${port}/${method}`);
   url.searchParams.set("job_id", job_id);
   url.searchParams.set("duration", duration.toString());
+  // url.searchParams.set("client_id", client_id);
 
   const response = await fetch(url.toString(), {
     method: "POST",
@@ -316,6 +407,7 @@ function renderBox(data: IntervalResponse) {
 }
 
 
-streamEvents('test', 11);
+// streamEvents('test', 11);
+streamSocket('test', 11);
 
   

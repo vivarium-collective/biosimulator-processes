@@ -64,6 +64,7 @@ server = [
     "pymongo>=4.11.3",
     "python-dotenv>=1.0.1",
     "uvicorn>=0.34.0",
+    "websockets>=15.0.1",
 ]
 
 [dependency-groups]
