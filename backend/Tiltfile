@@ -1,16 +1,18 @@
+# TODO: fix this workflow to start services in the following order: gateway -> dispatcher -> runner -> worker (worker depends on both the dispatcher and runner connections)
+
 # --- Gateway (Go with air) ---
 local_resource(
     "gateway",
-    cmd="make go module=gateway",
+    cmd="cd gateway && air -c .air.toml",
     deps=["gateway", "proto"],
     allow_parallel=True
 )
 
-# --- Server (Go with air) ---
+# --- Dispatcher (Go with air) ---
 local_resource(
-    "server",
-    cmd="make go module=server",
-    deps=["server", "proto"],
+    "dispatcher",
+    cmd="cd dispatcher && air -c .air.toml",
+    deps=["dispatcher", "proto"],
     allow_parallel=True
 )
 
@@ -21,4 +23,16 @@ local_resource(
     deps=["runner"],
     allow_parallel=True
 )
+
+# -- Worker (Go with air) ---
+local_resource(
+    "worker",
+    cmd="cd worker && air -c .air.toml",
+    # cmd="cd worker && ./start.sh",
+    deps=["worker", "proto"],
+    allow_parallel=True
+)
+
+
+
 

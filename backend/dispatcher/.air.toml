@@ -5,7 +5,7 @@ tmp_dir = ".air"
 [build]
   args_bin = []
   bin = ".air/main"
-  cmd = "go build -o .air/main ."
+  cmd = "go build -o .air/main main.go"
   delay = 1000
   exclude_dir = ["assets", ".test", "vendor", ".air"]
   exclude_file = []
@@ -20,7 +20,7 @@ tmp_dir = ".air"
   log = "build-errors.log"
   poll = false
   poll_interval = 0
-  pre_cmd = ["go work sync", "go mod tidy"]
+  pre_cmd = []
   post_cmd = []
   rerun = false
   rerun_delay = 500
@@ -28,7 +28,7 @@ tmp_dir = ".air"
   stop_on_error = false
 
 [color]
-  main = "yellow"
+  main = "blue"
 
 [log]
   main_only = false

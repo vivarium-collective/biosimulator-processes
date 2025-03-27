@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	sim "github.com/vivarium-collective/biosimulator-processes/backend/proto/simulation"
+	sim "github.com/vivarium-collective/biosimulator-processes/backend/proto/sim"
 	"google.golang.org/grpc"
 )
 

@@ -1,4 +1,4 @@
-module github.com/vivarium-collective/biosimulator-processes/backend/proto/runner
+module github.com/vivarium-collective/biosimulator-processes/backend/proto/sim
 
 go 1.24.1
 

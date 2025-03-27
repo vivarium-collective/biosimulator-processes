@@ -10,7 +10,6 @@ require (
 )
 
 require (
-	github.com/vivarium-collective/biosimulator-processes/backend/proto/simulation v0.0.0-00010101000000-000000000000
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
@@ -49,4 +48,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/vivarium-collective/biosimulator-processes/backend/proto/simulation => ../proto/simulation
+require github.com/vivarium-collective/biosimulator-processes/backend/proto/sim v0.0.0
+
+replace github.com/vivarium-collective/biosimulator-processes/backend/proto/sim => ../proto/sim

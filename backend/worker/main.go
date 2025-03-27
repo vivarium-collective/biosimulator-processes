@@ -67,7 +67,7 @@ import (
 	"google.golang.org/grpc"
 
 	runnerpb "github.com/vivarium-collective/biosimulator-processes/backend/proto/runner"
-	sim "github.com/vivarium-collective/biosimulator-processes/backend/proto/simulation"
+	sim "github.com/vivarium-collective/biosimulator-processes/backend/proto/sim"
 )
 
 func main() {
@@ -151,4 +151,3 @@ func main() {
 		}
 	}
 }
-

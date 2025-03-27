@@ -9,7 +9,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	sim "github.com/vivarium-collective/biosimulator-processes/backend/proto/simulation"
+	sim "github.com/vivarium-collective/biosimulator-processes/backend/proto/sim"
 )
 
 type workerStream struct {
@@ -102,4 +102,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-

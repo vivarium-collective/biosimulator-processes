@@ -1,8 +1,9 @@
 CURRENT_DIR := $(shell pwd)
-GO_MODULES := gateway server shared proto
+GO_MODULES := gateway dispatcher worker proto/sim proto/runner
 GATEWAY_DIR := gateway
 DOCS_DIR := "$(GATEWAY_DIR)"/docs
-PROTO_DIR := proto
+SIM_PROTO_DIR := proto/sim
+RUNNER_PROTO_DIR := proto/runner
 SERVER_DIR := server
 SHARED_DIR := shared
 
@@ -40,30 +41,13 @@ purge:
 	go clean -cache && uv cache prune
 
 # -- RUNNING -- #
-.PHONY: rungo
-rungo: sync tidy
-	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && air -log.main_only "true" -c "$(AIRNAME)" || echo "You must pass a module directory"
-
 .PHONY: go
-go: sync tidy
-	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && air -c "$(AIRNAME)" || echo "You must pass a module directory"
-	
+go:
+	@[ -n "$(module)" ] && echo ">> STARTING: $(module)" && cd "$(module)" && go mod tidy && air -c "$(AIRNAME)" || echo "You must pass a module directory"
 
-.PHONY: gateway
-gateway: 
-	@make rungo module=gateway
-
-.PHONY: server
-server:
-	@make rungo module=server
-
-.PHONY: runner
-runner:
-	python runner/main.py
-
-.PHONY: up
-up: sync 
-	@make tidy module=gateway && make tidy module=server && go run gateway/main.go & go run server/main.go & python runner/main.py & wait
+.PHONY: start
+start: 
+	@make go module=gateway & make go module=dispatcher & python runner/main.py && make go module=worker
 
 .PHONY: down
 down:
@@ -77,7 +61,7 @@ build:
 
 .PHONY: protoGo
 protoGo:
-	@echo "Generating protos..." && cd $(PROTO_DIR)/"$(file)" && $(PROTOC_GEN) \
+	@echo "Generating go protos..." && cd proto/"$(file)" && go mod tidy && $(PROTOC_GEN) \
 		--go_out=. \
 		--go_opt=paths=source_relative \
 		--go-grpc_out=. \
@@ -86,13 +70,17 @@ protoGo:
 
 .PHONY: protoPy
 protoPy:
-	python -m grpc_tools.protoc \
+	@echo "Generating python protos..."
+	@python -m grpc_tools.protoc \
 		-I./proto \
 		--python_out=. \
 		--grpc_python_out=. \
 		--proto_path=./proto \
-		./proto/"$(file)"/"$(file)".proto
+		./proto/runner/runner.proto
 
+.PHONY: protos
+protos:
+	@make protoGo file=sim && make protoGo file=runner && make protoPy file=sim && make protoPy
 
 .PHONY: protoClean
 protoClean:

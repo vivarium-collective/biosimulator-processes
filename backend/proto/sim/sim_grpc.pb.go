@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: simulation.proto
+// source: sim.proto
 
 package sim
 
@@ -152,5 +152,5 @@ var Simulator_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "simulation.proto",
+	Metadata: "sim.proto",
 }

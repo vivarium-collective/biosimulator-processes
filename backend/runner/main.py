@@ -8,8 +8,7 @@ from google.protobuf.struct_pb2 import Struct
 
 from process_bigraph import ProcessTypes
 from vivarium import Vivarium
-# from backend.runner import runner_pb2_grpc
-# from backend.runner.runner_pb2 import SimulationResult
+from backend.runner import runner_pb2, runner_pb2_grpc
 from bsp import app_registrar
 
 
@@ -53,7 +52,7 @@ class SimulationRunner(runner_pb2_grpc.SimulationRunnerServicer):
 
             for i in range(job.duration):
                 result = JobProcessor.run_interval(viv)
-                yield SimulationResult(
+                yield runner_pb2.SimulationResult(
                     job_id=job.job_id,
                     interval_id=i,
                     timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"),
