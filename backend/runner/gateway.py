@@ -3,12 +3,13 @@ Purely python SSE implementation
 """
 
 
+import abc
 from dataclasses import dataclass
 import json
 import asyncio
 import os
 from concurrent.futures import ProcessPoolExecutor
-from typing import Dict, List
+from typing import Any, Dict, List
 import uuid
 
 import uvicorn
@@ -69,33 +70,8 @@ class JobProcessor(object):
         print(f'Got interval results: {results}')
 
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}
-
-    async def connect(self, client_id: str, websocket: WebSocket):
-        self.active_connections[client_id] = websocket
-        print(f"[CONNECT] client_id {client_id} connected")
-
-
-    def disconnect(self, websocket: WebSocket):
-        for cid, ws in list(self.active_connections.items()):
-            if ws == websocket:
-                del self.active_connections[cid]
-
-    async def send_to(self, client_id: str, message: str):
-        websocket = self.active_connections.get(client_id)
-        if websocket:
-            await websocket.send_text(message)
-
-    async def broadcast(self, message: str):
-        for id, connection in self.active_connections.items():
-            await connection.send_text(message)
-
-
 RUNNER_PORT = os.getenv('RUNNER_PORT', '8000')
 
-manager = ConnectionManager()
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -110,82 +86,43 @@ def get_core(source=None) -> ProcessTypes:
     return app_registrar.core if not source else source
 
 
-async def interval_generator(job: SimulationRequest, _buffer: float):
+def new_vivarium(document) -> Vivarium:
     core = get_core()
-    viv = Vivarium(
+    return Vivarium(
         processes=core.process_registry.registry,
         types=core.types(),
         core=core,
-        document=job.document
+        document=document
     )
+
+
+async def interval_generator(job: SimulationRequest, _buffer: float):
+    viv = new_vivarium(job.document)
     for i in range(job.duration):
-        result = JobProcessor.process_interval(viv, job.job_id, i)
-        interval_data = result.serialized
-
-        # if it's a dict, dump it
-        if isinstance(interval_data, dict):
-            yield json.dumps(interval_data)
-        else:
-            yield interval_data  # already JSON
-
+        result = JobProcessor.process_interval(viv, job.job_id, i).serialized
+        interval_data = json.dumps(result)
+        yield f"event: intervalResponse\ndata: {interval_data}\n\n"
         await asyncio.sleep(_buffer)
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    client_id = str(uuid.uuid4())
-
-    # ✅ Register with manager
-    await manager.connect(client_id, websocket)
-
-    # ✅ Let client know its ID
-    await websocket.send_text(f"connected:{client_id}")
-
-    try:
-        while True:
-            await websocket.receive_text()
-    except:
-        manager.disconnect(websocket)
 
 
 @app.post("/simulate")
 async def simulate(
-    document: dict = Body(...),
+    document: dict = Body(..., example=EXAMPLE),
     duration: int = Query(...),
     job_id: str = Query(...),
-    client_id: str = Query(...),
-    _buffer: float = Query(default=0.5),
-):
+    _buffer: float = Query(default=0.5)
+) -> StreamingResponse:
     job = SimulationRequest(job_id=job_id, timestamp=timestamp(), duration=duration, document=document)
 
-    async def websocket_result_stream():
-        async for update in interval_generator(job, _buffer):
-            print(f'Got update:\n{update}')
-            await manager.send_to(client_id, update)
-
-    asyncio.create_task(websocket_result_stream())  # run in background
-    return {"status": "simulation started", "job_id": job_id}
-
-
-# @app.post("/simulate")
-# async def simulate(
-#     document: dict = Body(..., example=EXAMPLE),
-#     duration: int = Query(...),
-#     job_id: str = Query(...),
-#     _buffer: float = Query(default=0.5)
-# ) -> StreamingResponse:
-#     job = SimulationRequest(job_id=job_id, timestamp=timestamp(), duration=duration, document=document)
-# 
-#     # TODO: secure this stream and stream it to a go channel that can be fetched from client with auth
-#     return StreamingResponse(
-#         interval_generator(job, _buffer),
-#         media_type="text/event-stream",
-#         headers={
-#             "Cache-Control": "no-cache",
-#             "Connection": "keep-alive"
-#         }
-#     )
+    # TODO: secure this stream and stream it to a go channel that can be fetched from client with auth
+    return StreamingResponse(
+        interval_generator(job, _buffer),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
+        }
+    )
 
 
 if __name__ == "__main__":

@@ -138,182 +138,17 @@ const testDoc = {
   }
 }
 
-
-
-export class VivariumService {
-  public endpointRoot!: string
-  public localEndpointRoot = `http://localhost:8080`;
-  
-  constructor(endpointRoot?: string) {
-    this.endpointRoot = endpointRoot ? endpointRoot : this.localEndpointRoot
-  }
-
-  public async submitSimulation(onData: (data: IntervalResponse) => void): Promise<void> {
-    const requestParams: SimulationRequestParams = getTestRequest();
-
-    const payload: Payload = this.formatPayload(requestParams);
-    console.log(`Processing payload init: ${JSON.stringify(payload.init)} to\n${payload.url}`)
-    const response = await fetch(payload.url, payload.init);
-  
-    if (!response.ok || !response.body) {
-      console.error("Failed to connect:", await response.text());
-      return;
-    } else {
-      console.log(`Successfully subscribed to a response body:\n${response.status}`)
-    }
-  
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let buffer = "";
-  
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-  
-      buffer += decoder.decode(value, { stream: true });
-      const events = buffer.split("\n\n");
-      buffer = events.pop() || "";
-      console.log(`Buffer: ${buffer}`)
-  
-      for (const evt of events) {
-        console.log(`Getting data event:\n${evt}`)
-        if (evt.startsWith("data: ")) {
-          const json = evt.slice("data: ".length).trim();
-          try {
-            const parsed = JSON.parse(json);
-            onData(parsed);
-          } catch (err) {
-            console.warn("⚠️ Failed to parse JSON:", json);
-          }
-        }
-      }
-    }
+export interface Connection {
+  id: string
+  type: string
 }
 
-public formatPayload(requestParams: SimulationRequestParams): Payload {
-    const url: string = this.getSimulationUrl();
-    const params = new URLSearchParams({ duration: requestParams.duration.toString() });
-    return {
-      url: `${url}?${params.toString()}`,
-      init: {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestParams)
-      }
-    }
-  }
-
-  public static getRequestParams(duration: number, document: VivariumDocument): SimulationRequestParams {
-    return {
-      duration: duration,
-      document: document
-    }
-  }
-
-  public submitTestSimulation() {
-    this.submitSimulation((data) => {
-      console.log("Running simulate")
-      const out = document.getElementById("output");
-      if (out) {
-        out.textContent += `\n📥 ${JSON.stringify(data, null, 2)}\n`;
-      }
-    });
-  }
-
-  private getSimulationUrl(): string {
-    return `${this.endpointRoot}/simulate`
-  }
+export interface DataService {
+  urlRoot: string;
+  connect: () => Connection;
+  streamEvents: (runtime: Runtimes.Local | Runtimes.Production) => Promise<void>;
 
 }
-
-
-export async function c_onnectWebSocket(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const socket = new WebSocket("ws://localhost:8000/ws");
-
-    socket.onmessage = (event) => {
-      if (event.data.startsWith("connected:")) {
-        const clientId = event.data.split(":")[1];
-        console.log("✅ WebSocket connected with client_id:", clientId);
-        resolve(clientId);
-      }
-    };
-
-    socket.onerror = (err) => {
-      console.error("❌ WebSocket error", err);
-      reject(err);
-    };
-  });
-}
-
-export async function connectWebSocket(): Promise<{ clientId: string; socket: WebSocket }> {
-  return new Promise((resolve, reject) => {
-    const socket = new WebSocket("ws://localhost:8000/ws");
-
-    socket.onmessage = (event) => {
-      if (event.data.startsWith("connected:")) {
-        const clientId = event.data.split(":")[1];
-        console.log("✅ WebSocket connected with client_id:", clientId);
-        resolve({ clientId, socket });
-      }
-    };
-
-    socket.onerror = (err) => {
-      console.error("❌ WebSocket error", err);
-      reject(err);
-    };
-  });
-}
-
-
-export async function streamSocket(
-  job_name: string,
-  duration: number,
-  runtime: Runtimes.Local | Runtimes.Production = Runtimes.Local,
-  port: number = 8000,
-  method: string = "simulate"
-) {
-  const doc = testDoc;
-  const job_id = `simulation-${job_name}`;
-
-  const { clientId, socket } = await connectWebSocket();
-
-  socket.onmessage = (event) => {
-    try {
-      console.log(`Got a websocket message!`)
-      const parsed: IntervalResponse = JSON.parse(event.data);
-      console.log(`resp type: ${typeof parsed}`)
-      if (parsed.interval_id != undefined) {
-        renderBox(parsed);
-      } else {
-        console.log("📩 Other WebSocket message:", event.data);
-      }
-    } catch (err) {
-      console.warn("⚠️ Non-JSON WebSocket message:", event.data);
-    }
-  };
-
-  const url = new URL(`http://${runtime}:${port}/${method}`);
-  url.searchParams.set("job_id", job_id);
-  url.searchParams.set("duration", duration.toString());
-  url.searchParams.set("client_id", clientId);
-
-  const response = await fetch(url.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(doc),
-  });
-
-  if (!response.ok) {
-    console.error("❌ Simulation start failed:", await response.text());
-    return;
-  }
-
-  const { status } = await response.json();
-  console.log(`🚀 ${status}: ${job_id}`);
-}
-
-
 
 export async function streamEvents(
   job_name: string,
@@ -407,7 +242,7 @@ function renderBox(data: IntervalResponse) {
 }
 
 
-// streamEvents('test', 11);
-streamSocket('test', 11);
+streamEvents('test', 11);
+// streamSocket('test', 11);
 
   
