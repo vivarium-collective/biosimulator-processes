@@ -1,6 +1,13 @@
-.PHONY: docs help sync 
+.PHONY: docs help sync commit push
 
-all: sync 
+all: sync
+
+commit:
+	@git commit -m "$(m)"
+
+push:
+	@git push
+
 
 docs:
 	@uv run mkdocs serve

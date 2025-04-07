@@ -21,15 +21,27 @@ This project implements the `process_bigraph.Process()` interface around several
 then the corresponding process implementation for it will not be loaded into memory. Consider the following list of "optional" dependencies, convering the entire range of available implementations:
 
 ```python
-amici = ["amici (>=0.30.0,<0.31.0)"]
-builder = ["bigraph-builder (>=0.0.4,<0.0.5)", "bigraph-viz (>=0.0.35,<0.0.36)"]
-cobra = ["cobra (>=0.29.1,<0.30.0)", "imageio (>=2.36.1,<3.0.0)"]
-copasi = ["copasi-basico (>=0.82,<0.83)"]
-dev = ["pytest (>=8.3.4,<9.0.0)", "mypy (>=1.14.1,<2.0.0)", "flake8 (>=7.1.1,<8.0.0)", "pip-autoremove (>=0.10.0,<0.11.0)"]
-quantum = ["qiskit[visualization] (>=1.3.1,<2.0.0)", "qiskit-ibm-runtime (>=0.34.0,<0.35.0)", "qiskit-nature (>=0.7.2,<0.8.0)", "pyscf (>=2.8.0,<3.0.0)"]
-smoldyn = ["smoldyn (>=2.73,<3.0)", "simulariumio (>=1.11.0,<2.0.0)"]
-tellurium = ["tellurium (>=2.2.10,<3.0.0)", "libroadrunner (>=2.7.0,<3.0.0)"]
-membrane = ["pymem3dg"]
+cobra = ["cobra>=0.29.1"]
+copasi = ["copasi-basico>=0.83"]
+dev = [
+    "mypy>=1.15.0",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.11.0",
+]
+docs = [
+    "griffe>=1.6.2",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.9",
+    "mkdocstrings[python]>=0.29.0",
+    "nbsphinx>=0.9.7",
+    "sphinx>=8.1.3",
+    "sphinx-rtd-theme>=3.0.2",
+]
+membrane = ["pymem3dg>=0.0.7"]
+tellurium = ["tellurium>=2.2.10"]
+vcell = ["pyvcell>=0.0.1"]
 ```
 
 ## Interaction via a container available on `ghcr`:
