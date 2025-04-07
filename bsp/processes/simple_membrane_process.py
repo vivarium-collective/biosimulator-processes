@@ -145,7 +145,7 @@ class SimpleMembraneProcess(Process):
 
     def update(self, state, interval):
         # parameterize kth geometry from k-1th outputs
-        previous_vertices = np.array(state["geometry"]["vertices"][:self.n_vertices])  # TODO: why is -1 in improper format?
+        previous_vertices = np.array(state["geometry"]["vertices"][:self.n_vertices])
         self.geometry.setInputVertexPositions(previous_vertices)
 
         # set the kth osmotic volume model  # dfba vals here in update
@@ -176,28 +176,21 @@ class SimpleMembraneProcess(Process):
         # instantiate and initialize kth system using Geometry, proteinDensity, velocity, and parameters
         protein_density_k = np.array(state["protein_density"])
         velocities_k = np.array(state["velocities"])
-
-        # we parameterize the kth system with the stateful geometry that has been updated with the latest vertex coordinates
-        # system_k = dg.System(
-        #     geometry=self.geometry,
-        #     proteinDensity=protein_density_k,
-        #     velocity=velocities_k,
-        #     parameters=self.parameters,
-        # )
+        
         self.system.parameters = parameters
         self.system.initialize(True)
         # self.system.updateConfigurations()
         # system_k.initialize()
 
         # set up solver and parse time params
-        output_dir_k = Path(tmp.mkdtemp())
+        output_dir_k = tmp.mkdtemp()
         integrator_k = dg.VelocityVerlet(
             system=self.system,
             characteristicTimeStep=self.characteristic_time_step,
             totalTime=interval,
             savePeriod=interval,
             tolerance=self.tolerance,
-            outputDirectory=str(output_dir_k)
+            outputDirectory=output_dir_k
         )
         integrator_k.ifPrintToConsole = self.console_output
         integrator_k.ifOutputTrajFile = True

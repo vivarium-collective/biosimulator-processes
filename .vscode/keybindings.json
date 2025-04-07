@@ -1,0 +1,8 @@
+[
+    {
+      "key": "cmd+alt+b", // ctrl+alt+b on Windows/Linux
+      "command": "simpleBrowser.show",
+      "args": "http://localhost:5173"
+    }
+  ]
+  

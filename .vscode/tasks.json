@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Open Vite in Simple Browser",
+      "type": "shell",
+      "command": "code",
+      "args": ["--simple-browser", "http://localhost:5173"],
+      "problemMatcher": []
+    }
+  ]
+}
+
+

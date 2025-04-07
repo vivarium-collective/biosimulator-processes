@@ -19,11 +19,14 @@ ray_job.sh
 biosimulators_processes/__pycache__
 .pytest_cache
 submit-biosimulators-container.sh
+tmp
+*.log
 .vagrant
 ._vagrant
 .THIS-IS-FOR-CONTAINER-DEV-ONLY
 buildDockerImage.yml
 .env
+dev/
 process-bigraph
 bigraph-schema
 bigraph-builder
@@ -39,3 +42,6 @@ release_env
 env/
 venv/
 __pycache__/
+.air
+node_modules
+.NOTES

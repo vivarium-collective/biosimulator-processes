@@ -36,6 +36,13 @@ COPASI_PROCESSES = [
     )
 ]
 
+EXAMPLE_PROCESSES = [
+    Implementation(
+        address='tx',
+        location='processes.example_process.Tx',
+        dependencies=['numpy']
+    )
+]
 
 MEM3DG_PROCESSES = [
     # Implementation(
@@ -60,6 +67,7 @@ SMOLDYN_PROCESSES = [
 ]
 
 
+
 # TELLURIUM_PROCESSES = [
 #     Implementation(
 #         address='tellurium-process',
@@ -68,7 +76,7 @@ SMOLDYN_PROCESSES = [
 #     )
 # ]
 
-PROCESS_IMPLEMENTATIONS = COBRA_PROCESSES + COPASI_PROCESSES + MEM3DG_PROCESSES + SMOLDYN_PROCESSES  # + TELLURIUM_PROCESSES
+PROCESS_IMPLEMENTATIONS = COBRA_PROCESSES + COPASI_PROCESSES + EXAMPLE_PROCESSES + MEM3DG_PROCESSES + SMOLDYN_PROCESSES  # + TELLURIUM_PROCESSES
 
 
 STEP_IMPLEMENTATIONS = [
