@@ -11,9 +11,7 @@ tools. A complete environment with version-controlled dependencies already insta
 
          pip install biosimulator-processes
 
-We recommend using an environment/package manager [like Conda](https://conda.io/projects/conda/en/latest/index.html) if downloading from PyPI to 
-install the dependencies required for your use. Most of the direct UI content for this tooling will be in the form of
-a jupyter notebook. The installation for this notebook is provided below.
+We recommend using an environment/package manager like UV.
 
 
 ## Simulator process set-up and installation
